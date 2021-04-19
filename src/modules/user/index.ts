@@ -106,7 +106,11 @@ class User extends Module {
         throw new BadInputFormatException('A user already exists with this email');
       }
 
-      newUser = await this.model.create({...data, subrole:'superadmin'});
+      newUser = await this.model.create({
+        ...data,
+        subrole:'superadmin',
+        isVerified:true
+      });
       // let payload = {
       //   id:newUser._id,
       //   email:newUser.email

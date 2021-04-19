@@ -34,7 +34,7 @@ class User extends module_1.default {
                 if (existUser) {
                     throw new exceptions_1.BadInputFormatException('A user already exists with this email');
                 }
-                newUser = yield this.model.create(Object.assign(Object.assign({}, data), { subrole: 'superadmin' }));
+                newUser = yield this.model.create(Object.assign(Object.assign({}, data), { subrole: 'superadmin', isVerified: true }));
                 // let payload = {
                 //   id:newUser._id,
                 //   email:newUser.email

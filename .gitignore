@@ -1,0 +1,9 @@
+node_modules
+.idea
+.DS_Store
+*.logs
+.env
+keys/*
+tsconfig2.json
+k8t/*
+argocd-install.yaml

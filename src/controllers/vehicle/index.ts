@@ -1,0 +1,148 @@
+import { RequestHandler, Response, Request } from "express";
+import { VehicleInterface } from "../../models/vehicle";
+import Vehicle from "../../modules/vehicle";
+import Ctrl from "../ctrl";
+
+class VehicleController extends Ctrl{
+  private module:Vehicle
+
+  constructor(module:Vehicle){
+    super()
+    this.module = module
+  }
+
+  createVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const vehicle:VehicleInterface|undefined = await this.module.createVehicle(req.body);
+         this.ok(res, 'ok', vehicle);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchVehicles():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const vehicles = await this.module.fetchVehicles(req.query);
+        this.ok(res, 'ok', vehicles);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const vehicle = await this.module.fetchVehicle(req.params.id);
+        this.ok(res, 'ok', vehicle);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  vehicleInspection():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const vehicle = await this.module.vehicleInspection( req.params.vehicleId, req.body, req.user);
+        this.ok(res,'ok', vehicle);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchInspectionHistory():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        const data = await this.module.fetchInspectionHist(req.params.vehicleId, req.query);
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  approveInspection():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { vehicleId, inspectionId } = req.params;
+        const { status, comment } = req.body;
+        //@ts-ignore
+        const data = await this.module.aprroveInspection({vehicleId, inspectionId, status, comment}, req.user);
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req,  res);
+      }
+    }
+  }
+
+  recordRoute():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        //@ts-ignore
+        const data = await this.module.recordRoute(req.body, req.params, req.user);
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  assignDriver():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        const { vehicleId } = req.params
+        const { comment, driver } = req.body
+        //@ts-ignore
+        const data = await this.module.assignDriver({vehicleId, comment, driver},req.user );
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  deleteVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.deleteVehicle({vehicleId:req.params.vehicleId});
+        this.ok(res,'ok',data)
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  removeDriver():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { vehicleId, driver } = req.params;
+        const data = await this.module.removeDriver({vehicleId, driver});
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  markRouteAsComplete():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { vehicleId, routeId } = req.params;
+        const { status } = req.body;
+        const data = await this.module.markRouteAsComplete({vehicleId, routeId, status });
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+}
+
+export default VehicleController;

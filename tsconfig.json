@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "strict": true
+  },
+  "include": [
+    "./src/types/**/*.d.ts",
+    "./src/**/*.ts"
+, "src/util/validator.js"  ],
+  "exclude": [
+    "node_modules",
+    "./src/**/*.spec.ts"
+  ],
+  "files": [
+    "./node_modules/@types/node/index.d.ts",
+    "./node_modules/@types/mocha/index.d.ts",
+    "./node_modules/@types/express/index.d.ts",
+    "./node_modules/@types/mongoose/index.d.ts",
+    "./node_modules/@types/chai/index.d.ts"
+  ],
+  "compileOnSave": true
+}

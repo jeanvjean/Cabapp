@@ -47,4 +47,9 @@ const router: expressRouter = expressRouter();
       userCtrl.changePassword()
     );
 
+  router.delete(
+    '/delete-user/:userId',
+    userCtrl.deleteUser()
+  );
+
 export default router;

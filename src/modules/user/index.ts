@@ -331,6 +331,21 @@ class User extends Module {
     }
   }
 
+  public async deleteUser(id:string):Promise<any>{
+    try{
+      const user = await this.model.findById(id);
+      if(!user) {
+        throw new BadInputFormatException('user not found');
+      }
+      await this.model.findByIdAndDelete(id);
+      return Promise.resolve({
+        message:'User deleted'
+      })
+    }catch(e){
+      this.handleException(e);
+    }
+  }
+
 }
 
 export default User;

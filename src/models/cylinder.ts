@@ -8,7 +8,13 @@ import {
 
 export enum cylinderTypes{
   BUFFER = "buffer",
-  ASSIGNED = "assigned"
+  ASSIGNED = "assigned",
+  GOOD="good"
+}
+
+export enum CylinderCondition{
+  REPAIR='repair',
+  DAMAGED='damaged'
 }
 
 export interface CylinderInterface extends Document {
@@ -36,9 +42,16 @@ export interface CylinderInterface extends Document {
 
   type: string,
 
+  /**
+   * @param condeition cylinder condition (damaged, repair, etc)
+   */
+
+  condeition:string
+
     /**
      * @param createdAt date created
      */
+
   createdAt:Date,
 
   /**
@@ -57,7 +70,8 @@ export const cylinderSchema = new Schema({
     type:String,
     enum:[cylinderTypes.BUFFER, cylinderTypes.ASSIGNED],
     default:cylinderTypes.BUFFER
-  }
+  },
+  condition:{type:String,enum:Object.values(CylinderCondition)}
 },
 {
   timestamps:true

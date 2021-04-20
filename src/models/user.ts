@@ -50,6 +50,12 @@ import {
 
     subrole:string
 
+    location:string,
+
+    gender:string,
+
+    phoneNumber:number
+
     /**
      * @param isVerified account verified Boolean
      */
@@ -100,7 +106,10 @@ import {
     isVerified:{
       type:Boolean,
       default:false
-    }
+    },
+    location:{type:String},
+    gender:{type:String},
+    phoneNumber:{type:Number}
  },{
    collection:'users',
    timestamps:true

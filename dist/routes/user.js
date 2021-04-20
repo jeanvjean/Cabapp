@@ -17,5 +17,6 @@ router.post('/update-user/:id', auth.verify(), controllers_1.userCtrl.updateUser
 router.post('/request-password-reset', controllers_1.userCtrl.requestPasswordReset());
 router.post('/reset-password', user_1.Validator.validatePassword(), val.validate(), controllers_1.userCtrl.resetPassword());
 router.post('/change-password', user_1.Validator.validatePasswordChange(), val.validate(), auth.verify(), controllers_1.userCtrl.changePassword());
+router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());
 exports.default = router;
 //# sourceMappingURL=user.js.map

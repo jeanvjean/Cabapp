@@ -138,6 +138,17 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    deleteUser() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.deleteUser(req.params.userId);
+                this.ok(res, 'ok', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = UserController;
 //# sourceMappingURL=index.js.map

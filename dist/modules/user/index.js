@@ -266,6 +266,23 @@ class User extends module_1.default {
             }
         });
     }
+    deleteUser(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.model.findById(id);
+                if (!user) {
+                    throw new exceptions_1.BadInputFormatException('user not found');
+                }
+                yield this.model.findByIdAndDelete(id);
+                return Promise.resolve({
+                    message: 'User deleted'
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
 }
 exports.default = User;
 //# sourceMappingURL=index.js.map

@@ -49,5 +49,5 @@ export const vehicle = new VehicleModule({
 });
 
 export const driver = new DriverModule({
-  driver:Driver
+  driver:User
 });

@@ -149,6 +149,19 @@ class CylinderController extends Ctrl{
     }
   }
 
+  deleteRegisteredCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { cylinderId } = req.params;
+        //@ts-ignore
+        const data = await this.module.deleteRegisteredCylinder(cylinderId, req.user);
+        this.ok(res,'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

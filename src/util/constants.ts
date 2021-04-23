@@ -10,9 +10,8 @@ export const constants = [
       "Sales Superintendent",
       "Logistic Officer",
       "Customer Service Attendant",
-      "Loaders",
-      "Drivers"
-
+      "Loader",
+      "Driver"
     ]
   },
   {
@@ -22,7 +21,7 @@ export const constants = [
       "Technical Officer",
       "Supervisor",
       "Plant Operator",
-      "Fillers"
+      "Filler"
     ]
   },
   {

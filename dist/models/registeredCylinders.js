@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerCylinderSchema = void 0;
 const mongoose_1 = require("mongoose");
+const cylinder_1 = require("./cylinder");
 exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: mongoose_1.Schema.Types.ObjectId },
     waterCapacity: { type: String },
@@ -13,7 +14,8 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     testingPresure: { type: String },
     fillingPreasure: { type: String },
     gasVolumeContent: { type: String },
-    originalCylinderNumber: { type: String }
+    cylinderNumber: { type: String },
+    condition: { type: String, enum: Object.values(cylinder_1.CylinderCondition) }
 }, {
     timestamps: true
 });

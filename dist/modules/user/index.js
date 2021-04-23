@@ -124,9 +124,9 @@ class User extends module_1.default {
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('User Not Found');
                 }
-                if (user.isVerified) {
-                    throw new exceptions_1.BadInputFormatException('Account has not been verified');
-                }
+                // if(!user.isVerified) {
+                //   throw new BadInputFormatException('Account has not been verified');
+                // }
                 let correctPassword = yield user.comparePWD(data.password);
                 if (!correctPassword) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password');
@@ -180,8 +180,9 @@ class User extends module_1.default {
                         throw new exceptions_1.BadInputFormatException('the email is in use by another client');
                     }
                 }
+                let set = Object.assign(Object.assign({}, data), { isVerified: true });
                 let updateUser = yield this.model.findByIdAndUpdate(user._id, {
-                    $set: data
+                    $set: set
                 }, options);
                 return Promise.resolve(updateUser);
             }

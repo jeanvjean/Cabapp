@@ -5,6 +5,7 @@ import {
   Connection,
   model
 } from 'mongoose';
+import { CylinderCondition } from './cylinder';
 
 
 export interface RegisteredCylinderInterface extends Document{
@@ -70,10 +71,16 @@ export interface RegisteredCylinderInterface extends Document{
   gasVolumeContent:string
 
   /**
-   * @param originalCylinderNumber
+   * @param cylinderNumber
    */
 
-  originalCylinderNumber:string
+  cylinderNumber:string
+
+  /**
+   * @param condition cylinder condition
+   */
+
+  condition:CylinderCondition
 
   /**
    * @param createdAt
@@ -110,7 +117,9 @@ export const registerCylinderSchema = new Schema({
 
   gasVolumeContent:{type:String},
 
-  originalCylinderNumber:{type:String}
+  cylinderNumber:{type:String},
+
+  condition:{type:String, enum:Object.values(CylinderCondition)}
 },{
   timestamps:true
 });

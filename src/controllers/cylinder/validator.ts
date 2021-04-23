@@ -65,7 +65,7 @@ class CylinderValidator extends Ctrl{
       check('gasVolumeContent')
         .exists()
         .withMessage('Gas Volume Content required'),
-      check('originalCylinderNumber')
+      check('cylinderNumber')
         .exists()
         .withMessage('Original Cylinder Number required')
     ]

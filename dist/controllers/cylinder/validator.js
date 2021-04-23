@@ -68,7 +68,7 @@ class CylinderValidator extends ctrl_1.default {
             express_validator_1.check('gasVolumeContent')
                 .exists()
                 .withMessage('Gas Volume Content required'),
-            express_validator_1.check('originalCylinderNumber')
+            express_validator_1.check('cylinderNumber')
                 .exists()
                 .withMessage('Original Cylinder Number required')
         ];

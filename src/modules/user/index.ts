@@ -192,9 +192,9 @@ class User extends Module {
       if(!user) {
         throw new BadInputFormatException('User Not Found');
       }
-      if(user.isVerified) {
-        throw new BadInputFormatException('Account has not been verified');
-      }
+      // if(!user.isVerified) {
+      //   throw new BadInputFormatException('Account has not been verified');
+      // }
       let correctPassword = await user.comparePWD(data.password);
       if(!correctPassword) {
         throw new BadInputFormatException('Incorrect password');
@@ -248,10 +248,14 @@ class User extends Module {
           throw new BadInputFormatException('the email is in use by another client');
         }
       }
+      let set = {
+        ...data,
+        isVerified:true
+      }
       let updateUser = await this.model.findByIdAndUpdate(
         user._id,
         {
-          $set:data
+          $set:set
         },
         options
       )

@@ -63,4 +63,10 @@ router.get(
   cylinderCtrl.usersPendingApprovals()
 );
 
+router.delete(
+  '/remove-cylinder/:cylinderId',
+  auth.verify(),
+  cylinderCtrl.deleteRegisteredCylinder()
+);
+
 export default router;

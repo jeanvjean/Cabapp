@@ -36,7 +36,7 @@ class Driver extends module_1.default {
             try {
                 const driver = yield this.driver.findById(data.driverId);
                 if (!driver) {
-                    throw new exceptions_1.BadInputFormatException('thid driver no longer exist');
+                    throw new exceptions_1.BadInputFormatException('this driver no longer exist');
                 }
                 yield this.driver.findByIdAndDelete(data.driverId);
                 return Promise.resolve({
@@ -51,7 +51,8 @@ class Driver extends module_1.default {
     fetchDrivers(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const drivers = yield this.driver.find(query);
+                const users = yield this.driver.find(query);
+                const drivers = users.filter(driver => driver.subrole == 'Driver');
                 return Promise.resolve(drivers);
             }
             catch (e) {

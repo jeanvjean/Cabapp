@@ -31,7 +31,7 @@ interface NewCylinderRegisterationInterface{
   testingPresure:RegisteredCylinderInterface['testingPresure'],
   fillingPreasure:RegisteredCylinderInterface['fillingPreasure'],
   gasVolumeContent:RegisteredCylinderInterface['gasVolumeContent'],
-  originalCylinderNumber:RegisteredCylinderInterface['originalCylinderNumber']
+  cylinderNumber:RegisteredCylinderInterface['cylinderNumber']
 }
 
 interface CylinderCountInterface{
@@ -140,7 +140,7 @@ class Cylinder extends Module {
       this.handleException(e);
     }
   }
-//@ts-ignore
+
   public async regCylinder(data:NewCylinderRegisterationInterface, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     // console.log(data)
     try {
@@ -481,6 +481,21 @@ class Cylinder extends Module {
         pendingApprovals = startStage;
       }
       return Promise.resolve(pendingApprovals)
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async deleteRegisteredCylinder(id:string, user:UserInterface):Promise<any>{
+    try {
+      const cylinder = await this.cylinder.findById(id);
+      if(!cylinder) {
+        throw new BadInputFormatException('This cylinder was not found');
+      }
+      await cylinder.remove();
+      return Promise.resolve({
+        message:'Cylinder deleted'
+      });
     } catch (e) {
       this.handleException(e);
     }

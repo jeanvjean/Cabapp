@@ -18,5 +18,6 @@ router.post('/approve-transfer', auth.verify(), controllers_1.cylinderCtrl.appro
 router.get('/fetch-transfers', controllers_1.cylinderCtrl.fetchTransferRequests());
 router.get('/fetch-transfer/:id', controllers_1.cylinderCtrl.fetchTransferDetails());
 router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersPendingApprovals());
+router.delete('/remove-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.deleteRegisteredCylinder());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

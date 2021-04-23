@@ -33,6 +33,6 @@ exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle
 });
 exports.driver = new driver_1.default({
-    driver: index_1.Driver
+    driver: index_1.User
 });
 //# sourceMappingURL=index.js.map

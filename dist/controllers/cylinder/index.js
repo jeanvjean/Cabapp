@@ -150,6 +150,19 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    deleteRegisteredCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { cylinderId } = req.params;
+                //@ts-ignore
+                const data = yield this.module.deleteRegisteredCylinder(cylinderId, req.user);
+                this.ok(res, 'ok', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = CylinderController;
 //# sourceMappingURL=index.js.map

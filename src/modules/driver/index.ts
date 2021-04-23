@@ -2,9 +2,10 @@ import Module, { QueryInterface } from "../module";
 import { Model } from "mongoose";
 import { DriverInterface } from "../../models/driver";
 import { BadInputFormatException } from "../../exceptions";
+import { UserInterface } from "../../models/user";
 
 interface DriverPropInterface {
-  driver:Model<DriverInterface>
+  driver:Model<UserInterface>
 }
 
 interface NewDriverInterface {
@@ -27,14 +28,14 @@ type DeleteResponse = {
 
 
 class Driver extends Module{
-  private driver:Model<DriverInterface>
+  private driver:Model<UserInterface>
 
   constructor(props:DriverPropInterface) {
     super()
     this.driver = props.driver
   }
 
-  public async createDriver(data:NewDriverInterface):Promise<DriverInterface|undefined>{
+  public async createDriver(data:NewDriverInterface):Promise<UserInterface|undefined>{
     try {
       const driverExists = await this.driver.findOne({email:data.email});
       if(driverExists) {
@@ -51,7 +52,7 @@ class Driver extends Module{
     try {
       const driver = await this.driver.findById(data.driverId);
       if(!driver) {
-        throw new BadInputFormatException('thid driver no longer exist');
+        throw new BadInputFormatException('this driver no longer exist');
       }
       await this.driver.findByIdAndDelete(data.driverId);
       return Promise.resolve({
@@ -62,19 +63,20 @@ class Driver extends Module{
     }
   }
 
-  public async fetchDrivers(query:QueryInterface):Promise<DriverInterface[]|undefined>{
+  public async fetchDrivers(query:QueryInterface):Promise<UserInterface[]|undefined>{
     try {
-      const drivers = await this.driver.find(query);
+      const users = await this.driver.find(query);
+      const drivers = users.filter(driver=>driver.subrole == 'Driver');
       return Promise.resolve(drivers);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchDriver(data:Parameters):Promise<DriverInterface|undefined>{
+  public async fetchDriver(data:Parameters):Promise<UserInterface|undefined>{
     try {
       const driver = await this.driver.findById(data.driverId);
-      return Promise.resolve(driver as DriverInterface);
+      return Promise.resolve(driver as UserInterface);
     } catch (e) {
       this.handleException(e);
     }

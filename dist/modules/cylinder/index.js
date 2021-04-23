@@ -67,7 +67,6 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    //@ts-ignore
     regCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             // console.log(data)
@@ -423,6 +422,23 @@ class Cylinder extends module_1.default {
                     pendingApprovals = startStage;
                 }
                 return Promise.resolve(pendingApprovals);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    deleteRegisteredCylinder(id, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.cylinder.findById(id);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('This cylinder was not found');
+                }
+                yield cylinder.remove();
+                return Promise.resolve({
+                    message: 'Cylinder deleted'
+                });
             }
             catch (e) {
                 this.handleException(e);

@@ -16,7 +16,9 @@ exports.productSchema = new mongoose_1.Schema({
     totalCost: { type: Number },
     reorderLevel: { type: Number },
     location: { type: String },
-    referer: { type: String }
+    referer: { type: String },
+    division: { type: String },
+    supplier: { type: String }
 }, {
     timestamps: true
 });

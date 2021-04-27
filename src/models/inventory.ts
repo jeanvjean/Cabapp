@@ -20,6 +20,8 @@ export interface ProductInterface extends Document{
   reorderLevel:number
   location:string,
   referer:string
+  division:string
+  supplier:string
 }
 
 export const productSchema = new Schema({
@@ -36,7 +38,9 @@ export const productSchema = new Schema({
   totalCost:{type:Number},
   reorderLevel:{type:Number},
   location:{type:String},
-  referer:{type:String}
+  referer:{type:String},
+  division:{type:String},
+  supplier:{type:String}
 },{
   timestamps:true
 });

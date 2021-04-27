@@ -1,8 +1,9 @@
 import { compareSync } from "bcryptjs";
 import { verify } from "jsonwebtoken";
 import { Model } from "mongoose";
+import { cylinder } from "..";
 import { BadInputFormatException } from "../../exceptions";
-import { CylinderInterface, cylinderTypes } from "../../models/cylinder";
+import { CylinderCondition, CylinderInterface, cylinderTypes } from "../../models/cylinder";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { ApprovalStatus, stagesOfApproval, TransferCylinder, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
@@ -78,10 +79,9 @@ interface TransferRequestPool{
   message?:string
 }
 
-type PendingApprovalResponse = {
-  stage1approvals:TransferCylinder[],
-  stage2approvals:TransferCylinder[],
-  stage3approvals:TransferCylinder[]
+interface FilterCylinderResponse {
+  damaged:RegisteredCylinderInterface[],
+  repair:RegisteredCylinderInterface[]
 }
 
 
@@ -171,6 +171,20 @@ class Cylinder extends Module {
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async fetchDamagedCylinders(query:QueryInterface):Promise<FilterCylinderResponse|undefined>{
+    try {
+      const cylinders = await this.registerCylinder.find(query);
+      const damaged = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.DAMAGED);
+      const repair = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.REPAIR);
+      return Promise.resolve({
+        damaged:damaged,
+        repair:repair
+      });
+    } catch (e) {
+
     }
   }
 

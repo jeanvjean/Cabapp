@@ -69,4 +69,9 @@ router.delete(
   cylinderCtrl.deleteRegisteredCylinder()
 );
 
+router.get(
+  '/fetch-damaged-cylinders',
+  cylinderCtrl.fetchDamagedCylinders()
+);
+
 export default router;

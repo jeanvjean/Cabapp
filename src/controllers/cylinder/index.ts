@@ -162,6 +162,17 @@ class CylinderController extends Ctrl{
     }
   }
 
+  fetchDamagedCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchDamagedCylinders(req.query);
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

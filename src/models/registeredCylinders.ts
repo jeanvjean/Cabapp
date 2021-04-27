@@ -7,6 +7,11 @@ import {
 } from 'mongoose';
 import { CylinderCondition } from './cylinder';
 
+export enum TypesOfCylinders {
+  BUFFER="buffer",
+  ASSIGNED="assigned"
+}
+
 
 export interface RegisteredCylinderInterface extends Document{
   /**
@@ -16,7 +21,7 @@ export interface RegisteredCylinderInterface extends Document{
   /**
    * @param cylinderType type of cylinder being registered
    */
-  cylinderType:Schema.Types.ObjectId,
+  cylinderType:string,
   /**
    * @param waterCapacity cylinder water capacity
    */
@@ -97,7 +102,7 @@ export interface RegisteredCylinderInterface extends Document{
 }
 
 export const registerCylinderSchema = new Schema({
-  cylinderType:{type:Schema.Types.ObjectId},
+  cylinderType:{type:String, enum:Object.values(TypesOfCylinders)},
 
   waterCapacity:{type:String},
 

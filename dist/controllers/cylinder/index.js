@@ -163,6 +163,17 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    fetchDamagedCylinders() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchDamagedCylinders(req.query);
+                this.ok(res, 'ok', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = CylinderController;
 //# sourceMappingURL=index.js.map

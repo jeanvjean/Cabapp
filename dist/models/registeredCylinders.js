@@ -1,10 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerCylinderSchema = void 0;
+exports.registerCylinderSchema = exports.TypesOfCylinders = void 0;
 const mongoose_1 = require("mongoose");
 const cylinder_1 = require("./cylinder");
+var TypesOfCylinders;
+(function (TypesOfCylinders) {
+    TypesOfCylinders["BUFFER"] = "buffer";
+    TypesOfCylinders["ASSIGNED"] = "assigned";
+})(TypesOfCylinders = exports.TypesOfCylinders || (exports.TypesOfCylinders = {}));
 exports.registerCylinderSchema = new mongoose_1.Schema({
-    cylinderType: { type: mongoose_1.Schema.Types.ObjectId },
+    cylinderType: { type: String, enum: Object.values(TypesOfCylinders) },
     waterCapacity: { type: String },
     dateManufactured: { type: Date },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId },

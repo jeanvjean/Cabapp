@@ -43,7 +43,10 @@ class UserValidator extends ctrl_1.default {
                 .withMessage('Password must be at least six(6) character long and most contain at least 1 letter, 1 number and 1 special character'),
             express_validator_1.check('role')
                 .exists()
-                .withMessage('Role is required')
+                .withMessage('Role is required'),
+            express_validator_1.check('phoneNumber')
+                .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+                .withMessage('Phone number must contain international code as well as 9 or 10 digits!')
         ];
         return rules;
     }

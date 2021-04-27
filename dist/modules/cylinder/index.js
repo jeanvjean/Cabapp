@@ -103,6 +103,21 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    fetchDamagedCylinders(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.registerCylinder.find(query);
+                const damaged = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.DAMAGED);
+                const repair = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.REPAIR);
+                return Promise.resolve({
+                    damaged: damaged,
+                    repair: repair
+                });
+            }
+            catch (e) {
+            }
+        });
+    }
     transferCylinders(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

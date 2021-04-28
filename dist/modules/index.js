@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
+exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
 const index_1 = require("../models/index");
 const person_1 = require("./person");
 const user_1 = require("./user");
@@ -8,6 +8,7 @@ const cylinder_1 = require("./cylinder");
 const inventory_1 = require("./inventory");
 const vehicle_1 = require("./vehicle");
 const driver_1 = require("./driver");
+const customers_1 = require("./customers");
 /**
  * @category Modules
  * @param {person} Instance of Person module
@@ -34,5 +35,9 @@ exports.vehicle = new vehicle_1.default({
 });
 exports.driver = new driver_1.default({
     driver: index_1.User
+});
+exports.customer = new customers_1.default({
+    customer: index_1.Customer,
+    order: index_1.Order
 });
 //# sourceMappingURL=index.js.map

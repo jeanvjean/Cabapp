@@ -9,11 +9,11 @@ var TypesOfCylinders;
     TypesOfCylinders["ASSIGNED"] = "assigned";
 })(TypesOfCylinders = exports.TypesOfCylinders || (exports.TypesOfCylinders = {}));
 exports.registerCylinderSchema = new mongoose_1.Schema({
-    cylinderType: { type: String, enum: Object.values(TypesOfCylinders) },
+    cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
     waterCapacity: { type: String },
     dateManufactured: { type: Date },
-    assignedTo: { type: mongoose_1.Schema.Types.ObjectId },
-    gasType: { type: mongoose_1.Schema.Types.ObjectId },
+    assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    gasType: { type: String },
     standardColor: { type: String },
     assignedNumber: { type: String },
     testingPresure: { type: String },

@@ -102,15 +102,15 @@ export interface RegisteredCylinderInterface extends Document{
 }
 
 export const registerCylinderSchema = new Schema({
-  cylinderType:{type:String, enum:Object.values(TypesOfCylinders)},
+  cylinderType:{type:String, enum:Object.values(TypesOfCylinders), default:TypesOfCylinders.BUFFER},
 
   waterCapacity:{type:String},
 
   dateManufactured:{type:Date},
 
-  assignedTo:{type:Schema.Types.ObjectId},
+  assignedTo:{type:Schema.Types.ObjectId, ref:'users'},
 
-  gasType:{type:Schema.Types.ObjectId},
+  gasType:{type:String},
 
   standardColor:{type:String},
 

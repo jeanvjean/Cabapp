@@ -62,24 +62,24 @@ class driverCtrl extends Ctrl{
   }
 
 }
-export const uploadFile = async(files:object, filePath:string)=>{
+export const uploadFile = async(file:object, filePath:string)=>{
   //@ts-ignore
-  files = files.file
+  const files = file
   let path = './temp'
   if (!existsSync(path)) {
     mkdirSync(path)
   }
   if (Array.isArray(files)) {
     let images = []
-    for (let file of files) {
+    for (let f of files) {
       //@ts-ignore
-      await file.mv(path + '/' + file.name)
+      await f.mv(path + '/' + f.name)
       let uploader = new Uploader()
       //@ts-ignore
-      let url = await uploader.upload(path + '/' + file.name, filePath,{});
+      let url = await uploader.upload(path + '/' + f.name, filePath,{});
       images.push(url)
       //@ts-ignore
-      unlinkSync(path + '/' + file.name)
+      unlinkSync(path + '/' + f.name)
     }
     // res.send({images, message: 'files uploaded'})
     return images

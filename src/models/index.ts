@@ -15,6 +15,8 @@ import inventoryFactory,{InventoryInterface} from './receivedProduct';
 import disburseFactory,{ DisburseProductInterface } from './disburseStock';
 import vehicleFactory, {VehicleInterface} from './vehicle';
 import driverFactory, {DriverInterface} from './driver';
+import customerFactory, {CustomerInterface} from './customer';
+import orderFactory, { OrderInterface } from './order';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -39,5 +41,9 @@ export const DisburseProduct:Model<DisburseProductInterface> = disburseFactory(c
 export const Vehicle:Model<VehicleInterface> = vehicleFactory(conn);
 
 export const Driver:Model<DriverInterface> = driverFactory(conn);
+
+export const Customer:Model<CustomerInterface> = customerFactory(conn);
+
+export const Order:Model<OrderInterface> = orderFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

@@ -1,0 +1,84 @@
+import { Request, Response, RequestHandler } from 'express';
+import Customer from '../../modules/customers';
+import Ctrl from '../ctrl';
+import { uploadFile } from '../driver';
+import Validator from './validator';
+
+
+
+class customerCtrl extends Ctrl{
+  private module:Customer;
+
+  constructor(module:Customer) {
+    super()
+    this.module = module
+  }
+
+  createCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        let cac;
+        let validId;
+          //@ts-ignore
+          cac = await uploadFile(req.files.CAC, 'customer-document/cac');
+        //@ts-ignore
+          validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
+        const data = await this.module.createCustomer({...req.body, CAC:cac, validID:validId});
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res)
+      }
+    }
+  }
+
+  fetchCustomers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchCustomers(req.query);
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { customerId } = req.params;
+        const data = await this.module.fetchCustomerDetails(customerId);
+        this.ok(res,'ok',data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  createOrder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { customerId } = req.params;
+        const data = await this.module.createOrder({...req.body, customer:customerId});
+        this.ok(res, 'ok', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchUserOrder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { customerId } = req.params;
+        const data = await this.module.fetchCustomerOrder(customerId);
+        this.ok(res, 'ok', data)
+      } catch (e) {
+          this.handleError(e, req, res);
+      }
+    }
+  }
+}
+
+export { Validator }
+
+export default customerCtrl;

@@ -97,7 +97,7 @@ class User extends Module {
     super();
     this.model = props.model;
   }
-//@ts-ignore
+
   public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
     let newUser : UserInterface|undefined;
     try {

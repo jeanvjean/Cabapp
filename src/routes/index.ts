@@ -7,6 +7,7 @@ import InventoryRouter from './inventory';
 import vehicleRouter from './vehicle';
 import driverRouter from './driver';
 import Uploader from '../controllers/Uploader';
+import customerRouter from './customer';
 const uploader = new Uploader();
 
 const router: expressRouter = expressRouter();
@@ -21,6 +22,7 @@ router.use('/cylinder', CylinderRouter);
 router.use('/inventory', InventoryRouter);
 router.use('/vehicle', vehicleRouter);
 router.use('/driver', driverRouter);
+router.use('/customer', customerRouter);
 
 router.post('/upload', uploader.fileUpload());
 

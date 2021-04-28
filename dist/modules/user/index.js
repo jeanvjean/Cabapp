@@ -25,7 +25,6 @@ class User extends module_1.default {
         super();
         this.model = props.model;
     }
-    //@ts-ignore
     register(data) {
         return __awaiter(this, void 0, void 0, function* () {
             let newUser;

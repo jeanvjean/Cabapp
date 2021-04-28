@@ -66,24 +66,24 @@ class driverCtrl extends ctrl_1.default {
         });
     }
 }
-exports.uploadFile = (files, filePath) => __awaiter(void 0, void 0, void 0, function* () {
+exports.uploadFile = (file, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     //@ts-ignore
-    files = files.file;
+    const files = file;
     let path = './temp';
     if (!fs_1.existsSync(path)) {
         fs_1.mkdirSync(path);
     }
     if (Array.isArray(files)) {
         let images = [];
-        for (let file of files) {
+        for (let f of files) {
             //@ts-ignore
-            yield file.mv(path + '/' + file.name);
+            yield f.mv(path + '/' + f.name);
             let uploader = new uploader_1.default();
             //@ts-ignore
-            let url = yield uploader.upload(path + '/' + file.name, filePath, {});
+            let url = yield uploader.upload(path + '/' + f.name, filePath, {});
             images.push(url);
             //@ts-ignore
-            fs_1.unlinkSync(path + '/' + file.name);
+            fs_1.unlinkSync(path + '/' + f.name);
         }
         // res.send({images, message: 'files uploaded'})
         return images;

@@ -14,6 +14,7 @@ const firebase = require('firebase-admin');
 const node_mailjet_1 = require("node-mailjet");
 const firebase_admin_1 = require("firebase-admin");
 const resolve_template_1 = require("./resolve-template");
+const static_1 = require("../configs/static");
 /**
  * Handle all business logic that could happen in Index controller
  *
@@ -22,12 +23,12 @@ const resolve_template_1 = require("./resolve-template");
 class NotificationModule extends module_1.default {
     constructor() {
         super();
-        this.privateKey = process.env.PRIVATE_SMTP;
-        this.publicKey = process.env.PUBLIC_SMTP;
-        this.senderName = process.env.SMTP_FROM_NAME;
-        this.senderEmail = process.env.SMTP_FROM_EMAIL;
+        this.privateKey = static_1.default.PRIVATE_SMTP;
+        this.publicKey = static_1.default.PUBLIC_SMTP;
+        this.senderName = static_1.default.SMTP_FROM_NAME;
+        this.senderEmail = static_1.default.SMTP_FROM_EMAIL;
         this.mailJet = node_mailjet_1.connect(this.publicKey || '', this.privateKey || '');
-        this.serverKey = process.env.FCM_SERVER_KEY;
+        this.serverKey = static_1.default.FCM_SERVER_KEY;
         this.firebase = firebase_admin_1.messaging;
     }
     /**

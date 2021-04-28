@@ -5,6 +5,7 @@ import { messaging } from 'firebase-admin'
 import {join} from 'path'
 import {post} from 'request-promise'
 import { getTemplate } from "./resolve-template";
+import SecretKeys from '../configs/static';
 
 // const serviceAccount = require(join(
 // 	__dirname,
@@ -66,12 +67,12 @@ class NotificationModule extends Module {
 	private firebase?: any
 	constructor() {
 		super()
-		this.privateKey = process.env.PRIVATE_SMTP
-		this.publicKey = process.env.PUBLIC_SMTP
-		this.senderName = process.env.SMTP_FROM_NAME
-		this.senderEmail = process.env.SMTP_FROM_EMAIL
+		this.privateKey = SecretKeys.PRIVATE_SMTP
+		this.publicKey = SecretKeys.PUBLIC_SMTP
+		this.senderName = SecretKeys.SMTP_FROM_NAME
+		this.senderEmail = SecretKeys.SMTP_FROM_EMAIL
 		this.mailJet = connect(this.publicKey || '', this.privateKey || '');
-		this.serverKey = process.env.FCM_SERVER_KEY
+		this.serverKey = SecretKeys.FCM_SERVER_KEY
 
 		this.firebase = messaging
 	}

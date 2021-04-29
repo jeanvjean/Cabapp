@@ -73,7 +73,7 @@ class User extends module_1.default {
                         const html = yield resolve_template_1.getTemplate('invite', {
                             team: user.role,
                             role: user.subrole,
-                            link: static_1.default.FRONTEND_URL + 'login',
+                            link: static_1.default.FRONTEND_URL,
                             password
                         });
                         let mailLoad = {

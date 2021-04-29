@@ -147,7 +147,7 @@ class User extends Module {
           const html = await getTemplate('invite', {
             team: user.role,
             role:user.subrole,
-            link:Environment.FRONTEND_URL+'login',
+            link:Environment.FRONTEND_URL,
             password
           });
           let mailLoad = {

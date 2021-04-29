@@ -91,6 +91,14 @@ class UserValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateInvite() {
+        const rules = [
+            express_validator_1.check('users')
+                .isArray()
+                .withMessage('provide an array of user objects to be added with (email, role, and subrole)')
+        ];
+        return rules;
+    }
 }
 exports.default = UserValidator;
 //# sourceMappingURL=validator.js.map

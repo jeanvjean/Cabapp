@@ -21,6 +21,8 @@ const router: expressRouter = expressRouter();
 
   router.post('/invite-user',
       auth.verify(),
+      Validator.validateInvite(),
+      val.validate(),
       userCtrl.inviteUser()
   );
 

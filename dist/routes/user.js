@@ -9,7 +9,7 @@ const auth = new authentication_1.default();
 const router = express_1.Router();
 router.post('/register', user_1.Validator.validateUser(), val.validate(), controllers_1.userCtrl.create());
 router.post('/login', user_1.Validator.validateLogin(), val.validate(), controllers_1.userCtrl.login());
-router.post('/invite-user', auth.verify(), controllers_1.userCtrl.inviteUser());
+router.post('/invite-user', auth.verify(), user_1.Validator.validateInvite(), val.validate(), controllers_1.userCtrl.inviteUser());
 router.get('/get-roles', auth.verify(), controllers_1.userCtrl.getConstantRoles());
 router.get('/get-users', auth.verify(), controllers_1.userCtrl.fetchUsers());
 router.get('/user-details/:id/:email', auth.verify(), controllers_1.userCtrl.fetchUser());

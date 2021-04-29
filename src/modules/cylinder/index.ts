@@ -149,6 +149,15 @@ class Cylinder extends Module {
   public async regCylinder(data:NewCylinderRegisterationInterface, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     // console.log(data)
     try {
+      let foundCylinder
+      if(data.cylinderNumber) {
+        foundCylinder = await this.registerCylinder.findOne({cylinderNumber:data.cylinderNumber});
+      }else if(data.assignedNumber) {
+        foundCylinder = await this.registerCylinder.findOne({assignedNumber:data.assignedNumber});
+      }
+      if(foundCylinder) {
+        throw new BadInputFormatException('this cylinder has been registered');
+      }
       let manDate = new Date(data.dateManufactured);
       let payload = {
         ...data,

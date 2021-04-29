@@ -95,6 +95,15 @@ class UserValidator extends Ctrl {
     return rules;
   }
 
+  static validateInvite():ValidationChain[]{
+    const rules = [
+      check('users')
+        .isArray()
+        .withMessage('provide an array of user objects to be added with (email, role, and subrole)')
+    ]
+    return rules;
+  }
+
 }
 
 export default UserValidator;

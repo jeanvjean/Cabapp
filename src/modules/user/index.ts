@@ -225,7 +225,7 @@ class User extends Module {
       email: data.email
     });
       if(!user) {
-        throw new BadInputFormatException('this user does not exist');
+        throw new BadInputFormatException('No User found');
       }
       return Promise.resolve(user);
   }

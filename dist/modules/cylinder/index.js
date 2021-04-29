@@ -72,6 +72,16 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             // console.log(data)
             try {
+                let foundCylinder;
+                if (data.cylinderNumber) {
+                    foundCylinder = yield this.registerCylinder.findOne({ cylinderNumber: data.cylinderNumber });
+                }
+                else if (data.assignedNumber) {
+                    foundCylinder = yield this.registerCylinder.findOne({ assignedNumber: data.assignedNumber });
+                }
+                if (foundCylinder) {
+                    throw new exceptions_1.BadInputFormatException('this cylinder has been registered');
+                }
                 let manDate = new Date(data.dateManufactured);
                 let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString() });
                 let newRegistration = yield this.registerCylinder.create(payload);

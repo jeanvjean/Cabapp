@@ -58,7 +58,8 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { customerId } = req.params;
-        const data = await this.module.createOrder({...req.body, customer:customerId});
+        //@ts-ignore
+        const data = await this.module.createOrder({...req.body, customer:customerId}, req.user);
         this.ok(res, 'ok', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -121,6 +122,18 @@ class customerCtrl extends Ctrl{
       try {
         const data = await this.module.fetchComplaints(req.params.customerId);
         this.ok(res, 'complaints fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  updateTracking():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { orderId } = req.params;
+        const data = await this.module.updateTracking({...req.body, orderId});
+        this.ok(res, 'tracking updated', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

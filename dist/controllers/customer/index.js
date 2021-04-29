@@ -63,7 +63,8 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { customerId } = req.params;
-                const data = yield this.module.createOrder(Object.assign(Object.assign({}, req.body), { customer: customerId }));
+                //@ts-ignore
+                const data = yield this.module.createOrder(Object.assign(Object.assign({}, req.body), { customer: customerId }), req.user);
                 this.ok(res, 'ok', data);
             }
             catch (e) {
@@ -126,6 +127,18 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const data = yield this.module.fetchComplaints(req.params.customerId);
                 this.ok(res, 'complaints fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    updateTracking() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { orderId } = req.params;
+                const data = yield this.module.updateTracking(Object.assign(Object.assign({}, req.body), { orderId }));
+                this.ok(res, 'tracking updated', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

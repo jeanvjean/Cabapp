@@ -9,9 +9,9 @@ import {
 
 export interface ComplaintInterface extends Document{
   customer:Schema.Types.ObjectId
-  title:string
-  issue:string
-  comment:string
+  title?:string
+  issue?:string
+  comment?:string
   createdAt:Date
   updatedAt:Date
 }

@@ -51,10 +51,14 @@ class Customer extends module_1.default {
             }
         });
     }
-    createOrder(data) {
+    createOrder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const order = yield this.order.create(data);
+                const order = new this.order(data);
+                order.tracking.push({
+                    location: user.role,
+                    status: 'pending'
+                });
                 return Promise.resolve(order);
             }
             catch (e) {
@@ -90,6 +94,23 @@ class Customer extends module_1.default {
                     order === null || order === void 0 ? void 0 : order.status = order_1.PickupStatus.PENDING;
                 }
                 yield (order === null || order === void 0 ? void 0 : order.save());
+                return Promise.resolve(order);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    updateTracking(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const order = yield this.order.findById(data.orderId);
+                //@ts-ignore
+                order === null || order === void 0 ? void 0 : order.status = data.status;
+                //@ts-ignore
+                order.location = data.location;
+                //@ts-ignore
+                yield order.save();
                 return Promise.resolve(order);
             }
             catch (e) {

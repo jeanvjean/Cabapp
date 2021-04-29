@@ -2,7 +2,8 @@ import { Model } from "mongoose";
 import { ComplaintInterface } from "../../models/complaint";
 import { CustomerInterface } from "../../models/customer";
 import { CylinderInterface } from "../../models/cylinder";
-import { OrderInterface, PickupStatus } from "../../models/order";
+import { OrderInterface, PickupStatus, trackingOrder } from "../../models/order";
+import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
 
 
@@ -33,18 +34,27 @@ interface newCustomerInterface {
 }
 
 interface CreateOrderInterface{
-  pickupType:OrderInterface['pickupType']
-  pickupDate:OrderInterface['pickupDate']
-  numberOfCylinders:OrderInterface['numberOfCylinders']
+  pickupType?:OrderInterface['pickupType']
+  pickupDate?:OrderInterface['pickupDate']
+  numberOfCylinders?:OrderInterface['numberOfCylinders']
   customer:OrderInterface['customer']
-  vehicle:OrderInterface['vehicle']
+  vehicle?:OrderInterface['vehicle']
+  cylinderSize?:OrderInterface['cylinderSize']
+  gasType?:OrderInterface['gasType']
+  gasColor?:OrderInterface['gasColor']
+}
+
+type TrackingDataInput = {
+  location:trackingOrder['location']
+  status:trackingOrder['status']
+  orderId:string
 }
 
 type NewComplainInterface = {
   customer:ComplaintInterface['customer']
-  title:ComplaintInterface['title']
-  issue:ComplaintInterface['issue']
-  comment:ComplaintInterface['comment']
+  title?:ComplaintInterface['title']
+  issue?:ComplaintInterface['issue']
+  comment?:ComplaintInterface['comment']
 }
 
 type OrderDoneInput = {
@@ -91,9 +101,13 @@ class Customer extends Module{
     }
   }
 
-  public async createOrder(data:CreateOrderInterface):Promise<OrderInterface|undefined>{
+  public async createOrder(data:CreateOrderInterface, user:UserInterface):Promise<OrderInterface|undefined>{
     try {
-      const order = await this.order.create(data);
+      const order = new this.order(data);
+      order.tracking.push({
+        location:user.role,
+        status:'pending'
+      });
       return Promise.resolve(order);
     } catch (e) {
       this.handleException(e);
@@ -124,6 +138,21 @@ class Customer extends Module{
         order?.status = PickupStatus.PENDING;
       }
       await order?.save();
+      return Promise.resolve(order as OrderInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async updateTracking(data:TrackingDataInput):Promise<OrderInterface|undefined>{
+    try {
+      const order = await this.order.findById(data.orderId);
+      //@ts-ignore
+      order?.status = data.status;
+      //@ts-ignore
+      order.location = data.location;
+      //@ts-ignore
+      await order.save()
       return Promise.resolve(order as OrderInterface);
     } catch (e) {
       this.handleException(e);

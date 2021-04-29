@@ -74,6 +74,19 @@ class CustomerValidation extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateOrder() {
+        const rules = [
+            express_validator_1.check('pickupType'),
+            express_validator_1.check('pickupDate'),
+            express_validator_1.check('status'),
+            express_validator_1.check('numberOfCylinders'),
+            express_validator_1.check('vehicle'),
+            express_validator_1.check('cylinderSize'),
+            express_validator_1.check('gasType'),
+            express_validator_1.check('gasColor')
+        ];
+        return rules;
+    }
 }
 exports.default = CustomerValidation;
 //# sourceMappingURL=validator.js.map

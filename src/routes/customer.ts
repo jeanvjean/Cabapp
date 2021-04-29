@@ -29,6 +29,8 @@ router.get(
 router.post(
   '/create-order/:customerId',
   auth.verify(),
+  Validator.validateOrder(),
+  val.validate(),
   customerCtrl.createOrder()
 );
 

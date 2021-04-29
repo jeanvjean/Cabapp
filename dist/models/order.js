@@ -7,13 +7,21 @@ var PickupStatus;
     PickupStatus["PENDING"] = "pending";
     PickupStatus["DONE"] = "done";
 })(PickupStatus = exports.PickupStatus || (exports.PickupStatus = {}));
+const trackingSchema = new mongoose_1.Schema({
+    location: String,
+    status: String
+});
 const OrderSchema = new mongoose_1.Schema({
     pickupType: String,
     pickupDate: Date,
     status: { type: String, enum: Object.values(PickupStatus), default: PickupStatus.PENDING },
     numberOfCylinders: Number,
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
-    vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' }
+    vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' },
+    cylinderSize: { type: String },
+    gasType: { type: String },
+    gasColor: { type: String },
+    tracking: [trackingSchema]
 }, {
     timestamps: true
 });

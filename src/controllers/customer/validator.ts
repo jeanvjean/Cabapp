@@ -70,6 +70,20 @@ class CustomerValidation extends Ctrl{
     ]
     return rules;
   }
+
+  static validateOrder():ValidationChain[]{
+    const rules = [
+      check('pickupType'),
+      check('pickupDate'),
+      check('status'),
+      check('numberOfCylinders'),
+      check('vehicle'),
+      check('cylinderSize'),
+      check('gasType'),
+      check('gasColor')
+    ]
+    return rules;
+  }
 }
 
 export default CustomerValidation;

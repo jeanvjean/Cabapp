@@ -10,7 +10,7 @@ const router = express_1.Router();
 router.post('/create-customer', auth.verify(), customer_1.Validator.validateCustomer(), val.validate(), controllers_1.customerCtrl.createCustomer());
 router.get('/fetch-customers', controllers_1.customerCtrl.fetchCustomers());
 router.get('/fetch-customer/:customerId', controllers_1.customerCtrl.fetchCustomer());
-router.post('/create-order/:customerId', auth.verify(), controllers_1.customerCtrl.createOrder());
+router.post('/create-order/:customerId', auth.verify(), customer_1.Validator.validateOrder(), val.validate(), controllers_1.customerCtrl.createOrder());
 router.get('/fetch-order/:customerId', controllers_1.customerCtrl.fetchUserOrder());
 router.post('/mark-order/:orderId', auth.verify(), controllers_1.customerCtrl.markOrder());
 router.get('/fetch-order/:orderId', controllers_1.customerCtrl.orderDetails());

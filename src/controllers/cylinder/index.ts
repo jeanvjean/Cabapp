@@ -24,7 +24,7 @@ class CylinderController extends Ctrl{
         //@ts-ignore
         let cylinder = await this.module.createCylinder(req.body, req.user);
         console.log(cylinder);
-        this.ok(res, 'ok', cylinder);
+        this.ok(res, 'Created', cylinder);
       } catch (e) {
         this.handleError(e, req, res)
       }
@@ -35,7 +35,7 @@ class CylinderController extends Ctrl{
     return async (req:Request, res:Response) =>{
       try {
         const list = await this.module.fetchCylinders(req.query);
-        this.ok(res, 'ok', list);
+        this.ok(res, 'fetched cylinder types', list);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -47,7 +47,7 @@ class CylinderController extends Ctrl{
       try {
         const {id} = req.params
         const cylinder = await this.module.cylinderDetails(id);
-        this.ok(res,'ok',cylinder);
+        this.ok(res,'Cylinder type',cylinder);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -59,7 +59,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.regCylinder(req.body, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Registered', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -71,7 +71,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchRegisteredCylinders(req.query, req.user);;
-        this.ok(res, 'ok', data)
+        this.ok(res, 'fetched', data)
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -84,7 +84,7 @@ class CylinderController extends Ctrl{
         const { id } = req.params;
         //@ts-ignore
         const cylinder = await this.module.fetchRegisteredCylinder(id, req.user);
-        this.ok(res, 'ok', cylinder);
+        this.ok(res, 'Fetched details', cylinder);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -96,7 +96,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const transfer = await this.module.transferCylinders(req.body, req.user);
-        this.ok(res, 'ok', transfer);
+        this.ok(res, 'Transfer Initiated', transfer);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -108,7 +108,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const approval = await this.module.approveTransfer(req.body, req.user);
-        this.ok(res, 'ok', approval);
+        this.ok(res, 'Approved', approval);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -119,7 +119,7 @@ class CylinderController extends Ctrl{
     return async(req:Request, res:Response) =>{
       try {
         const transfers = await this.module.fetchTransferRequets(req.query);
-        this.ok(res, 'ok', transfers);
+        this.ok(res, 'fetched', transfers);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -130,7 +130,7 @@ class CylinderController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.fetchTransferDetails(req.params.id);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -142,7 +142,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchUserPendingApproval(req.query, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Pending approvals fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -155,7 +155,7 @@ class CylinderController extends Ctrl{
         const { cylinderId } = req.params;
         //@ts-ignore
         const data = await this.module.deleteRegisteredCylinder(cylinderId, req.user);
-        this.ok(res,'ok', data);
+        this.ok(res,'Deleted', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -166,7 +166,7 @@ class CylinderController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.fetchDamagedCylinders(req.query);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

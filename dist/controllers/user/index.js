@@ -23,7 +23,7 @@ class UserController extends ctrl_1.default {
             try {
                 const { body } = req;
                 const user = yield this.module.register(body);
-                this.ok(res, 'ok', user);
+                this.ok(res, 'Registered successfully', user);
             }
             catch (error) {
                 this.handleError(error, req, res);
@@ -36,7 +36,7 @@ class UserController extends ctrl_1.default {
                 const { body } = req;
                 //@ts-ignore
                 const data = yield this.module.inviteUser(body, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Invitation sent', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -48,7 +48,7 @@ class UserController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.fetchRoles(req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched successfully', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -60,7 +60,7 @@ class UserController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.fetchUsers(req.query, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched Users', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -72,7 +72,7 @@ class UserController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const user = yield this.module.fetchUser(req.params);
-                this.ok(res, 'ok', user);
+                this.ok(res, 'User details', user);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -84,7 +84,7 @@ class UserController extends ctrl_1.default {
             try {
                 const { body } = req;
                 const user = yield this.module.login(body);
-                this.ok(res, 'ok', user);
+                this.ok(res, 'Login successful', user);
             }
             catch (error) {
                 this.handleError(error, req, res);
@@ -97,7 +97,7 @@ class UserController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.updateUser(req.body, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Updated', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -108,7 +108,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.requestPasswordReset(req.body);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'A link has been sent to your email', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -119,7 +119,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.resetPassword(req.body);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Password changed', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -131,7 +131,7 @@ class UserController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.changePassword(req.body, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Password changed', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -142,7 +142,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.deleteUser(req.params.userId);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Deleted', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

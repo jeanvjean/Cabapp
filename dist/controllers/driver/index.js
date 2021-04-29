@@ -23,7 +23,7 @@ class driverCtrl extends ctrl_1.default {
             try {
                 let image = yield exports.uploadFile(req.files, 'profile_image/');
                 const data = yield this.module.createDriver(Object.assign(Object.assign({}, req.body), { image }));
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Created', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -35,7 +35,7 @@ class driverCtrl extends ctrl_1.default {
             try {
                 const { driverId } = req.params;
                 const data = yield this.module.deleteDriver({ driverId });
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Deleted', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -46,7 +46,7 @@ class driverCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.fetchDrivers(req.query);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -58,7 +58,7 @@ class driverCtrl extends ctrl_1.default {
             try {
                 const { driverId } = req.params;
                 const driver = yield this.module.fetchDriver({ driverId });
-                this.ok(res, 'ok', driver);
+                this.ok(res, 'details fetched', driver);
             }
             catch (e) {
                 this.handleError(e, req, res);

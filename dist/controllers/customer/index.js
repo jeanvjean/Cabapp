@@ -29,7 +29,7 @@ class customerCtrl extends ctrl_1.default {
                 //@ts-ignore
                 validId = yield driver_1.uploadFile(req.files.validId, 'customer-document/valid-id');
                 const data = yield this.module.createCustomer(Object.assign(Object.assign({}, req.body), { CAC: cac, validID: validId }));
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Created', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -40,7 +40,7 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.fetchCustomers(req.query);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -52,7 +52,7 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const { customerId } = req.params;
                 const data = yield this.module.fetchCustomerDetails(customerId);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -65,7 +65,7 @@ class customerCtrl extends ctrl_1.default {
                 const { customerId } = req.params;
                 //@ts-ignore
                 const data = yield this.module.createOrder(Object.assign(Object.assign({}, req.body), { customer: customerId }), req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Created', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -77,7 +77,7 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const { customerId } = req.params;
                 const data = yield this.module.fetchCustomerOrder(customerId);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Fetched Orders', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

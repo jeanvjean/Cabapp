@@ -19,7 +19,7 @@ class driverCtrl extends Ctrl{
       try {
           let image = await uploadFile(req.files, 'profile_image/');
           const data = await this.module.createDriver({...req.body, image});
-          this.ok(res, 'ok', data);
+          this.ok(res, 'Created', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -31,7 +31,7 @@ class driverCtrl extends Ctrl{
       try {
         const { driverId } = req.params;
         const data = await this.module.deleteDriver({driverId});
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Deleted', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -42,7 +42,7 @@ class driverCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.fetchDrivers(req.query);
-        this.ok(res,'ok',data);
+        this.ok(res,'Fetched',data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -54,7 +54,7 @@ class driverCtrl extends Ctrl{
       try {
         const { driverId } = req.params
         const driver = await this.module.fetchDriver({driverId});
-        this.ok(res, 'ok', driver);
+        this.ok(res, 'details fetched', driver);
       } catch (e) {
         this.handleError(e, req, res);
       }

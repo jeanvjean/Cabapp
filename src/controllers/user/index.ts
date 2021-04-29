@@ -23,7 +23,7 @@ class UserController extends Ctrl{
       try {
         const { body } = req;
         const user:UserInterface | undefined = await this.module.register(body);
-        this.ok(res,'ok', user);
+        this.ok(res,'Registered successfully', user);
       } catch (error) {
         this.handleError(error, req, res)
       }
@@ -36,7 +36,7 @@ class UserController extends Ctrl{
         const { body } = req;
         //@ts-ignore
         const data = await this.module.inviteUser(body, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Invitation sent', data);
       } catch (e) {
         this.handleError(e, req, res)
       }
@@ -48,7 +48,7 @@ class UserController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchRoles(req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Fetched successfully', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -60,7 +60,7 @@ class UserController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchUsers(req.query, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Fetched Users', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -72,7 +72,7 @@ class UserController extends Ctrl{
       try{
         //@ts-ignore
         const user:UserInterface | undefined = await this.module.fetchUser(req.params);
-        this.ok(res, 'ok', user);
+        this.ok(res, 'User details', user);
       }catch(e){
         this.handleError(e, req, res);
       }
@@ -84,7 +84,7 @@ class UserController extends Ctrl{
       try {
         const {body} = req;
         const user = await this.module.login(body);
-        this.ok(res, 'ok', user);
+        this.ok(res, 'Login successful', user);
       } catch (error) {
         this.handleError(error, req, res)
       }
@@ -97,7 +97,7 @@ class UserController extends Ctrl{
       try {
         //@ts-ignore
         const data: UserInterface | undefined = await this.module.updateUser(req.body, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Updated', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -108,7 +108,7 @@ class UserController extends Ctrl{
     return async (req:Request, res:Response)=>{
       try {
         const data = await this.module.requestPasswordReset(req.body);
-        this.ok(res,'ok',data);
+        this.ok(res,'A link has been sent to your email',data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -119,7 +119,7 @@ class UserController extends Ctrl{
     return async (req:Request, res:Response)=>{
       try {
         const data = await this.module.resetPassword(req.body);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Password changed', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -131,7 +131,7 @@ class UserController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.changePassword(req.body, req.user);
-        this.ok(res,'ok',data);
+        this.ok(res,'Password changed',data);
       } catch (e) {
         this.handleError(e, req, res)
       }
@@ -142,7 +142,7 @@ class UserController extends Ctrl{
     return async(req:Request, res:Response) =>{
       try {
         const data = await this.module.deleteUser(req.params.userId);
-        this.ok(res,'ok',data);
+        this.ok(res,'Deleted',data);
       } catch (e) {
         this.handleError(e, req, res);
       }

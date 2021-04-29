@@ -24,7 +24,7 @@ class customerCtrl extends Ctrl{
         //@ts-ignore
           validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
         const data = await this.module.createCustomer({...req.body, CAC:cac, validID:validId});
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Created', data);
       } catch (e) {
         this.handleError(e, req, res)
       }
@@ -35,7 +35,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.fetchCustomers(req.query);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -47,7 +47,7 @@ class customerCtrl extends Ctrl{
       try {
         const { customerId } = req.params;
         const data = await this.module.fetchCustomerDetails(customerId);
-        this.ok(res,'ok',data);
+        this.ok(res,'Fetched',data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -60,7 +60,7 @@ class customerCtrl extends Ctrl{
         const { customerId } = req.params;
         //@ts-ignore
         const data = await this.module.createOrder({...req.body, customer:customerId}, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Created', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -72,7 +72,7 @@ class customerCtrl extends Ctrl{
       try {
         const { customerId } = req.params;
         const data = await this.module.fetchCustomerOrder(customerId);
-        this.ok(res, 'ok', data)
+        this.ok(res, 'Fetched Orders', data)
       } catch (e) {
           this.handleError(e, req, res);
       }

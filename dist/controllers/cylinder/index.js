@@ -24,7 +24,7 @@ class CylinderController extends ctrl_1.default {
                 //@ts-ignore
                 let cylinder = yield this.module.createCylinder(req.body, req.user);
                 console.log(cylinder);
-                this.ok(res, 'ok', cylinder);
+                this.ok(res, 'Created', cylinder);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -35,7 +35,7 @@ class CylinderController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const list = yield this.module.fetchCylinders(req.query);
-                this.ok(res, 'ok', list);
+                this.ok(res, 'fetched cylinder types', list);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -47,7 +47,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 const { id } = req.params;
                 const cylinder = yield this.module.cylinderDetails(id);
-                this.ok(res, 'ok', cylinder);
+                this.ok(res, 'Cylinder type', cylinder);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -59,7 +59,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.regCylinder(req.body, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Registered', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -72,7 +72,7 @@ class CylinderController extends ctrl_1.default {
                 //@ts-ignore
                 const data = yield this.module.fetchRegisteredCylinders(req.query, req.user);
                 ;
-                this.ok(res, 'ok', data);
+                this.ok(res, 'fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -85,7 +85,7 @@ class CylinderController extends ctrl_1.default {
                 const { id } = req.params;
                 //@ts-ignore
                 const cylinder = yield this.module.fetchRegisteredCylinder(id, req.user);
-                this.ok(res, 'ok', cylinder);
+                this.ok(res, 'Fetched details', cylinder);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -97,7 +97,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const transfer = yield this.module.transferCylinders(req.body, req.user);
-                this.ok(res, 'ok', transfer);
+                this.ok(res, 'Transfer Initiated', transfer);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -109,7 +109,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const approval = yield this.module.approveTransfer(req.body, req.user);
-                this.ok(res, 'ok', approval);
+                this.ok(res, 'Approved', approval);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -120,7 +120,7 @@ class CylinderController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const transfers = yield this.module.fetchTransferRequets(req.query);
-                this.ok(res, 'ok', transfers);
+                this.ok(res, 'fetched', transfers);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -131,7 +131,7 @@ class CylinderController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.fetchTransferDetails(req.params.id);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -143,7 +143,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.fetchUserPendingApproval(req.query, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Pending approvals fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -156,7 +156,7 @@ class CylinderController extends ctrl_1.default {
                 const { cylinderId } = req.params;
                 //@ts-ignore
                 const data = yield this.module.deleteRegisteredCylinder(cylinderId, req.user);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'Deleted', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -167,7 +167,7 @@ class CylinderController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.fetchDamagedCylinders(req.query);
-                this.ok(res, 'ok', data);
+                this.ok(res, 'fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

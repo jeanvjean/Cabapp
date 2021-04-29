@@ -17,7 +17,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.createProduct(req.body, req.user);
-        this.ok(res,'ok', data);
+        this.ok(res,'Products created', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -29,7 +29,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const products = await this.module.fetchProducts(req.query, req.user);
-        this.ok(res, 'ok', products);
+        this.ok(res, 'fetched', products);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -42,7 +42,7 @@ class ProductCtrl extends Ctrl{
         const { id } = req.params;
         //@ts-ignore
         const product = await this.module.fetchProduct(id, req.user);
-        this.ok(res, 'ok', product);
+        this.ok(res, 'details fetched', product);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -54,7 +54,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const supplier = await this.module.createSupplier(req.body, req.user);
-        this.ok(res, 'ok', supplier);
+        this.ok(res, 'supplier added', supplier);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -65,7 +65,7 @@ class ProductCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const inventory = await this.module.addInventory(req.body);
-        this.ok(res, 'ok', inventory);
+        this.ok(res, 'Inventory registered', inventory);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -77,7 +77,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const disbursement = await this.module.disburseProduct(req.body, req.user);
-        this.ok(res, 'ok', disbursement);
+        this.ok(res, 'done', disbursement);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -89,7 +89,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.approveDisbursment(req.body, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Approved', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -101,7 +101,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const disbursements = await this.module.fetchusersDisburseApprovals(req.query, req.user);
-        this.ok(res, 'ok', disbursements)
+        this.ok(res, 'Fetched', disbursements)
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -112,7 +112,7 @@ class ProductCtrl extends Ctrl{
     return async(req:Request, res:Response)=> {
       try {
         const disbursement  = await this.module.fetchDisbursement(req.params.id);
-        this.ok(res,'ok',disbursement);
+        this.ok(res,'Details fetched',disbursement);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -123,7 +123,7 @@ class ProductCtrl extends Ctrl{
     return async(req:Request, res:Response) =>{
       try {
         const disbursement = await this.module.fetchDisburseRequests(req.query);
-        this.ok(res, 'ok', disbursement);
+        this.ok(res, 'Fetched', disbursement);
       } catch (e) {
         this.handleError(e, req, res);
       }

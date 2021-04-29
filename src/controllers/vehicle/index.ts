@@ -15,7 +15,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const vehicle:VehicleInterface|undefined = await this.module.createVehicle(req.body);
-         this.ok(res, 'ok', vehicle);
+         this.ok(res, 'Created', vehicle);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -26,7 +26,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const vehicles = await this.module.fetchVehicles(req.query);
-        this.ok(res, 'ok', vehicles);
+        this.ok(res, 'Fetched list', vehicles);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -37,7 +37,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const vehicle = await this.module.fetchVehicle(req.params.id);
-        this.ok(res, 'ok', vehicle);
+        this.ok(res, 'details fetched', vehicle);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -49,7 +49,7 @@ class VehicleController extends Ctrl{
       try {
         //@ts-ignore
         const vehicle = await this.module.vehicleInspection( req.params.vehicleId, req.body, req.user);
-        this.ok(res,'ok', vehicle);
+        this.ok(res,'Recorded', vehicle);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -60,7 +60,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response) =>{
       try {
         const data = await this.module.fetchInspectionHist(req.params.vehicleId, req.query);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'History fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -74,7 +74,7 @@ class VehicleController extends Ctrl{
         const { status, comment } = req.body;
         //@ts-ignore
         const data = await this.module.aprroveInspection({vehicleId, inspectionId, status, comment}, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Approved', data);
       } catch (e) {
         this.handleError(e, req,  res);
       }
@@ -86,7 +86,7 @@ class VehicleController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.recordRoute(req.body, req.params, req.user);
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Recorded', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -100,7 +100,7 @@ class VehicleController extends Ctrl{
         const { comment, driver } = req.body
         //@ts-ignore
         const data = await this.module.assignDriver({vehicleId, comment, driver},req.user );
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Driver has been assigned', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -111,7 +111,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.deleteVehicle({vehicleId:req.params.vehicleId});
-        this.ok(res,'ok',data)
+        this.ok(res,'Vehicle deleted',data)
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -123,7 +123,7 @@ class VehicleController extends Ctrl{
       try {
         const { vehicleId, driver } = req.params;
         const data = await this.module.removeDriver({vehicleId, driver});
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Driver removed', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -136,7 +136,7 @@ class VehicleController extends Ctrl{
         const { vehicleId, routeId } = req.params;
         const { status } = req.body;
         const data = await this.module.markRouteAsComplete({vehicleId, routeId, status });
-        this.ok(res, 'ok', data);
+        this.ok(res, 'Completed', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

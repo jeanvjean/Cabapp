@@ -53,9 +53,7 @@ class CylinderValidator extends Ctrl{
       check('standardColor')
         .exists()
         .withMessage('Color standard is required'),
-      check('assignedNumber')
-        .exists()
-        .withMessage('Assigned Number is required'),
+      check('assignedNumber'),
       check('testingPresure')
         .exists()
         .withMessage('Testing Presure is required'),
@@ -66,8 +64,6 @@ class CylinderValidator extends Ctrl{
         .exists()
         .withMessage('Gas Volume Content required'),
       check('cylinderNumber')
-        .exists()
-        .withMessage('Original Cylinder Number required')
     ]
     return rules;
   }

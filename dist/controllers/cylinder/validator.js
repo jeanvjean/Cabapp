@@ -56,9 +56,7 @@ class CylinderValidator extends ctrl_1.default {
             express_validator_1.check('standardColor')
                 .exists()
                 .withMessage('Color standard is required'),
-            express_validator_1.check('assignedNumber')
-                .exists()
-                .withMessage('Assigned Number is required'),
+            express_validator_1.check('assignedNumber'),
             express_validator_1.check('testingPresure')
                 .exists()
                 .withMessage('Testing Presure is required'),
@@ -69,8 +67,6 @@ class CylinderValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('Gas Volume Content required'),
             express_validator_1.check('cylinderNumber')
-                .exists()
-                .withMessage('Original Cylinder Number required')
         ];
         return rules;
     }

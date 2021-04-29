@@ -11,7 +11,8 @@ import {
   Vehicle,
   Driver,
   Customer,
-  Order
+  Order,
+  Complain
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -57,5 +58,6 @@ export const driver = new DriverModule({
 
 export const customer = new CustomerModule({
   customer:Customer,
-  order:Order
+  order:Order,
+  complaint:Complain
 });

@@ -173,6 +173,17 @@ class CylinderController extends Ctrl{
     }
   }
 
+  fetchCustomerCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchCustomerCylinders(req.params.customerId);
+        this.ok(res, 'fetched cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const bcryptjs_1 = require("bcryptjs");
 const exceptions_1 = require("../../exceptions");
 const cylinder_1 = require("../../models/cylinder");
 const transferCylinder_1 = require("../../models/transferCylinder");
@@ -85,7 +86,16 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const registeredCylinders = yield this.registerCylinder.find(query);
-                return Promise.resolve(registeredCylinders);
+                const bufferCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
+                const assignedCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
+                return Promise.resolve({
+                    cylinders: registeredCylinders,
+                    counts: {
+                        totalCylinders: registeredCylinders.length | 0,
+                        totalBufferCylinders: bufferCylinders.length | 0,
+                        totalAssignedCylinders: assignedCylinders.length | 0
+                    }
+                });
             }
             catch (e) {
                 this.handleException(e);
@@ -160,11 +170,10 @@ class Cylinder extends module_1.default {
     approveTransfer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // let decode = verify(data.token, signTokenKey);
-                // let matchPWD = compareSync(data.password, user.password);
-                // if(!matchPWD) {
-                //   throw new BadInputFormatException('Incorrect password... please check the password');
-                // }
+                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
                 let transfer = yield this.transfer.findById(data.id);
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((transfer === null || transfer === void 0 ? void 0 : transfer.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -454,6 +463,18 @@ class Cylinder extends module_1.default {
                 return Promise.resolve({
                     message: 'Cylinder deleted'
                 });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchCustomerCylinders(customerId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const cylinders = yield this.registerCylinder.find({ assignedTo: customerId });
+                return Promise.resolve(cylinders);
             }
             catch (e) {
                 this.handleException(e);

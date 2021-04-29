@@ -95,6 +95,14 @@ class Product extends Module{
 
   public async createProduct(data:NewProductInterface, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
+      let findProduct = await this.product.findOne({
+        partNumber:data.partNumber,
+        serialNumber:data.serialNumber,
+        asnlNumber:data.asnlNumber
+      });
+      if(findProduct) {
+        throw new BadInputFormatException('this product serial number, asnl number and part number is already in the system');
+      }
       let product = await this.product.create(data)
       return Promise.resolve(product);
     } catch (e) {

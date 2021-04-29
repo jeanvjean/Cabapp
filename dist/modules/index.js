@@ -38,6 +38,7 @@ exports.driver = new driver_1.default({
 });
 exports.customer = new customers_1.default({
     customer: index_1.Customer,
-    order: index_1.Order
+    order: index_1.Order,
+    complaint: index_1.Complain
 });
 //# sourceMappingURL=index.js.map

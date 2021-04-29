@@ -1,6 +1,8 @@
 import { Model } from "mongoose";
+import { ComplaintInterface } from "../../models/complaint";
 import { CustomerInterface } from "../../models/customer";
-import { OrderInterface } from "../../models/order";
+import { CylinderInterface } from "../../models/cylinder";
+import { OrderInterface, PickupStatus } from "../../models/order";
 import Module, { QueryInterface } from "../module";
 
 
@@ -8,6 +10,7 @@ import Module, { QueryInterface } from "../module";
 export interface CustomerInterfaceProp{
   customer:Model<CustomerInterface>
   order:Model<OrderInterface>
+  complaint:Model<ComplaintInterface>
 }
 
 interface newCustomerInterface {
@@ -37,14 +40,28 @@ interface CreateOrderInterface{
   vehicle:OrderInterface['vehicle']
 }
 
+type NewComplainInterface = {
+  customer:ComplaintInterface['customer']
+  title:ComplaintInterface['title']
+  issue:ComplaintInterface['issue']
+  comment:ComplaintInterface['comment']
+}
+
+type OrderDoneInput = {
+  status:string,
+  orderId:string
+}
+
 class Customer extends Module{
   private customer:Model<CustomerInterface>
   private order:Model<OrderInterface>
+  private complaint:Model<ComplaintInterface>
 
   constructor(props:CustomerInterfaceProp){
     super()
     this.customer = props.customer
     this.order = props.order
+    this.complaint = props.complaint
   }
 
   public async createCustomer(data:newCustomerInterface):Promise<CustomerInterface|undefined> {
@@ -90,10 +107,54 @@ class Customer extends Module{
         {path:'customer', model:'customer'},
         {path:'vehicle', model:'vehicle'}
       ]);
-      console.log(orders);
       return Promise.resolve(orders)
     } catch (e) {
       this.handleException(e)
+    }
+  }
+
+  public async markOrderAsDone(data:OrderDoneInput ):Promise<OrderInterface|undefined>{
+    try {
+      const order = await this.order.findById(data.orderId);
+      if(data.status == PickupStatus.DONE) {
+        //@ts-ignore
+        order?.status = PickupStatus.DONE
+      }else if(data.status == PickupStatus.PENDING){
+        //@ts-ignore
+        order?.status = PickupStatus.PENDING;
+      }
+      await order?.save();
+      return Promise.resolve(order as OrderInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async viewOrder(orderId:string):Promise<OrderInterface|undefined>{
+    try {
+      const order = await this.order.findById(orderId);
+      return Promise.resolve(order as OrderInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async makeComplaint(data:NewComplainInterface):Promise<ComplaintInterface|undefined>{
+    try {
+      const complain = await this.complaint.create(data);
+      return Promise.resolve(complain);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchComplaints(customerId:string):Promise<ComplaintInterface[]|undefined>{
+    try {
+      //@ts-ignore
+      const complains = await this.complaint.find({customer:customerId});
+      return Promise.resolve(complains);
+    } catch (e) {
+      this.handleException(e);
     }
   }
 }

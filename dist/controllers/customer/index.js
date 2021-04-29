@@ -83,6 +83,55 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    markOrder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { orderId } = req.params;
+                const { status } = req.body;
+                const data = yield this.module.markOrderAsDone({ orderId, status });
+                this.ok(res, 'changed status', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    orderDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.viewOrder(req.params.orderId);
+                this.ok(res, 'order details fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    createComplaint() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { title, issue, comment } = req.body;
+                const { customerId } = req.params;
+                //@ts-ignore
+                const data = yield this.module.makeComplaint({ customer: customerId, title, issue, comment });
+                this.ok(res, 'complain registered', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchComplaints() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchComplaints(req.params.customerId);
+                this.ok(res, 'complaints fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = customerCtrl;
 //# sourceMappingURL=index.js.map

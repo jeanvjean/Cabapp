@@ -9,12 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const order_1 = require("../../models/order");
 const module_1 = require("../module");
 class Customer extends module_1.default {
     constructor(props) {
         super();
         this.customer = props.customer;
         this.order = props.order;
+        this.complaint = props.complaint;
     }
     createCustomer(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -68,8 +70,61 @@ class Customer extends module_1.default {
                     { path: 'customer', model: 'customer' },
                     { path: 'vehicle', model: 'vehicle' }
                 ]);
-                console.log(orders);
                 return Promise.resolve(orders);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    markOrderAsDone(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const order = yield this.order.findById(data.orderId);
+                if (data.status == order_1.PickupStatus.DONE) {
+                    //@ts-ignore
+                    order === null || order === void 0 ? void 0 : order.status = order_1.PickupStatus.DONE;
+                }
+                else if (data.status == order_1.PickupStatus.PENDING) {
+                    //@ts-ignore
+                    order === null || order === void 0 ? void 0 : order.status = order_1.PickupStatus.PENDING;
+                }
+                yield (order === null || order === void 0 ? void 0 : order.save());
+                return Promise.resolve(order);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    viewOrder(orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const order = yield this.order.findById(orderId);
+                return Promise.resolve(order);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    makeComplaint(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const complain = yield this.complaint.create(data);
+                return Promise.resolve(complain);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchComplaints(customerId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const complains = yield this.complaint.find({ customer: customerId });
+                return Promise.resolve(complains);
             }
             catch (e) {
                 this.handleException(e);

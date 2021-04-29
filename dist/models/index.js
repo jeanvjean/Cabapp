@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
+exports.Complain = exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
 const mongoose_1 = require("mongoose");
 const mongo_1 = require("../configs/mongo");
 const cylinder_1 = require("./cylinder");
@@ -16,6 +16,7 @@ const vehicle_1 = require("./vehicle");
 const driver_1 = require("./driver");
 const customer_1 = require("./customer");
 const order_1 = require("./order");
+const complaint_1 = require("./complaint");
 exports.conn = mongoose_1.createConnection(mongo_1.default.uri, mongo_1.default.options);
 exports.Person = person_1.default(exports.conn);
 exports.User = user_1.default(exports.conn);
@@ -30,5 +31,6 @@ exports.Vehicle = vehicle_1.default(exports.conn);
 exports.Driver = driver_1.default(exports.conn);
 exports.Customer = customer_1.default(exports.conn);
 exports.Order = order_1.default(exports.conn);
+exports.Complain = complaint_1.default(exports.conn);
 exports.conn.once('open', () => console.log('db connection open'));
 //# sourceMappingURL=index.js.map

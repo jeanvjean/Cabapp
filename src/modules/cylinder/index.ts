@@ -84,6 +84,11 @@ interface FilterCylinderResponse {
   repair:RegisteredCylinderInterface[]
 }
 
+interface RegisteredCylinderPoolInterface {
+  cylinders:RegisteredCylinderInterface[],
+  counts:CylinderCountInterface
+}
+
 
 class Cylinder extends Module {
   private cylinder:Model<CylinderInterface>
@@ -156,10 +161,19 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
+  public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
       const registeredCylinders = await this.registerCylinder.find(query);
-      return Promise.resolve(registeredCylinders);
+      const bufferCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
+      const assignedCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
+      return Promise.resolve({
+        cylinders:registeredCylinders,
+        counts:{
+          totalCylinders:registeredCylinders.length|0,
+          totalBufferCylinders:bufferCylinders.length|0,
+          totalAssignedCylinders:assignedCylinders.length|0
+        }
+      });
     } catch (e) {
       this.handleException(e);
     }
@@ -228,11 +242,10 @@ class Cylinder extends Module {
 
   public async approveTransfer(data:ApprovalInput, user:UserInterface):Promise<ApprovalResponse|undefined>{
     try {
-      // let decode = verify(data.token, signTokenKey);
-      // let matchPWD = compareSync(data.password, user.password);
-      // if(!matchPWD) {
-      //   throw new BadInputFormatException('Incorrect password... please check the password');
-      // }
+      let matchPWD = compareSync(data.password, user.password);
+      if(!matchPWD) {
+        throw new BadInputFormatException('Incorrect password... please check the password');
+      }
       let transfer = await this.transfer.findById(data.id);
       if(data.status == ApprovalStatus.REJECTED) {
         if(transfer?.approvalStage == stagesOfApproval.STAGE1){
@@ -512,6 +525,16 @@ class Cylinder extends Module {
       });
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async fetchCustomerCylinders(customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
+    try {
+      //@ts-ignore
+      const cylinders = await this.registerCylinder.find({assignedTo:customerId});
+      return Promise.resolve(cylinders);
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

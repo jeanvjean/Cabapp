@@ -37,4 +37,25 @@ router.get(
   customerCtrl.fetchUserOrder()
 );
 
+router.post(
+  '/mark-order/:orderId',
+  auth.verify(),
+  customerCtrl.markOrder()
+);
+
+router.get(
+  '/fetch-order/:orderId',
+  customerCtrl.orderDetails()
+);
+
+router.post(
+  '/make-complain/:customerId',
+  customerCtrl.createComplaint()
+);
+
+router.get(
+  '/fetch-complaints/:customerId',
+  customerCtrl.fetchComplaints()
+);
+
 export default router;

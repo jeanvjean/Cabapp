@@ -12,5 +12,9 @@ router.get('/fetch-customers', controllers_1.customerCtrl.fetchCustomers());
 router.get('/fetch-customer/:customerId', controllers_1.customerCtrl.fetchCustomer());
 router.post('/create-order/:customerId', auth.verify(), controllers_1.customerCtrl.createOrder());
 router.get('/fetch-order/:customerId', controllers_1.customerCtrl.fetchUserOrder());
+router.post('/mark-order/:orderId', auth.verify(), controllers_1.customerCtrl.markOrder());
+router.get('/fetch-order/:orderId', controllers_1.customerCtrl.orderDetails());
+router.post('/make-complain/:customerId', controllers_1.customerCtrl.createComplaint());
+router.get('/fetch-complaints/:customerId', controllers_1.customerCtrl.fetchComplaints());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

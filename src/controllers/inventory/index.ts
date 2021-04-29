@@ -1,6 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import Product from '../../modules/inventory';
 import Ctrl from '../ctrl';
+import Validator from './validation';
 
 
 class ProductCtrl extends Ctrl{
@@ -130,5 +131,7 @@ class ProductCtrl extends Ctrl{
   }
 
 }
+
+export { Validator }
 
 export default ProductCtrl;

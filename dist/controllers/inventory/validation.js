@@ -26,6 +26,53 @@ class InventoryValidator extends ctrl_1.default {
             return next();
         });
     }
+    static validateProduct() {
+        const rules = [
+            express_validator_1.check('itemDescription')
+                .exists()
+                .withMessage('provide item description'),
+            express_validator_1.check('equipmentModel')
+                .exists()
+                .withMessage('equipment Model required'),
+            express_validator_1.check('equipmentType'),
+            express_validator_1.check('areaOfSpecialization'),
+            express_validator_1.check('asnlNumber')
+                .exists()
+                .withMessage('Provide ASNL number'),
+            express_validator_1.check('partNumber')
+                .exists()
+                .withMessage('Part Number is required'),
+            express_validator_1.check('serialNumber')
+                .exists()
+                .withMessage('provide serial number'),
+            express_validator_1.check('quantity')
+                .exists()
+                .withMessage('quantity is required')
+                .isNumeric()
+                .withMessage('quantity should be a numeric value'),
+            express_validator_1.check('unitCost')
+                .exists()
+                .withMessage('provide unit cost'),
+            express_validator_1.check('totalCost')
+                .exists()
+                .withMessage('totalCost')
+                .isNumeric()
+                .withMessage('Total cost should be numeric value'),
+            express_validator_1.check('reorderLevel')
+                .exists()
+                .withMessage('Provice reorder level'),
+            express_validator_1.check('location')
+                .exists()
+                .withMessage('Provide Location'),
+            express_validator_1.check('referer'),
+            express_validator_1.check('division')
+                .exists()
+                .withMessage('Provide division'),
+            express_validator_1.check('supplier')
+        ];
+        return rules;
+    }
 }
 exports.InventoryValidator = InventoryValidator;
+exports.default = InventoryValidator;
 //# sourceMappingURL=validation.js.map

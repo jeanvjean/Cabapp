@@ -77,6 +77,56 @@ class customerCtrl extends Ctrl{
       }
     }
   }
+
+  markOrder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+        const data = await this.module.markOrderAsDone({orderId, status});
+        this.ok(res, 'changed status', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  orderDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.viewOrder(req.params.orderId);
+        this.ok(res, 'order details fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  createComplaint():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { title, issue, comment } = req.body;
+        const { customerId } = req.params;
+        //@ts-ignore
+        const data = await this.module.makeComplaint({customer:customerId, title, issue, comment});
+        this.ok(res, 'complain registered', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchComplaints():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchComplaints(req.params.customerId);
+        this.ok(res, 'complaints fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

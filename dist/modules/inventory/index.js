@@ -23,6 +23,14 @@ class Product extends module_1.default {
     createProduct(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let findProduct = yield this.product.findOne({
+                    partNumber: data.partNumber,
+                    serialNumber: data.serialNumber,
+                    asnlNumber: data.asnlNumber
+                });
+                if (findProduct) {
+                    throw new exceptions_1.BadInputFormatException('this product serial number, asnl number and part number is already in the system');
+                }
                 let product = yield this.product.create(data);
                 return Promise.resolve(product);
             }

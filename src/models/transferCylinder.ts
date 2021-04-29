@@ -93,7 +93,7 @@ export const ApprovalOfficerSchema = new Schema({
 });
 
 export const TransferSchema = new Schema({
-  cylinders:[{type:Schema.Types.ObjectId}],
+  cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   initiator:{type:Schema.Types.ObjectId},
   to:{type:Schema.Types.ObjectId},
   tracking:{

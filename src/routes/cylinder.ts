@@ -74,4 +74,9 @@ router.get(
   cylinderCtrl.fetchDamagedCylinders()
 );
 
+router.get(
+  '/fetch-customer-cylinders/:customerId',
+  cylinderCtrl.fetchCustomerCylinders()
+);
+
 export default router;

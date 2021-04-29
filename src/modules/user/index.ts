@@ -147,7 +147,7 @@ class User extends Module {
           const html = await getTemplate('invite', {
             team: user.role,
             role:user.subrole,
-            link:Environment.FRONTEND_URL+'/login',
+            link:Environment.FRONTEND_URL+'login',
             password
           });
           let mailLoad = {
@@ -280,7 +280,7 @@ class User extends Module {
       const token = sign(payload, signTokenKey, {expiresIn} );
       const html = await getTemplate('reset-password', {
         name: user.role,
-        link:Environment.FRONTEND_URL+'/reset-password'+'/token',
+        link:Environment.FRONTEND_URL+'reset-password/'+ token,
       });
       let mailLoad = {
         content:html,

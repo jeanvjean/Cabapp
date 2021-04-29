@@ -15,7 +15,7 @@ let Secret = /** @class */ (() => {
     Secret.CLOUDINARY_SECRET = "iMeFPISULshzgunCBP-cpdOO6kk";
     Secret.CLOUDINARY_NAME = "dorz7hgqx";
     Secret.FCM_SERVER_KEY = '';
-    Secret.FRONTEND_URL = 'www.asnl.com';
+    Secret.FRONTEND_URL = 'http://178.62.127.157/';
     return Secret;
 })();
 exports.default = Secret;

@@ -15,7 +15,7 @@ class Secret {
   static CLOUDINARY_NAME="dorz7hgqx"
   static FCM_SERVER_KEY = ''
 
-  static FRONTEND_URL='www.asnl.com'
+  static FRONTEND_URL='http://178.62.127.157/'
 }
 
 export default Secret

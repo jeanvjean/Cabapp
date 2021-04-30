@@ -46,5 +46,12 @@ export const constants = [
     subroles:[
       "Head of department"
     ]
+  },
+  {
+    role:'Admin',
+    subrole:[
+      'superadmin',
+      'admin'
+    ]
   }
 ]

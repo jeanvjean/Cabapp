@@ -3,52 +3,52 @@
 
 export const constants = [
   {
-    role:"Sale",
+    role:"sale",
     subroles:[
-      "Head of department",
-      "Sales Executive",
-      "Sales Superintendent",
-      "Logistic Officer",
-      "Customer Service Attendant",
-      "Loader",
-      "Driver"
+      "head of department",
+      "sales executive",
+      "sales superintendent",
+      "logistic officer",
+      "customer service attendant",
+      "loader",
+      "driver"
     ]
   },
   {
-    role:"Production",
+    role:"production",
     subroles:[
-      "Head of department",
-      "Technical Officer",
-      "Supervisor",
-      "Plant Operator",
-      "Filler"
+      "head of department",
+      "technical officer",
+      "supervisor",
+      "plant operator",
+      "filler"
     ]
   },
   {
-    role:"Account",
+    role:"account",
     subroles:[
-      "Head of department",
-      "Account officers",
-      "Account Assistant"
+      "head of department",
+      "account officers",
+      "account assistant"
 
     ]
   },
   {
-    role:"Audit",
+    role:"audit",
     subroles:[
-      "Head of Department",
-      "Audit Officer",
-      "Audit Assistant"
+      "head of department",
+      "audit officer",
+      "audit assistant"
     ]
   },
   {
-    role:"Security",
+    role:"security",
     subroles:[
-      "Head of department"
+      "head of department"
     ]
   },
   {
-    role:'Admin',
+    role:'admin',
     subrole:[
       'superadmin',
       'admin'

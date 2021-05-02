@@ -1,19 +1,26 @@
 import { Model, Schema } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
+import { BranchInterface } from "../../models/branch";
 import { DisburseProduct, DisburseProductInterface } from "../../models/disburseStock";
 import { ProductInterface } from "../../models/inventory";
 import { InventoryInterface, ReceivedProduct } from "../../models/receivedProduct";
 import { SupplierInterface } from "../../models/supplier";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
+import { getTemplate } from "../../util/resolve-template";
+import { generateToken } from "../../util/token";
 import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
+import Environment from '../../configs/static';
+import Notify from '../../util/mail'
 
 interface ProductProp {
   product:Model<ProductInterface>
   supplier:Model<SupplierInterface>
   inventory:Model<InventoryInterface>
   disburse:Model<DisburseProductInterface>
+  branch:Model<BranchInterface>
+  user:Model<UserInterface>
 }
 
 interface NewProductInterface{
@@ -23,13 +30,13 @@ interface NewProductInterface{
   areaOfSpecialization:string
   asnlNumber:string
   partNumber:string
-  serialNumber:string
   quantity:number
   unitCost:number
   totalCost:number
   reorderLevel:number
-  location?:string,
+  location?:string
   referer?:string
+  productName?:string
 }
 
 type NewSupplierInterface = {
@@ -55,8 +62,8 @@ type NewInventory={
 
 interface NewDisburseInterface{
   products:DisburseProduct[]
-  releasedBy:Schema.Types.ObjectId
-  releasedTo:Schema.Types.ObjectId
+  releasedBy:DisburseProductInterface['releasedBy']
+  releasedTo:DisburseProductInterface['releasedTo']
   comment:string
   nextApprovalOfficer:string
 }
@@ -78,12 +85,20 @@ type DisbursePoolResponse = {
   message?:string
 }
 
+interface NewBranchInterface{
+  name:BranchInterface['name'],
+  location:BranchInterface['location']
+  branchAdmin:BranchInterface['branchAdmin']
+}
+
 
 class Product extends Module{
   private product:Model<ProductInterface>
   private supplier:Model<SupplierInterface>
   private inventory:Model<InventoryInterface>
   private disburse:Model<DisburseProductInterface>
+  private branch:Model<BranchInterface>
+  private user:Model<UserInterface>
 
   constructor(props:ProductProp) {
     super()
@@ -91,19 +106,80 @@ class Product extends Module{
     this.supplier = props.supplier
     this.inventory = props.inventory
     this.disburse = props.disburse
+    this.branch = props.branch
+    this.user = props.user
+  }
+
+  public async createBranch(data:NewBranchInterface, user:UserInterface):Promise<BranchInterface|undefined>{
+    try{
+      if(user.subrole !== 'superadmin') {
+        throw new BadInputFormatException('You cannot perform this action');
+      }
+      //@ts-ignore
+      let checkEmail = await this.user.findOne({email:data.branchAdmin});
+      if(checkEmail) {
+        throw new BadInputFormatException('this email already exists on the platform!! please check the email and try again');
+      }
+      const newUser = new this.user({email:data.branchAdmin, role:'admin', subrole:'superadmin'});
+      const branch = new this.branch({...data, branchAdmin:newUser._id});
+      newUser.branch = branch._id;
+      branch?.officers.push(newUser._id);
+      let password = await generateToken(4);
+      //@ts-ignore
+        newUser.password = password;
+
+        await newUser.save();
+        await branch.save();
+
+        const html = await getTemplate('invite', {
+          team: newUser.role,
+          role:newUser.subrole,
+          link:Environment.FRONTEND_URL,
+          branch:branch.name,
+          password
+        });
+        let mailLoad = {
+          content:html,
+          subject:'New User registeration',
+          email:newUser.email,
+        }
+        new Notify().sendMail(mailLoad)
+      return Promise.resolve(branch as BranchInterface);
+    }catch(e){
+      this.handleException(e);
+    }
+  }
+
+  public async fetchBranches(query:QueryInterface):Promise<BranchInterface[]|undefined>{
+    try {
+      const branches = await this.branch.find(query);
+      return Promise.resolve(branches);
+    } catch (e) {
+      this.handleException(e)
+    }
   }
 
   public async createProduct(data:NewProductInterface, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
       let findProduct = await this.product.findOne({
         partNumber:data.partNumber,
-        serialNumber:data.serialNumber,
         asnlNumber:data.asnlNumber
       });
-      if(findProduct) {
-        throw new BadInputFormatException('this product serial number, asnl number and part number is already in the system');
-      }
-      let product = await this.product.create(data)
+      // if(findProduct) {
+      //   throw new BadInputFormatException('this product serial number, asnl number and part number is already in the system');
+      // }
+      let sn;
+      let documents = await this.product.find()
+      let docs = documents.map(doc=> doc.serialNumber);
+      //@ts-ignore
+      let maxNumber = Math.max(...docs);
+      sn = maxNumber + 1
+      let product = await this.product.create({
+        ...data,
+        serialNumber:sn|1
+      });
+      const branch = await this.branch.findById(user.branch);
+      branch?.products.push(product._id);
       return Promise.resolve(product);
     } catch (e) {
       this.handleException(e)
@@ -138,6 +214,15 @@ class Product extends Module{
     }
   }
 
+  public async fetchSuppliers(query:QueryInterface):Promise<SupplierInterface[]|undefined>{
+    try {
+      const suppliers = await this.supplier.find(query);
+      return Promise.resolve(suppliers);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async addInventory(data:NewInventory):Promise<InventoryInterface|undefined> {
     try {
       const inventory = await this.inventory.create(data);
@@ -154,7 +239,7 @@ class Product extends Module{
       }
       const disbursement = new this.disburse(data);
       let track = {
-        title:"initiate disburse",
+        title:"initiate disbursement",
         stage:stagesOfApproval.STAGE1,
         status:ApprovalStatus.APPROVED,
         approvalOfficer:user._id
@@ -167,8 +252,8 @@ class Product extends Module{
         department:user.role,
         stageOfApproval:stagesOfApproval.STAGE1
       });
-      disbursement.disburseStatus = TransferStatus.PENDING
-      disbursement.approvalStage = stagesOfApproval.STAGE1
+      disbursement.requestApproval = TransferStatus.PENDING
+      disbursement.requestStage = stagesOfApproval.STAGE1
       disbursement.comments.push({
         comment:data.comment,
         commentBy:user._id
@@ -180,7 +265,7 @@ class Product extends Module{
     }
   }
 
-  public async approveDisbursment(data:ApprovalInput, user:UserInterface):Promise<ApprovalResponseType|undefined> {
+  public async approveDisbursment(data:ApprovalInput, user:UserInterface):Promise<DisburseProductInterface|undefined> {
     try {
       const disbursement = await this.disburse.findById(data.id);
       if(data.status == ApprovalStatus.REJECTED) {
@@ -209,10 +294,7 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
-          return Promise.resolve({
-            message:"Rejected",
-            disbursement
-          })
+          return Promise.resolve(disbursement)
         } else if(disbursement?.approvalStage == stagesOfApproval.STAGE2){
           let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
           let track = {
@@ -238,10 +320,59 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
-          return Promise.resolve({
-            message:"Rejected",
-            disbursement
-          })
+          return Promise.resolve(disbursement)
+        } else if(disbursement?.requestStage == stagesOfApproval.STAGE1){
+          let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
+          let track = {
+            title:"Corrections",
+            stage:stagesOfApproval.STAGE2,
+            status:ApprovalStatus.REJECTED,
+            approvalOfficer:AO[0].id
+          }
+          let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`)
+          if(checkOfficer.length == 0) {
+            disbursement.approvalOfficers.push({
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE2
+            });
+          }
+          disbursement.tracking.push(track);
+          disbursement.requestStage = stagesOfApproval.START;
+          disbursement.comments.push({
+            comment:data.comment,
+            commentBy:user._id
+          });
+          await disbursement.save();
+          return Promise.resolve(disbursement)
+        }else if(disbursement?.requestStage == stagesOfApproval.STAGE2){
+          let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
+          let track = {
+            title:"Corrections",
+            stage:stagesOfApproval.STAGE3,
+            status:ApprovalStatus.REJECTED,
+            approvalOfficer:AO[0].id
+          }
+          let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`)
+          if(checkOfficer.length == 0) {
+            disbursement.approvalOfficers.push({
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE3
+            });
+          }
+          disbursement.tracking.push(track);
+          disbursement.requestStage = stagesOfApproval.STAGE1;
+          disbursement.comments.push({
+            comment:data.comment,
+            commentBy:user._id
+          });
+          await disbursement.save();
+          return Promise.resolve(disbursement)
         }
       }else {
         if(disbursement?.approvalStage == stagesOfApproval.START) {
@@ -273,10 +404,7 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
-          return Promise.resolve({
-            message:"Approved",
-            disbursement
-          })
+          return Promise.resolve(disbursement)
         }else if(disbursement?.approvalStage == stagesOfApproval.STAGE1){
           let track = {
             title:"Approval Prorcess",
@@ -306,14 +434,42 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
-          return Promise.resolve({
-            message:"Approved",
-            disbursement
-          });
+          return Promise.resolve(disbursement);
         } else if(disbursement?.approvalStage == stagesOfApproval.STAGE2){
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE3,
+            status:ApprovalStatus.APPROVED,
+            dateApproved:new Date().toISOString(),
+            approvalOfficer:user._id,
+            nextApprovalOfficer:data.nextApprovalOfficer
+          }
+          let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
+
+          if(checkOfficer.length == 0) {
+            disbursement.approvalOfficers.push({
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE3
+            })
+          }
+          //@ts-ignore
+          disbursement.tracking.push(track);
+          disbursement.approvalStage = stagesOfApproval.APPROVED;
+          disbursement.disburseStatus = TransferStatus.COMPLETED;
+          //@ts-ignore
+          disbursement.comments.push({
+            comment:data.comment,
+            commentBy:user._id
+          });
+          await disbursement.save();
+          return Promise.resolve(disbursement)
+        }else if(disbursement?.requestStage == stagesOfApproval.START) {
+          let track = {
+            title:"Approval Prorcess",
+            stage:stagesOfApproval.STAGE1,
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
@@ -326,23 +482,83 @@ class Product extends Module{
               id:user._id,
               office:user.subrole,
               department:user.role,
-              stageOfApproval:stagesOfApproval.STAGE3
+              stageOfApproval:stagesOfApproval.STAGE1
             })
           }
           //@ts-ignore
           disbursement.tracking.push(track)
-          disbursement.approvalStage = stagesOfApproval.APPROVED;
-          disbursement.disburseStatus = TransferStatus.COMPLETED
+          disbursement.requestStage = stagesOfApproval.STAGE1;
           //@ts-ignore
-          disbursement.comment.push({
+          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
           })
           await disbursement.save();
-          return Promise.resolve({
-            message:"Approved",
-            disbursement
+          return Promise.resolve(disbursement)
+        }else if(disbursement?.requestStage == stagesOfApproval.STAGE1){
+          let track = {
+            title:"Approval Prorcess",
+            stage:stagesOfApproval.STAGE2,
+            status:ApprovalStatus.APPROVED,
+            dateApproved:new Date().toISOString(),
+            approvalOfficer:user._id,
+            nextApprovalOfficer:data.nextApprovalOfficer
+          }
+          let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
+          if(checkOfficer.length == 0) {
+            disbursement.approvalOfficers.push({
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE2
+            })
+          }
+          //@ts-ignore
+          disbursement.tracking.push(track)
+          disbursement.requestStage = stagesOfApproval.STAGE2;
+          //@ts-ignore
+          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.comments.push({
+            comment:data.comment,
+            commentBy:user._id
           })
+          await disbursement.save();
+          return Promise.resolve(disbursement);
+        } else if(disbursement?.requestStage == stagesOfApproval.STAGE2){
+          let track = {
+            title:"Approval Prorcess",
+            stage:stagesOfApproval.STAGE3,
+            status:ApprovalStatus.APPROVED,
+            dateApproved:new Date().toISOString(),
+            approvalOfficer:user._id,
+            nextApprovalOfficer:data.nextApprovalOfficer
+          }
+          let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
+
+          if(checkOfficer.length == 0) {
+            disbursement.approvalOfficers.push({
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE3
+            })
+          }
+          //@ts-ignore
+          disbursement.tracking.push(track);
+          disbursement.requestStage = stagesOfApproval.APPROVED;
+          disbursement.requestApproval = TransferStatus.COMPLETED;
+          disbursement.approvalStage = stagesOfApproval.START
+          disbursement.disburseStatus = TransferStatus.PENDING
+          //@ts-ignore
+          disbursement.comments.push({
+            comment:data.comment,
+            commentBy:user._id
+          });
+          await disbursement.save();
+          return Promise.resolve(disbursement)
         }
       }
     } catch (e) {
@@ -407,6 +623,63 @@ class Product extends Module{
     }
   }
 
+  public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
+    try {
+      const disbursement = await this.disburse.find(query);
+      const pendingDisbursement = disbursement.filter(disburse=> disburse.requestApproval == TransferStatus.PENDING);
+      let startStage = pendingDisbursement.filter(transfer=> {
+        if(transfer.requestStage == stagesOfApproval.START) {
+          for(let tofficer of transfer.approvalOfficers) {
+            if(`${tofficer.id}` == `${user._id}`){
+              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                return transfer
+              }
+            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+              return transfer
+            }
+          }
+        }
+      });
+      let stage1 = pendingDisbursement.filter(transfer=>{
+        if(transfer.requestStage == stagesOfApproval.STAGE1) {
+          for(let tofficer of transfer.approvalOfficers) {
+            if(`${tofficer.id}` == `${user._id}`){
+              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                return transfer
+              }
+            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+              return transfer
+            }
+          }
+        }
+      });
+      let stage2 = pendingDisbursement.filter(transfer=>{
+        if(transfer.requestStage == stagesOfApproval.STAGE2) {
+          for(let tofficer of transfer.approvalOfficers) {
+            if(`${tofficer.id}` == `${user._id}`){
+              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                return transfer
+              }
+            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+              return transfer
+            }
+          }
+        }
+      });
+      let disbursements;
+      if(user.subrole == 'superadmin'){
+        disbursements = stage2;
+      }else if(user.subrole == 'head of department'){
+        disbursements = stage1
+      }else {
+        disbursements = startStage;
+      }
+      return Promise.resolve(disbursements)
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async fetchDisbursement(id:string):Promise<DisburseProductInterface|undefined>{
     try {
       const disbursement = await this.disburse.findById(id);
@@ -435,6 +708,16 @@ class Product extends Module{
     });
     } catch (error) {
       this.handleException(error);
+    }
+  }
+
+  public async disburseReport(query:QueryInterface):Promise<DisburseProductInterface[]|undefined>{
+    try {
+      const disbursements = await this.disburse.find(query);
+      let completed = disbursements.filter(disburse=> disburse.disburseStatus == TransferStatus.COMPLETED);
+      return Promise.resolve(completed)
+    } catch (e) {
+      this.handleException(e);
     }
   }
 }

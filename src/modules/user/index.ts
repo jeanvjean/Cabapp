@@ -21,6 +21,7 @@ interface NewUserInterface {
   email:UserInterface['email'],
   password:UserInterface['password'],
   account_type:UserInterface['account_type']
+  branch:UserInterface['branch']
 }
 
 interface inviteUserInput {
@@ -134,7 +135,7 @@ class User extends Module {
     }
   }
 
-  public async inviteUser(data:inviteUserInput, user:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
+  public async inviteUser(data:inviteUserInput, userInfo:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
     try {
       const exists = [];
       for(let user of data.users) {

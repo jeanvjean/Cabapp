@@ -23,7 +23,6 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 let cylinder = yield this.module.createCylinder(req.body, req.user);
-                console.log(cylinder);
                 this.ok(res, 'Created', cylinder);
             }
             catch (e) {
@@ -179,6 +178,17 @@ class CylinderController extends ctrl_1.default {
             try {
                 const data = yield this.module.fetchCustomerCylinders(req.params.customerId);
                 this.ok(res, 'fetched cylinders', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchCompletedTransfers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchTransferReport(req.query);
+                this.ok(res, 'transfer report fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

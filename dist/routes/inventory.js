@@ -15,7 +15,12 @@ router.post('/register-inventory', auth.verify(), controllers_1.productCtrl.addI
 router.post('/disburse-products', auth.verify(), controllers_1.productCtrl.disburseProducts());
 router.post('/approve-disbursement', auth.verify(), controllers_1.productCtrl.approveDisbursement());
 router.get('/fetch-pending-disburse', auth.verify(), controllers_1.productCtrl.fetchDisburseApprovals());
+router.get('/fetch-pending-disburse-requests', auth.verify(), controllers_1.productCtrl.fetchUserDisburseRequests());
 router.get('/fetch-disburse-requests', auth.verify(), controllers_1.productCtrl.fetchDisbursements());
 router.get('/fetch-disbursement/:id', controllers_1.productCtrl.fetchDisbursement());
+router.get('/fetch-disbursement-report', controllers_1.productCtrl.disburseReport());
+router.post('/create-branch', auth.verify(), controllers_1.productCtrl.createBranch());
+router.get('/fetch-branches', controllers_1.productCtrl.fetchBranches());
+router.get('/fetch-suppliers', controllers_1.productCtrl.fetchSuppliers());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

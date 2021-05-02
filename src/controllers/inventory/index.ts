@@ -130,6 +130,63 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  disburseReport():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        const data = await this.module.disburseReport(req.query);
+        this.ok(res, 'disburse report fetched successfully', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchUserDisburseRequests():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const disbursements = await this.module.fetchusersDisburseRequests(req.query, req.user);
+        this.ok(res, 'Fetched', disbursements)
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  createBranch():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.createBranch(req.body, req.user);
+        this.ok(res, 'branch created', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchBranches():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data =  await this.module.fetchBranches(req.query);
+        this.ok(res,'branches returned', data)
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchSuppliers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchSuppliers(req.query);
+        this.ok(res,'suppliers fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

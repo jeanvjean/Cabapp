@@ -3,14 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.inventorySchema = exports.productRecievedSchema = void 0;
 const mongoose_1 = require("mongoose");
 exports.productRecievedSchema = new mongoose_1.Schema({
-    productNumber: { type: String },
+    productNumber: { type: Number },
     productName: { type: String },
     quantity: { type: Number },
     passed: { type: Number },
     rejected: { type: Number },
     unitCost: { type: Number },
     totalCost: { type: Number },
-    comment: { type: String }
+    comment: { type: String },
+    totalAvailable: { type: Number }
 }, {
     timestamps: true
 });

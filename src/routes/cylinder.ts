@@ -79,4 +79,9 @@ router.get(
   cylinderCtrl.fetchCustomerCylinders()
 );
 
+router.get(
+  '/fetch-cylinder-transfer-report',
+  cylinderCtrl.fetchCompletedTransfers()
+);
+
 export default router;

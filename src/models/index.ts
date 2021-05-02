@@ -18,6 +18,7 @@ import driverFactory, {DriverInterface} from './driver';
 import customerFactory, {CustomerInterface} from './customer';
 import orderFactory, { OrderInterface } from './order';
 import complainFactory, { ComplaintInterface } from './complaint';
+import branchFactory, { BranchInterface } from './branch';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -48,5 +49,7 @@ export const Customer:Model<CustomerInterface> = customerFactory(conn);
 export const Order:Model<OrderInterface> = orderFactory(conn);
 
 export const Complain:Model<ComplaintInterface> = complainFactory(conn);
+
+export const Branch:Model<BranchInterface> = branchFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

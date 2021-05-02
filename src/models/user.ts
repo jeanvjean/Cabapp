@@ -56,6 +56,8 @@ import {
 
     phoneNumber:number
 
+    branch:Schema.Types.ObjectId
+
     /**
      * @param isVerified account verified Boolean
      */
@@ -81,7 +83,8 @@ import {
     },
     email:{
       type:String,
-      lowercase:true
+      lowercase:true,
+      unique:true
     },
     password: {
       type:String,
@@ -109,7 +112,8 @@ import {
     },
     location:{type:String},
     gender:{type:String},
-    phoneNumber:{type:Number}
+    phoneNumber:{type:Number},
+    branch:{type:Schema.Types.ObjectId, ref:'branches'}
  },{
    collection:'users',
    timestamps:true

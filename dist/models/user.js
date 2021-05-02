@@ -33,7 +33,8 @@ exports.userSchema = new mongoose_1.Schema({
     },
     email: {
         type: String,
-        lowercase: true
+        lowercase: true,
+        unique: true
     },
     password: {
         type: String,
@@ -61,7 +62,8 @@ exports.userSchema = new mongoose_1.Schema({
     },
     location: { type: String },
     gender: { type: String },
-    phoneNumber: { type: Number }
+    phoneNumber: { type: Number },
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 }, {
     collection: 'users',
     timestamps: true

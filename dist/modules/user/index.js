@@ -58,7 +58,7 @@ class User extends module_1.default {
             }
         });
     }
-    inviteUser(data, user) {
+    inviteUser(data, userInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const exists = [];

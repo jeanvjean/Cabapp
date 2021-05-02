@@ -37,9 +37,6 @@ export class InventoryValidator extends Ctrl{
       check('partNumber')
         .exists()
         .withMessage('Part Number is required'),
-      check('serialNumber')
-        .exists()
-        .withMessage('provide serial number'),
       check('quantity')
         .exists()
         .withMessage('quantity is required')

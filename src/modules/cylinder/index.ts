@@ -547,6 +547,16 @@ class Cylinder extends Module {
     }
   }
 
+  public async fetchTransferReport(query:QueryInterface):Promise<TransferCylinder[]|undefined>{
+    try {
+      const transfers = await this.transfer.find(query);
+      const completed = transfers.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
+      return Promise.resolve(completed);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
 }
 
 export default Cylinder;

@@ -21,5 +21,6 @@ router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersP
 router.delete('/remove-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.deleteRegisteredCylinder());
 router.get('/fetch-damaged-cylinders', controllers_1.cylinderCtrl.fetchDamagedCylinders());
 router.get('/fetch-customer-cylinders/:customerId', controllers_1.cylinderCtrl.fetchCustomerCylinders());
+router.get('/fetch-cylinder-transfer-report', controllers_1.cylinderCtrl.fetchCompletedTransfers());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

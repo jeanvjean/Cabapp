@@ -19,7 +19,7 @@ export interface InventoryInterface extends Document{
 }
 
 export interface ReceivedProduct {
-  productNumber:string,
+  productNumber:number,
   productName:string
   quantity:number
   passed:number
@@ -27,17 +27,19 @@ export interface ReceivedProduct {
   unitCost:number
   totalCost:string
   comment:string
+  totalAvailable:number
 }
 
 export const productRecievedSchema = new Schema({
-  productNumber:{type:String},
+  productNumber:{type:Number},
   productName:{type:String},
   quantity:{type:Number},
   passed:{type:Number},
   rejected:{type:Number},
   unitCost:{type:Number},
   totalCost:{type:Number},
-  comment:{type:String}
+  comment:{type:String},
+  totalAvailable:{type:Number}
 },{
   timestamps:true
 });

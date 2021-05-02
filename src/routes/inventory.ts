@@ -55,6 +55,12 @@ router.get(
 );
 
 router.get(
+  '/fetch-pending-disburse-requests',
+  auth.verify(),
+  productCtrl.fetchUserDisburseRequests()
+);
+
+router.get(
   '/fetch-disburse-requests',
   auth.verify(),
   productCtrl.fetchDisbursements()
@@ -63,6 +69,27 @@ router.get(
 router.get(
   '/fetch-disbursement/:id',
   productCtrl.fetchDisbursement()
+);
+
+router.get(
+  '/fetch-disbursement-report',
+  productCtrl.disburseReport()
+);
+
+router.post(
+  '/create-branch',
+  auth.verify(),
+  productCtrl.createBranch()
+);
+
+router.get(
+  '/fetch-branches',
+  productCtrl.fetchBranches()
+);
+
+router.get(
+  '/fetch-suppliers',
+  productCtrl.fetchSuppliers()
 );
 
 export default router;

@@ -21,7 +21,9 @@ class Customer extends module_1.default {
     createCustomer(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customer = yield this.customer.create(Object.assign({}, data));
+                const date = new Date();
+                date.setDate(date.getDate() + data.cylinderHoldingTime);
+                const customer = yield this.customer.create(Object.assign(Object.assign({}, data), { cylinderHoldingTime: date.toISOString() }));
                 return Promise.resolve(customer);
             }
             catch (e) {

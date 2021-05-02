@@ -42,9 +42,6 @@ class InventoryValidator extends ctrl_1.default {
             express_validator_1.check('partNumber')
                 .exists()
                 .withMessage('Part Number is required'),
-            express_validator_1.check('serialNumber')
-                .exists()
-                .withMessage('provide serial number'),
             express_validator_1.check('quantity')
                 .exists()
                 .withMessage('quantity is required')

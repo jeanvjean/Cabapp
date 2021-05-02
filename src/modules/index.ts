@@ -12,7 +12,8 @@ import {
   Driver,
   Customer,
   Order,
-  Complain
+  Complain,
+  Branch
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -45,7 +46,9 @@ export const product = new ProductModule({
   product:Product,
   supplier:Supplier,
   inventory:Inventory,
-  disburse:DisburseProduct
+  disburse:DisburseProduct,
+  branch:Branch,
+  user:User
 });
 
 export const vehicle = new VehicleModule({

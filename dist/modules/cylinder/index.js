@@ -491,6 +491,18 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    fetchTransferReport(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const transfers = yield this.transfer.find(query);
+                const completed = transfers.filter(transfer => transfer.transferStatus == `${transferCylinder_1.TransferStatus.COMPLETED}`);
+                return Promise.resolve(completed);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
 }
 exports.default = Cylinder;
 //# sourceMappingURL=index.js.map

@@ -61,12 +61,8 @@ class CustomerValidation extends Ctrl{
       check('unitPrice')
         .exists()
         .withMessage('Provide price'),
-      check('CAC')
-        .exists()
-        .withMessage('Provide Your CAC certificate'),
+      check('CAC'),
       check('validId')
-        .exists()
-        .withMessage('Provide a valid ID')
     ]
     return rules;
   }

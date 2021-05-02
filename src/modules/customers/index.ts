@@ -25,7 +25,7 @@ interface newCustomerInterface {
   TIN:CustomerInterface['TIN']
   phoneNumber:CustomerInterface['phoneNumber']
   rcNumber:CustomerInterface['rcNumber']
-  cylinderHoldingTime:CustomerInterface['cylinderHoldingTime']
+  cylinderHoldingTime:number
   territory:CustomerInterface['territory']
   products:CustomerInterface['products']
   unitPrice:CustomerInterface['unitPrice']
@@ -76,7 +76,9 @@ class Customer extends Module{
 
   public async createCustomer(data:newCustomerInterface):Promise<CustomerInterface|undefined> {
     try {
-      const customer = await this.customer.create({...data});
+      const date = new Date()
+      date.setDate(date.getDate() + data.cylinderHoldingTime);
+      const customer = await this.customer.create({...data, cylinderHoldingTime:date.toISOString()});
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e);

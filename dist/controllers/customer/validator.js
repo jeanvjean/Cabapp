@@ -65,12 +65,8 @@ class CustomerValidation extends ctrl_1.default {
             express_validator_1.check('unitPrice')
                 .exists()
                 .withMessage('Provide price'),
-            express_validator_1.check('CAC')
-                .exists()
-                .withMessage('Provide Your CAC certificate'),
+            express_validator_1.check('CAC'),
             express_validator_1.check('validId')
-                .exists()
-                .withMessage('Provide a valid ID')
         ];
         return rules;
     }

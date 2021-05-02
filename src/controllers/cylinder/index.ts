@@ -23,7 +23,6 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         let cylinder = await this.module.createCylinder(req.body, req.user);
-        console.log(cylinder);
         this.ok(res, 'Created', cylinder);
       } catch (e) {
         this.handleError(e, req, res)
@@ -178,6 +177,17 @@ class CylinderController extends Ctrl{
       try {
         const data = await this.module.fetchCustomerCylinders(req.params.customerId);
         this.ok(res, 'fetched cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchCompletedTransfers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchTransferReport(req.query);
+        this.ok(res, 'transfer report fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

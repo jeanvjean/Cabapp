@@ -7,7 +7,7 @@ import {
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
 export interface DisburseProduct {
-  productNumber:string,
+  productNumber:number,
   productName:string
   quantityRequested:number
   quantityReleased:number
@@ -18,6 +18,11 @@ export interface DisburseProduct {
 //   comment: string,
 //   commentBy:Schema.Types.ObjectId
 // }
+
+export type RequesterInterface = {
+  requestingOfficer:Schema.Types.ObjectId
+  branch:Schema.Types.ObjectId
+}
 
 
 export interface DisburseProductInterface extends Document{
@@ -31,22 +36,26 @@ export interface DisburseProductInterface extends Document{
   tracking:ApprovalStage[]
   approvalOfficers:ApprovalOfficers[]
   disburseStatus:TransferStatus
+  branches:Schema.Types.ObjectId
+  requestFrom:RequesterInterface
+  requestApproval:TransferStatus
+  requestStage:stagesOfApproval
 }
 
-// const commentSchema = new Schema({
-//   comment:{type:String},
-//   commentBy:{type:Schema.Types.ObjectId}
-// },{
-//   timestamps:true
-// });
+const requesterSchema = new Schema({
+  requestingOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  branch:{type:Schema.Types.ObjectId}
+},{
+  timestamps:true
+});
 
 const disburseProductSchema = new Schema({
-  productNumber:{type:String},
+  productNumber:{type:Number},
   productName:{type:String},
   quantityRequested:{type:Number},
   quantityReleased:{type:Number},
   comment:{type:String}
-})
+});
 
 export const disburseSchema = new Schema({
   products:[disburseProductSchema],
@@ -56,8 +65,12 @@ export const disburseSchema = new Schema({
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval)},
   disburseStatus:{type:String, enum:Object.values(TransferStatus)},
+  requestStage:{type:String, enum:Object.values(stagesOfApproval)},
+  requestApproval:{type:String, enum:Object.values(TransferStatus)},
   tracking:[approvalStageShema],
-  approvalOfficers:[ApprovalOfficerSchema]
+  approvalOfficers:[ApprovalOfficerSchema],
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  requestFrom:{type:requesterSchema}
 });
 
 export default function factory(conn:Connection):Model<DisburseProductInterface>{

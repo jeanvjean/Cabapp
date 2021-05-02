@@ -136,6 +136,63 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    disburseReport() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.disburseReport(req.query);
+                this.ok(res, 'disburse report fetched successfully', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchUserDisburseRequests() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const disbursements = yield this.module.fetchusersDisburseRequests(req.query, req.user);
+                this.ok(res, 'Fetched', disbursements);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    createBranch() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.createBranch(req.body, req.user);
+                this.ok(res, 'branch created', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchBranches() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchBranches(req.query);
+                this.ok(res, 'branches returned', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchSuppliers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchSuppliers(req.query);
+                this.ok(res, 'suppliers fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = ProductCtrl;
 //# sourceMappingURL=index.js.map

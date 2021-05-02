@@ -28,7 +28,9 @@ exports.product = new inventory_1.default({
     product: index_1.Product,
     supplier: index_1.Supplier,
     inventory: index_1.Inventory,
-    disburse: index_1.DisburseProduct
+    disburse: index_1.DisburseProduct,
+    branch: index_1.Branch,
+    user: index_1.User
 });
 exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle

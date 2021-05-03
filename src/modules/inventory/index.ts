@@ -13,6 +13,7 @@ import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
 import Environment from '../../configs/static';
 import Notify from '../../util/mail'
+import { DeleteResponse } from "../vehicle";
 
 interface ProductProp {
   product:Model<ProductInterface>
@@ -40,13 +41,13 @@ interface NewProductInterface{
 }
 
 type NewSupplierInterface = {
-  productType:string
-  name:string
-  location:string
-  contactPerson:string
-  emailAddress:string
-  phoneNumber:number
-  supplierType:string
+  productType:SupplierInterface['productType']
+  name:SupplierInterface['name']
+  location:SupplierInterface['location']
+  contactPerson:SupplierInterface['contactPerson']
+  emailAddress:SupplierInterface['emailAddress']
+  phoneNumber:SupplierInterface['phoneNumber']
+  supplierType:SupplierInterface['supplierType']
 }
 
 type NewInventory={
@@ -205,6 +206,30 @@ class Product extends Module{
     }
   }
 
+  public async updateProduct(productId:string,data:NewProductInterface):Promise<ProductInterface|undefined>{
+    try {
+      const product = await this.product.findByIdAndUpdate(productId,{$set:data}, {new:true});
+      return Promise.resolve(product as ProductInterface);
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
+  public async deleteProduct(productId:string):Promise<DeleteResponse|undefined>{
+    try {
+      const product = await this.product.findById(productId);
+      if(!product){
+        throw new BadInputFormatException('product not found')
+      }
+      await product.remove();
+      return Promise.resolve({
+        message:'Product deleted'
+      })
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
       const supplier = await this.supplier.create(data);
@@ -223,9 +248,43 @@ class Product extends Module{
     }
   }
 
+  public async updateSupplier(supplierId:string, data:NewSupplierInterface):Promise<SupplierInterface|undefined>{
+    try {
+      const supplier = await this.supplier.findByIdAndUpdate(supplierId,{$set:data},{new:true});
+      return Promise.resolve(supplier as SupplierInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async removeSupplier(supplierId:string):Promise<DeleteResponse|undefined>{
+    try {
+      const supplier = await this.supplier.findById(supplierId);
+      if(!supplier) {
+        throw new BadInputFormatException('Supplier not found');
+      }
+      await supplier.remove();
+      return Promise.resolve({
+        message:'deleted successfully'
+      })
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async addInventory(data:NewInventory):Promise<InventoryInterface|undefined> {
     try {
-      const inventory = await this.inventory.create(data);
+      const inventory = new this.inventory(data);
+      let products = inventory.products;
+
+      for(let product of products) {
+        let prod = await this.product.findOne({serialNumber: product.productNumber});
+        //@ts-ignore
+        prod?.quantity + product.passed;
+        //@ts-ignore
+        await prod?.save()
+      }
+      await inventory.save();
       return Promise.resolve(inventory);
     } catch (e) {
       this.handleException(e);
@@ -710,6 +769,29 @@ class Product extends Module{
       this.handleException(error);
     }
   }
+
+  public async fetchProductRequests(query:QueryInterface):Promise<DisbursePoolResponse|undefined>{
+    try{
+      const disbursements = await this.disburse.find(query);
+      let totalApproved = disbursements.filter(
+        transfer=>transfer.requestApproval == TransferStatus.COMPLETED
+      );
+    let totalPending = disbursements.filter(
+      transfer=>transfer.requestApproval == TransferStatus.PENDING
+    );
+    return Promise.resolve({
+      disburse:disbursements,
+      count:{
+        totalApproved:totalApproved.length | 0,
+        totalPending:totalPending.length | 0,
+        totalDisbursements:disbursements.length|0
+      }
+    });
+    }catch(e){
+      this.handleException(e);
+    }
+  }
+
 
   public async disburseReport(query:QueryInterface):Promise<DisburseProductInterface[]|undefined>{
     try {

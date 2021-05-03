@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Validator = void 0;
 const ctrl_1 = require("../ctrl");
+const driver_1 = require("../driver");
 const validation_1 = require("./validation");
 exports.Validator = validation_1.default;
 class ProductCtrl extends ctrl_1.default {
@@ -70,7 +71,9 @@ class ProductCtrl extends ctrl_1.default {
     addInventory() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const inventory = yield this.module.addInventory(req.body);
+                //@ts-ignore
+                let grnDocument = yield driver_1.uploadFile(req.files.grnDocument, 'inventory/grn-docs');
+                const inventory = yield this.module.addInventory(Object.assign(Object.assign({}, req.body), { grnDocument }));
                 this.ok(res, 'Inventory registered', inventory);
             }
             catch (e) {
@@ -187,6 +190,63 @@ class ProductCtrl extends ctrl_1.default {
             try {
                 const data = yield this.module.fetchSuppliers(req.query);
                 this.ok(res, 'suppliers fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    updateSupplier() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { supplierId } = req.params;
+                const data = yield this.module.updateSupplier(supplierId, req.body);
+                this.ok(res, 'updated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    deleteSupplier() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.removeSupplier(req.params.supplierId);
+                this.ok(res, 'Deleted', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    deleteProduct() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.deleteProduct(req.params.productId);
+                this.ok(res, 'Product deleted', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    updateProduct() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { productId } = req.params;
+                const data = this.module.updateProduct(productId, req.body);
+                this.ok(res, 'product updated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchProductsRequest() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchProductRequests(req.query);
+                this.ok(res, 'all restock requests fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

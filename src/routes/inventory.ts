@@ -91,5 +91,29 @@ router.get(
   '/fetch-suppliers',
   productCtrl.fetchSuppliers()
 );
+router.post(
+  '/update-supplier/:supplierId',
+  productCtrl.updateSupplier()
+);
+
+router.delete(
+  '/remove-supplier/:supplierId',
+  productCtrl.deleteSupplier()
+);
+
+router.post(
+  '/update-product/:productId',
+  productCtrl.updateProduct()
+);
+
+router.delete(
+  '/delete-product/:productId',
+  productCtrl.deleteProduct()
+);
+
+router.get(
+  '/fetch-restock-requests',
+  productCtrl.fetchProductsRequest()
+);
 
 export default router;

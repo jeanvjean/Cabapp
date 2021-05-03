@@ -1,5 +1,4 @@
 import { Model } from "mongoose";
-import { user } from "..";
 import { stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteActivity, VehicleInterface } from "../../models/vehicle";
@@ -67,7 +66,7 @@ interface ApproveInspectionData {
   comment:string
 }
 
-type DeleteResponse = {
+export type DeleteResponse = {
   message:string
 }
 

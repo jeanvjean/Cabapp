@@ -22,5 +22,10 @@ router.get('/fetch-disbursement-report', controllers_1.productCtrl.disburseRepor
 router.post('/create-branch', auth.verify(), controllers_1.productCtrl.createBranch());
 router.get('/fetch-branches', controllers_1.productCtrl.fetchBranches());
 router.get('/fetch-suppliers', controllers_1.productCtrl.fetchSuppliers());
+router.post('/update-supplier/:supplierId', controllers_1.productCtrl.updateSupplier());
+router.delete('/remove-supplier/:supplierId', controllers_1.productCtrl.deleteSupplier());
+router.post('/update-product/:productId', controllers_1.productCtrl.updateProduct());
+router.delete('/delete-product/:productId', controllers_1.productCtrl.deleteProduct());
+router.get('/fetch-restock-requests', controllers_1.productCtrl.fetchProductsRequest());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

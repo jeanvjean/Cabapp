@@ -1,6 +1,8 @@
 import { Request, Response, RequestHandler } from 'express';
+import { pathExists } from 'fs-extra';
 import Product from '../../modules/inventory';
 import Ctrl from '../ctrl';
+import { uploadFile } from '../driver';
 import Validator from './validation';
 
 
@@ -64,7 +66,9 @@ class ProductCtrl extends Ctrl{
   addInventory():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const inventory = await this.module.addInventory(req.body);
+        //@ts-ignore
+        let grnDocument = await uploadFile(req.files.grnDocument, 'inventory/grn-docs');
+        const inventory = await this.module.addInventory({...req.body, grnDocument});
         this.ok(res, 'Inventory registered', inventory);
       } catch (e) {
         this.handleError(e, req, res);
@@ -181,6 +185,63 @@ class ProductCtrl extends Ctrl{
       try {
         const data = await this.module.fetchSuppliers(req.query);
         this.ok(res,'suppliers fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  updateSupplier():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { supplierId } = req.params;
+        const data = await this.module.updateSupplier(supplierId, req.body);
+        this.ok(res, 'updated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  deleteSupplier():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.removeSupplier(req.params.supplierId);
+        this.ok(res,'Deleted',data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  deleteProduct():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.deleteProduct(req.params.productId);
+        this.ok(res,'Product deleted', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  updateProduct():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { productId } = req.params
+        const data = this.module.updateProduct(productId, req.body);
+        this.ok(res, 'product updated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchProductsRequest():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchProductRequests(req.query);
+        this.ok(res, 'all restock requests fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

@@ -126,6 +126,34 @@ class Product extends module_1.default {
             }
         });
     }
+    updateProduct(productId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const product = yield this.product.findByIdAndUpdate(productId, { $set: data }, { new: true });
+                return Promise.resolve(product);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    deleteProduct(productId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const product = yield this.product.findById(productId);
+                if (!product) {
+                    throw new exceptions_1.BadInputFormatException('product not found');
+                }
+                yield product.remove();
+                return Promise.resolve({
+                    message: 'Product deleted'
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     createSupplier(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -148,10 +176,47 @@ class Product extends module_1.default {
             }
         });
     }
+    updateSupplier(supplierId, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const supplier = yield this.supplier.findByIdAndUpdate(supplierId, { $set: data }, { new: true });
+                return Promise.resolve(supplier);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    removeSupplier(supplierId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const supplier = yield this.supplier.findById(supplierId);
+                if (!supplier) {
+                    throw new exceptions_1.BadInputFormatException('Supplier not found');
+                }
+                yield supplier.remove();
+                return Promise.resolve({
+                    message: 'deleted successfully'
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     addInventory(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const inventory = yield this.inventory.create(data);
+                const inventory = new this.inventory(data);
+                let products = inventory.products;
+                for (let product of products) {
+                    let prod = yield this.product.findOne({ serialNumber: product.productNumber });
+                    //@ts-ignore
+                    (prod === null || prod === void 0 ? void 0 : prod.quantity) + product.passed;
+                    //@ts-ignore
+                    yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                }
+                yield inventory.save();
                 return Promise.resolve(inventory);
             }
             catch (e) {
@@ -660,6 +725,26 @@ class Product extends module_1.default {
             }
             catch (error) {
                 this.handleException(error);
+            }
+        });
+    }
+    fetchProductRequests(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const disbursements = yield this.disburse.find(query);
+                let totalApproved = disbursements.filter(transfer => transfer.requestApproval == transferCylinder_1.TransferStatus.COMPLETED);
+                let totalPending = disbursements.filter(transfer => transfer.requestApproval == transferCylinder_1.TransferStatus.PENDING);
+                return Promise.resolve({
+                    disburse: disbursements,
+                    count: {
+                        totalApproved: totalApproved.length | 0,
+                        totalPending: totalPending.length | 0,
+                        totalDisbursements: disbursements.length | 0
+                    }
+                });
+            }
+            catch (e) {
+                this.handleException(e);
             }
         });
     }

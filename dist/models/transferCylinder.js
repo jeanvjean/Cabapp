@@ -70,7 +70,8 @@ exports.TransferSchema = new mongoose_1.Schema({
     },
     approvalOfficers: [exports.ApprovalOfficerSchema],
     comments: [exports.commentSchema],
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    holdingTime: { type: Date }
 }, {
     timestamps: true
 });

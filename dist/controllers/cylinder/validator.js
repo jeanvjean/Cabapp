@@ -47,9 +47,7 @@ class CylinderValidator extends ctrl_1.default {
             express_validator_1.check('dateManufactured')
                 .exists()
                 .withMessage('Manufacture Date is required'),
-            express_validator_1.check('assignedTo')
-                .exists()
-                .withMessage('Assigned to is required'),
+            express_validator_1.check('assignedTo'),
             express_validator_1.check('gasType')
                 .exists()
                 .withMessage('Gas type is required'),

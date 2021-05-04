@@ -44,9 +44,7 @@ class CylinderValidator extends Ctrl{
       check('dateManufactured')
         .exists()
         .withMessage('Manufacture Date is required'),
-      check('assignedTo')
-        .exists()
-        .withMessage('Assigned to is required'),
+      check('assignedTo'),
       check('gasType')
         .exists()
         .withMessage('Gas type is required'),

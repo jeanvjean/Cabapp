@@ -60,6 +60,7 @@ export interface TransferCylinder extends Document {
   approvalOfficers:ApprovalOfficers[],
   comments:commentInterface[]
   nextApprovalOfficer:Schema.Types.ObjectId
+  holdingTime:Date
   type:TransferType
   createdAt:Date,
   updatedAt:Date,
@@ -113,7 +114,8 @@ export const TransferSchema = new Schema({
   },
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'}
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  holdingTime:{type:Date}
 },{
   timestamps:true
 });

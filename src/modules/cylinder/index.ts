@@ -420,7 +420,17 @@ class Cylinder extends Module {
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id
-          })
+          });
+          let cylinders = transfer.cylinders
+          for(let cylinder of cylinders) {
+            let cyl = await this.registerCylinder.findById(cylinder);
+            //@ts-ignore
+            cyl?.assignedTo = transfer.to;
+            //@ts-ignore
+            cyl?.cylinderType = 'assigned';
+
+            await cyl?.save();
+          }
           await transfer.save();
           return Promise.resolve({
             message:"Approved",

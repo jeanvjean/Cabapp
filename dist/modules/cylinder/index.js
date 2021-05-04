@@ -354,6 +354,15 @@ class Cylinder extends module_1.default {
                             comment: data.comment,
                             commentBy: user._id
                         });
+                        let cylinders = transfer.cylinders;
+                        for (let cylinder of cylinders) {
+                            let cyl = yield this.registerCylinder.findById(cylinder);
+                            //@ts-ignore
+                            cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
+                            //@ts-ignore
+                            cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = 'assigned';
+                            yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                        }
                         yield transfer.save();
                         return Promise.resolve({
                             message: "Approved",

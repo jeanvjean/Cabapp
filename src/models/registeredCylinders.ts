@@ -108,7 +108,7 @@ export const registerCylinderSchema = new Schema({
 
   dateManufactured:{type:Date},
 
-  assignedTo:{type:Schema.Types.ObjectId, ref:'users'},
+  assignedTo:{type:Schema.Types.ObjectId, ref:'customer'},
 
   gasType:{type:String},
 

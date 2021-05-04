@@ -12,7 +12,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
     waterCapacity: { type: String },
     dateManufactured: { type: Date },
-    assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     gasType: { type: String },
     standardColor: { type: String },
     assignedNumber: { type: String },

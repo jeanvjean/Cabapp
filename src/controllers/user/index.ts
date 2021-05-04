@@ -8,6 +8,7 @@ import Ctrl from '../ctrl';
 import { UserInterface } from '../../models/user';
 import Validator from './validator';
 import uploader from '../../util/uploader';
+const permissions = require('../../util/permissions.json');
 
 
 class UserController extends Ctrl{
@@ -143,6 +144,17 @@ class UserController extends Ctrl{
       try {
         const data = await this.module.deleteUser(req.params.userId);
         this.ok(res,'Deleted',data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchPermissions():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = permissions.permissions;
+        this.ok(res, 'permissions fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

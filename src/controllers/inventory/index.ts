@@ -161,7 +161,7 @@ class ProductCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.createBranch(req.body, req.user);
+        const data = await this.module.createBranch(req.body);
         this.ok(res, 'branch created', data);
       } catch (e) {
         this.handleError(e, req, res);

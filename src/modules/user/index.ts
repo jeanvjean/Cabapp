@@ -10,7 +10,7 @@ import { constants } from '../../util/constants';
 import Environment from '../../configs/static';
 import { compareSync, genSaltSync, hash } from 'bcryptjs';
 import { getTemplate } from '../../util/resolve-template';
-export const signTokenKey = "loremipsumdolorsitemet"
+export const signTokenKey = "loremipsumdolorsitemet";
 
 interface UserConstructorInterface {
   model: Model<UserInterface>

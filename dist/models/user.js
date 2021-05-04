@@ -13,6 +13,7 @@ exports.userSchema = exports.UserRoles = exports.salt = void 0;
 const mongoose_1 = require("mongoose");
 const bcryptjs_1 = require("bcryptjs");
 exports.salt = bcryptjs_1.genSaltSync(10);
+const permissions = require('../util/permissions.json');
 /**
  * Attributes of a user
  * @meta Model Model
@@ -63,7 +64,11 @@ exports.userSchema = new mongoose_1.Schema({
     location: { type: String },
     gender: { type: String },
     phoneNumber: { type: Number },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    permissions: [{
+            name: String,
+            sub_permissions: [String]
+        }]
 }, {
     collection: 'users',
     timestamps: true
@@ -78,6 +83,9 @@ exports.userSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (this.isModified('password')) {
             this.password = yield bcryptjs_1.hash(this.password, exports.salt);
+        }
+        if (this.subrole == 'superadmin') {
+            this.permissions = permissions.permissions;
         }
         next();
     });

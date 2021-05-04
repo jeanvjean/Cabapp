@@ -166,7 +166,7 @@ class ProductCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.createBranch(req.body, req.user);
+                const data = yield this.module.createBranch(req.body);
                 this.ok(res, 'branch created', data);
             }
             catch (e) {

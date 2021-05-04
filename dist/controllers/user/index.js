@@ -13,6 +13,7 @@ exports.Validator = void 0;
 const ctrl_1 = require("../ctrl");
 const validator_1 = require("./validator");
 exports.Validator = validator_1.default;
+const permissions = require('../../util/permissions.json');
 class UserController extends ctrl_1.default {
     constructor(module) {
         super();
@@ -143,6 +144,17 @@ class UserController extends ctrl_1.default {
             try {
                 const data = yield this.module.deleteUser(req.params.userId);
                 this.ok(res, 'Deleted', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchPermissions() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = permissions.permissions;
+                this.ok(res, 'permissions fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

@@ -7,6 +7,7 @@ import {
  from "mongoose";
  import { hash, compare, genSaltSync } from 'bcryptjs';
  export const salt = genSaltSync(10);
+ const permissions = require('../util/permissions.json');
 
 /**
  * Attributes of a user
@@ -21,6 +22,15 @@ import {
    SECURITY = 'security',
    AUDIT = 'audit'
  }
+
+
+ type PermissionInterface = {
+   permission:string,
+   sub_permissions:string[]
+ }
+
+ type Permissions = PermissionInterface[]
+
  export interface UserInterface extends Document{
    /**
     * @param name
@@ -57,6 +67,8 @@ import {
     phoneNumber:number
 
     branch:Schema.Types.ObjectId
+
+    permissions:Permissions[]
 
     /**
      * @param isVerified account verified Boolean
@@ -113,7 +125,11 @@ import {
     location:{type:String},
     gender:{type:String},
     phoneNumber:{type:Number},
-    branch:{type:Schema.Types.ObjectId, ref:'branches'}
+    branch:{type:Schema.Types.ObjectId, ref:'branches'},
+    permissions:[{
+      name:String,
+      sub_permissions:[String]
+    }]
  },{
    collection:'users',
    timestamps:true
@@ -129,6 +145,9 @@ import {
  userSchema.pre<UserInterface>('save',async function(next): Promise<void>{
    if(this.isModified('password')){
     this.password = await hash(this.password, salt)
+   }
+   if(this.subrole == 'superadmin') {
+    this.permissions = permissions.permissions
    }
    next();
  })

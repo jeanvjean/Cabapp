@@ -26,12 +26,9 @@ class Product extends module_1.default {
         this.branch = props.branch;
         this.user = props.user;
     }
-    createBranch(data, user) {
+    createBranch(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (user.subrole !== 'superadmin') {
-                    throw new exceptions_1.BadInputFormatException('You cannot perform this action');
-                }
                 //@ts-ignore
                 let checkEmail = yield this.user.findOne({ email: data.branchAdmin });
                 if (checkEmail) {

@@ -111,11 +111,8 @@ class Product extends Module{
     this.user = props.user
   }
 
-  public async createBranch(data:NewBranchInterface, user:UserInterface):Promise<BranchInterface|undefined>{
+  public async createBranch(data:NewBranchInterface):Promise<BranchInterface|undefined>{
     try{
-      if(user.subrole !== 'superadmin') {
-        throw new BadInputFormatException('You cannot perform this action');
-      }
       //@ts-ignore
       let checkEmail = await this.user.findOne({email:data.branchAdmin});
       if(checkEmail) {

@@ -54,4 +54,9 @@ const router: expressRouter = expressRouter();
     userCtrl.deleteUser()
   );
 
+  router.get(
+    '/fetch-permissions',
+    userCtrl.fetchPermissions()
+  );
+
 export default router;

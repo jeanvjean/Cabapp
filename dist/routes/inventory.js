@@ -19,7 +19,7 @@ router.get('/fetch-pending-disburse-requests', auth.verify(), controllers_1.prod
 router.get('/fetch-disburse-requests', auth.verify(), controllers_1.productCtrl.fetchDisbursements());
 router.get('/fetch-disbursement/:id', controllers_1.productCtrl.fetchDisbursement());
 router.get('/fetch-disbursement-report', controllers_1.productCtrl.disburseReport());
-router.post('/create-branch', auth.verify(), controllers_1.productCtrl.createBranch());
+router.post('/create-branch', controllers_1.productCtrl.createBranch());
 router.get('/fetch-branches', controllers_1.productCtrl.fetchBranches());
 router.get('/fetch-suppliers', controllers_1.productCtrl.fetchSuppliers());
 router.post('/update-supplier/:supplierId', controllers_1.productCtrl.updateSupplier());

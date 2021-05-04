@@ -1,0 +1,52 @@
+{"permissions":
+  [
+      {
+          "id":1,
+          "name":"Usermanagement",
+          "sub_permissions":[
+             "Read",
+             "Edit"
+          ]
+      },
+      {
+          "id":2,
+          "name":"Cylinders",
+          "sub_permissions":[
+            "Read",
+            "Edit"
+          ]
+      },
+      {
+          "id":3,
+          "name":"Inventory Management",
+          "sub_permissions":[
+            "Read",
+            "Edit"
+          ]
+      },
+      {
+          "id":4,
+          "name":"Vehicle Management",
+          "sub_permissions":[
+            "Read",
+            "Edit"
+          ]
+      },
+      {
+          "id":5,
+          "name":"Complaint",
+          "sub_permissions":[
+            "Read",
+            "Edit"
+          ]
+      },
+      {
+          "id":6,
+          "name":"Report",
+          "sub_permissions":[
+            "Read",
+            "Edit"
+          ]
+      }
+  ]
+}

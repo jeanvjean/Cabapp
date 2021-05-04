@@ -78,7 +78,6 @@ router.get(
 
 router.post(
   '/create-branch',
-  auth.verify(),
   productCtrl.createBranch()
 );
 

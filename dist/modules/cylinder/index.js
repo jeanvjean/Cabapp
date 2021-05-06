@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bcryptjs_1 = require("bcryptjs");
 const exceptions_1 = require("../../exceptions");
 const cylinder_1 = require("../../models/cylinder");
+const registeredCylinders_1 = require("../../models/registeredCylinders");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 class Cylinder extends module_1.default {
@@ -135,6 +136,7 @@ class Cylinder extends module_1.default {
                 });
             }
             catch (e) {
+                this.handleException(e);
             }
         });
     }
@@ -355,13 +357,37 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         let cylinders = transfer.cylinders;
-                        for (let cylinder of cylinders) {
-                            let cyl = yield this.registerCylinder.findById(cylinder);
-                            //@ts-ignore
-                            cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
-                            //@ts-ignore
-                            cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = 'assigned';
-                            yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                        if (transfer.type == transferCylinder_1.TransferType.TEMPORARY || transfer.type == transferCylinder_1.TransferType.PERMANENT) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
+                        }
+                        else if (transfer.type == transferCylinder_1.TransferType.DIVISION) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.BUFFER;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toBranch;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
+                        }
+                        else if (transfer.type == transferCylinder_1.TransferType.CONDEMN) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.DAMAGED;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toBranch;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.condition = transferCylinder_1.TransferType.CONDEMN;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
                         }
                         yield transfer.save();
                         return Promise.resolve({

@@ -24,6 +24,8 @@ var TransferType;
 (function (TransferType) {
     TransferType["PERMANENT"] = "permanent";
     TransferType["TEMPORARY"] = "temporary";
+    TransferType["DIVISION"] = "within-division";
+    TransferType["CONDEMN"] = "condemn";
 })(TransferType = exports.TransferType || (exports.TransferType = {}));
 exports.commentSchema = new mongoose_1.Schema({
     comment: { type: String },
@@ -71,7 +73,11 @@ exports.TransferSchema = new mongoose_1.Schema({
     approvalOfficers: [exports.ApprovalOfficerSchema],
     comments: [exports.commentSchema],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
-    holdingTime: { type: Date }
+    holdingTime: { type: Date },
+    purchaseDate: { type: Date },
+    purchasePrice: { type: Number },
+    toBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    toDepartment: { type: String }
 }, {
     timestamps: true
 });

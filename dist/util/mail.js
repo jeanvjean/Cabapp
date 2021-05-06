@@ -13,8 +13,14 @@ const module_1 = require("../modules/module");
 const firebase = require('firebase-admin');
 const node_mailjet_1 = require("node-mailjet");
 const firebase_admin_1 = require("firebase-admin");
+const path_1 = require("path");
 const resolve_template_1 = require("./resolve-template");
 const static_1 = require("../configs/static");
+const serviceAccount = require(path_1.join(__dirname, '../../asnl.json'));
+firebase.initializeApp({
+    credential: firebase.credential.cert(serviceAccount),
+    databaseURL: "https://asnl-1f533-default-rtdb.firebaseio.com"
+});
 /**
  * Handle all business logic that could happen in Index controller
  *

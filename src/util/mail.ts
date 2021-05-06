@@ -7,17 +7,17 @@ import {post} from 'request-promise'
 import { getTemplate } from "./resolve-template";
 import SecretKeys from '../configs/static';
 
-// const serviceAccount = require(join(
-// 	__dirname,
-// 	'../../goodtalentio.json'
-// ))
+const serviceAccount = require(join(
+	__dirname,
+	'../../asnl.json'
+));
 
-// firebase.initializeApp(
-// 	{
-// 		credential: firebase.credential.cert(serviceAccount),
-// 		databaseURL: "https://gt-app-69daa-default-rtdb.firebaseio.com"
-// 	}
-// )
+firebase.initializeApp(
+	{
+		credential: firebase.credential.cert(serviceAccount),
+    databaseURL: "https://asnl-1f533-default-rtdb.firebaseio.com"
+	}
+);
 
 export interface MessageOptions {
 	data?: string

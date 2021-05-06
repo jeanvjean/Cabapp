@@ -27,7 +27,9 @@ export enum ApprovalStatus {
 
 export enum TransferType{
   PERMANENT="permanent",
-  TEMPORARY="temporary"
+  TEMPORARY="temporary",
+  DIVISION="within-division",
+  CONDEMN="condemn"
 }
 
 export interface ApprovalStage{
@@ -57,11 +59,15 @@ export interface TransferCylinder extends Document {
   tracking:ApprovalStage[]
   transferStatus:TransferStatus
   approvalStage:stagesOfApproval
-  approvalOfficers:ApprovalOfficers[],
+  approvalOfficers:ApprovalOfficers[]
   comments:commentInterface[]
   nextApprovalOfficer:Schema.Types.ObjectId
   holdingTime:Date
   type:TransferType
+  purchaseDate:Date
+  purchasePrice:number
+  toBranch:Schema.Types.ObjectId
+  toDepartment:string
   createdAt:Date,
   updatedAt:Date,
 }
@@ -115,7 +121,11 @@ export const TransferSchema = new Schema({
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
-  holdingTime:{type:Date}
+  holdingTime:{type:Date},
+  purchaseDate:{type:Date},
+  purchasePrice:{type:Number},
+  toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
+  toDepartment:{type:String}
 },{
   timestamps:true
 });

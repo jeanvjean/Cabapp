@@ -1,14 +1,11 @@
 import { compareSync } from "bcryptjs";
-import { verify } from "jsonwebtoken";
 import { Model } from "mongoose";
-import { cylinder } from "..";
 import { BadInputFormatException } from "../../exceptions";
 import { CylinderCondition, CylinderInterface, cylinderTypes } from "../../models/cylinder";
-import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
-import { ApprovalStatus, stagesOfApproval, TransferCylinder, TransferStatus } from "../../models/transferCylinder";
+import { RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
+import { ApprovalStatus, stagesOfApproval, TransferCylinder, TransferStatus, TransferType } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
-import { signTokenKey } from "../user";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -47,11 +44,16 @@ interface FetchCylinderInterface {
 }
 
 interface TransferCylinderInput {
-  cylinders:string[]
-  to:string
-  type:string
+  cylinders:TransferCylinder['cylinders']
+  to:TransferCylinder['to']
+  type:TransferCylinder['type']
   comment?:string
-  nextApprovalOfficer?:string
+  nextApprovalOfficer?:TransferCylinder['nextApprovalOfficer'],
+  holdingTime:TransferCylinder['holdingTime']
+  purchasePrice:TransferCylinder['purchasePrice']
+  purchaseDate:TransferCylinder['purchaseDate']
+  toBranch:TransferCylinder['toBranch']
+  toDepartment:TransferCylinder['toDepartment']
 }
 
 interface ApprovalResponse{
@@ -207,7 +209,7 @@ class Cylinder extends Module {
         repair:repair
       });
     } catch (e) {
-
+      this.handleException(e)
     }
   }
 
@@ -422,14 +424,38 @@ class Cylinder extends Module {
             commentBy:user._id
           });
           let cylinders = transfer.cylinders
-          for(let cylinder of cylinders) {
-            let cyl = await this.registerCylinder.findById(cylinder);
-            //@ts-ignore
-            cyl?.assignedTo = transfer.to;
-            //@ts-ignore
-            cyl?.cylinderType = 'assigned';
+          if(transfer.type == TransferType.TEMPORARY || transfer.type == TransferType.PERMANENT){
+            for(let cylinder of cylinders) {
+              let cyl = await this.registerCylinder.findById(cylinder);
+              //@ts-ignore
+              cyl?.assignedTo = transfer.to;
+              //@ts-ignore
+              cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
 
-            await cyl?.save();
+              await cyl?.save();
+            }
+          }else if(transfer.type == TransferType.DIVISION){
+            for(let cylinder of cylinders) {
+              let cyl = await this.registerCylinder.findById(cylinder);
+              //@ts-ignore
+              cyl?.cylinderType = TypesOfCylinders.BUFFER;
+              //@ts-ignore
+              cyl?.department = transfer.toBranch;
+
+              await cyl?.save();
+            }
+          }else if(transfer.type == TransferType.CONDEMN){
+            for(let cylinder of cylinders) {
+              let cyl = await this.registerCylinder.findById(cylinder);
+              //@ts-ignore
+              cyl?.cylinderType = TypesOfCylinders.DAMAGED;
+              //@ts-ignore
+              cyl?.department = transfer.toBranch;
+              //@ts-ignore
+              cyl?.condition = TransferType.CONDEMN
+
+              await cyl?.save();
+            }
           }
           await transfer.save();
           return Promise.resolve({

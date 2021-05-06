@@ -260,6 +260,9 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const disbursement = yield this.disburse.findById(data.id);
+                //@ts-ignore
+                disbursement === null || disbursement === void 0 ? void 0 : disbursement.products = data.products;
+                yield (disbursement === null || disbursement === void 0 ? void 0 : disbursement.save());
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = disbursement.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

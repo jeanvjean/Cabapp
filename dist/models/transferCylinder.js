@@ -26,6 +26,8 @@ var TransferType;
     TransferType["TEMPORARY"] = "temporary";
     TransferType["DIVISION"] = "within-division";
     TransferType["CONDEMN"] = "condemn";
+    TransferType["REPAIR"] = "repair";
+    TransferType["BRANCH"] = "branch";
 })(TransferType = exports.TransferType || (exports.TransferType = {}));
 exports.commentSchema = new mongoose_1.Schema({
     comment: { type: String },

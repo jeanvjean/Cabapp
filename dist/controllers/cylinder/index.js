@@ -195,6 +195,39 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    faultyCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.faultyCylinder(req.params.cylinderId);
+                this.ok(res, 'cylinder marked as faulty', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    condemnCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.condemnCylinder(req.params.cylinderId);
+                this.ok(res, 'archived cylinder', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchCondemnCylinders() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchArchivedCylinder(req.query);
+                this.ok(res, 'archive fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = CylinderController;
 //# sourceMappingURL=index.js.map

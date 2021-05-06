@@ -8,6 +8,7 @@ var TypesOfCylinders;
     TypesOfCylinders["BUFFER"] = "buffer";
     TypesOfCylinders["ASSIGNED"] = "assigned";
     TypesOfCylinders["DAMAGED"] = "damaged";
+    TypesOfCylinders["REPAIR"] = "repair";
 })(TypesOfCylinders = exports.TypesOfCylinders || (exports.TypesOfCylinders = {}));
 exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
@@ -21,8 +22,9 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     fillingPreasure: { type: String },
     gasVolumeContent: { type: String },
     cylinderNumber: { type: String },
-    condition: { type: String, enum: Object.values(cylinder_1.CylinderCondition) },
+    condition: { type: String, enum: Object.values(cylinder_1.CylinderCondition), default: cylinder_1.CylinderCondition.GOOD },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    holdingTime: { type: Date },
     department: { type: String }
 }, {
     timestamps: true

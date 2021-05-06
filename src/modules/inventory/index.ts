@@ -324,6 +324,9 @@ class Product extends Module{
   public async approveDisbursment(data:ApprovalInput, user:UserInterface):Promise<DisburseProductInterface|undefined> {
     try {
       const disbursement = await this.disburse.findById(data.id);
+      //@ts-ignore
+      disbursement?.products = data.products;
+      await disbursement?.save();
       if(data.status == ApprovalStatus.REJECTED) {
         if(disbursement?.approvalStage == stagesOfApproval.STAGE1) {
           let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);

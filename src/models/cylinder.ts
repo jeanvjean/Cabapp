@@ -8,13 +8,14 @@ import {
 
 export enum cylinderTypes{
   BUFFER = "buffer",
-  ASSIGNED = "assigned",
-  GOOD="good"
+  ASSIGNED = "assigned"
 }
 
 export enum CylinderCondition{
   REPAIR='repair',
-  DAMAGED='damaged'
+  DAMAGED='condemned',
+  FAULTY="faulty",
+  GOOD="good"
 }
 
 export interface CylinderInterface extends Document {

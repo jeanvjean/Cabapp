@@ -10,7 +10,8 @@ import { CylinderCondition } from './cylinder';
 export enum TypesOfCylinders {
   BUFFER="buffer",
   ASSIGNED="assigned",
-  DAMAGED="damaged"
+  DAMAGED="damaged",
+  REPAIR="repair"
 }
 
 
@@ -92,6 +93,8 @@ export interface RegisteredCylinderInterface extends Document{
 
   department:string
 
+  holdingTime:Date
+
   /**
    * @param createdAt
    */
@@ -129,9 +132,11 @@ export const registerCylinderSchema = new Schema({
 
   cylinderNumber:{type:String},
 
-  condition:{type:String, enum:Object.values(CylinderCondition)},
+  condition:{type:String, enum:Object.values(CylinderCondition), default:CylinderCondition.GOOD},
 
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
+
+  holdingTime:{type:Date},
 
   department:{type:String}
 },{

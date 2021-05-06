@@ -194,6 +194,39 @@ class CylinderController extends Ctrl{
     }
   }
 
+  faultyCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.faultyCylinder(req.params.cylinderId);
+        this.ok(res,'cylinder marked as faulty', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  condemnCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.condemnCylinder(req.params.cylinderId);
+        this.ok(res,'archived cylinder', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchCondemnCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchArchivedCylinder(req.query);
+        this.ok(res,'archive fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

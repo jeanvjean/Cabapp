@@ -1,7 +1,9 @@
 import { compareSync } from "bcryptjs";
 import { Model } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
+import { ArchivedCylinder } from "../../models/archiveCylinder";
 import { CylinderCondition, CylinderInterface, cylinderTypes } from "../../models/cylinder";
+import { DisburseProduct, DisburseProductInterface } from "../../models/disburseStock";
 import { RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
 import { ApprovalStatus, stagesOfApproval, TransferCylinder, TransferStatus, TransferType } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
@@ -11,6 +13,7 @@ type CylinderProps = {
   cylinder: Model<CylinderInterface>
   registerCylinder: Model<RegisteredCylinderInterface>
   transfer: Model<TransferCylinder>
+  archive:Model<ArchivedCylinder>
 }
 
 interface NewCylinderInterface{
@@ -49,7 +52,7 @@ interface TransferCylinderInput {
   type:TransferCylinder['type']
   comment?:string
   nextApprovalOfficer?:TransferCylinder['nextApprovalOfficer'],
-  holdingTime:TransferCylinder['holdingTime']
+  holdingTime:number
   purchasePrice:TransferCylinder['purchasePrice']
   purchaseDate:TransferCylinder['purchaseDate']
   toBranch:TransferCylinder['toBranch']
@@ -66,7 +69,8 @@ export interface ApprovalInput{
   status:string,
   id:string,
   nextApprovalOfficer?:string,
-  password:string
+  password:string,
+  products?:DisburseProductInterface['products']
 }
 
 type countTransferedCylinders = {
@@ -82,8 +86,7 @@ interface TransferRequestPool{
 }
 
 interface FilterCylinderResponse {
-  damaged:RegisteredCylinderInterface[],
-  repair:RegisteredCylinderInterface[]
+  faulty:RegisteredCylinderInterface[]
 }
 
 interface RegisteredCylinderPoolInterface {
@@ -96,12 +99,14 @@ class Cylinder extends Module {
   private cylinder:Model<CylinderInterface>
   private registerCylinder:Model<RegisteredCylinderInterface>
   private transfer: Model<TransferCylinder>
+  private archive: Model<ArchivedCylinder>
 
   constructor(props:CylinderProps) {
     super()
     this.cylinder = props.cylinder
     this.registerCylinder = props.registerCylinder
     this.transfer = props.transfer
+    this.archive = props.archive
   }
 
   public async createCylinder(data:NewCylinderInterface, user:UserInterface): Promise<CylinderInterface|undefined> {
@@ -174,7 +179,10 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
-      const registeredCylinders = await this.registerCylinder.find(query);
+      const registeredCylinders = await this.registerCylinder.find(query).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'}
+      ]);
       const bufferCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
       const assignedCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
       return Promise.resolve({
@@ -192,7 +200,10 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinder(id:string,user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     try {
-      const cylinder = await this.registerCylinder.findById(id);
+      const cylinder = await this.registerCylinder.findById(id).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'}
+      ]);
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);
@@ -201,13 +212,50 @@ class Cylinder extends Module {
 
   public async fetchDamagedCylinders(query:QueryInterface):Promise<FilterCylinderResponse|undefined>{
     try {
-      const cylinders = await this.registerCylinder.find(query);
-      const damaged = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.DAMAGED);
-      const repair = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.REPAIR);
+      const cylinders = await this.registerCylinder.find(query).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'}
+      ]);
+      const faulty = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.FAULTY);
       return Promise.resolve({
-        damaged:damaged,
-        repair:repair
+        faulty
       });
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
+  public async condemnCylinder(cylinderId:string):Promise<ArchivedCylinder|undefined>{
+    try {
+      const cylinder = await this.registerCylinder.findById(cylinderId);
+      const saveInfo = {
+        cylinderType: cylinder?.cylinderType,
+        condition: CylinderCondition.DAMAGED,
+        waterCapacity: cylinder?.waterCapacity,
+        dateManufactured: cylinder?.dateManufactured,
+        assignedTo: cylinder?.assignedTo,
+        gasType: cylinder?.gasType,
+        standardColor: cylinder?.standardColor,
+        testingPresure: cylinder?.testingPresure,
+        fillingPreasure: cylinder?.fillingPreasure,
+        gasVolumeContent: cylinder?.gasVolumeContent,
+        cylinderNumber: cylinder?.cylinderNumber
+      }
+      const archive = await this.archive.create(saveInfo);
+      await cylinder?.remove();
+      return Promise.resolve(archive);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchArchivedCylinder(query:QueryInterface):Promise<ArchivedCylinder[]|undefined>{
+    try {
+      const cylinders = await this.archive.find(query).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'}
+      ]);
+      return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
     }
@@ -431,16 +479,19 @@ class Cylinder extends Module {
               cyl?.assignedTo = transfer.to;
               //@ts-ignore
               cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
-
+              if(transfer.type == TransferType.TEMPORARY){
+                //@ts-ignore
+                cyl?.holdingTime = transfer.holdingTime;
+              }
               await cyl?.save();
             }
           }else if(transfer.type == TransferType.DIVISION){
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
               //@ts-ignore
-              cyl?.cylinderType = TypesOfCylinders.BUFFER;
+              // cyl?.cylinderType = TypesOfCylinders.BUFFER;
               //@ts-ignore
-              cyl?.department = transfer.toBranch;
+              cyl?.department = transfer.toDepartment;
 
               await cyl?.save();
             }
@@ -448,12 +499,26 @@ class Cylinder extends Module {
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
               //@ts-ignore
-              cyl?.cylinderType = TypesOfCylinders.DAMAGED;
-              //@ts-ignore
-              cyl?.department = transfer.toBranch;
+              // cyl?.department = transfer.toBranch;
               //@ts-ignore
               cyl?.condition = TransferType.CONDEMN
+              await cyl?.save();
+            }
+          }else if(transfer.type == TransferType.REPAIR){
+            for(let cylinder of cylinders) {
+              let cyl = await this.registerCylinder.findById(cylinder);
+              //@ts-ignore
+              cyl?.department = transfer.toDEPARTMENT;
+              //@ts-ignore
+              cyl?.condition = TransferType.REPAIR
 
+              await cyl?.save();
+            }
+          }else if(transfer.type == TransferType.BRANCH){
+            for(let cylinder of cylinders) {
+              let cyl = await this.registerCylinder.findById(cylinder);
+              //@ts-ignore
+              cyl?.branch = transfer.toBranch;
               await cyl?.save();
             }
           }
@@ -467,6 +532,18 @@ class Cylinder extends Module {
 
     } catch (e) {
       this.handleException(e)
+    }
+  }
+
+  public async faultyCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      const cylinder = await this.registerCylinder.findById(cylinderId);
+      //@ts-ignore
+      cylinder.condition = CylinderCondition.FAULTY;
+      await cylinder?.save();
+      return Promise.resolve(cylinder as RegisteredCylinderInterface);
+    } catch (e) {
+      this.handleException(e);
     }
   }
 

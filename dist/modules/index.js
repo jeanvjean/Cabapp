@@ -22,7 +22,8 @@ exports.user = new user_1.default({
 exports.cylinder = new cylinder_1.default({
     cylinder: index_1.Cylinder,
     registerCylinder: index_1.RegisteredCylinder,
-    transfer: index_1.TransferCyl
+    transfer: index_1.TransferCyl,
+    archive: index_1.Archive
 });
 exports.product = new inventory_1.default({
     product: index_1.Product,

@@ -13,7 +13,8 @@ import {
   Customer,
   Order,
   Complain,
-  Branch
+  Branch,
+  Archive
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -39,7 +40,8 @@ export const user = new UserModule({
 export const cylinder = new CylinderModule({
   cylinder:Cylinder,
   registerCylinder:RegisteredCylinder,
-  transfer:TransferCyl
+  transfer:TransferCyl,
+  archive:Archive
 });
 
 export const product = new ProductModule({

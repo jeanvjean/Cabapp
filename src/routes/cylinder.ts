@@ -84,4 +84,19 @@ router.get(
   cylinderCtrl.fetchCompletedTransfers()
 );
 
+router.get(
+  '/mark-faulty-cylinder/:cylinderId',
+  cylinderCtrl.faultyCylinder()
+);
+
+router.get(
+  '/condemn-cylinder/:cylinderId',
+  cylinderCtrl.condemnCylinder()
+);
+
+router.get(
+  '/fetch-archived-cylinders',
+  cylinderCtrl.fetchCondemnCylinders()
+);
+
 export default router;

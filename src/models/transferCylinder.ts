@@ -29,7 +29,9 @@ export enum TransferType{
   PERMANENT="permanent",
   TEMPORARY="temporary",
   DIVISION="within-division",
-  CONDEMN="condemn"
+  CONDEMN="condemn",
+  REPAIR="repair",
+  BRANCH="branch"
 }
 
 export interface ApprovalStage{

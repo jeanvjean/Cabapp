@@ -6,12 +6,13 @@ var cylinderTypes;
 (function (cylinderTypes) {
     cylinderTypes["BUFFER"] = "buffer";
     cylinderTypes["ASSIGNED"] = "assigned";
-    cylinderTypes["GOOD"] = "good";
 })(cylinderTypes = exports.cylinderTypes || (exports.cylinderTypes = {}));
 var CylinderCondition;
 (function (CylinderCondition) {
     CylinderCondition["REPAIR"] = "repair";
-    CylinderCondition["DAMAGED"] = "damaged";
+    CylinderCondition["DAMAGED"] = "condemned";
+    CylinderCondition["FAULTY"] = "faulty";
+    CylinderCondition["GOOD"] = "good";
 })(CylinderCondition = exports.CylinderCondition || (exports.CylinderCondition = {}));
 exports.cylinderSchema = new mongoose_1.Schema({
     gasName: { type: String, required: true },

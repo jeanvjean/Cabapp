@@ -21,6 +21,7 @@ class Cylinder extends module_1.default {
         this.cylinder = props.cylinder;
         this.registerCylinder = props.registerCylinder;
         this.transfer = props.transfer;
+        this.archive = props.archive;
     }
     createCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -96,7 +97,10 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const registeredCylinders = yield this.registerCylinder.find(query);
+                const registeredCylinders = yield this.registerCylinder.find(query).populate([
+                    { path: 'assignedTo', model: 'customer' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 const bufferCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
                 const assignedCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
                 return Promise.resolve({
@@ -116,7 +120,10 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinder(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinder = yield this.registerCylinder.findById(id);
+                const cylinder = yield this.registerCylinder.findById(id).populate([
+                    { path: 'assignedTo', model: 'customer' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(cylinder);
             }
             catch (e) {
@@ -127,13 +134,54 @@ class Cylinder extends module_1.default {
     fetchDamagedCylinders(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.registerCylinder.find(query);
-                const damaged = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.DAMAGED);
-                const repair = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.REPAIR);
+                const cylinders = yield this.registerCylinder.find(query).populate([
+                    { path: 'assignedTo', model: 'customer' },
+                    { path: 'branch', model: 'branches' }
+                ]);
+                const faulty = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.FAULTY);
                 return Promise.resolve({
-                    damaged: damaged,
-                    repair: repair
+                    faulty
                 });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    condemnCylinder(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.registerCylinder.findById(cylinderId);
+                const saveInfo = {
+                    cylinderType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderType,
+                    condition: cylinder_1.CylinderCondition.DAMAGED,
+                    waterCapacity: cylinder === null || cylinder === void 0 ? void 0 : cylinder.waterCapacity,
+                    dateManufactured: cylinder === null || cylinder === void 0 ? void 0 : cylinder.dateManufactured,
+                    assignedTo: cylinder === null || cylinder === void 0 ? void 0 : cylinder.assignedTo,
+                    gasType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasType,
+                    standardColor: cylinder === null || cylinder === void 0 ? void 0 : cylinder.standardColor,
+                    testingPresure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.testingPresure,
+                    fillingPreasure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.fillingPreasure,
+                    gasVolumeContent: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasVolumeContent,
+                    cylinderNumber: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderNumber
+                };
+                const archive = yield this.archive.create(saveInfo);
+                yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.remove());
+                return Promise.resolve(archive);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchArchivedCylinder(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.archive.find(query).populate([
+                    { path: 'assignedTo', model: 'customer' },
+                    { path: 'branch', model: 'branches' }
+                ]);
+                return Promise.resolve(cylinders);
             }
             catch (e) {
                 this.handleException(e);
@@ -364,6 +412,10 @@ class Cylinder extends module_1.default {
                                 cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
                                 //@ts-ignore
                                 cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
+                                if (transfer.type == transferCylinder_1.TransferType.TEMPORARY) {
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
+                                }
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
@@ -371,9 +423,9 @@ class Cylinder extends module_1.default {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.BUFFER;
+                                // cyl?.cylinderType = TypesOfCylinders.BUFFER;
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toBranch;
+                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toDepartment;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
@@ -381,11 +433,27 @@ class Cylinder extends module_1.default {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.DAMAGED;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toBranch;
+                                // cyl?.department = transfer.toBranch;
                                 //@ts-ignore
                                 cyl === null || cyl === void 0 ? void 0 : cyl.condition = transferCylinder_1.TransferType.CONDEMN;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
+                        }
+                        else if (transfer.type == transferCylinder_1.TransferType.REPAIR) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toDEPARTMENT;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.condition = transferCylinder_1.TransferType.REPAIR;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
+                        }
+                        else if (transfer.type == transferCylinder_1.TransferType.BRANCH) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.branch = transfer.toBranch;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
@@ -396,6 +464,20 @@ class Cylinder extends module_1.default {
                         });
                     }
                 }
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    faultyCylinder(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.registerCylinder.findById(cylinderId);
+                //@ts-ignore
+                cylinder.condition = cylinder_1.CylinderCondition.FAULTY;
+                yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.save());
+                return Promise.resolve(cylinder);
             }
             catch (e) {
                 this.handleException(e);

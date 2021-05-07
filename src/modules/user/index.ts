@@ -137,6 +137,9 @@ class User extends Module {
 
   public async inviteUser(data:inviteUserInput, userInfo:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
     try {
+      const branch = await this.model.findById(userInfo._id).populate({
+        path:'branch', model:'branches'
+      });
       const exists = [];
       for(let user of data.users) {
         let existUser:UserInterface | null = await this.model.findOne({email:user.email});
@@ -144,11 +147,14 @@ class User extends Module {
           exists.push(user.email);
         } else {
           let password = await generateToken(4);
-          await this.model.create({...user, password});
+          //@ts-ignore
+          await this.model.create({...user, branch:branch?.branch._id, password});
           const html = await getTemplate('invite', {
             team: user.role,
             role:user.subrole,
             link:Environment.FRONTEND_URL,
+            //@ts-ignore
+            branch:branch?.branch.name,
             password
           });
           let mailLoad = {

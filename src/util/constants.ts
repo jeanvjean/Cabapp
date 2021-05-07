@@ -3,7 +3,7 @@
 
 export const constants = [
   {
-    role:"sale",
+    role:"sales",
     subroles:[
       "head of department",
       "sales executive",

@@ -41,7 +41,8 @@ export const cylinder = new CylinderModule({
   cylinder:Cylinder,
   registerCylinder:RegisteredCylinder,
   transfer:TransferCyl,
-  archive:Archive
+  archive:Archive,
+  user:User
 });
 
 export const product = new ProductModule({

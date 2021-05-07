@@ -61,6 +61,9 @@ class User extends module_1.default {
     inviteUser(data, userInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const branch = yield this.model.findById(userInfo._id).populate({
+                    path: 'branch', model: 'branches'
+                });
                 const exists = [];
                 for (let user of data.users) {
                     let existUser = yield this.model.findOne({ email: user.email });
@@ -69,11 +72,14 @@ class User extends module_1.default {
                     }
                     else {
                         let password = yield token_1.generateToken(4);
-                        yield this.model.create(Object.assign(Object.assign({}, user), { password }));
+                        //@ts-ignore
+                        yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
                         const html = yield resolve_template_1.getTemplate('invite', {
                             team: user.role,
                             role: user.subrole,
                             link: static_1.default.FRONTEND_URL,
+                            //@ts-ignore
+                            branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
                             password
                         });
                         let mailLoad = {

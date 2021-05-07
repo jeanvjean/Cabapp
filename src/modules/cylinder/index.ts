@@ -14,6 +14,7 @@ type CylinderProps = {
   registerCylinder: Model<RegisteredCylinderInterface>
   transfer: Model<TransferCylinder>
   archive:Model<ArchivedCylinder>
+  user:Model<UserInterface>
 }
 
 interface NewCylinderInterface{
@@ -100,6 +101,7 @@ class Cylinder extends Module {
   private registerCylinder:Model<RegisteredCylinderInterface>
   private transfer: Model<TransferCylinder>
   private archive: Model<ArchivedCylinder>
+  private user: Model<UserInterface>
 
   constructor(props:CylinderProps) {
     super()
@@ -107,6 +109,7 @@ class Cylinder extends Module {
     this.registerCylinder = props.registerCylinder
     this.transfer = props.transfer
     this.archive = props.archive
+    this.user = props.user
   }
 
   public async createCylinder(data:NewCylinderInterface, user:UserInterface): Promise<CylinderInterface|undefined> {
@@ -210,7 +213,7 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchDamagedCylinders(query:QueryInterface):Promise<FilterCylinderResponse|undefined>{
+  public async fetchFaultyCylinders(query:QueryInterface):Promise<FilterCylinderResponse|undefined>{
     try {
       const cylinders = await this.registerCylinder.find(query).populate([
         {path:'assignedTo', model:'customer'},
@@ -228,6 +231,9 @@ class Cylinder extends Module {
   public async condemnCylinder(cylinderId:string):Promise<ArchivedCylinder|undefined>{
     try {
       const cylinder = await this.registerCylinder.findById(cylinderId);
+      if(!cylinder) {
+        throw new BadInputFormatException('No cylinder found with this id');
+      }
       const saveInfo = {
         cylinderType: cylinder?.cylinderType,
         condition: CylinderCondition.DAMAGED,
@@ -264,16 +270,18 @@ class Cylinder extends Module {
   public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<TransferCylinder|undefined>{
     try {
       let transfer = new this.transfer(data);
-      transfer.initiator = user._id,
+      transfer.initiator = user._id
       transfer.transferStatus = TransferStatus.PENDING
       transfer.approvalStage = stagesOfApproval.STAGE1 //stage has been approved
+      let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
+      transfer.nextApprovalOfficer = hod?._id;
       let track = {
         title:"Initiate Transfer",
         stage:stagesOfApproval.STAGE1,
         status:ApprovalStatus.APPROVED,
         dateApproved:new Date().toISOString(),
         approvalOfficer:user._id,
-        nextApprovalOfficer:data.nextApprovalOfficer
+        nextApprovalOfficer:hod?._id
       }
       //@ts-ignore
       transfer.tracking.push(track)
@@ -375,6 +383,10 @@ class Cylinder extends Module {
           })
         }
       }else {
+        let hod = await this.user.findOne({branch:user.branch, subrole:'head of department', role:user.role}).populate({
+          path:'branch', model:'branches'
+        });
+        // console.log(hod);
         if(transfer?.approvalStage == stagesOfApproval.START){
           let track = {
             title:"Approval Prorcess",
@@ -382,7 +394,7 @@ class Cylinder extends Module {
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            nextApprovalOfficer:hod?._id
           }
           let checkOfficer = transfer.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -392,13 +404,13 @@ class Cylinder extends Module {
               office:user.subrole,
               department:user.role,
               stageOfApproval:stagesOfApproval.STAGE1
-            })
+            });
           }
           //@ts-ignore
           transfer.tracking.push(track)
           transfer.approvalStage = stagesOfApproval.STAGE1;
           //@ts-ignore
-          transfer.nextApprovalOfficer = data.nextApprovalOfficer
+          transfer.nextApprovalOfficer = hod?._id;
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -415,7 +427,8 @@ class Cylinder extends Module {
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            //@ts-ignore
+            nextApprovalOfficer:hod?.branch.branchAdmin
           }
           // console.log(track);
           let checkOfficer = transfer.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
@@ -432,7 +445,7 @@ class Cylinder extends Module {
           transfer.tracking.push(track)
           transfer.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          transfer.nextApprovalOfficer = data.nextApprovalOfficer
+          transfer.nextApprovalOfficer = hod?.branch.branchAdmin;
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -449,7 +462,7 @@ class Cylinder extends Module {
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            // nextApprovalOfficer:data.nextApprovalOfficer
           }
           let checkOfficer = transfer.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0){
@@ -466,7 +479,7 @@ class Cylinder extends Module {
           transfer.approvalStage = stagesOfApproval.APPROVED;
           transfer.transferStatus = TransferStatus.COMPLETED
           //@ts-ignore
-          transfer.nextApprovalOfficer = data.nextApprovalOfficer
+          // transfer.nextApprovalOfficer = data.nextApprovalOfficer
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -495,22 +508,13 @@ class Cylinder extends Module {
 
               await cyl?.save();
             }
-          }else if(transfer.type == TransferType.CONDEMN){
-            for(let cylinder of cylinders) {
-              let cyl = await this.registerCylinder.findById(cylinder);
-              //@ts-ignore
-              // cyl?.department = transfer.toBranch;
-              //@ts-ignore
-              cyl?.condition = TransferType.CONDEMN
-              await cyl?.save();
-            }
           }else if(transfer.type == TransferType.REPAIR){
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
               //@ts-ignore
               cyl?.department = transfer.toDEPARTMENT;
               //@ts-ignore
-              cyl?.condition = TransferType.REPAIR
+              cyl?.condition = TransferType.REPAIR;
 
               await cyl?.save();
             }
@@ -538,6 +542,9 @@ class Cylinder extends Module {
   public async faultyCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
     try {
       const cylinder = await this.registerCylinder.findById(cylinderId);
+      if(!cylinder) {
+        throw new BadInputFormatException('cylinder not found');
+      }
       //@ts-ignore
       cylinder.condition = CylinderCondition.FAULTY;
       await cylinder?.save();

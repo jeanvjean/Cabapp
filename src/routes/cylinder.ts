@@ -70,8 +70,8 @@ router.delete(
 );
 
 router.get(
-  '/fetch-damaged-cylinders',
-  cylinderCtrl.fetchDamagedCylinders()
+  '/fetch-faulty-cylinders',
+  cylinderCtrl.fetchFaultyCylinders()
 );
 
 router.get(

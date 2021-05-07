@@ -290,12 +290,10 @@ class Product extends Module{
 
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
-      if(data.nextApprovalOfficer == null) {
-        throw new BadInputFormatException('please select the next approval stage officer');
-      }
-      const disbursement = new this.disburse(data);
+      let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
+      const disbursement = new this.disburse({...data, nextApprovalOfficer:hod?._id});
       let track = {
-        title:"initiate disbursement",
+        title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,
         status:ApprovalStatus.APPROVED,
         approvalOfficer:user._id
@@ -434,6 +432,9 @@ class Product extends Module{
           return Promise.resolve(disbursement)
         }
       }else {
+        let hod = await this.user.findOne({branch:user.branch, subrole:'head of department', role:user.role}).populate({
+          path:'branch', model:'branches'
+        });
         if(disbursement?.approvalStage == stagesOfApproval.START) {
           let track = {
             title:"Approval Prorcess",
@@ -441,7 +442,7 @@ class Product extends Module{
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            nextApprovalOfficer:hod?._id
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -457,7 +458,7 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.approvalStage = stagesOfApproval.STAGE1;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.nextApprovalOfficer = hod?._id
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -471,7 +472,8 @@ class Product extends Module{
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            //@ts-ignore
+            nextApprovalOfficer:hod?.branch.branchAdmin
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -487,7 +489,7 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.nextApprovalOfficer = hod?.branch.branchAdmin
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -501,7 +503,7 @@ class Product extends Module{
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            // nextApprovalOfficer:data.nextApprovalOfficer
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
 
@@ -526,13 +528,15 @@ class Product extends Module{
           await disbursement.save();
           return Promise.resolve(disbursement)
         }else if(disbursement?.requestStage == stagesOfApproval.START) {
+          //@ts-ignore
+          const branchApproval = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.role});
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE1,
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            nextApprovalOfficer:branchApproval?._id
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -548,7 +552,7 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.requestStage = stagesOfApproval.STAGE1;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.nextApprovalOfficer = branchApproval?._id
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -556,13 +560,17 @@ class Product extends Module{
           await disbursement.save();
           return Promise.resolve(disbursement)
         }else if(disbursement?.requestStage == stagesOfApproval.STAGE1){
+          let brenchRequestApproval = await this.user.findOne({branch:user.branch, subrole:'head of department'}).populate({
+            path:'branch', model:'branches'
+          });
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE2,
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            //@ts-ignore
+            nextApprovalOfficer:brenchRequestApproval?.branch.branchAdmin
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -578,11 +586,11 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.requestStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.nextApprovalOfficer = brenchRequestApproval?.branch.branchAdmin
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
-          })
+          });
           await disbursement.save();
           return Promise.resolve(disbursement);
         } else if(disbursement?.requestStage == stagesOfApproval.STAGE2){
@@ -603,7 +611,7 @@ class Product extends Module{
               office:user.subrole,
               department:user.role,
               stageOfApproval:stagesOfApproval.STAGE3
-            })
+            });
           }
           //@ts-ignore
           disbursement.tracking.push(track);
@@ -611,6 +619,9 @@ class Product extends Module{
           disbursement.requestApproval = TransferStatus.COMPLETED;
           disbursement.approvalStage = stagesOfApproval.START
           disbursement.disburseStatus = TransferStatus.PENDING
+          //@ts-ignore
+          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+
           //@ts-ignore
           disbursement.comments.push({
             comment:data.comment,

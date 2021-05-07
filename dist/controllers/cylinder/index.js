@@ -162,10 +162,10 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
-    fetchDamagedCylinders() {
+    fetchFaultyCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchDamagedCylinders(req.query);
+                const data = yield this.module.fetchFaultyCylinders(req.query);
                 this.ok(res, 'fetched', data);
             }
             catch (e) {

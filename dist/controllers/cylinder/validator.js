@@ -80,10 +80,7 @@ class CylinderValidator extends ctrl_1.default {
             express_validator_1.check('type')
                 .exists()
                 .withMessage('type of transfer (Permanent/Temporary)'),
-            express_validator_1.check('comment'),
-            express_validator_1.check('nextApprovalOfficer')
-                .exists()
-                .withMessage('Please indicate the next officer to approve this transfer')
+            express_validator_1.check('comment')
         ];
         return rules;
     }

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.constants = void 0;
 exports.constants = [
     {
-        role: "sale",
+        role: "sales",
         subroles: [
             "head of department",
             "sales executive",

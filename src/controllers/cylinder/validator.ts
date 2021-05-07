@@ -78,10 +78,7 @@ class CylinderValidator extends Ctrl{
       check('type')
         .exists()
         .withMessage('type of transfer (Permanent/Temporary)'),
-      check('comment'),
-      check('nextApprovalOfficer')
-        .exists()
-        .withMessage('Please indicate the next officer to approve this transfer')
+      check('comment')
     ]
     return rules;
   }

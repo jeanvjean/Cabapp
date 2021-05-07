@@ -161,10 +161,10 @@ class CylinderController extends Ctrl{
     }
   }
 
-  fetchDamagedCylinders():RequestHandler{
+  fetchFaultyCylinders():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchDamagedCylinders(req.query);
+        const data = await this.module.fetchFaultyCylinders(req.query);
         this.ok(res, 'fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

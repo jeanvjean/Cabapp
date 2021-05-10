@@ -48,13 +48,13 @@ export type Maintainance = {
   DELIVERY='delivery'
 }
 
-enum RoutePlanStatus {
+export enum RoutePlanStatus {
   PROGRESS='in-progress',
   DONE='done'
 }
 
 export type RecordRoute = {
-  driver:Schema.Types.ObjectId,
+  customer:Schema.Types.ObjectId,
   startDate:Date
   endDate?:Date
   activity:RouteActivity
@@ -96,7 +96,7 @@ const replacedItemSchema = new Schema({
 });
 
 const routeSchema = new Schema({
-  driver:Schema.Types.ObjectId,
+  customer:{type:Schema.Types.ObjectId, ref:'customer'},
   startDate:Date,
   endDate:Date,
   activity:{type:String, enum:Object.values(RouteActivity)},

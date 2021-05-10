@@ -14,7 +14,9 @@ import {
   Order,
   Complain,
   Branch,
-  Archive
+  Archive,
+  PickupRoutes,
+  WalkInCustomer
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -55,7 +57,8 @@ export const product = new ProductModule({
 });
 
 export const vehicle = new VehicleModule({
-  vehicle:Vehicle
+  vehicle:Vehicle,
+  pickup:PickupRoutes
 });
 
 export const driver = new DriverModule({
@@ -65,5 +68,7 @@ export const driver = new DriverModule({
 export const customer = new CustomerModule({
   customer:Customer,
   order:Order,
-  complaint:Complain
+  complaint:Complain,
+  user:User,
+  walkin:WalkInCustomer
 });

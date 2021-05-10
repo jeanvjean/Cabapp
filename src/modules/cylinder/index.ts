@@ -198,7 +198,7 @@ class Cylinder extends Module {
       });
     } catch (e) {
       this.handleException(e);
-    }
+    };
   }
 
   public async fetchRegisteredCylinder(id:string,user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
@@ -551,6 +551,21 @@ class Cylinder extends Module {
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async fixedFaultyCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      const cylinder = await this.registerCylinder.findById(cylinderId);
+      if(!cylinder) {
+        throw new BadInputFormatException('cylinder not found');
+      }
+      //@ts-ignore
+      cylinder.condition = CylinderCondition.GOOD;
+      await cylinder?.save();
+      return Promise.resolve(cylinder as RegisteredCylinderInterface);
+    } catch (e) {
+
     }
   }
 

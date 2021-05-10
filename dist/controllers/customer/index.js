@@ -122,10 +122,46 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    approveComplaint() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { complaintId } = req.params;
+                //@ts-ignore
+                const data = yield this.module.approveComplaint(Object.assign(Object.assign({}, req.body), { id: complaintId }), req.user);
+                this.ok(res, 'Approval status updated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchComplaints() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const data = yield this.module.fetchComplaints(req.params.customerId);
+                this.ok(res, 'complaints fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchPendingComplaintApproval() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchUserComplaintApproval(req.query, req.user);
+                this.ok(res, 'pending approvals fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchApprovedComplaints() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchApprovedCOmplaints(req.query);
                 this.ok(res, 'complaints fetched', data);
             }
             catch (e) {
@@ -139,6 +175,74 @@ class customerCtrl extends ctrl_1.default {
                 const { orderId } = req.params;
                 const data = yield this.module.updateTracking(Object.assign(Object.assign({}, req.body), { orderId }));
                 this.ok(res, 'tracking updated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    resolveComplaint() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.resolveComplaint(req.params.complaintId);
+                this.ok(res, 'Complaint resolved', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    registerWalkinCustomer() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.registerWalkinCustomers(req.body, req.user);
+                this.ok(res, 'customer registered', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchWalkinCustomers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchWalkinCustomers(req.query, req.user);
+                this.ok(res, 'fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchWalkinCustomer() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchWalkinCustomer(req.params.customerId);
+                this.ok(res, 'customer fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    markCustomerAsFilled() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.markFilledCustomer(req.params.customerId);
+                this.ok(res, 'marked as full', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    deleteWalkinCustomer() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.deleteWalkinCustomer(req.params.customerId);
+                this.ok(res, 'customer deleted', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

@@ -227,6 +227,17 @@ class CylinderController extends Ctrl{
     }
   }
 
+  fixFaultyCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fixedFaultyCylinder(req.params.cylinderId);
+        this.ok(res,'cylinder fixed', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

@@ -116,6 +116,7 @@ class Cylinder extends module_1.default {
             catch (e) {
                 this.handleException(e);
             }
+            ;
         });
     }
     fetchRegisteredCylinder(id, user) {
@@ -484,6 +485,22 @@ class Cylinder extends module_1.default {
             }
             catch (e) {
                 this.handleException(e);
+            }
+        });
+    }
+    fixedFaultyCylinder(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.registerCylinder.findById(cylinderId);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('cylinder not found');
+                }
+                //@ts-ignore
+                cylinder.condition = cylinder_1.CylinderCondition.GOOD;
+                yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.save());
+                return Promise.resolve(cylinder);
+            }
+            catch (e) {
             }
         });
     }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.vehicleSchema = exports.RouteActivity = exports.InspectApproval = exports.maintType = void 0;
+exports.vehicleSchema = exports.RoutePlanStatus = exports.RouteActivity = exports.InspectApproval = exports.maintType = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 var maintType;
@@ -23,12 +23,12 @@ var RoutePlanStatus;
 (function (RoutePlanStatus) {
     RoutePlanStatus["PROGRESS"] = "in-progress";
     RoutePlanStatus["DONE"] = "done";
-})(RoutePlanStatus || (RoutePlanStatus = {}));
+})(RoutePlanStatus = exports.RoutePlanStatus || (exports.RoutePlanStatus = {}));
 const replacedItemSchema = new mongoose_1.Schema({
     name: String
 });
 const routeSchema = new mongoose_1.Schema({
-    driver: mongoose_1.Schema.Types.ObjectId,
+    customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     startDate: Date,
     endDate: Date,
     activity: { type: String, enum: Object.values(RouteActivity) },

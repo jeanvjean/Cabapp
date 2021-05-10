@@ -1,4 +1,6 @@
 import { Model } from "mongoose";
+import { BadInputFormatException } from "../../exceptions";
+import { PickupInterface } from "../../models/driverPickup";
 import { stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteActivity, VehicleInterface } from "../../models/vehicle";
@@ -6,6 +8,7 @@ import Module, { QueryInterface } from "../module";
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
+  pickup:Model<PickupInterface>
 }
 
 type NewVehicle = {
@@ -42,12 +45,23 @@ interface InspectionData {
 }
 
 type RouteRecordInput = {
-  driver:RecordRoute['driver']
-  activity:RecordRoute['activity']
-  startDate:RecordRoute['startDate']
-  endDate?:RecordRoute['endDate']
-  destination:RecordRoute['destination']
-  departure:RecordRoute['departure']
+  customer:PickupInterface['customer'],
+  startDate:PickupInterface['startDate'],
+  endDate?:PickupInterface['endDate'],
+  activity:PickupInterface['activity'],
+  destination:PickupInterface['destination'],
+  departure:PickupInterface['departure'],
+  status:PickupInterface['status'],
+  ecrNo:PickupInterface['ecrNo'],
+  icnNo:PickupInterface['icnNo'],
+  orderType:PickupInterface['orderType'],
+  modeOfService:PickupInterface['modeOfService'],
+  date:PickupInterface['date'],
+  serialNo:number
+  cylinders:PickupInterface['cylinders'],
+  vehicle:PickupInterface['vehicle'],
+  recievedBy:PickupInterface['recievedBy'],
+  security:PickupInterface['security'],
 }
 
 type Parameters = {
@@ -72,10 +86,12 @@ export type DeleteResponse = {
 
 class Vehicle extends Module{
   private vehicle:Model<VehicleInterface>
+  private pickup:Model<PickupInterface>
 
   constructor(props:vehicleProps) {
     super()
     this.vehicle = props.vehicle
+    this.pickup = props.pickup;
   }
   public async createVehicle(data:NewVehicle):Promise<VehicleInterface|undefined>{
     try {
@@ -189,34 +205,21 @@ class Vehicle extends Module{
     data:RouteRecordInput,
     params:Parameters,
     user:UserInterface
-    ):Promise<VehicleInterface|undefined>{
+    ):Promise<PickupInterface|undefined>{
     try {
-      console.log(params);
       const vehicle = await this.vehicle.findById(params.vehicleId);
-      let route;
-      if(data.activity == RouteActivity.DELIVERY) {
-        route = {
-          driver:data.driver,
-          startDate:data.startDate,
-          endDate:data.endDate,
-          activity:RouteActivity.DELIVERY,
-          destination:data.destination,
-          departure:data.departure
-        }
-      } else if(data.activity == RouteActivity.PICKUP){
-        route = {
-          driver:data.driver,
-          startDate:data.startDate,
-          endDate:data.endDate,
-          activity:RouteActivity.DELIVERY,
-          destination:data.destination,
-          departure:data.departure
-        }
+      if(!vehicle) {
+        throw new BadInputFormatException('selected vehicle was not found please pick an available vehicle')
       }
+      let routePlan = new this.pickup(data)
+      let availableRoutes = await this.pickup.find()
+      let docs = availableRoutes.map(doc=>doc.serialNo);
       //@ts-ignore
-      vehicle?.routes.push(route);
-      await vehicle?.save();
-      return Promise.resolve(vehicle as VehicleInterface);
+      let maxNumber = Math.max(...docs);
+      let sn = maxNumber + 1
+      routePlan.serialNo = sn | 1;
+      await routePlan.save();
+      return Promise.resolve(routePlan as PickupInterface);
     } catch (e) {
       this.handleException(e)
     }
@@ -267,29 +270,24 @@ class Vehicle extends Module{
     }
   }
 
-  public async fetchRoutePlan(data:Parameters):Promise<any>{
+  public async fetchRoutePlan(data:Parameters):Promise<PickupInterface[]|undefined>{
     try {
       const { vehicleId } = data;
-      const vehicle = await this.vehicle.findById(vehicleId);
-      let routePlan = vehicle?.routes;
-      return Promise.resolve({
-        routePlan
-      });
+      //@ts-ignore
+      const routePlan = await this.pickup.find({vehicle:`${vehicleId}`});
+      return Promise.resolve(routePlan);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async markRouteAsComplete(data:Parameters):Promise<VehicleInterface|undefined>{
+  public async markRouteAsComplete(data:Parameters):Promise<PickupInterface|undefined>{
     try {
-      const { vehicleId, status, routeId } = data;
-      const vehicle = await this.vehicle.findById(vehicleId);
+      const { status, routeId } = data;
+      const pickup = await this.pickup.findById(routeId);
       //@ts-ignore
-      let route = vehicle?.routes.filter(route=> `${route._id}` == `${routeId}`);
-      //@ts-ignore
-      route[0].status = status;
-      vehicle?.save();
-      return Promise.resolve(vehicle as VehicleInterface);
+      pickup?.status = status;
+      return Promise.resolve(pickup as PickupInterface);
     } catch (e) {
       this.handleException(e);
     }

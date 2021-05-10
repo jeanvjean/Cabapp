@@ -99,4 +99,9 @@ router.get(
   cylinderCtrl.fetchCondemnCylinders()
 );
 
+router.get(
+  '/fixed-cylinder/:cylinderId',
+  cylinderCtrl.fixFaultyCylinder()
+);
+
 export default router;

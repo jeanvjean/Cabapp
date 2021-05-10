@@ -117,10 +117,46 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  approveComplaint():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { complaintId } = req.params;
+        //@ts-ignore
+        const data = await this.module.approveComplaint({...req.body, id:complaintId}, req.user);
+        this.ok(res, 'Approval status updated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchComplaints():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.fetchComplaints(req.params.customerId);
+        this.ok(res, 'complaints fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchPendingComplaintApproval():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchUserComplaintApproval(req.query, req.user);
+        this.ok(res, 'pending approvals fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchApprovedComplaints():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchApprovedCOmplaints(req.query);
         this.ok(res, 'complaints fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -134,6 +170,74 @@ class customerCtrl extends Ctrl{
         const { orderId } = req.params;
         const data = await this.module.updateTracking({...req.body, orderId});
         this.ok(res, 'tracking updated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  resolveComplaint():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.resolveComplaint(req.params.complaintId);
+        this.ok(res, 'Complaint resolved', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  registerWalkinCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.registerWalkinCustomers(req.body, req.user);
+        this.ok(res,'customer registered', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchWalkinCustomers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try{
+        //@ts-ignore
+        const data = await this.module.fetchWalkinCustomers(req.query, req.user);
+        this.ok(res,'fetched', data);
+      }catch(e){
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchWalkinCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchWalkinCustomer(req.params.customerId);
+        this.ok(res, 'customer fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  markCustomerAsFilled():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.markFilledCustomer(req.params.customerId);
+        this.ok(res, 'marked as full', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  deleteWalkinCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.deleteWalkinCustomer(req.params.customerId);
+        this.ok(res,'customer deleted',data);
       } catch (e) {
         this.handleError(e, req, res);
       }

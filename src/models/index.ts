@@ -20,6 +20,8 @@ import orderFactory, { OrderInterface } from './order';
 import complainFactory, { ComplaintInterface } from './complaint';
 import branchFactory, { BranchInterface } from './branch';
 import archiveFactory, { ArchivedCylinder } from './archiveCylinder';
+import driverPickupFactory, { PickupInterface } from './driverPickup';
+import walkinCustomerFactory, { WalkinCustomerInterface } from './walk-in-customers';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -54,5 +56,9 @@ export const Complain:Model<ComplaintInterface> = complainFactory(conn);
 export const Branch:Model<BranchInterface> = branchFactory(conn);
 
 export const Archive:Model<ArchivedCylinder> = archiveFactory(conn);
+
+export const PickupRoutes:Model<PickupInterface> = driverPickupFactory(conn);
+
+export const WalkInCustomer:Model<WalkinCustomerInterface> = walkinCustomerFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

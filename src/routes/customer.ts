@@ -52,12 +52,65 @@ router.get(
 
 router.post(
   '/make-complain/:customerId',
+  auth.verify(),
   customerCtrl.createComplaint()
 );
 
 router.get(
   '/fetch-complaints/:customerId',
   customerCtrl.fetchComplaints()
+);
+
+router.post(
+  '/approve-complaint/:complaintId',
+  auth.verify(),
+  customerCtrl.approveComplaint()
+);
+
+router.get(
+  '/fetch-pending-comment-approval',
+  auth.verify(),
+  customerCtrl.fetchPendingComplaintApproval()
+);
+
+router.get(
+  '/fetch-approved-complaints',
+  auth.verify(),
+  customerCtrl.fetchApprovedComplaints()
+);
+
+router.get(
+  '/resolve-complaint/:complaintId',
+  customerCtrl.resolveComplaint()
+);
+
+router.post(
+  '/register-walkin-customer',
+  auth.verify(),
+  Validator.validateValkinCustomer(),
+  val.validate(),
+  customerCtrl.registerWalkinCustomer()
+);
+
+router.get(
+  '/fetch-walkin-customers',
+  auth.verify(),
+  customerCtrl.fetchWalkinCustomers()
+);
+
+router.get(
+  '/fetch-walkin-customer/:customerId',
+  customerCtrl.fetchWalkinCustomer()
+);
+
+router.delete(
+  '/delete-walkin-customer/:customerId',
+  customerCtrl.deleteWalkinCustomer()
+);
+
+router.get(
+  '/mark-filled-cylinder/:customerId',
+  customerCtrl.markCustomerAsFilled()
 );
 
 export default router;

@@ -9,12 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const exceptions_1 = require("../../exceptions");
 const vehicle_1 = require("../../models/vehicle");
 const module_1 = require("../module");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
         this.vehicle = props.vehicle;
+        this.pickup = props.pickup;
     }
     createVehicle(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -141,33 +143,19 @@ class Vehicle extends module_1.default {
     recordRoute(data, params, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(params);
                 const vehicle = yield this.vehicle.findById(params.vehicleId);
-                let route;
-                if (data.activity == vehicle_1.RouteActivity.DELIVERY) {
-                    route = {
-                        driver: data.driver,
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        activity: vehicle_1.RouteActivity.DELIVERY,
-                        destination: data.destination,
-                        departure: data.departure
-                    };
+                if (!vehicle) {
+                    throw new exceptions_1.BadInputFormatException('selected vehicle was not found please pick an available vehicle');
                 }
-                else if (data.activity == vehicle_1.RouteActivity.PICKUP) {
-                    route = {
-                        driver: data.driver,
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        activity: vehicle_1.RouteActivity.DELIVERY,
-                        destination: data.destination,
-                        departure: data.departure
-                    };
-                }
+                let routePlan = new this.pickup(data);
+                let availableRoutes = yield this.pickup.find();
+                let docs = availableRoutes.map(doc => doc.serialNo);
                 //@ts-ignore
-                vehicle === null || vehicle === void 0 ? void 0 : vehicle.routes.push(route);
-                yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
-                return Promise.resolve(vehicle);
+                let maxNumber = Math.max(...docs);
+                let sn = maxNumber + 1;
+                routePlan.serialNo = sn | 1;
+                yield routePlan.save();
+                return Promise.resolve(routePlan);
             }
             catch (e) {
                 this.handleException(e);
@@ -229,11 +217,9 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { vehicleId } = data;
-                const vehicle = yield this.vehicle.findById(vehicleId);
-                let routePlan = vehicle === null || vehicle === void 0 ? void 0 : vehicle.routes;
-                return Promise.resolve({
-                    routePlan
-                });
+                //@ts-ignore
+                const routePlan = yield this.pickup.find({ vehicle: `${vehicleId}` });
+                return Promise.resolve(routePlan);
             }
             catch (e) {
                 this.handleException(e);
@@ -243,14 +229,11 @@ class Vehicle extends module_1.default {
     markRouteAsComplete(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { vehicleId, status, routeId } = data;
-                const vehicle = yield this.vehicle.findById(vehicleId);
+                const { status, routeId } = data;
+                const pickup = yield this.pickup.findById(routeId);
                 //@ts-ignore
-                let route = vehicle === null || vehicle === void 0 ? void 0 : vehicle.routes.filter(route => `${route._id}` == `${routeId}`);
-                //@ts-ignore
-                route[0].status = status;
-                vehicle === null || vehicle === void 0 ? void 0 : vehicle.save();
-                return Promise.resolve(vehicle);
+                pickup === null || pickup === void 0 ? void 0 : pickup.status = status;
+                return Promise.resolve(pickup);
             }
             catch (e) {
                 this.handleException(e);

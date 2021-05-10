@@ -83,6 +83,35 @@ class CustomerValidation extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateValkinCustomer() {
+        const rules = [
+            express_validator_1.check('customerName')
+                .exists()
+                .withMessage('customer name is required'),
+            express_validator_1.check('ercNo')
+                .exists()
+                .withMessage('ECR nuber is required'),
+            express_validator_1.check('orderType')
+                .exists()
+                .withMessage('please indicate order type'),
+            express_validator_1.check('date')
+                .exists()
+                .withMessage('provide order date'),
+            express_validator_1.check('icnNo')
+                .exists()
+                .withMessage('provide icn number'),
+            express_validator_1.check('modeOfService'),
+            express_validator_1.check('cylinderNo')
+                .exists()
+                .withMessage('enter cylinder number'),
+            express_validator_1.check('cylinderSize')
+                .exists()
+                .withMessage('enter cylinder size'),
+            express_validator_1.check('totalVolume'),
+            express_validator_1.check('totalQuantity')
+        ];
+        return rules;
+    }
 }
 exports.default = CustomerValidation;
 //# sourceMappingURL=validator.js.map

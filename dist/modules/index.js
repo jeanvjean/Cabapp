@@ -35,7 +35,8 @@ exports.product = new inventory_1.default({
     user: index_1.User
 });
 exports.vehicle = new vehicle_1.default({
-    vehicle: index_1.Vehicle
+    vehicle: index_1.Vehicle,
+    pickup: index_1.PickupRoutes
 });
 exports.driver = new driver_1.default({
     driver: index_1.User
@@ -43,6 +44,8 @@ exports.driver = new driver_1.default({
 exports.customer = new customers_1.default({
     customer: index_1.Customer,
     order: index_1.Order,
-    complaint: index_1.Complain
+    complaint: index_1.Complain,
+    user: index_1.User,
+    walkin: index_1.WalkInCustomer
 });
 //# sourceMappingURL=index.js.map

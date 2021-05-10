@@ -80,6 +80,36 @@ class CustomerValidation extends Ctrl{
     ]
     return rules;
   }
+
+  static validateValkinCustomer():ValidationChain[]{
+    const rules = [
+      check('customerName')
+        .exists()
+        .withMessage('customer name is required'),
+      check('ercNo')
+        .exists()
+        .withMessage('ECR nuber is required'),
+      check('orderType')
+        .exists()
+        .withMessage('please indicate order type'),
+      check('date')
+        .exists()
+        .withMessage('provide order date'),
+      check('icnNo')
+        .exists()
+        .withMessage('provide icn number'),
+      check('modeOfService'),
+      check('cylinderNo')
+        .exists()
+        .withMessage('enter cylinder number'),
+      check('cylinderSize')
+        .exists()
+        .withMessage('enter cylinder size'),
+      check('totalVolume'),
+      check('totalQuantity')
+    ]
+    return rules;
+  }
 }
 
 export default CustomerValidation;

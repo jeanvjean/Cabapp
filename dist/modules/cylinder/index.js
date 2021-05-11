@@ -539,7 +539,7 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const transfers = yield this.transfer.find(query);
-                let pendingTransfers = transfers.filter(transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.PENDING);
+                let pendingTransfers = transfers.filter(transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.PENDING && transfer.branch == user.branch);
                 let startStage = pendingTransfers.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {

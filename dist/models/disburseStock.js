@@ -29,6 +29,7 @@ exports.disburseSchema = new mongoose_1.Schema({
     tracking: [transferCylinder_1.approvalStageShema],
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    fromBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     requestFrom: { type: requesterSchema }
 });
 function factory(conn) {

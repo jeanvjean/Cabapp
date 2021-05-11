@@ -603,7 +603,7 @@ class Cylinder extends Module {
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
       const transfers = await this.transfer.find(query);
-      let pendingTransfers = transfers.filter(transfer=>transfer.transferStatus == TransferStatus.PENDING);
+      let pendingTransfers = transfers.filter(transfer=>transfer.transferStatus == TransferStatus.PENDING && transfer.branch == user.branch);
       let startStage = pendingTransfers.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {

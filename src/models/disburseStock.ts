@@ -36,7 +36,8 @@ export interface DisburseProductInterface extends Document{
   tracking:ApprovalStage[]
   approvalOfficers:ApprovalOfficers[]
   disburseStatus:TransferStatus
-  branches:Schema.Types.ObjectId
+  branch:Schema.Types.ObjectId
+  fromBranch:Schema.Types.ObjectId
   requestFrom:RequesterInterface
   requestApproval:TransferStatus
   requestStage:stagesOfApproval
@@ -70,6 +71,7 @@ export const disburseSchema = new Schema({
   tracking:[approvalStageShema],
   approvalOfficers:[ApprovalOfficerSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  fromBranch:{type:Schema.Types.ObjectId, ref:'branches'},
   requestFrom:{type:requesterSchema}
 });
 

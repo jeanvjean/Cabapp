@@ -16,7 +16,8 @@ import {
   Branch,
   Archive,
   PickupRoutes,
-  WalkInCustomer
+  WalkInCustomer,
+  SalesReq
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -26,6 +27,7 @@ import { inventorySchema } from '../models/receivedProduct';
 import VehicleModule from './vehicle';
 import DriverModule from './driver';
 import CustomerModule from './customers';
+import SalesModule from './sales';
 
 /**
  * @category Modules
@@ -71,4 +73,9 @@ export const customer = new CustomerModule({
   complaint:Complain,
   user:User,
   walkin:WalkInCustomer
+});
+
+export const sales = new SalesModule({
+  sales:SalesReq,
+  user:User
 });

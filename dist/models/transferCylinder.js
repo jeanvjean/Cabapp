@@ -79,7 +79,8 @@ exports.TransferSchema = new mongoose_1.Schema({
     purchaseDate: { type: Date },
     purchasePrice: { type: Number },
     toBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    toDepartment: { type: String }
+    toDepartment: { type: String },
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 }, {
     timestamps: true
 });

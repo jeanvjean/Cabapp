@@ -70,6 +70,7 @@ export interface TransferCylinder extends Document {
   purchasePrice:number
   toBranch:Schema.Types.ObjectId
   toDepartment:string
+  branch:Schema.Types.ObjectId
   createdAt:Date,
   updatedAt:Date,
 }
@@ -127,7 +128,8 @@ export const TransferSchema = new Schema({
   purchaseDate:{type:Date},
   purchasePrice:{type:Number},
   toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
-  toDepartment:{type:String}
+  toDepartment:{type:String},
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{
   timestamps:true
 });

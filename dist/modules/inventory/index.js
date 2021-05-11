@@ -561,8 +561,12 @@ class Product extends module_1.default {
                         disbursement.requestApproval = transferCylinder_1.TransferStatus.COMPLETED;
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.START;
                         disbursement.disburseStatus = transferCylinder_1.TransferStatus.PENDING;
+                        //set next branch
+                        let nb = yield this.user.findById(data.nextApprovalOfficer);
                         //@ts-ignore
                         disbursement.nextApprovalOfficer = data.nextApprovalOfficer;
+                        //@ts-ignore
+                        disbursement.fromBranch = nb === null || nb === void 0 ? void 0 : nb.branch;
                         //@ts-ignore
                         disbursement.comments.push({
                             comment: data.comment,
@@ -582,7 +586,7 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const disbursement = yield this.disburse.find(query);
-                const pendingDisbursement = disbursement.filter(disburse => disburse.disburseStatus == transferCylinder_1.TransferStatus.PENDING);
+                const pendingDisbursement = disbursement.filter(disburse => disburse.disburseStatus == transferCylinder_1.TransferStatus.PENDING && disburse.fromBranch == user.branch);
                 let startStage = pendingDisbursement.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {
@@ -646,7 +650,7 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const disbursement = yield this.disburse.find(query);
-                const pendingDisbursement = disbursement.filter(disburse => disburse.requestApproval == transferCylinder_1.TransferStatus.PENDING);
+                const pendingDisbursement = disbursement.filter(disburse => disburse.requestApproval == transferCylinder_1.TransferStatus.PENDING && disburse.branch == user.branch);
                 let startStage = pendingDisbursement.filter(transfer => {
                     if (transfer.requestStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {

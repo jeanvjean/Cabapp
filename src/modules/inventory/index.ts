@@ -619,8 +619,13 @@ class Product extends Module{
           disbursement.requestApproval = TransferStatus.COMPLETED;
           disbursement.approvalStage = stagesOfApproval.START
           disbursement.disburseStatus = TransferStatus.PENDING
+
+          //set next branch
+          let nb = await this.user.findById(data.nextApprovalOfficer);
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer
+          disbursement.nextApprovalOfficer = data.nextApprovalOfficer;
+          //@ts-ignore
+          disbursement.fromBranch = nb?.branch;
 
           //@ts-ignore
           disbursement.comments.push({
@@ -639,7 +644,9 @@ class Product extends Module{
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const disbursement = await this.disburse.find(query);
-      const pendingDisbursement = disbursement.filter(disburse=> disburse.disburseStatus == TransferStatus.PENDING);
+      const pendingDisbursement = disbursement.filter(disburse=>
+          disburse.disburseStatus == TransferStatus.PENDING && disburse.fromBranch == user.branch
+        );
       let startStage = pendingDisbursement.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {
@@ -696,7 +703,8 @@ class Product extends Module{
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const disbursement = await this.disburse.find(query);
-      const pendingDisbursement = disbursement.filter(disburse=> disburse.requestApproval == TransferStatus.PENDING);
+      const pendingDisbursement = disbursement.filter(disburse=>
+        disburse.requestApproval == TransferStatus.PENDING && disburse.branch == user.branch);
       let startStage = pendingDisbursement.filter(transfer=> {
         if(transfer.requestStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {

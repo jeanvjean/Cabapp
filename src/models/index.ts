@@ -22,6 +22,7 @@ import branchFactory, { BranchInterface } from './branch';
 import archiveFactory, { ArchivedCylinder } from './archiveCylinder';
 import driverPickupFactory, { PickupInterface } from './driverPickup';
 import walkinCustomerFactory, { WalkinCustomerInterface } from './walk-in-customers';
+import salesReqFactory, { SalesRequisitionInterface } from './sales-requisition';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -60,5 +61,7 @@ export const Archive:Model<ArchivedCylinder> = archiveFactory(conn);
 export const PickupRoutes:Model<PickupInterface> = driverPickupFactory(conn);
 
 export const WalkInCustomer:Model<WalkinCustomerInterface> = walkinCustomerFactory(conn);
+
+export const SalesReq:Model<SalesRequisitionInterface> = salesReqFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

@@ -396,7 +396,9 @@ class Customer extends Module{
   public async fetchUserComplaintApproval(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
       const complaints = await this.complaint.find(query);
-      let pendingComplaints = complaints.filter(complaint=>complaint.approvalStatus == TransferStatus.PENDING);
+      let pendingComplaints = complaints.filter(complaint=>
+          complaint.approvalStatus == TransferStatus.PENDING && complaint.branch == user.branch
+        );
 
       let startStage = pendingComplaints.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {

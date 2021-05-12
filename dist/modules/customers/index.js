@@ -341,7 +341,7 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const complaints = yield this.complaint.find(query);
-                let pendingComplaints = complaints.filter(complaint => complaint.approvalStatus == transferCylinder_1.TransferStatus.PENDING);
+                let pendingComplaints = complaints.filter(complaint => complaint.approvalStatus == transferCylinder_1.TransferStatus.PENDING && complaint.branch == user.branch);
                 let startStage = pendingComplaints.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {

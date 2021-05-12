@@ -31,7 +31,8 @@ var TransferType;
 })(TransferType = exports.TransferType || (exports.TransferType = {}));
 exports.commentSchema = new mongoose_1.Schema({
     comment: { type: String },
-    commentBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+    commentBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    officer: { type: String }
 }, {
     timestamps: true
 });

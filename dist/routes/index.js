@@ -11,6 +11,7 @@ const driver_1 = require("./driver");
 const Uploader_1 = require("../controllers/Uploader");
 const customer_1 = require("./customer");
 const sales_1 = require("./sales");
+const production_1 = require("./production");
 const uploader = new Uploader_1.default();
 const router = express_1.Router();
 router.get('/', (req, res) => {
@@ -24,6 +25,7 @@ router.use('/vehicle', vehicle_1.default);
 router.use('/driver', driver_1.default);
 router.use('/customer', customer_1.default);
 router.use('/sales', sales_1.default);
+router.use('/production', production_1.default);
 router.post('/upload', uploader.fileUpload());
 exports.default = router;
 //# sourceMappingURL=index.js.map

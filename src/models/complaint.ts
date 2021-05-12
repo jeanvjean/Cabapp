@@ -40,6 +40,7 @@ export interface ComplaintInterface extends Document{
   nextApprovalOfficer:Schema.Types.ObjectId
   additionalAction:string
   comments:commentInterface[]
+  branch:Schema.Types.ObjectId
   approvalStatus:string
   status:complaintStatus
   icnNo?:string
@@ -75,7 +76,8 @@ export const complaintSchema = new Schema({
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
-  approvalStatus:{type:String}
+  approvalStatus:{type:String},
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{
   timestamps:true
 });

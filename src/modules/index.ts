@@ -17,7 +17,8 @@ import {
   Archive,
   PickupRoutes,
   WalkInCustomer,
-  SalesReq
+  SalesReq,
+  Production
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -28,6 +29,7 @@ import VehicleModule from './vehicle';
 import DriverModule from './driver';
 import CustomerModule from './customers';
 import SalesModule from './sales';
+import ProductionModule from './production'
 
 /**
  * @category Modules
@@ -77,5 +79,10 @@ export const customer = new CustomerModule({
 
 export const sales = new SalesModule({
   sales:SalesReq,
+  user:User
+});
+
+export const production = new ProductionModule ({
+  production:Production,
   user:User
 });

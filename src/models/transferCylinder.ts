@@ -52,6 +52,7 @@ export interface ApprovalOfficers{
 export interface commentInterface {
   comment:string,
   commentBy:Schema.Types.ObjectId
+  officer?:string
 }
 
 export interface TransferCylinder extends Document {
@@ -77,7 +78,8 @@ export interface TransferCylinder extends Document {
 
 export const commentSchema = new Schema({
   comment:{type:String},
-  commentBy:{type:Schema.Types.ObjectId, ref:'User'}
+  commentBy:{type:Schema.Types.ObjectId, ref:'User'},
+  officer:{type:String}
 },{
   timestamps:true
 });

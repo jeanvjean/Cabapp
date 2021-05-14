@@ -71,9 +71,13 @@ class ProductCtrl extends ctrl_1.default {
     addInventory() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                let grnDocument;
+                if (req.files) {
+                    //@ts-ignore
+                    grnDocument = yield driver_1.uploadFile(req.files.grnDocument, 'inventory/grn-docs');
+                }
                 //@ts-ignore
-                let grnDocument = yield driver_1.uploadFile(req.files.grnDocument, 'inventory/grn-docs');
-                const inventory = yield this.module.addInventory(Object.assign(Object.assign({}, req.body), { grnDocument }));
+                const inventory = yield this.module.addInventory(Object.assign(Object.assign({}, req.body), { grnDocument }), req.user);
                 this.ok(res, 'Inventory registered', inventory);
             }
             catch (e) {

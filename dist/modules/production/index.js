@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
+const bcryptjs_1 = require("bcryptjs");
 class ProductionSchedule extends module_1.default {
     constructor(props) {
         super();
@@ -36,8 +37,7 @@ class ProductionSchedule extends module_1.default {
                 });
                 production.comments.push({
                     comment: data.comment,
-                    commentBy: user._id,
-                    officer: 'Authorizing officer'
+                    commentBy: user._id
                 });
                 yield production.save();
                 return Promise.resolve(production);
@@ -50,6 +50,10 @@ class ProductionSchedule extends module_1.default {
     approveProductionSchedule(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
                 const production = yield this.production.findById(data.productionId);
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((production === null || production === void 0 ? void 0 : production.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -79,7 +83,7 @@ class ProductionSchedule extends module_1.default {
                         production.comments.push({
                             comment: data.comment,
                             commentBy: user._id,
-                            officer: 'approving officer'
+                            officer: 'Authorizing officer'
                         });
                         yield production.save();
                         return Promise.resolve(production);
@@ -111,7 +115,7 @@ class ProductionSchedule extends module_1.default {
                         production.comments.push({
                             comment: data.comment,
                             commentBy: user._id,
-                            officer: 'approving officer'
+                            officer: 'Approving officer'
                         });
                         yield production.save();
                         return Promise.resolve(production);
@@ -149,7 +153,6 @@ class ProductionSchedule extends module_1.default {
                         production.comments.push({
                             comment: data.comment,
                             commentBy: user._id,
-                            officer: 'Approving officer'
                         });
                         yield production.save();
                         return Promise.resolve(production);
@@ -182,7 +185,8 @@ class ProductionSchedule extends module_1.default {
                         production.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
                         production.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: 'Authorizing officer'
                         });
                         yield production.save();
                         return Promise.resolve(production);

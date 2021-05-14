@@ -66,9 +66,13 @@ class ProductCtrl extends Ctrl{
   addInventory():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
+        let grnDocument
+        if(req.files) {
+          //@ts-ignore
+          grnDocument = await uploadFile(req.files.grnDocument, 'inventory/grn-docs');
+        }
         //@ts-ignore
-        let grnDocument = await uploadFile(req.files.grnDocument, 'inventory/grn-docs');
-        const inventory = await this.module.addInventory({...req.body, grnDocument});
+        const inventory = await this.module.addInventory({...req.body, grnDocument}, req.user);
         this.ok(res, 'Inventory registered', inventory);
       } catch (e) {
         this.handleError(e, req, res);

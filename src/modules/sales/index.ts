@@ -3,10 +3,15 @@ import { SalesRequisitionInterface } from "../../models/sales-requisition";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
+import { RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
+import { BadInputFormatException } from "../../exceptions";
+import { PurchaseOrderInterface } from "../../models/purchaseOrder";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
   user:Model<UserInterface>
+  cylinder:Model<RegisteredCylinderInterface>
+  purchase:Model<PurchaseOrderInterface>
 }
 
 interface newSaleRequisition{
@@ -29,15 +34,31 @@ type SalesApproval = {
   password:string,
 }
 
+interface salesOrderReport {
+  orders:SalesRequisitionInterface[]
+  completed:SalesRequisitionInterface[]
+  pending:SalesRequisitionInterface[]
+}
+
+interface purchaseOrderReport{
+  orders:PurchaseOrderInterface[]
+  completed:PurchaseOrderInterface[]
+  pending:PurchaseOrderInterface[]
+}
+
 
 class Sale extends Module{
   private sales:Model<SalesRequisitionInterface>
   private user:Model<UserInterface>
+  private cylinder:Model<RegisteredCylinderInterface>
+  private purchase:Model<PurchaseOrderInterface>
 
   constructor(props:salesRequisitionProps){
     super()
     this.sales = props.sales
     this.user = props.user
+    this.cylinder = props.cylinder
+    this.purchase = props.purchase
   }
 
   public async createSalesRequisition(data:newSaleRequisition, user:UserInterface):Promise<SalesRequisitionInterface|undefined>{
@@ -297,7 +318,60 @@ class Sale extends Module{
     }
   }
 
+  public async returnedCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      const cylinder = await this.cylinder.findById(cylinderId);
+      if(!cylinder) {
+        throw new BadInputFormatException('cylinder not found');
+      }
+      cylinder.cylinderType = TypesOfCylinders.BUFFER
+      await cylinder.save();
+      return Promise.resolve(cylinder);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
 
+  public async cylinderTransactions(user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
+    try {
+      const cylinders = await this.cylinder.find({branch:user.branch, cylinderType:TypesOfCylinders.ASSIGNED}).populate(
+        {path:'assignedTo', model:'customer'}
+      );
+      return Promise.resolve(cylinders);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async salesOrderTransaction(user:UserInterface):Promise<salesOrderReport|undefined>{
+    try {
+      const salesOrders = await this.sales.find({branch:user.branch});
+      const completed = salesOrders.filter(sales=> sales.status == TransferStatus.COMPLETED);
+      const in_progress = salesOrders.filter(sales=>sales.status == TransferStatus.PENDING);
+      return Promise.resolve({
+        orders:salesOrders,
+        completed,
+        pending:in_progress
+      });
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async purchaseOrderReport(user:UserInterface):Promise<purchaseOrderReport|undefined>{
+    try {
+      const purchaseOrder = await this.purchase.find({branch:user.branch});
+      const completed = purchaseOrder.filter(order=> order.approvalStatus == TransferStatus.COMPLETED);
+      const pending = purchaseOrder.filter(order=> order.approvalStatus == TransferStatus.PENDING);
+      return Promise.resolve({
+        orders:purchaseOrder,
+        completed,
+        pending
+      });
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
 }
 
 export default Sale;

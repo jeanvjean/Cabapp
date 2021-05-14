@@ -15,6 +15,7 @@ const order_1 = require("../../models/order");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
 const module_1 = require("../module");
+const bcryptjs_1 = require("bcryptjs");
 class Customer extends module_1.default {
     constructor(props) {
         super();
@@ -174,6 +175,10 @@ class Customer extends module_1.default {
     approveComplaint(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
                 const complaint = yield this.complaint.findById(data.id);
                 if ((complaint === null || complaint === void 0 ? void 0 : complaint.complaintType) == 'cylinder') {
                     if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {

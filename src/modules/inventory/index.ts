@@ -14,6 +14,7 @@ import Module, { QueryInterface } from "../module";
 import Environment from '../../configs/static';
 import Notify from '../../util/mail'
 import { DeleteResponse } from "../vehicle";
+import { compareSync } from "bcryptjs";
 
 interface ProductProp {
   product:Model<ProductInterface>
@@ -269,13 +270,13 @@ class Product extends Module{
     }
   }
 
-  public async addInventory(data:NewInventory):Promise<InventoryInterface|undefined> {
+  public async addInventory(data:NewInventory, user:UserInterface):Promise<InventoryInterface|undefined> {
     try {
       const inventory = new this.inventory(data);
       let products = inventory.products;
 
       for(let product of products) {
-        let prod = await this.product.findOne({serialNumber: product.productNumber});
+        let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
         //@ts-ignore
         prod?.quantity + product.passed;
         //@ts-ignore
@@ -321,6 +322,10 @@ class Product extends Module{
 
   public async approveDisbursment(data:ApprovalInput, user:UserInterface):Promise<DisburseProductInterface|undefined> {
     try {
+      let matchPWD = compareSync(data.password, user.password);
+      if(!matchPWD) {
+        throw new BadInputFormatException('Incorrect password... please check the password');
+      }
       const disbursement = await this.disburse.findById(data.id);
       //@ts-ignore
       disbursement?.products = data.products;
@@ -520,6 +525,14 @@ class Product extends Module{
           disbursement.tracking.push(track);
           disbursement.approvalStage = stagesOfApproval.APPROVED;
           disbursement.disburseStatus = TransferStatus.COMPLETED;
+
+          for(let product of disbursement.products) {
+            let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
+            //@ts-ignore
+            pro?.quantity - +product.quantityReleased;
+            await pro?.save();
+          }
+
           //@ts-ignore
           disbursement.comments.push({
             comment:data.comment,

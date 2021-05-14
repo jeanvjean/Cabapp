@@ -19,10 +19,12 @@ class customerCtrl extends Ctrl{
       try {
         let cac;
         let validId;
-          //@ts-ignore
-          cac = await uploadFile(req.files.CAC, 'customer-document/cac');
-        //@ts-ignore
-          validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
+        if(req.files) {
+            //@ts-ignore
+            cac = await uploadFile(req.files.CAC, 'customer-document/cac');
+            //@ts-ignore
+              validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
+        }
         const data = await this.module.createCustomer({...req.body, CAC:cac, validID:validId});
         this.ok(res, 'Created', data);
       } catch (e) {

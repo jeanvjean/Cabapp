@@ -8,7 +8,7 @@ exports.productSchema = new mongoose_1.Schema({
     equipmentModel: { type: String },
     equipmentType: { type: String },
     areaOfSpecialization: { type: String },
-    asnlNumber: { type: String, unique: true },
+    asnlNumber: { type: String },
     partNumber: { type: String },
     serialNumber: { type: Number, unique: true },
     quantity: { type: Number },

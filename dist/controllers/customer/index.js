@@ -24,10 +24,12 @@ class customerCtrl extends ctrl_1.default {
             try {
                 let cac;
                 let validId;
-                //@ts-ignore
-                cac = yield driver_1.uploadFile(req.files.CAC, 'customer-document/cac');
-                //@ts-ignore
-                validId = yield driver_1.uploadFile(req.files.validId, 'customer-document/valid-id');
+                if (req.files) {
+                    //@ts-ignore
+                    cac = yield driver_1.uploadFile(req.files.CAC, 'customer-document/cac');
+                    //@ts-ignore
+                    validId = yield driver_1.uploadFile(req.files.validId, 'customer-document/valid-id');
+                }
                 const data = yield this.module.createCustomer(Object.assign(Object.assign({}, req.body), { CAC: cac, validID: validId }));
                 this.ok(res, 'Created', data);
             }

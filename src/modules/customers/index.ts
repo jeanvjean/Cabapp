@@ -9,6 +9,7 @@ import { UserInterface } from "../../models/user";
 import { WalkinCustomerInterface, WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
+import { compareSync } from "bcryptjs";
 
 
 
@@ -234,6 +235,10 @@ class Customer extends Module{
 
   public async approveComplaint(data:ApprovalInput, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try {
+      let matchPWD = compareSync(data.password, user.password);
+      if(!matchPWD) {
+        throw new BadInputFormatException('Incorrect password... please check the password');
+      }
       const complaint = await this.complaint.findById(data.id);
       if(complaint?.complaintType == 'cylinder'){
         if(data.status == ApprovalStatus.REJECTED){

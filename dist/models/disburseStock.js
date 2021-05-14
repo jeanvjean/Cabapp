@@ -10,7 +10,7 @@ const requesterSchema = new mongoose_1.Schema({
     timestamps: true
 });
 const disburseProductSchema = new mongoose_1.Schema({
-    productNumber: { type: Number },
+    productNumber: { type: String },
     productName: { type: String },
     quantityRequested: { type: Number },
     quantityReleased: { type: Number },

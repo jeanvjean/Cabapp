@@ -45,6 +45,8 @@ router.post('/transfer-cylinders',
 
 router.post('/approve-transfer',
   auth.verify(),
+  Validator.validateApproval(),
+  val.validate(),
   cylinderCtrl.approveTransfer()
 );
 

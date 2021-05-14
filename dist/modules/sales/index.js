@@ -11,11 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
+const registeredCylinders_1 = require("../../models/registeredCylinders");
+const exceptions_1 = require("../../exceptions");
 class Sale extends module_1.default {
     constructor(props) {
         super();
         this.sales = props.sales;
         this.user = props.user;
+        this.cylinder = props.cylinder;
+        this.purchase = props.purchase;
     }
     createSalesRequisition(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -286,6 +290,67 @@ class Sale extends module_1.default {
                     pendingApprovals = startStage;
                 }
                 return Promise.resolve(pendingApprovals);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    returnedCylinder(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.cylinder.findById(cylinderId);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('cylinder not found');
+                }
+                cylinder.cylinderType = registeredCylinders_1.TypesOfCylinders.BUFFER;
+                yield cylinder.save();
+                return Promise.resolve(cylinder);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    cylinderTransactions(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.cylinder.find({ branch: user.branch, cylinderType: registeredCylinders_1.TypesOfCylinders.ASSIGNED }).populate({ path: 'assignedTo', model: 'customer' });
+                return Promise.resolve(cylinders);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    salesOrderTransaction(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const salesOrders = yield this.sales.find({ branch: user.branch });
+                const completed = salesOrders.filter(sales => sales.status == transferCylinder_1.TransferStatus.COMPLETED);
+                const in_progress = salesOrders.filter(sales => sales.status == transferCylinder_1.TransferStatus.PENDING);
+                return Promise.resolve({
+                    orders: salesOrders,
+                    completed,
+                    pending: in_progress
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    purchaseOrderReport(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const purchaseOrder = yield this.purchase.find({ branch: user.branch });
+                const completed = purchaseOrder.filter(order => order.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED);
+                const pending = purchaseOrder.filter(order => order.approvalStatus == transferCylinder_1.TransferStatus.PENDING);
+                return Promise.resolve({
+                    orders: purchaseOrder,
+                    completed,
+                    pending
+                });
             }
             catch (e) {
                 this.handleException(e);

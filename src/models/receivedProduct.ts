@@ -19,7 +19,7 @@ export interface InventoryInterface extends Document{
 }
 
 export interface ReceivedProduct {
-  productNumber:number,
+  productNumber:string,
   productName:string
   quantity:number
   passed:number

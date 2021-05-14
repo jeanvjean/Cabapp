@@ -7,7 +7,7 @@ import {
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
 export interface DisburseProduct {
-  productNumber:number,
+  productNumber:string,
   productName:string
   quantityRequested:number
   quantityReleased:number
@@ -51,7 +51,7 @@ const requesterSchema = new Schema({
 });
 
 const disburseProductSchema = new Schema({
-  productNumber:{type:Number},
+  productNumber:{type:String},
   productName:{type:String},
   quantityRequested:{type:Number},
   quantityReleased:{type:Number},

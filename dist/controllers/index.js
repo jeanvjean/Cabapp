@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ctrl = exports.productionCtrl = exports.salesCtrl = exports.customerCtrl = exports.driverCtrl = exports.vehicleCtrl = exports.productCtrl = exports.cylinderCtrl = exports.userCtrl = exports.personCtrl = void 0;
+exports.ctrl = exports.ocnController = exports.purchaseCtrl = exports.productionCtrl = exports.salesCtrl = exports.customerCtrl = exports.driverCtrl = exports.vehicleCtrl = exports.productCtrl = exports.cylinderCtrl = exports.userCtrl = exports.personCtrl = void 0;
 const modules_1 = require("../modules");
 const cylinder_1 = require("./cylinder");
 const ctrl_1 = require("./ctrl");
@@ -12,6 +12,8 @@ const driver_1 = require("./driver");
 const customer_1 = require("./customer");
 const sales_1 = require("./sales");
 const production_1 = require("./production");
+const purchaseOrder_1 = require("./purchaseOrder");
+const ocn_1 = require("./ocn");
 exports.personCtrl = new person_1.default(modules_1.person);
 exports.userCtrl = new user_1.default(modules_1.user);
 exports.cylinderCtrl = new cylinder_1.default(modules_1.cylinder);
@@ -21,5 +23,7 @@ exports.driverCtrl = new driver_1.default(modules_1.driver);
 exports.customerCtrl = new customer_1.default(modules_1.customer);
 exports.salesCtrl = new sales_1.default(modules_1.sales);
 exports.productionCtrl = new production_1.default(modules_1.production);
+exports.purchaseCtrl = new purchaseOrder_1.default(modules_1.purchase);
+exports.ocnController = new ocn_1.default(modules_1.ocn);
 exports.ctrl = new ctrl_1.default();
 //# sourceMappingURL=index.js.map

@@ -4,6 +4,7 @@ import { ProductionScheduleInterface } from "../../models/productionSchedule";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
+import { compareSync } from "bcryptjs";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -67,8 +68,7 @@ class ProductionSchedule extends Module{
 
       production.comments.push({
         comment:data.comment,
-        commentBy:user._id,
-        officer:'Authorizing officer'
+        commentBy:user._id
       });
       await production.save();
       return Promise.resolve(production);
@@ -79,6 +79,10 @@ class ProductionSchedule extends Module{
 
   public async approveProductionSchedule(data:ProductionApprovalInput, user:UserInterface):Promise<ProductionScheduleInterface|undefined>{
     try {
+        let matchPWD = compareSync(data.password, user.password);
+        if(!matchPWD) {
+          throw new BadInputFormatException('Incorrect password... please check the password');
+        }
       const production = await this.production.findById(data.productionId);
       if(data.status == ApprovalStatus.REJECTED) {
         if(production?.approvalStage == stagesOfApproval.STAGE1){
@@ -108,7 +112,7 @@ class ProductionSchedule extends Module{
           production.comments.push({
             comment:data.comment,
             commentBy:user._id,
-            officer:'approving officer'
+            officer:'Authorizing officer'
           });
           await production.save();
           return Promise.resolve(production);
@@ -139,7 +143,7 @@ class ProductionSchedule extends Module{
           production.comments.push({
             comment:data.comment,
             commentBy:user._id,
-            officer:'approving officer'
+            officer:'Approving officer'
           });
           await production.save();
           return Promise.resolve(production);
@@ -176,7 +180,6 @@ class ProductionSchedule extends Module{
           production.comments.push({
             comment:data.comment,
             commentBy:user._id,
-            officer:'Approving officer'
           })
           await production.save();
           return Promise.resolve(production)
@@ -208,7 +211,8 @@ class ProductionSchedule extends Module{
           production.nextApprovalOfficer = hod?.branch.branchAdmin;
           production.comments.push({
             comment:data.comment,
-            commentBy:user._id
+            commentBy:user._id,
+            officer:'Authorizing officer'
           })
           await production.save();
           return Promise.resolve(production)

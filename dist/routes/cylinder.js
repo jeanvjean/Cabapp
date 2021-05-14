@@ -14,7 +14,7 @@ router.post('/register-cylinder', cylinder_1.Validator.validateCylinderRegistera
 router.get('/fetch-registered-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchRegisteredCylinders());
 router.get('/registered-cylinder-details/:id', auth.verify(), controllers_1.cylinderCtrl.fetchRegisteredCylinder());
 router.post('/transfer-cylinders', auth.verify(), cylinder_1.Validator.validateCylinderTransfer(), val.validate(), controllers_1.cylinderCtrl.transferCylinder());
-router.post('/approve-transfer', auth.verify(), controllers_1.cylinderCtrl.approveTransfer());
+router.post('/approve-transfer', auth.verify(), cylinder_1.Validator.validateApproval(), val.validate(), controllers_1.cylinderCtrl.approveTransfer());
 router.get('/fetch-transfers', controllers_1.cylinderCtrl.fetchTransferRequests());
 router.get('/fetch-transfer/:id', controllers_1.cylinderCtrl.fetchTransferDetails());
 router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersPendingApprovals());

@@ -16,6 +16,7 @@ const token_1 = require("../../util/token");
 const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const bcryptjs_1 = require("bcryptjs");
 class Product extends module_1.default {
     constructor(props) {
         super();
@@ -201,13 +202,13 @@ class Product extends module_1.default {
             }
         });
     }
-    addInventory(data) {
+    addInventory(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const inventory = new this.inventory(data);
                 let products = inventory.products;
                 for (let product of products) {
-                    let prod = yield this.product.findOne({ serialNumber: product.productNumber });
+                    let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
                     //@ts-ignore
                     (prod === null || prod === void 0 ? void 0 : prod.quantity) + product.passed;
                     //@ts-ignore
@@ -257,6 +258,10 @@ class Product extends module_1.default {
     approveDisbursment(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
                 const disbursement = yield this.disburse.findById(data.id);
                 //@ts-ignore
                 disbursement === null || disbursement === void 0 ? void 0 : disbursement.products = data.products;
@@ -460,6 +465,12 @@ class Product extends module_1.default {
                         disbursement.tracking.push(track);
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
                         disbursement.disburseStatus = transferCylinder_1.TransferStatus.COMPLETED;
+                        for (let product of disbursement.products) {
+                            let pro = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
+                            //@ts-ignore
+                            (pro === null || pro === void 0 ? void 0 : pro.quantity) - +product.quantityReleased;
+                            yield (pro === null || pro === void 0 ? void 0 : pro.save());
+                        }
                         //@ts-ignore
                         disbursement.comments.push({
                             comment: data.comment,

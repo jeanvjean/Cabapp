@@ -40,4 +40,28 @@ router.get(
   salesCtrl.approveSalesRequisition()
 );
 
+router.get(
+  '/returned-cylinder/:cylinderId',
+  auth.verify(),
+  salesCtrl.returnedCylinder()
+);
+
+router.get(
+  '/sales-cylinder-transactions',
+  auth.verify(),
+  salesCtrl.salesReportCylinders()
+);
+
+router.get(
+  '/sales-purchase-order',
+  auth.verify(),
+  salesCtrl.purchaseOrderReport()
+);
+
+router.get(
+  '/sales-order-report',
+  auth.verify(),
+  salesCtrl.salesOrderReport()
+);
+
 export default router;

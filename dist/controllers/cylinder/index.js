@@ -108,7 +108,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const approval = yield this.module.approveTransfer(req.body, req.user);
-                this.ok(res, 'Approved', approval);
+                this.ok(res, `${approval === null || approval === void 0 ? void 0 : approval.message}`, approval);
             }
             catch (e) {
                 this.handleError(e, req, res);

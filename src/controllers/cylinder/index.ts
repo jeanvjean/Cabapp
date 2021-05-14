@@ -107,7 +107,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const approval = await this.module.approveTransfer(req.body, req.user);
-        this.ok(res, 'Approved', approval);
+        this.ok(res, `${approval?.message}`, approval);
       } catch (e) {
         this.handleError(e, req, res);
       }

@@ -6,6 +6,7 @@ export interface QueryInterface {
   page?: number;
   limit?: number;
   search?: 'string';
+  produced?:boolean;
   sort?: object;
   range?: string[];
 }

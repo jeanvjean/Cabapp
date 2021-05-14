@@ -18,7 +18,9 @@ import {
   PickupRoutes,
   WalkInCustomer,
   SalesReq,
-  Production
+  Production,
+  PurchaseOrder,
+  OCN
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -29,7 +31,9 @@ import VehicleModule from './vehicle';
 import DriverModule from './driver';
 import CustomerModule from './customers';
 import SalesModule from './sales';
-import ProductionModule from './production'
+import ProductionModule from './production';
+import PurchaseOrderModule from './purchaseOrder';
+import OcnModule from './ocn';
 
 /**
  * @category Modules
@@ -79,10 +83,22 @@ export const customer = new CustomerModule({
 
 export const sales = new SalesModule({
   sales:SalesReq,
-  user:User
+  user:User,
+  cylinder:RegisteredCylinder,
+  purchase:PurchaseOrder
 });
 
 export const production = new ProductionModule ({
   production:Production,
+  user:User
+});
+
+export const purchase = new PurchaseOrderModule({
+  purchase:PurchaseOrder,
+  user:User
+});
+
+export const ocn = new OcnModule({
+  ocn:OCN,
   user:User
 });

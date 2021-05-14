@@ -10,6 +10,7 @@ import Uploader from '../controllers/Uploader';
 import customerRouter from './customer';
 import salesRouter from './sales';
 import productionRouter from './production';
+import purchaseRouter from './purchase';
 const uploader = new Uploader();
 
 const router: expressRouter = expressRouter();
@@ -27,6 +28,7 @@ router.use('/driver', driverRouter);
 router.use('/customer', customerRouter);
 router.use('/sales', salesRouter);
 router.use('/production', productionRouter);
+router.use('/purchase', purchaseRouter);
 
 router.post('/upload', uploader.fileUpload());
 

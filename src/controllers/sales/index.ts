@@ -71,6 +71,53 @@ class SalesCtrl extends Ctrl{
     }
   }
 
+  returnedCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.returnedCylinder(req.params.cylinderId);
+        this.ok(res, 'cylinder has been returned', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  salesReportCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.cylinderTransactions(req.user);
+        this.ok(res, 'cylinder report fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  salesOrderReport():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.salesOrderTransaction(req.user);
+        this.ok(res, 'sales order report', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  purchaseOrderReport():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.purchaseOrderReport(req.user);
+        this.ok(res, 'purchase order report', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator };

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Production = exports.SalesReq = exports.WalkInCustomer = exports.PickupRoutes = exports.Archive = exports.Branch = exports.Complain = exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
+exports.OCN = exports.PurchaseOrder = exports.Production = exports.SalesReq = exports.WalkInCustomer = exports.PickupRoutes = exports.Archive = exports.Branch = exports.Complain = exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
 const mongoose_1 = require("mongoose");
 const mongo_1 = require("../configs/mongo");
 const cylinder_1 = require("./cylinder");
@@ -23,6 +23,8 @@ const driverPickup_1 = require("./driverPickup");
 const walk_in_customers_1 = require("./walk-in-customers");
 const sales_requisition_1 = require("./sales-requisition");
 const productionSchedule_1 = require("./productionSchedule");
+const purchaseOrder_1 = require("./purchaseOrder");
+const ocn_1 = require("./ocn");
 exports.conn = mongoose_1.createConnection(mongo_1.default.uri, mongo_1.default.options);
 exports.Person = person_1.default(exports.conn);
 exports.User = user_1.default(exports.conn);
@@ -44,5 +46,7 @@ exports.PickupRoutes = driverPickup_1.default(exports.conn);
 exports.WalkInCustomer = walk_in_customers_1.default(exports.conn);
 exports.SalesReq = sales_requisition_1.default(exports.conn);
 exports.Production = productionSchedule_1.default(exports.conn);
+exports.PurchaseOrder = purchaseOrder_1.default(exports.conn);
+exports.OCN = ocn_1.default(exports.conn);
 exports.conn.once('open', () => console.log('db connection open'));
 //# sourceMappingURL=index.js.map

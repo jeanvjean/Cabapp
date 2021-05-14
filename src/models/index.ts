@@ -24,6 +24,8 @@ import driverPickupFactory, { PickupInterface } from './driverPickup';
 import walkinCustomerFactory, { WalkinCustomerInterface } from './walk-in-customers';
 import salesReqFactory, { SalesRequisitionInterface } from './sales-requisition';
 import productionFactory, { ProductionScheduleInterface } from './productionSchedule';
+import purchaseFactory, { PurchaseOrderInterface } from './purchaseOrder';
+import ocnFactory, { OutgoingCylinderInterface } from './ocn';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -66,5 +68,9 @@ export const WalkInCustomer:Model<WalkinCustomerInterface> = walkinCustomerFacto
 export const SalesReq:Model<SalesRequisitionInterface> = salesReqFactory(conn);
 
 export const Production:Model<ProductionScheduleInterface> = productionFactory(conn);
+
+export const PurchaseOrder:Model<PurchaseOrderInterface> = purchaseFactory(conn);
+
+export const OCN:Model<OutgoingCylinderInterface> = ocnFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

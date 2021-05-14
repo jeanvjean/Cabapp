@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
+exports.ocn = exports.purchase = exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
 const index_1 = require("../models/index");
 const person_1 = require("./person");
 const user_1 = require("./user");
@@ -11,6 +11,8 @@ const driver_1 = require("./driver");
 const customers_1 = require("./customers");
 const sales_1 = require("./sales");
 const production_1 = require("./production");
+const purchaseOrder_1 = require("./purchaseOrder");
+const ocn_1 = require("./ocn");
 /**
  * @category Modules
  * @param {person} Instance of Person module
@@ -52,10 +54,20 @@ exports.customer = new customers_1.default({
 });
 exports.sales = new sales_1.default({
     sales: index_1.SalesReq,
-    user: index_1.User
+    user: index_1.User,
+    cylinder: index_1.RegisteredCylinder,
+    purchase: index_1.PurchaseOrder
 });
 exports.production = new production_1.default({
     production: index_1.Production,
+    user: index_1.User
+});
+exports.purchase = new purchaseOrder_1.default({
+    purchase: index_1.PurchaseOrder,
+    user: index_1.User
+});
+exports.ocn = new ocn_1.default({
+    ocn: index_1.OCN,
     user: index_1.User
 });
 //# sourceMappingURL=index.js.map

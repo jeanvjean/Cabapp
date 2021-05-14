@@ -77,6 +77,53 @@ class SalesCtrl extends ctrl_1.default {
             }
         });
     }
+    returnedCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.returnedCylinder(req.params.cylinderId);
+                this.ok(res, 'cylinder has been returned', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    salesReportCylinders() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.cylinderTransactions(req.user);
+                this.ok(res, 'cylinder report fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    salesOrderReport() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.salesOrderTransaction(req.user);
+                this.ok(res, 'sales order report', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    purchaseOrderReport() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.purchaseOrderReport(req.user);
+                this.ok(res, 'purchase order report', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = SalesCtrl;
 //# sourceMappingURL=index.js.map

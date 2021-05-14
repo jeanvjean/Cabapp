@@ -84,6 +84,20 @@ class CylinderValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateApproval() {
+        const rules = [
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('provide approval status'),
+            express_validator_1.check('password')
+                .exists()
+                .withMessage('provide your password'),
+            express_validator_1.check('comment')
+                .exists()
+                .withMessage('please make a short comment on this action')
+        ];
+        return rules;
+    }
 }
 exports.default = CylinderValidator;
 //# sourceMappingURL=validator.js.map

@@ -83,6 +83,21 @@ class CylinderValidator extends Ctrl{
     return rules;
   }
 
+  static validateApproval():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('provide approval status'),
+      check('password')
+        .exists()
+        .withMessage('provide your password'),
+      check('comment')
+        .exists()
+        .withMessage('please make a short comment on this action')
+    ]
+    return rules;
+  }
+
 }
 
 export default CylinderValidator;

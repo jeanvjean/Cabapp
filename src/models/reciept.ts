@@ -34,7 +34,7 @@ const recieptSchema = new Schema({
     outstandingBalance:{type:Number},
     paymentMode:{type:String, enum:Object.values(paymentMode)},
     date:{type:Date},
-    preparedBy:{type:Schema.Types.ObjectId, ref:'users'},
+    preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
     amountInWords:{type:String}
 },{
     timestamps:true

@@ -17,7 +17,7 @@ var CylinderCondition;
 exports.cylinderSchema = new mongoose_1.Schema({
     gasName: { type: String, required: true },
     colorCode: { type: String, required: true },
-    creator: { type: mongoose_1.Schema.Types.ObjectId },
+    creator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     type: {
         type: String,
         enum: [cylinderTypes.BUFFER, cylinderTypes.ASSIGNED],

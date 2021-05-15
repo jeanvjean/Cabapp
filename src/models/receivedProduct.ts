@@ -51,7 +51,7 @@ export const inventorySchema = new Schema({
   invoiceNumber:{type:String},
   dateReceived:{type:Date},
   products:[productRecievedSchema],
-  inspectingOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  inspectingOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   grnDocument:{type:String}
 });
 

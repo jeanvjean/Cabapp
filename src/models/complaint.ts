@@ -73,7 +73,7 @@ export const complaintSchema = new Schema({
   cylinderReplace:cylinderReplaceSchema,
   status:{type:String, enum:Object.values(complaintStatus),default:complaintStatus.PENDING},
   approvalStage:{type:String},
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
   approvalStatus:{type:String},

@@ -66,7 +66,7 @@ export interface CylinderInterface extends Document {
 export const cylinderSchema = new Schema({
   gasName:{type:String, required:true},
   colorCode:{type:String, required:true},
-  creator:{type:Schema.Types.ObjectId},
+  creator:{type:Schema.Types.ObjectId, ref:'User'},
   type:{
     type:String,
     enum:[cylinderTypes.BUFFER, cylinderTypes.ASSIGNED],

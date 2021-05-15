@@ -25,7 +25,7 @@ interface NewUserInterface {
 }
 
 interface inviteUserInput {
-  users:[UserInterface]
+  users:UserInterface[]
 }
 
 export interface TokenInterface {
@@ -64,7 +64,7 @@ interface ResetResponseInterface{
 
 interface UpdateUserInterface{
   id?:string,
-  input?:object
+  input?:UserInterface
 }
 
 interface ChangePasswordInterface{

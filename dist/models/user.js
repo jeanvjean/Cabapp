@@ -68,7 +68,8 @@ exports.userSchema = new mongoose_1.Schema({
     permissions: [{
             name: String,
             sub_permissions: [String]
-        }]
+        }],
+    image: { type: String }
 }, {
     collection: 'users',
     timestamps: true

@@ -104,6 +104,23 @@ class UserValidator extends Ctrl {
     return rules;
   }
 
+  static validateUserUpdate():ValidationChain[]{
+    const rules = [
+      check('name'),
+      check('email'),
+      check('phoneNumber')
+        .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+        .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+      check('gender')
+        .exists()
+        .withMessage('provide gender please'),
+      check('location')
+        .exists()
+        .withMessage('provide location')
+    ]
+    return rules;
+  }
+
 }
 
 export default UserValidator;

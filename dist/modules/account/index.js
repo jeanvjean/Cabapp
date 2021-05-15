@@ -50,7 +50,7 @@ class Account extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const invoice = yield this.account.findById(invoiceId).populate({
-                    path: 'preparedBy', model: 'users'
+                    path: 'preparedBy', model: 'User'
                 });
                 return Promise.resolve(invoice);
             }

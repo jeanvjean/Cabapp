@@ -17,9 +17,9 @@ export interface BranchInterface extends Document{
 
 const branchSchema = new Schema({
   name:{type:String, required:true},
-  officers:[{type:Schema.Types.ObjectId, ref:'users'}],
+  officers:[{type:Schema.Types.ObjectId, ref:'User'}],
   products:[{type:Schema.Types.ObjectId, ref:'products'}],
-  branchAdmin:{type:Schema.Types.ObjectId, ref:'users'},
+  branchAdmin:{type:Schema.Types.ObjectId, ref:'User'},
   location:{type:String}
 },{
   timestamps:true

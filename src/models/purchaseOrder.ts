@@ -36,7 +36,7 @@ const purchaseOrderSchema = new Schema({
     cylinders:{type:[cylinderSchema]},
     comments:{type:commentSchema},
     approvalOfficer:{type:[ApprovalOfficerSchema]},
-    nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+    nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     approvalStage:{type:String, default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, default:TransferStatus.PENDING},
     branch:{type:Schema.Types.ObjectId, ref:'branches'}

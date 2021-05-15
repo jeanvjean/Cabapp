@@ -22,7 +22,7 @@ exports.inventorySchema = new mongoose_1.Schema({
     invoiceNumber: { type: String },
     dateReceived: { type: Date },
     products: [exports.productRecievedSchema],
-    inspectingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    inspectingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     grnDocument: { type: String }
 });
 function factory(conn) {

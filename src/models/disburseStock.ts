@@ -44,7 +44,7 @@ export interface DisburseProductInterface extends Document{
 }
 
 const requesterSchema = new Schema({
-  requestingOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  requestingOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   branch:{type:Schema.Types.ObjectId}
 },{
   timestamps:true
@@ -60,10 +60,10 @@ const disburseProductSchema = new Schema({
 
 export const disburseSchema = new Schema({
   products:[disburseProductSchema],
-  releasedBy:{type:Schema.Types.ObjectId, ref:'users'},
-  releasedTo:{type:Schema.Types.ObjectId, ref:"users"},
+  releasedBy:{type:Schema.Types.ObjectId, ref:'User'},
+  releasedTo:{type:Schema.Types.ObjectId, ref:"User"},
   comments:[commentSchema],
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval)},
   disburseStatus:{type:String, enum:Object.values(TransferStatus)},
   requestStage:{type:String, enum:Object.values(stagesOfApproval)},

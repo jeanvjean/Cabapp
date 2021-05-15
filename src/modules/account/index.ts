@@ -66,7 +66,7 @@ class Account extends Module{
     public async viewInvoiceDetails(invoiceId:string):Promise<RecieptInterface|undefined>{
         try{
             const invoice = await this.account.findById(invoiceId).populate({
-                path:'preparedBy', model:'users'
+                path:'preparedBy', model:'User'
             });
             return Promise.resolve(invoice as RecieptInterface);
         }catch(e){

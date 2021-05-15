@@ -8,6 +8,7 @@ import Ctrl from '../ctrl';
 import { UserInterface } from '../../models/user';
 import Validator from './validator';
 import uploader from '../../util/uploader';
+import { uploadFile } from '../driver';
 const permissions = require('../../util/permissions.json');
 
 
@@ -96,8 +97,13 @@ class UserController extends Ctrl{
     return async(req:Request, res:Response) =>{
       //Todo: implement update function
       try {
+        let image;
+        if(req.files){
+          //@ts-ignore
+          image = await uploadFile(req.files.image, 'profile_image/');
+        }
         //@ts-ignore
-        const data: UserInterface | undefined = await this.module.updateUser(req.body, req.user);
+        const data: UserInterface | undefined = await this.module.updateUser({...req.body, image}, req.user);
         this.ok(res, 'Updated', data);
       } catch (e) {
         this.handleError(e, req, res);

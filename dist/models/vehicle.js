@@ -47,7 +47,7 @@ const maintainaceSchema = new mongoose_1.Schema({
     comments: [transferCylinder_1.commentSchema],
     approvalStatus: { type: String },
     approvalStage: { type: String },
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId }
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
 });
@@ -66,7 +66,7 @@ exports.vehicleSchema = new mongoose_1.Schema({
     acqisistionDate: { type: Date },
     mileageDate: { type: Date },
     currMile: { type: String },
-    assignedTo: { type: mongoose_1.Schema.Types.ObjectId },
+    assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     vehCategory: { type: String },
     tankCapacity: { type: String },
     batteryCapacity: { type: String },

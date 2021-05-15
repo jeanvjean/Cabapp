@@ -70,6 +70,8 @@ import {
 
     permissions:Permissions[]
 
+    image:string
+
     /**
      * @param isVerified account verified Boolean
      */
@@ -129,7 +131,8 @@ import {
     permissions:[{
       name:String,
       sub_permissions:[String]
-    }]
+    }],
+    image:{type:String}
  },{
    collection:'users',
    timestamps:true

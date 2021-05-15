@@ -24,8 +24,8 @@ const routeSchema = new mongoose_1.Schema({
     serialNo: { type: Number },
     cylinders: { type: [routeCylinderSchema] },
     vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' },
-    recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
-    security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
 }, {
     timestamps: true
 });

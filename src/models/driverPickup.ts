@@ -59,8 +59,8 @@ const routeSchema = new Schema({
   serialNo:{type:Number},
   cylinders:{type:[routeCylinderSchema]},
   vehicle:{type:Schema.Types.ObjectId, ref:'vehicle'},
-  recievedBy:{type:Schema.Types.ObjectId, ref:'users'},
-  security:{type:Schema.Types.ObjectId, ref:'users'},
+  recievedBy:{type:Schema.Types.ObjectId, ref:'User'},
+  security:{type:Schema.Types.ObjectId, ref:'User'},
 },{
   timestamps:true
 });

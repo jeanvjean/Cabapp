@@ -4,7 +4,7 @@ exports.disburseSchema = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const requesterSchema = new mongoose_1.Schema({
-    requestingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    requestingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId }
 }, {
     timestamps: true
@@ -18,10 +18,10 @@ const disburseProductSchema = new mongoose_1.Schema({
 });
 exports.disburseSchema = new mongoose_1.Schema({
     products: [disburseProductSchema],
-    releasedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
-    releasedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: "users" },
+    releasedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    releasedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     comments: [transferCylinder_1.commentSchema],
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval) },
     disburseStatus: { type: String, enum: Object.values(transferCylinder_1.TransferStatus) },
     requestStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval) },

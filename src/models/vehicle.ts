@@ -116,7 +116,7 @@ const maintainaceSchema = new Schema({
   comments:[commentSchema],
   approvalStatus:{type:String},
   approvalStage:{type:String},
-  nextApprovalOfficer:{type:Schema.Types.ObjectId}
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'}
 },{
   timestamps:true
 });
@@ -137,7 +137,7 @@ export const vehicleSchema = new Schema({
   acqisistionDate:{type:Date},
   mileageDate:{type:Date},
   currMile:{type:String},
-  assignedTo:{type:Schema.Types.ObjectId},
+  assignedTo:{type:Schema.Types.ObjectId, ref:'User'},
   vehCategory:{type:String},
   tankCapacity:{type:String},
   batteryCapacity:{type:String},

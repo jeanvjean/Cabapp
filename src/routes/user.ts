@@ -32,7 +32,13 @@ const router: expressRouter = expressRouter();
 
   router.get('/user-details/:id/:email', auth.verify(), userCtrl.fetchUser());
 
-  router.post('/update-user/:id', auth.verify(), userCtrl.updateUser());
+  router.post(
+    '/update-user/:id', 
+    Validator.validateUserUpdate(),
+    val.validate(),
+    auth.verify(), 
+    userCtrl.updateUser()
+  );
 
   router.post('/request-password-reset', userCtrl.requestPasswordReset());
 

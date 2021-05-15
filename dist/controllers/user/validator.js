@@ -99,6 +99,22 @@ class UserValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateUserUpdate() {
+        const rules = [
+            express_validator_1.check('name'),
+            express_validator_1.check('email'),
+            express_validator_1.check('phoneNumber')
+                .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+                .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+            express_validator_1.check('gender')
+                .exists()
+                .withMessage('provide gender please'),
+            express_validator_1.check('location')
+                .exists()
+                .withMessage('provide location')
+        ];
+        return rules;
+    }
 }
 exports.default = UserValidator;
 //# sourceMappingURL=validator.js.map

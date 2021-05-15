@@ -48,7 +48,7 @@ const ocnSchema = new Schema({
     approvalOfficers:{type:[approvalStageShema]},
     approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
-    nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+    nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
 

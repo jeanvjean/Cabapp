@@ -13,6 +13,7 @@ exports.Validator = void 0;
 const ctrl_1 = require("../ctrl");
 const validator_1 = require("./validator");
 exports.Validator = validator_1.default;
+const driver_1 = require("../driver");
 const permissions = require('../../util/permissions.json');
 class UserController extends ctrl_1.default {
     constructor(module) {
@@ -96,8 +97,13 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             //Todo: implement update function
             try {
+                let image;
+                if (req.files) {
+                    //@ts-ignore
+                    image = yield driver_1.uploadFile(req.files.image, 'profile_image/');
+                }
                 //@ts-ignore
-                const data = yield this.module.updateUser(req.body, req.user);
+                const data = yield this.module.updateUser(Object.assign(Object.assign({}, req.body), { image }), req.user);
                 this.ok(res, 'Updated', data);
             }
             catch (e) {

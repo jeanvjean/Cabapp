@@ -20,7 +20,8 @@ import {
   SalesReq,
   Production,
   PurchaseOrder,
-  OCN
+  OCN,
+  Reciept
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -34,6 +35,7 @@ import SalesModule from './sales';
 import ProductionModule from './production';
 import PurchaseOrderModule from './purchaseOrder';
 import OcnModule from './ocn';
+import AccountModule from './account';
 
 /**
  * @category Modules
@@ -101,4 +103,8 @@ export const purchase = new PurchaseOrderModule({
 export const ocn = new OcnModule({
   ocn:OCN,
   user:User
+});
+
+export const account = new AccountModule({
+  account:Reciept
 });

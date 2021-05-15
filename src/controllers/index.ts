@@ -1,4 +1,4 @@
-import {customer, cylinder, driver, person, product, user, vehicle, sales, production, purchase, ocn} from '../modules';
+import {customer, cylinder, driver, person, product, user, vehicle, sales, production, purchase, ocn, account} from '../modules';
 import CylinderCtrl from './cylinder';
 import Ctrl from "./ctrl";
 import PersonCtrl from './person';
@@ -11,6 +11,7 @@ import SalesCtrl from './sales';
 import ProductionCtrl from './production';
 import PurchaseOrder from './purchaseOrder';
 import OcnController from './ocn';
+import AccountCtrl from './account'
 
 export const personCtrl = new PersonCtrl(person);
 export const userCtrl = new UserCtrl(user);
@@ -23,5 +24,6 @@ export const salesCtrl = new SalesCtrl(sales);
 export const productionCtrl = new ProductionCtrl(production);
 export const purchaseCtrl = new PurchaseOrder(purchase)
 export const ocnController = new OcnController(ocn);
+export const accountCtrl = new AccountCtrl(account);
 export const ctrl = new Ctrl();
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ocn = exports.purchase = exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
+exports.account = exports.ocn = exports.purchase = exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
 const index_1 = require("../models/index");
 const person_1 = require("./person");
 const user_1 = require("./user");
@@ -13,6 +13,7 @@ const sales_1 = require("./sales");
 const production_1 = require("./production");
 const purchaseOrder_1 = require("./purchaseOrder");
 const ocn_1 = require("./ocn");
+const account_1 = require("./account");
 /**
  * @category Modules
  * @param {person} Instance of Person module
@@ -69,5 +70,8 @@ exports.purchase = new purchaseOrder_1.default({
 exports.ocn = new ocn_1.default({
     ocn: index_1.OCN,
     user: index_1.User
+});
+exports.account = new account_1.default({
+    account: index_1.Reciept
 });
 //# sourceMappingURL=index.js.map

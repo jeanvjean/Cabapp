@@ -13,6 +13,7 @@ const customer_1 = require("./customer");
 const sales_1 = require("./sales");
 const production_1 = require("./production");
 const purchase_1 = require("./purchase");
+const account_1 = require("./account");
 const uploader = new Uploader_1.default();
 const router = express_1.Router();
 router.get('/', (req, res) => {
@@ -28,6 +29,7 @@ router.use('/customer', customer_1.default);
 router.use('/sales', sales_1.default);
 router.use('/production', production_1.default);
 router.use('/purchase', purchase_1.default);
+router.use('/account', account_1.default);
 router.post('/upload', uploader.fileUpload());
 exports.default = router;
 //# sourceMappingURL=index.js.map

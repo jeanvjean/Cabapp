@@ -12,16 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const vehicle_1 = require("../../models/vehicle");
 const module_1 = require("../module");
+const static_1 = require("../../configs/static");
+const mail_1 = require("../../util/mail");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
         this.vehicle = props.vehicle;
         this.pickup = props.pickup;
+        this.user = props.user;
     }
-    createVehicle(data) {
+    createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicle = yield this.vehicle.create(data);
+                const vehicle = yield this.vehicle.create(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 return Promise.resolve(vehicle);
             }
             catch (e) {
@@ -73,7 +76,27 @@ class Vehicle extends module_1.default {
                 //@ts-ignore
                 vehicle === null || vehicle === void 0 ? void 0 : vehicle.maintainace.push(Object.assign(Object.assign({}, vinspection), { comments: [com] }));
                 yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
+                let approvalUser = yield this.user.findById({ role: 'sales', subrole: 'head of department', branch: vehicle === null || vehicle === void 0 ? void 0 : vehicle.branch });
+                new mail_1.default().push({
+                    subject: "Vehicle inspection",
+                    content: `A vehicle inspection request requires your approval. click to view ${static_1.default.FRONTEND_URL}/view-inspection-history/${vehicle === null || vehicle === void 0 ? void 0 : vehicle._id}`,
+                    user: approvalUser
+                });
                 return Promise.resolve(vehicle);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    viewInspection(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const vehicle = yield this.vehicle.findById(data.vehicleId);
+                //@ts-ignore
+                let inspection = vehicle === null || vehicle === void 0 ? void 0 : vehicle.maintainace.filter(inspect => `${inspect._id}` == `${data.inspectionId}`);
+                //@ts-ignore
+                return Promise.resolve(inspection[0]);
             }
             catch (e) {
                 this.handleException(e);

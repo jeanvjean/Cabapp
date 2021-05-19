@@ -85,6 +85,7 @@ export interface VehicleInterface extends Document{
   insuranceDate:Date
   lastMileage?:string
   comments:commentInterface[]
+  branch:Schema.Types.ObjectId
 }
 
 export type ReplacedItems ={
@@ -150,7 +151,8 @@ export const vehicleSchema = new Schema({
   licence:{type:String},
   insuranceDate:{type:String},
   latestMileage:{type:String},
-  comments:[commentSchema]
+  comments:[commentSchema],
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{
   timestamps:true
 });

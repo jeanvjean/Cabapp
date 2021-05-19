@@ -39,7 +39,8 @@ exports.userSchema = new mongoose_1.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     account_type: {
         type: String

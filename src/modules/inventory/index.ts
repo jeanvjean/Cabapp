@@ -292,7 +292,7 @@ class Product extends Module{
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
-      const disbursement = new this.disburse({...data, nextApprovalOfficer:hod?._id});
+      const disbursement = new this.disburse({...data, nextApprovalOfficer:hod?._id, initiator:user._id});
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,
@@ -314,6 +314,12 @@ class Product extends Module{
         commentBy:user._id
       });
       await disbursement.save();
+      let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal process has been initiated and requires your approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
       return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e)
@@ -350,12 +356,20 @@ class Product extends Module{
             });
           }
           disbursement.tracking.push(track);
+          
+          disbursement.nextApprovalOfficer = AO[0].id;
           disbursement.approvalStage = stagesOfApproval.START;
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
           });
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         } else if(disbursement?.approvalStage == stagesOfApproval.STAGE2){
           let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -381,7 +395,14 @@ class Product extends Module{
             comment:data.comment,
             commentBy:user._id
           });
+          disbursement.nextApprovalOfficer = AO[0].id;
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         } else if(disbursement?.requestStage == stagesOfApproval.STAGE1){
           let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -408,6 +429,13 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          disbursement.nextApprovalOfficer = AO[0].id;
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }else if(disbursement?.requestStage == stagesOfApproval.STAGE2){
           let AO = disbursement.approvalOfficers.filter(officer=> officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -433,7 +461,14 @@ class Product extends Module{
             comment:data.comment,
             commentBy:user._id
           });
+          disbursement.nextApprovalOfficer = AO[0].id
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }
       }else {
@@ -469,6 +504,12 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }else if(disbursement?.approvalStage == stagesOfApproval.STAGE1){
           let track = {
@@ -498,8 +539,14 @@ class Product extends Module{
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
-          })
+          });
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement);
         } else if(disbursement?.approvalStage == stagesOfApproval.STAGE2){
           let track = {
@@ -539,6 +586,12 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.initiator);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }else if(disbursement?.requestStage == stagesOfApproval.START) {
           //@ts-ignore
@@ -571,6 +624,12 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }else if(disbursement?.requestStage == stagesOfApproval.STAGE1){
           let brenchRequestApproval = await this.user.findOne({branch:user.branch, subrole:'head of department'}).populate({
@@ -605,6 +664,12 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement);
         } else if(disbursement?.requestStage == stagesOfApproval.STAGE2){
           let track = {
@@ -646,6 +711,12 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
+          await new Notify().push({
+            subject: "Product disbursal", 
+            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            user: apUser
+          });
           return Promise.resolve(disbursement)
         }
       }

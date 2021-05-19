@@ -196,7 +196,8 @@ class User extends Module {
   public async login(data:LoginInterface) : Promise<LoginReturn | undefined>{
 
     try {
-      let user = await this.model.findOne({email:data.email});
+      // console.log(data)
+      let user = await this.model.findOne({email:data.email}).select('+password');
       if(!user) {
         throw new BadInputFormatException('User Not Found');
       }
@@ -308,7 +309,7 @@ class User extends Module {
     try {
       const decode = verify(data.token, signTokenKey);
       //@ts-ignore
-      const user = await this.model.findOne({_id:decode.id, email:decode.email});
+      const user = await this.model.findOne({_id:decode.id, email:decode.email}).select('+password');
       const salt = genSaltSync(10);
       let password = await hash(data.password, salt);
       //@ts-ignore
@@ -329,8 +330,10 @@ class User extends Module {
 
   public async changePassword(data:ChangePasswordInterface, user:UserInterface):Promise<UserInterface|undefined>{
     try {
+      const findUser = await this.model.findById(user._id).select('+password');
       const { oldPassword, newPassword } = data;
-      const matchPassword = compareSync(oldPassword, user.password);
+      //@ts-ignore
+      const matchPassword = compareSync(oldPassword, findUser.password);
       if(!matchPassword) {
         throw new BadInputFormatException('Old password does not match');
       }
@@ -354,6 +357,19 @@ class User extends Module {
         message:'User deleted'
       })
     }catch(e){
+      this.handleException(e);
+    }
+  }
+
+  public async updateToken(userId:string, token:string):Promise<UserInterface|undefined>{
+    try {
+      const user = await this.model.findByIdAndUpdate(userId, { token }, {new:true});
+      console.log(user);
+      if(!user){
+        throw new BadInputFormatException('user not found');
+      }
+      return Promise.resolve(user)
+    } catch (e) {
       this.handleException(e);
     }
   }

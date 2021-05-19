@@ -3,6 +3,8 @@ import { Model } from "mongoose";
 import { OutgoingCylinderInterface } from "../../models/ocn";
 import { UserInterface } from "../../models/user";
 import { stagesOfApproval, ApprovalStatus, TransferStatus } from "../../models/transferCylinder";
+import Notify from '../../util/mail';
+import Environment from '../../configs/static';
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
@@ -49,8 +51,13 @@ class OutGoingCylinder extends Module{
                 department:user.role,
                 stageOfApproval:stagesOfApproval.STAGE1
             });
-
             await ocn.save();
+            let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
+            await new Notify().push({
+              subject: "Outgoing cylinder note (OCN)", 
+              content: `OCN generated. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+              user: apUser
+            });
             return Promise.resolve(ocn);
         } catch (e) {
             this.handleException(e);
@@ -91,6 +98,12 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  let apUser = await this.user.findById(ocn.nextApprovalOfficer);
+                  await new Notify().push({
+                    subject: "Outgoing cylinder note(OCN)", 
+                    content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    user: apUser
+                  });
                   return Promise.resolve(ocn);
                 }else if(ocn?.approvalStage == stagesOfApproval.STAGE2) {
                   let AO = ocn.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
@@ -121,6 +134,12 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  let apUser = await this.user.findById(ocn.nextApprovalOfficer);
+                  await new Notify().push({
+                    subject: "Outgoing cylinder note(OCN)", 
+                    content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    user: apUser
+                  });
                   return Promise.resolve(ocn);
                 }
               }else {
@@ -157,6 +176,12 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  let apUser = await this.user.findById(ocn.nextApprovalOfficer);
+                  await new Notify().push({
+                    subject: "Outgoing cylinder note(OCN)", 
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    user: apUser
+                  });
                   return Promise.resolve(ocn)
                 }else if(ocn?.approvalStage == stagesOfApproval.STAGE1){
                 //   let track = {
@@ -189,6 +214,12 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  let apUser = await this.user.findById(ocn.nextApprovalOfficer);
+                  await new Notify().push({
+                    subject: "Outgoing cylinder note(OCN)", 
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    user: apUser
+                  });
                   return Promise.resolve(ocn)
                 } else if(ocn?.approvalStage == stagesOfApproval.STAGE2){
                 //   let track = {
@@ -216,7 +247,13 @@ class OutGoingCylinder extends Module{
                   //@ts-ignore
                   // transfer.nextApprovalOfficer = data.nextApprovalOfficer
                 //   transfer.comments.push(ocn);
-                  await transfer.save();
+                  await ocn.save();
+                  let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
+                  await new Notify().push({
+                    subject: "Outgoing cylinder note (OCN)", 
+                    content: `OCN approval complete. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    user: apUser
+                  });
                   return Promise.resolve(ocn);
                 }
               }

@@ -102,7 +102,8 @@ import {
     },
     password: {
       type:String,
-      required:true
+      required:true,
+      select:false
     },
     account_type:{
       type:String

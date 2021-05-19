@@ -167,6 +167,21 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    updateToken() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const user = req.user;
+                // console.log(user);
+                const { token } = req.params;
+                const data = yield this.module.updateToken(user._id.toString(), token);
+                this.ok(res, 'Token saved', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = UserController;
 //# sourceMappingURL=index.js.map

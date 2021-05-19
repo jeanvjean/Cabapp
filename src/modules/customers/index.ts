@@ -10,6 +10,8 @@ import { WalkinCustomerInterface, WalkinCustomerStatus } from "../../models/walk
 import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
 import { compareSync } from "bcryptjs";
+import Notify from '../../util/mail';
+import env from '../../configs/static';
 
 
 
@@ -226,6 +228,12 @@ class Customer extends Module{
         complaint.comments.push(com);
         complaint.save()
       }
+      
+      new Notify().push({
+        subject: "Complaint", 
+        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+        user: hod
+      });
       await complaint.save();
       return Promise.resolve(complaint);
     } catch (e) {
@@ -271,6 +279,12 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            let approvalUser = await this.user.findById(AO[0].id);
+            new Notify().push({
+              subject: "Complaint", 
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              user: approvalUser
+            });
             return Promise.resolve(complaint)
           }else if(complaint?.approvalStage == stagesOfApproval.STAGE2) {
             let AO = complaint.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
@@ -301,6 +315,12 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            let approvalUser = await this.user.findById(AO[0].id);
+            new Notify().push({
+              subject: "Complaint", 
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              user: approvalUser
+            });
             return Promise.resolve(complaint);
           }
         }else{
@@ -327,6 +347,11 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            new Notify().push({
+              subject: "Complaint", 
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              user: hod
+            });
             return Promise.resolve(complaint);
           }else if(complaint?.approvalStage == stagesOfApproval.STAGE1){
             let track = {
@@ -357,6 +382,12 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            let approvalUser = await this.user.findById(complaint.nextApprovalOfficer);
+            new Notify().push({
+              subject: "Complaint", 
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              user: approvalUser
+            });
             return Promise.resolve(complaint)
           } else if(complaint?.approvalStage == stagesOfApproval.STAGE2){
             // let track = {
@@ -388,6 +419,12 @@ class Customer extends Module{
               commentBy:user._id
             });
             await complaint.save();
+            let approvalUser = await this.user.findById(complaint.initiator);
+            new Notify().push({
+              subject: "Complaint", 
+              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              user: approvalUser
+            });
             return Promise.resolve(complaint);
           }
         }

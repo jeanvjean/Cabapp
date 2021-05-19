@@ -14,7 +14,8 @@ class VehicleController extends Ctrl{
   createVehicle():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const vehicle:VehicleInterface|undefined = await this.module.createVehicle(req.body);
+        //@ts-ignore
+        const vehicle:VehicleInterface|undefined = await this.module.createVehicle(req.body, req.user);
          this.ok(res, 'Created', vehicle);
       } catch (e) {
         this.handleError(e, req, res);
@@ -137,6 +138,18 @@ class VehicleController extends Ctrl{
         const { status } = req.body;
         const data = await this.module.markRouteAsComplete({vehicleId, routeId, status });
         this.ok(res, 'Completed', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  viewInspectionDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { vehicleId, inspectionId } = req.params;
+        const data = await this.module.viewInspection({vehicleId, inspectionId});
+        this.ok(res, 'vehicle inspection details', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

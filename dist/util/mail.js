@@ -14,6 +14,7 @@ const firebase = require('firebase-admin');
 const node_mailjet_1 = require("node-mailjet");
 const firebase_admin_1 = require("firebase-admin");
 const path_1 = require("path");
+const request_promise_1 = require("request-promise");
 const resolve_template_1 = require("./resolve-template");
 const static_1 = require("../configs/static");
 const serviceAccount = require(path_1.join(__dirname, '../../asnl.json'));
@@ -106,6 +107,70 @@ class NotificationModule extends module_1.default {
                 subject: 'Hello Reviewer from Goodtalent.io',
             };
             yield this.sendMail(mailLoad);
+        });
+    }
+    /**
+     * Send a push notification to a user's token
+     *
+     * @param {Object|WebPush} payload
+     *
+     * @return {Promise<Object>}
+     */
+    push(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Send a message to devices subscribed to the provided topic.
+            try {
+                let response = null;
+                if (payload.user.token) {
+                    const message = {
+                        notification: {
+                            title: payload.subject,
+                            body: payload.content
+                        },
+                        to: payload.user.token
+                    };
+                    if (payload.data) {
+                        message.data = payload.data;
+                    }
+                    response = yield request_promise_1.post({
+                        uri: 'https://fcm.googleapis.com/fcm/send',
+                        body: message,
+                        json: true,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `key=${this.serverKey}`
+                        }
+                    });
+                }
+                yield this.saveMessageToFirebase(payload);
+                return { success: true, data: response };
+            }
+            catch (error) {
+                return { success: false, error };
+            }
+        });
+    }
+    saveMessageToFirebase(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (payload.user) {
+                try {
+                    const dbRef = firebase.database().ref(payload.user._id.toString());
+                    const time = Date.now();
+                    let rad = yield dbRef
+                        .child("notifications")
+                        .push({
+                        title: payload.subject,
+                        body: payload.content,
+                        date: time
+                    });
+                    let red = yield dbRef
+                        .child('newNotifications')
+                        .transaction((counter) => (counter || 0) + 1);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
         });
     }
 }

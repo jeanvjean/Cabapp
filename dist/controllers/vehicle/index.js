@@ -18,7 +18,8 @@ class VehicleController extends ctrl_1.default {
     createVehicle() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicle = yield this.module.createVehicle(req.body);
+                //@ts-ignore
+                const vehicle = yield this.module.createVehicle(req.body, req.user);
                 this.ok(res, 'Created', vehicle);
             }
             catch (e) {
@@ -141,6 +142,18 @@ class VehicleController extends ctrl_1.default {
                 const { status } = req.body;
                 const data = yield this.module.markRouteAsComplete({ vehicleId, routeId, status });
                 this.ok(res, 'Completed', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    viewInspectionDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { vehicleId, inspectionId } = req.params;
+                const data = yield this.module.viewInspection({ vehicleId, inspectionId });
+                this.ok(res, 'vehicle inspection details', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

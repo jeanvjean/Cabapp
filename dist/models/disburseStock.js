@@ -30,7 +30,8 @@ exports.disburseSchema = new mongoose_1.Schema({
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     fromBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    requestFrom: { type: requesterSchema }
+    requestFrom: { type: requesterSchema },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
 });
 function factory(conn) {
     return conn.model('disburse-product', exports.disburseSchema);

@@ -226,7 +226,7 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
-                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id }));
+                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id }));
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,
@@ -248,6 +248,12 @@ class Product extends module_1.default {
                     commentBy: user._id
                 });
                 yield disbursement.save();
+                let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                yield new mail_1.default().push({
+                    subject: "Product disbursal",
+                    content: `A disbursal process has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                    user: apUser
+                });
                 return Promise.resolve(disbursement);
             }
             catch (e) {
@@ -286,12 +292,19 @@ class Product extends module_1.default {
                             });
                         }
                         disbursement.tracking.push(track);
+                        disbursement.nextApprovalOfficer = AO[0].id;
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.START;
                         disbursement.comments.push({
                             comment: data.comment,
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -318,7 +331,14 @@ class Product extends module_1.default {
                             comment: data.comment,
                             commentBy: user._id
                         });
+                        disbursement.nextApprovalOfficer = AO[0].id;
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.requestStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -346,6 +366,13 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        disbursement.nextApprovalOfficer = AO[0].id;
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.requestStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -372,7 +399,14 @@ class Product extends module_1.default {
                             comment: data.comment,
                             commentBy: user._id
                         });
+                        disbursement.nextApprovalOfficer = AO[0].id;
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                 }
@@ -409,6 +443,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -441,6 +481,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -477,6 +523,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.initiator);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.requestStage) == transferCylinder_1.stagesOfApproval.START) {
@@ -510,6 +562,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.requestStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -545,6 +603,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.requestStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -584,6 +648,12 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "Product disbursal",
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            user: apUser
+                        });
                         return Promise.resolve(disbursement);
                     }
                 }

@@ -16,6 +16,8 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
 const module_1 = require("../module");
 const bcryptjs_1 = require("bcryptjs");
+const mail_1 = require("../../util/mail");
+const static_1 = require("../../configs/static");
 class Customer extends module_1.default {
     constructor(props) {
         super();
@@ -164,6 +166,11 @@ class Customer extends module_1.default {
                     complaint.comments.push(com);
                     complaint.save();
                 }
+                new mail_1.default().push({
+                    subject: "Complaint",
+                    content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                    user: hod
+                });
                 yield complaint.save();
                 return Promise.resolve(complaint);
             }
@@ -211,6 +218,12 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            let approvalUser = yield this.user.findById(AO[0].id);
+                            new mail_1.default().push({
+                                subject: "Complaint",
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                user: approvalUser
+                            });
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -242,6 +255,12 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            let approvalUser = yield this.user.findById(AO[0].id);
+                            new mail_1.default().push({
+                                subject: "Complaint",
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                user: approvalUser
+                            });
                             return Promise.resolve(complaint);
                         }
                     }
@@ -269,6 +288,11 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            new mail_1.default().push({
+                                subject: "Complaint",
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                user: hod
+                            });
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -300,6 +324,12 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            let approvalUser = yield this.user.findById(complaint.nextApprovalOfficer);
+                            new mail_1.default().push({
+                                subject: "Complaint",
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                user: approvalUser
+                            });
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -332,6 +362,12 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            let approvalUser = yield this.user.findById(complaint.initiator);
+                            new mail_1.default().push({
+                                subject: "Complaint",
+                                content: `Complaint approval complete. click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                user: approvalUser
+                            });
                             return Promise.resolve(complaint);
                         }
                     }

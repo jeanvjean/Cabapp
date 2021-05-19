@@ -38,6 +38,12 @@ router.post(
   vehicleCtrl.approveInspection()
 );
 
+router.get(
+  '/approve-inspection/:vehicleId/:inspectionId',
+  auth.verify(),
+  vehicleCtrl.viewInspectionDetails()
+);
+
 router.post(
   '/record-route/:vehicleId',
   auth.verify(),

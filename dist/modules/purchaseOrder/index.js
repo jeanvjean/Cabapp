@@ -13,6 +13,8 @@ const module_1 = require("../module");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const bcryptjs_1 = require("bcryptjs");
 const exceptions_1 = require("../../exceptions");
+const static_1 = require("../../configs/static");
+const mail_1 = require("../../util/mail");
 class PurchaseOrder extends module_1.default {
     constructor(props) {
         super();
@@ -24,6 +26,7 @@ class PurchaseOrder extends module_1.default {
             try {
                 const purchase = new this.purchase(data);
                 purchase.branch = user.branch;
+                purchase.initiator = user._id;
                 purchase.comments.push({
                     comment: data.comment,
                     commentBy: user._id
@@ -38,6 +41,12 @@ class PurchaseOrder extends module_1.default {
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
                 purchase.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                 yield purchase.save();
+                let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
+                new mail_1.default().push({
+                    subject: "Purchase Order",
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    user: approvalUser
+                });
                 return Promise.resolve(purchase);
             }
             catch (e) {
@@ -111,6 +120,12 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Purchase Order",
+                            content: `A purchase order you scheduled failed approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(purchase);
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -142,6 +157,12 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Purchase Order",
+                            content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(purchase);
                     }
                 }
@@ -179,6 +200,12 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Purchase Order",
+                            content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(purchase);
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -213,6 +240,12 @@ class PurchaseOrder extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield purchase.save();
+                        let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Purchase Order",
+                            content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(purchase);
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -246,6 +279,12 @@ class PurchaseOrder extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield purchase.save();
+                        let approvalUser = yield this.user.findById(purchase.initiator);
+                        new mail_1.default().push({
+                            subject: "Purchase Order",
+                            content: `A purchase order has been approved. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(purchase);
                     }
                 }

@@ -13,6 +13,8 @@ const exceptions_1 = require("../../exceptions");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const bcryptjs_1 = require("bcryptjs");
+const static_1 = require("../../configs/static");
+const mail_1 = require("../../util/mail");
 class ProductionSchedule extends module_1.default {
     constructor(props) {
         super();
@@ -40,6 +42,12 @@ class ProductionSchedule extends module_1.default {
                     commentBy: user._id
                 });
                 yield production.save();
+                let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
+                new mail_1.default().push({
+                    subject: "Production Schedule",
+                    content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                    user: approvalUser
+                });
                 return Promise.resolve(production);
             }
             catch (e) {
@@ -86,6 +94,12 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield production.save();
+                        let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Production Schedule",
+                            content: `A production schedule You initiated failed approval please attend to the corrections. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(production);
                     }
                     else if ((production === null || production === void 0 ? void 0 : production.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -118,6 +132,12 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield production.save();
+                        let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Production Schedule",
+                            content: `A production schedule You Approved failed secondary approval please attend to the corrections. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(production);
                     }
                 }
@@ -155,6 +175,12 @@ class ProductionSchedule extends module_1.default {
                             commentBy: user._id,
                         });
                         yield production.save();
+                        let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Production Schedule",
+                            content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(production);
                     }
                     else if ((production === null || production === void 0 ? void 0 : production.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -189,6 +215,12 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield production.save();
+                        let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Production Schedule",
+                            content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(production);
                     }
                     else if ((production === null || production === void 0 ? void 0 : production.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -222,6 +254,12 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield production.save();
+                        let approvalUser = yield this.user.findById(production.initiator);
+                        new mail_1.default().push({
+                            subject: "Production Schedule",
+                            content: `A production you scheduled scheduled has been approved. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(production);
                     }
                 }
@@ -328,6 +366,12 @@ class ProductionSchedule extends module_1.default {
                 }
                 production.produced = true;
                 yield production.save();
+                let approvalUser = yield this.user.findById({ role: 'sales', subrole: 'head of department', branch: production.branch });
+                new mail_1.default().push({
+                    subject: "Production complete",
+                    content: `Production schedule completed. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                    user: approvalUser
+                });
                 return Promise.resolve(production);
             }
             catch (e) {

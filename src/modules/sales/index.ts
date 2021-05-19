@@ -6,6 +6,8 @@ import Module, { QueryInterface } from "../module";
 import { RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
 import { BadInputFormatException } from "../../exceptions";
 import { PurchaseOrderInterface } from "../../models/purchaseOrder";
+import env from '../../configs/static';
+import Notify from '../../util/mail';
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -125,6 +127,12 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Sales Requisition", 
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(sales)
         }else if(sales?.approvalStage == stagesOfApproval.STAGE2) {
           let AO = sales.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
@@ -155,6 +163,12 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Sales Requisition", 
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(sales);
         }
       }else {
@@ -191,6 +205,12 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Sales Requisition", 
+            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(sales)
         }else if(sales?.approvalStage == stagesOfApproval.STAGE1){
           let track = {
@@ -223,6 +243,12 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Sales Requisition", 
+            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(sales);
         } else if(sales?.approvalStage == stagesOfApproval.STAGE2){
           let track = {
@@ -254,6 +280,12 @@ class Sale extends Module{
             commentBy:user._id
           });
           await sales.save();
+          let approvalUser = await this.user.findById(sales.initiator);
+          new Notify().push({
+            subject: "Sales Requisition", 
+            content: `A Sales requisition has been approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(sales)
         }
       }

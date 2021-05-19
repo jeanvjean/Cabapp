@@ -166,6 +166,21 @@ class UserController extends Ctrl{
       }
     }
   }
+
+  updateToken():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try{
+        //@ts-ignore
+        const user = req.user;
+        // console.log(user);
+        const { token } = req.params;
+        const data = await this.module.updateToken(user._id.toString(), token);
+        this.ok(res, 'Token saved', data);
+      }catch(e){
+        this.handleError(e, req, res);
+      }
+    }
+  }
 }
 
 export {Validator}

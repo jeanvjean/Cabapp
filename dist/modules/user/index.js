@@ -126,7 +126,8 @@ class User extends module_1.default {
     login(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let user = yield this.model.findOne({ email: data.email });
+                // console.log(data)
+                let user = yield this.model.findOne({ email: data.email }).select('+password');
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('User Not Found');
                 }
@@ -235,7 +236,7 @@ class User extends module_1.default {
             try {
                 const decode = jsonwebtoken_1.verify(data.token, exports.signTokenKey);
                 //@ts-ignore
-                const user = yield this.model.findOne({ _id: decode.id, email: decode.email });
+                const user = yield this.model.findOne({ _id: decode.id, email: decode.email }).select('+password');
                 const salt = bcryptjs_1.genSaltSync(10);
                 let password = yield bcryptjs_1.hash(data.password, salt);
                 //@ts-ignore
@@ -258,8 +259,10 @@ class User extends module_1.default {
     changePassword(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const findUser = yield this.model.findById(user._id).select('+password');
                 const { oldPassword, newPassword } = data;
-                const matchPassword = bcryptjs_1.compareSync(oldPassword, user.password);
+                //@ts-ignore
+                const matchPassword = bcryptjs_1.compareSync(oldPassword, findUser.password);
                 if (!matchPassword) {
                     throw new exceptions_1.BadInputFormatException('Old password does not match');
                 }
@@ -284,6 +287,21 @@ class User extends module_1.default {
                 return Promise.resolve({
                     message: 'User deleted'
                 });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    updateToken(userId, token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.model.findByIdAndUpdate(userId, { token }, { new: true });
+                console.log(user);
+                if (!user) {
+                    throw new exceptions_1.BadInputFormatException('user not found');
+                }
+                return Promise.resolve(user);
             }
             catch (e) {
                 this.handleException(e);

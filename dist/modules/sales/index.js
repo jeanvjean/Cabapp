@@ -13,6 +13,8 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
 const exceptions_1 = require("../../exceptions");
+const static_1 = require("../../configs/static");
+const mail_1 = require("../../util/mail");
 class Sale extends module_1.default {
     constructor(props) {
         super();
@@ -92,6 +94,12 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Sales Requisition",
+                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(sales);
                     }
                     else if ((sales === null || sales === void 0 ? void 0 : sales.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -123,6 +131,12 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Sales Requisition",
+                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(sales);
                     }
                 }
@@ -160,6 +174,12 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Sales Requisition",
+                            content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(sales);
                     }
                     else if ((sales === null || sales === void 0 ? void 0 : sales.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -193,6 +213,12 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
+                        new mail_1.default().push({
+                            subject: "Sales Requisition",
+                            content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(sales);
                     }
                     else if ((sales === null || sales === void 0 ? void 0 : sales.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
@@ -224,6 +250,12 @@ class Sale extends module_1.default {
                             commentBy: user._id
                         });
                         yield sales.save();
+                        let approvalUser = yield this.user.findById(sales.initiator);
+                        new mail_1.default().push({
+                            subject: "Sales Requisition",
+                            content: `A Sales requisition has been approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            user: approvalUser
+                        });
                         return Promise.resolve(sales);
                     }
                 }

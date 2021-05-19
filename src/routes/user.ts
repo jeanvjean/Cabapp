@@ -65,4 +65,10 @@ const router: expressRouter = expressRouter();
     userCtrl.fetchPermissions()
   );
 
+  router.get(
+    '/register-token/:token',
+    auth.verify(),
+    userCtrl.updateToken()
+  );
+
 export default router;

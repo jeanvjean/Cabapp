@@ -22,7 +22,8 @@ export interface PurchaseOrderInterface extends Document{
     nextApprovalOfficer:Schema.Types.ObjectId
     approvalStage:stagesOfApproval
     approvalStatus:TransferStatus
-    branch:Schema.Types.ObjectId
+    branch:Schema.Types.ObjectId,
+    initiator:Schema.Types.ObjectId
 }
 
 const cylinderSchema = new Schema({
@@ -39,7 +40,8 @@ const purchaseOrderSchema = new Schema({
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     approvalStage:{type:String, default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, default:TransferStatus.PENDING},
-    branch:{type:Schema.Types.ObjectId, ref:'branches'}
+    branch:{type:Schema.Types.ObjectId, ref:'branches'},
+    initiator:{type:Schema.Types.ObjectId, ref:'User'}
 },{
     timestamps:true
 });

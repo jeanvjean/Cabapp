@@ -5,6 +5,8 @@ import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/t
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
 import { compareSync } from "bcryptjs";
+import env from '../../configs/static';
+import Notify from '../../util/mail';
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -71,6 +73,12 @@ class ProductionSchedule extends Module{
         commentBy:user._id
       });
       await production.save();
+      let approvalUser = await this.user.findById(production.nextApprovalOfficer);
+      new Notify().push({
+        subject: "Production Schedule", 
+        content: `A production has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+        user: approvalUser
+      });
       return Promise.resolve(production);
     } catch (e) {
       this.handleException(e);
@@ -115,6 +123,12 @@ class ProductionSchedule extends Module{
             officer:'Authorizing officer'
           });
           await production.save();
+          let approvalUser = await this.user.findById(production.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Production Schedule", 
+            content: `A production schedule You initiated failed approval please attend to the corrections. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(production);
         }else if(production?.approvalStage == stagesOfApproval.STAGE2) {
           let AO = production.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
@@ -146,6 +160,12 @@ class ProductionSchedule extends Module{
             officer:'Approving officer'
           });
           await production.save();
+          let approvalUser = await this.user.findById(production.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Production Schedule", 
+            content: `A production schedule You Approved failed secondary approval please attend to the corrections. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(production);
         }
       }else {
@@ -182,6 +202,12 @@ class ProductionSchedule extends Module{
             commentBy:user._id,
           })
           await production.save();
+          let approvalUser = await this.user.findById(production.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Production Schedule", 
+            content: `A production has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(production)
         }else if(production?.approvalStage == stagesOfApproval.STAGE1){
           // let track = {
@@ -215,6 +241,12 @@ class ProductionSchedule extends Module{
             officer:'Authorizing officer'
           })
           await production.save();
+          let approvalUser = await this.user.findById(production.nextApprovalOfficer);
+          new Notify().push({
+            subject: "Production Schedule", 
+            content: `A production has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(production)
         } else if(production?.approvalStage == stagesOfApproval.STAGE2){
           // let track = {
@@ -247,6 +279,12 @@ class ProductionSchedule extends Module{
             officer:'Approving officer'
           });
           await production.save();
+          let approvalUser = await this.user.findById(production.initiator);
+          new Notify().push({
+            subject: "Production Schedule", 
+            content: `A production you scheduled scheduled has been approved. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
           return Promise.resolve(production);
         }
       }
@@ -340,6 +378,12 @@ class ProductionSchedule extends Module{
       }
       production.produced = true;
       await production.save();
+      let approvalUser = await this.user.findById({role:'sales', subrole:'head of department', branch:production.branch});
+          new Notify().push({
+            subject: "Production complete", 
+            content: `Production schedule completed. click to view ${env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`, 
+            user: approvalUser
+          });
       return Promise.resolve(production);
     } catch (e) {
       this.handleException(e);

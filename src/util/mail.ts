@@ -32,8 +32,9 @@ export interface SubscriptionOPtion {
 
 export interface WebPush {
 	subject: string
-	content: string
-	data?: string
+  content: string
+  //@ts-ignore
+	data?: messaging.DataMessagePayload
 	icon?: string
 	user?: any
 }
@@ -152,65 +153,61 @@ class NotificationModule extends Module {
 	 *
 	 * @return {Promise<Object>}
 	 */
-	// async push(payload: WebPush): Promise<Record<string, unknown>> {
-	// 	// Send a message to devices subscribed to the provided topic.
-  //       try {
-  //           let response = null
+	async push(payload: WebPush): Promise<Record<string, unknown>> {
+		// Send a message to devices subscribed to the provided topic.
+        try {
+            let response = null
 
-  //           if (payload.user.token) {
-  //               const message: MessageOptions = {
-  //                   notification: {
-  //                       title: payload.subject,
-  //                       body: payload.content
-  //                   },
-  //                   to: payload.user.token
-  //               }
-  //               if (payload.data) {
-  //                   message.data = payload.data
-  //               }
-  //               response = await post({
-  //                   uri: 'https://fcm.googleapis.com/fcm/send',
-  //                   body: message,
-  //                   json: true,
-  //                   headers: {
-  //                       'Content-Type': 'application/json',
-  //                       Authorization: `key=${this.serverKey}`
-  //                   }
-  //               })
-  //           }
-	// 		await this.saveMessageToFirebase(payload)
-	// 		return {success: true, data: response}
-	// 	} catch (error) {
-	// 		return {success: false, error}
-	// 	}
-	// }
+            if (payload.user.token) {
+                const message: MessageOptions = {
+                    notification: {
+                        title: payload.subject,
+                        body: payload.content
+                    },
+                    to: payload.user.token
+                }
+                if (payload.data) {
+                    message.data = payload.data
+                }
+                response = await post({
+                    uri: 'https://fcm.googleapis.com/fcm/send',
+                    body: message,
+                    json: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `key=${this.serverKey}`
+                    }
+                })
+            }
+			await this.saveMessageToFirebase(payload)
+			return {success: true, data: response}
+		} catch (error) {
+			return {success: false, error}
+		}
+	}
 
-  //   public async saveMessageToFirebase(payload: WebPush) {
+    public async saveMessageToFirebase(payload: WebPush) {
 
-	// 	if (payload.user) {
-  //           try {
-  //               const dbRef = firebase.database().ref(payload.user._id.toString())
-  //               const time = Date.now()
-  //               let rad = await dbRef
-	// 			.child("notifications")
-	// 			.push({
-	// 				title: payload.subject,
-	// 				body: payload.content,
-	// 				date: time
-  //               })
+		if (payload.user) {
+            try {
+                const dbRef = firebase.database().ref(payload.user._id.toString())
+                const time = Date.now()
+                let rad = await dbRef
+				.child("notifications")
+				.push({
+					title: payload.subject,
+					body: payload.content,
+					date: time
+                })
+			let red = await dbRef
+				.child('newNotifications')
+                .transaction((counter: number) => (counter || 0) + 1)
 
-
-
-
-	// 		let red = await dbRef
-	// 			.child('newNotifications')
-  //               .transaction((counter: number) => (counter || 0) + 1)
-
-  //           } catch (error) {
-  //               console.log(error)
-  //           }
-	// 	}
-	// }
+            } catch (error) {
+                console.log(error)
+            }
+		}
+	}
 }
 
 export default NotificationModule

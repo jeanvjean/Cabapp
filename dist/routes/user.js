@@ -19,5 +19,6 @@ router.post('/reset-password', user_1.Validator.validatePassword(), val.validate
 router.post('/change-password', user_1.Validator.validatePasswordChange(), val.validate(), auth.verify(), controllers_1.userCtrl.changePassword());
 router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());
 router.get('/fetch-permissions', controllers_1.userCtrl.fetchPermissions());
+router.get('/register-token/:token', auth.verify(), controllers_1.userCtrl.updateToken());
 exports.default = router;
 //# sourceMappingURL=user.js.map

@@ -5,10 +5,13 @@ import { stagesOfApproval, TransferStatus } from "../../models/transferCylinder"
 import { UserInterface } from "../../models/user";
 import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteActivity, VehicleInterface } from "../../models/vehicle";
 import Module, { QueryInterface } from "../module";
+import env from '../../configs/static';
+import Notify from '../../util/mail';
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
   pickup:Model<PickupInterface>
+  user:Model<UserInterface>
 }
 
 type NewVehicle = {
@@ -64,6 +67,8 @@ type RouteRecordInput = {
   security:PickupInterface['security'],
 }
 
+
+
 type Parameters = {
   vehicleId?:string
   routeId?:string
@@ -87,15 +92,17 @@ export type DeleteResponse = {
 class Vehicle extends Module{
   private vehicle:Model<VehicleInterface>
   private pickup:Model<PickupInterface>
+  private user:Model<UserInterface>
 
   constructor(props:vehicleProps) {
     super()
     this.vehicle = props.vehicle
     this.pickup = props.pickup;
+    this.user = props.user
   }
-  public async createVehicle(data:NewVehicle):Promise<VehicleInterface|undefined>{
+  public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
-      const vehicle = await this.vehicle.create(data);
+      const vehicle = await this.vehicle.create({...data, branch:user.branch});
       return Promise.resolve(vehicle);
     } catch (e) {
       this.handleException(e);
@@ -141,7 +148,25 @@ class Vehicle extends Module{
       //@ts-ignore
       vehicle?.maintainace.push({...vinspection, comments:[com]});
       await vehicle?.save();
+      let approvalUser = await this.user.findById({role:'sales', subrole:'head of department', branch:vehicle?.branch});
+      new Notify().push({
+        subject: "Vehicle inspection", 
+        content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`, 
+        user: approvalUser
+      });
       return Promise.resolve(vehicle as VehicleInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async viewInspection(data:Parameters):Promise<Maintainance|undefined>{
+    try {
+      const vehicle = await this.vehicle.findById(data.vehicleId);
+      //@ts-ignore
+      let inspection = vehicle?.maintainace.filter(inspect=>`${inspect._id}` == `${data.inspectionId}`);
+      //@ts-ignore
+      return Promise.resolve(inspection[0] as Maintainance);
     } catch (e) {
       this.handleException(e);
     }

@@ -15,7 +15,8 @@ const purchaseOrderSchema = new mongoose_1.Schema({
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalStage: { type: String, default: transferCylinder_1.stagesOfApproval.STAGE1 },
     approvalStatus: { type: String, default: transferCylinder_1.TransferStatus.PENDING },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
 });

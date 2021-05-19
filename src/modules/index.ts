@@ -68,7 +68,8 @@ export const product = new ProductModule({
 
 export const vehicle = new VehicleModule({
   vehicle:Vehicle,
-  pickup:PickupRoutes
+  pickup:PickupRoutes,
+  user:User
 });
 
 export const driver = new DriverModule({

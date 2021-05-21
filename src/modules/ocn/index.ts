@@ -5,6 +5,7 @@ import { UserInterface } from "../../models/user";
 import { stagesOfApproval, ApprovalStatus, TransferStatus } from "../../models/transferCylinder";
 import Notify from '../../util/mail';
 import Environment from '../../configs/static';
+import { BadInputFormatException } from "../../exceptions";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
@@ -54,8 +55,8 @@ class OutGoingCylinder extends Module{
             await ocn.save();
             let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
             await new Notify().push({
-              subject: "Outgoing cylinder note (OCN)", 
-              content: `OCN generated. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+              subject: "Outgoing cylinder note (OCN)",
+              content: `OCN generated. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
               user: apUser
             });
             return Promise.resolve(ocn);
@@ -68,6 +69,9 @@ class OutGoingCylinder extends Module{
         try {
             const { ocnId, status } = data;
             const ocn = await this.ocn.findById(ocnId);
+            if(!ocn) {
+              throw new BadInputFormatException('OCN not found')
+            }
             if(status == ApprovalStatus.REJECTED) {
                 if(ocn?.approvalStage == stagesOfApproval.STAGE1){
                   let AO = ocn.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -100,8 +104,8 @@ class OutGoingCylinder extends Module{
                   await ocn.save();
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
-                    subject: "Outgoing cylinder note(OCN)", 
-                    content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    subject: "Outgoing cylinder note(OCN)",
+                    content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);
@@ -136,8 +140,8 @@ class OutGoingCylinder extends Module{
                   await ocn.save();
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
-                    subject: "Outgoing cylinder note(OCN)", 
-                    content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    subject: "Outgoing cylinder note(OCN)",
+                    content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);
@@ -178,8 +182,8 @@ class OutGoingCylinder extends Module{
                   await ocn.save();
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
-                    subject: "Outgoing cylinder note(OCN)", 
-                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    subject: "Outgoing cylinder note(OCN)",
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn)
@@ -216,8 +220,8 @@ class OutGoingCylinder extends Module{
                   await ocn.save();
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
-                    subject: "Outgoing cylinder note(OCN)", 
-                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    subject: "Outgoing cylinder note(OCN)",
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn)
@@ -250,8 +254,8 @@ class OutGoingCylinder extends Module{
                   await ocn.save();
                   let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
                   await new Notify().push({
-                    subject: "Outgoing cylinder note (OCN)", 
-                    content: `OCN approval complete. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`, 
+                    subject: "Outgoing cylinder note (OCN)",
+                    content: `OCN approval complete. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);

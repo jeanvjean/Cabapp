@@ -63,7 +63,15 @@ class Sale extends module_1.default {
     approveSalesRequisition(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
                 const sales = yield this.sales.findById(data.salesId);
+                if (!sales) {
+                    throw new exceptions_1.BadInputFormatException('sales requisition not found');
+                }
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((sales === null || sales === void 0 ? void 0 : sales.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = sales.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

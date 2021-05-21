@@ -12,6 +12,7 @@ router.post('/login', user_1.Validator.validateLogin(), val.validate(), controll
 router.post('/invite-user', auth.verify(), user_1.Validator.validateInvite(), val.validate(), controllers_1.userCtrl.inviteUser());
 router.get('/get-roles', auth.verify(), controllers_1.userCtrl.getConstantRoles());
 router.get('/get-users', auth.verify(), controllers_1.userCtrl.fetchUsers());
+router.get('/get-branch-users', auth.verify(), controllers_1.userCtrl.branchUsers());
 router.get('/user-details/:id/:email', auth.verify(), controllers_1.userCtrl.fetchUser());
 router.post('/update-user/:id', user_1.Validator.validateUserUpdate(), val.validate(), auth.verify(), controllers_1.userCtrl.updateUser());
 router.post('/request-password-reset', controllers_1.userCtrl.requestPasswordReset());

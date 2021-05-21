@@ -123,6 +123,17 @@ class User extends module_1.default {
             }
         });
     }
+    branchUsers(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let users = yield this.model.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                return users;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     login(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

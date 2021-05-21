@@ -69,6 +69,18 @@ class UserController extends Ctrl{
     }
   }
 
+  branchUsers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.branchUsers(req.query, req.user);
+        this.ok(res, 'branch users', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchUser(): RequestHandler{
     return async (req:Request, res: Response)=>{
       try{

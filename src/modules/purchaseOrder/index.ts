@@ -65,8 +65,8 @@ class PurchaseOrder extends Module{
             await purchase.save();
             let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
             new Notify().push({
-              subject: "Purchase Order", 
-              content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+              subject: "Purchase Order",
+              content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
               user: approvalUser
             });
             return Promise.resolve(purchase);
@@ -101,11 +101,15 @@ class PurchaseOrder extends Module{
 
     public async approvePurchaseOrder(data:ApprovePurchase, user:UserInterface):Promise<PurchaseOrderInterface|undefined>{
         try {
-            let matchPWD = compareSync(data.password, user.password);
-            if(!matchPWD) {
-                throw new BadInputFormatException('Incorrect password... please check the password');
-            }
+          let loginUser = await this.user.findById(user._id).select('+password');
+          let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+          if(!matchPWD) {
+            throw new BadInputFormatException('Incorrect password... please check the password');
+          }
             const purchase = await this.purchase.findById(data.purchaseId);
+            if(!purchase) {
+              throw new BadInputFormatException('purchase order not found');
+            }
             if(data.status == ApprovalStatus.REJECTED) {
                 if(purchase?.approvalStage == stagesOfApproval.STAGE1){
                   let AO = purchase.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -138,8 +142,8 @@ class PurchaseOrder extends Module{
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   new Notify().push({
-                    subject: "Purchase Order", 
-                    content: `A purchase order you scheduled failed approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+                    subject: "Purchase Order",
+                    content: `A purchase order you scheduled failed approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase);
@@ -174,8 +178,8 @@ class PurchaseOrder extends Module{
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   new Notify().push({
-                    subject: "Purchase Order", 
-                    content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+                    subject: "Purchase Order",
+                    content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase);
@@ -216,8 +220,8 @@ class PurchaseOrder extends Module{
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   new Notify().push({
-                    subject: "Purchase Order", 
-                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+                    subject: "Purchase Order",
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)
@@ -255,8 +259,8 @@ class PurchaseOrder extends Module{
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   new Notify().push({
-                    subject: "Purchase Order", 
-                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+                    subject: "Purchase Order",
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)
@@ -293,8 +297,8 @@ class PurchaseOrder extends Module{
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.initiator);
                   new Notify().push({
-                    subject: "Purchase Order", 
-                    content: `A purchase order has been approved. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`, 
+                    subject: "Purchase Order",
+                    content: `A purchase order has been approved. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)

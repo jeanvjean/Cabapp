@@ -13,6 +13,7 @@ const module_1 = require("../module");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
+const exceptions_1 = require("../../exceptions");
 class OutGoingCylinder extends module_1.default {
     constructor(props) {
         super();
@@ -52,6 +53,9 @@ class OutGoingCylinder extends module_1.default {
             try {
                 const { ocnId, status } = data;
                 const ocn = yield this.ocn.findById(ocnId);
+                if (!ocn) {
+                    throw new exceptions_1.BadInputFormatException('OCN not found');
+                }
                 if (status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = ocn.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

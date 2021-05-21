@@ -107,20 +107,24 @@ class Customer extends Module{
     this.walkin = props.walkin
   }
 
-  public async createCustomer(data:newCustomerInterface):Promise<CustomerInterface|undefined> {
+  public async createCustomer(data:newCustomerInterface, user:UserInterface):Promise<CustomerInterface|undefined> {
     try {
       const date = new Date()
       date.setDate(date.getDate() + data.cylinderHoldingTime);
-      const customer = await this.customer.create({...data, cylinderHoldingTime:date.toISOString()});
+      const customer = await this.customer.create({
+        ...data,
+        cylinderHoldingTime:date.toISOString(),
+        branch:user.branch
+      });
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchCustomers(query:QueryInterface):Promise<CustomerInterface[]|undefined>{
+  public async fetchCustomers(query:QueryInterface, user:UserInterface):Promise<CustomerInterface[]|undefined>{
     try {
-      const customers = await this.customer.find(query);
+      const customers = await this.customer.find({...query, branch:user.branch});
       return Promise.resolve(customers);
     } catch (e) {
       this.handleException(e)
@@ -205,7 +209,11 @@ class Customer extends Module{
 
   public async makeComplaint(data:NewComplainInterface, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try {
-      const complaint = new this.complaint(data);
+      // console.log(data);
+      const complaint = new this.complaint({
+        ...data,
+        branch:user.branch
+      });
       const hod = await this.user.findOne({branch:user.branch, role:user.role, subrole:'head of department'});
       if(complaint.complaintType == 'cylinder'){
         complaint.initiator = user._id
@@ -226,15 +234,14 @@ class Customer extends Module{
         }
         //@ts-ignore
         complaint.comments.push(com);
-        complaint.save()
       }
-      
+
+      await complaint.save();
       new Notify().push({
-        subject: "Complaint", 
-        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+        subject: "Complaint",
+        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
         user: hod
       });
-      await complaint.save();
       return Promise.resolve(complaint);
     } catch (e) {
       this.handleException(e);
@@ -243,11 +250,16 @@ class Customer extends Module{
 
   public async approveComplaint(data:ApprovalInput, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try {
-      let matchPWD = compareSync(data.password, user.password);
+      // console.log(data)
+      let loginUser = await this.user.findById(user._id).select('+password');
+      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
       const complaint = await this.complaint.findById(data.id);
+      if(!complaint){
+        throw new BadInputFormatException('complaint not found')
+      }
       if(complaint?.complaintType == 'cylinder'){
         if(data.status == ApprovalStatus.REJECTED){
           if(complaint?.approvalStage == stagesOfApproval.STAGE1){
@@ -281,8 +293,8 @@ class Customer extends Module{
             await complaint.save();
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
-              subject: "Complaint", 
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              subject: "Complaint",
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -317,8 +329,8 @@ class Customer extends Module{
             await complaint.save();
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
-              subject: "Complaint", 
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              subject: "Complaint",
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);
@@ -348,21 +360,21 @@ class Customer extends Module{
             })
             await complaint.save();
             new Notify().push({
-              subject: "Complaint", 
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              subject: "Complaint",
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: hod
             });
             return Promise.resolve(complaint);
           }else if(complaint?.approvalStage == stagesOfApproval.STAGE1){
-            let track = {
-              title:"Initiate complaint",
-              stage:stagesOfApproval.STAGE2,
-              status:ApprovalStatus.APPROVED,
-              dateApproved:new Date().toISOString(),
-              approvalOfficer:user._id,
-              //@ts-ignore
-              nextApprovalOfficer:hod?.branch.branchAdmin
-            }
+            // let track = {
+            //   title:"Initiate complaint",
+            //   stage:stagesOfApproval.STAGE2,
+            //   status:ApprovalStatus.APPROVED,
+            //   dateApproved:new Date().toISOString(),
+            //   approvalOfficer:user._id,
+            //   //@ts-ignore
+            //   nextApprovalOfficer:hod?.branch.branchAdmin
+            // }
             // console.log(track);
             let checkOfficer = complaint.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
             if(checkOfficer.length == 0){
@@ -377,6 +389,7 @@ class Customer extends Module{
             complaint.approvalStage = stagesOfApproval.STAGE2;
             //@ts-ignore
             complaint.nextApprovalOfficer = hod?.branch.branchAdmin;
+
             complaint.comments.push({
               comment:data.comment,
               commentBy:user._id
@@ -384,8 +397,8 @@ class Customer extends Module{
             await complaint.save();
             let approvalUser = await this.user.findById(complaint.nextApprovalOfficer);
             new Notify().push({
-              subject: "Complaint", 
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              subject: "Complaint",
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -421,8 +434,8 @@ class Customer extends Module{
             await complaint.save();
             let approvalUser = await this.user.findById(complaint.initiator);
             new Notify().push({
-              subject: "Complaint", 
-              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`, 
+              subject: "Complaint",
+              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);
@@ -505,9 +518,9 @@ class Customer extends Module{
     }
   }
 
-  public async fetchApprovedCOmplaints(query:QueryInterface):Promise<ComplaintInterface[]|undefined>{
+  public async fetchApprovedComplaints(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
-      const complaints = await this.complaint.find(query);
+      const complaints = await this.complaint.find({...query, branch:user.branch});
       let approved = complaints.filter(complaint=> complaint.approvalStatus == TransferStatus.COMPLETED);
       return Promise.resolve(approved);
     } catch (e) {
@@ -587,6 +600,15 @@ class Customer extends Module{
       return Promise.resolve(customer);
     } catch (e) {
       this.handleException(e)
+    }
+  }
+
+  public async fetchFilledCustomerCylinders(query:QueryInterface, user:UserInterface):Promise<WalkinCustomerInterface[]|undefined>{
+    try {
+      const cylinders = await this.walkin.find({...query,status:WalkinCustomerStatus.FILLED, branch:user.branch});
+      return cylinders;
+    } catch (e) {
+      this.handleException(e);
     }
   }
 }

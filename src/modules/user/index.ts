@@ -193,6 +193,15 @@ class User extends Module {
     }
   }
 
+  public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
+    try {
+      let users = await this.model.find({...query, branch:user.branch});
+      return users;
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async login(data:LoginInterface) : Promise<LoginReturn | undefined>{
 
     try {

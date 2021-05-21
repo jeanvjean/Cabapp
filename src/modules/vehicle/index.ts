@@ -150,8 +150,8 @@ class Vehicle extends Module{
       await vehicle?.save();
       let approvalUser = await this.user.findById({role:'sales', subrole:'head of department', branch:vehicle?.branch});
       new Notify().push({
-        subject: "Vehicle inspection", 
-        content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`, 
+        subject: "Vehicle inspection",
+        content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
         user: approvalUser
       });
       return Promise.resolve(vehicle as VehicleInterface);
@@ -194,8 +194,14 @@ class Vehicle extends Module{
   public async aprroveInspection(data:ApproveInspectionData, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
       const vehicle = await this.vehicle.findById(data.vehicleId);
+      if(!vehicle){
+        throw new BadInputFormatException('this vehicle was not found');
+      }
       //@ts-ignore
       let inspection = vehicle?.maintainace.filter(inspect=>`${inspect._id}` == `${data.inspectionId}`);
+      if(!inspection[0]) {
+        throw new BadInputFormatException('maintainance request not found');
+      }
       if(data.status == InspectApproval.APPROVED){
         //@ts-ignore
         inspection[0].approvalStatus = InspectApproval.APPROVED

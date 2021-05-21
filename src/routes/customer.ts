@@ -18,6 +18,7 @@ router.post(
 
 router.get(
   '/fetch-customers',
+  auth.verify(),
   customerCtrl.fetchCustomers()
 );
 
@@ -111,6 +112,12 @@ router.delete(
 router.get(
   '/mark-filled-cylinder/:customerId',
   customerCtrl.markCustomerAsFilled()
+);
+
+router.get(
+  '/fetch-filled-walkincylinders',
+  auth.verify(),
+  customerCtrl.fetchFilledCustomerCylinders()
 );
 
 export default router;

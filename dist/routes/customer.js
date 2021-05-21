@@ -8,7 +8,7 @@ const auth = new authentication_1.default();
 const val = new customer_1.Validator();
 const router = express_1.Router();
 router.post('/create-customer', auth.verify(), customer_1.Validator.validateCustomer(), val.validate(), controllers_1.customerCtrl.createCustomer());
-router.get('/fetch-customers', controllers_1.customerCtrl.fetchCustomers());
+router.get('/fetch-customers', auth.verify(), controllers_1.customerCtrl.fetchCustomers());
 router.get('/fetch-customer/:customerId', controllers_1.customerCtrl.fetchCustomer());
 router.post('/create-order/:customerId', auth.verify(), customer_1.Validator.validateOrder(), val.validate(), controllers_1.customerCtrl.createOrder());
 router.get('/fetch-order/:customerId', controllers_1.customerCtrl.fetchUserOrder());
@@ -25,5 +25,6 @@ router.get('/fetch-walkin-customers', auth.verify(), controllers_1.customerCtrl.
 router.get('/fetch-walkin-customer/:customerId', controllers_1.customerCtrl.fetchWalkinCustomer());
 router.delete('/delete-walkin-customer/:customerId', controllers_1.customerCtrl.deleteWalkinCustomer());
 router.get('/mark-filled-cylinder/:customerId', controllers_1.customerCtrl.markCustomerAsFilled());
+router.get('/fetch-filled-walkincylinders', auth.verify(), controllers_1.customerCtrl.fetchFilledCustomerCylinders());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

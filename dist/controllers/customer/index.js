@@ -30,7 +30,8 @@ class customerCtrl extends ctrl_1.default {
                     //@ts-ignore
                     validId = yield driver_1.uploadFile(req.files.validId, 'customer-document/valid-id');
                 }
-                const data = yield this.module.createCustomer(Object.assign(Object.assign({}, req.body), { CAC: cac, validID: validId }));
+                //@ts-ignore
+                const data = yield this.module.createCustomer(Object.assign(Object.assign({}, req.body), { CAC: cac, validID: validId }), req.user);
                 this.ok(res, 'Created', data);
             }
             catch (e) {
@@ -41,7 +42,8 @@ class customerCtrl extends ctrl_1.default {
     fetchCustomers() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchCustomers(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchCustomers(req.query, req.user);
                 this.ok(res, 'Fetched', data);
             }
             catch (e) {
@@ -116,7 +118,7 @@ class customerCtrl extends ctrl_1.default {
                 const { title, issue, comment } = req.body;
                 const { customerId } = req.params;
                 //@ts-ignore
-                const data = yield this.module.makeComplaint({ customer: customerId, title, issue, comment });
+                const data = yield this.module.makeComplaint(Object.assign({}, req.body), req.user);
                 this.ok(res, 'complain registered', data);
             }
             catch (e) {
@@ -163,7 +165,8 @@ class customerCtrl extends ctrl_1.default {
     fetchApprovedComplaints() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchApprovedCOmplaints(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchApprovedComplaints(req.query, req.user);
                 this.ok(res, 'complaints fetched', data);
             }
             catch (e) {
@@ -245,6 +248,18 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const data = yield this.module.deleteWalkinCustomer(req.params.customerId);
                 this.ok(res, 'customer deleted', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchFilledCustomerCylinders() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchFilledCustomerCylinders(req.query, req.user);
+                this.ok(res, 'Filled cylinders', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

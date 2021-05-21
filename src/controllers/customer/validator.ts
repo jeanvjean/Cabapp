@@ -53,14 +53,8 @@ class CustomerValidation extends Ctrl{
         .exists()
         .withMessage('Please Provide holding time'),
       check('territory'),
-      check('products')
-        .exists()
-        .withMessage('Products are required')
-        .isArray()
-        .withMessage('Products should be an array'),
-      check('unitPrice')
-        .exists()
-        .withMessage('Provide price'),
+      check('products'),
+      check('unitPrice'),
       check('CAC'),
       check('validId')
     ]

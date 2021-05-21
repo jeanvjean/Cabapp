@@ -57,14 +57,8 @@ class CustomerValidation extends ctrl_1.default {
                 .exists()
                 .withMessage('Please Provide holding time'),
             express_validator_1.check('territory'),
-            express_validator_1.check('products')
-                .exists()
-                .withMessage('Products are required')
-                .isArray()
-                .withMessage('Products should be an array'),
-            express_validator_1.check('unitPrice')
-                .exists()
-                .withMessage('Provide price'),
+            express_validator_1.check('products'),
+            express_validator_1.check('unitPrice'),
             express_validator_1.check('CAC'),
             express_validator_1.check('validId')
         ];

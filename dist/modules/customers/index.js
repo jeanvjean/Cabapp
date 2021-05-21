@@ -15,7 +15,6 @@ const order_1 = require("../../models/order");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
 const module_1 = require("../module");
-const bcryptjs_1 = require("bcryptjs");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 class Customer extends module_1.default {
@@ -27,12 +26,12 @@ class Customer extends module_1.default {
         this.user = props.user;
         this.walkin = props.walkin;
     }
-    createCustomer(data) {
+    createCustomer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const date = new Date();
                 date.setDate(date.getDate() + data.cylinderHoldingTime);
-                const customer = yield this.customer.create(Object.assign(Object.assign({}, data), { cylinderHoldingTime: date.toISOString() }));
+                const customer = yield this.customer.create(Object.assign(Object.assign({}, data), { cylinderHoldingTime: date.toISOString(), branch: user.branch }));
                 return Promise.resolve(customer);
             }
             catch (e) {
@@ -40,10 +39,10 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchCustomers(query) {
+    fetchCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customers = yield this.customer.find(query);
+                const customers = yield this.customer.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -143,7 +142,8 @@ class Customer extends module_1.default {
     makeComplaint(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaint = new this.complaint(data);
+                // console.log(data);
+                const complaint = new this.complaint(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 const hod = yield this.user.findOne({ branch: user.branch, role: user.role, subrole: 'head of department' });
                 if (complaint.complaintType == 'cylinder') {
                     complaint.initiator = user._id;
@@ -164,14 +164,13 @@ class Customer extends module_1.default {
                     };
                     //@ts-ignore
                     complaint.comments.push(com);
-                    complaint.save();
                 }
+                yield complaint.save();
                 new mail_1.default().push({
                     subject: "Complaint",
                     content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
                     user: hod
                 });
-                yield complaint.save();
                 return Promise.resolve(complaint);
             }
             catch (e) {
@@ -182,11 +181,16 @@ class Customer extends module_1.default {
     approveComplaint(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                // console.log(data)
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
                 const complaint = yield this.complaint.findById(data.id);
+                if (!complaint) {
+                    throw new exceptions_1.BadInputFormatException('complaint not found');
+                }
                 if ((complaint === null || complaint === void 0 ? void 0 : complaint.complaintType) == 'cylinder') {
                     if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                         if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -296,15 +300,15 @@ class Customer extends module_1.default {
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
-                            let track = {
-                                title: "Initiate complaint",
-                                stage: transferCylinder_1.stagesOfApproval.STAGE2,
-                                status: transferCylinder_1.ApprovalStatus.APPROVED,
-                                dateApproved: new Date().toISOString(),
-                                approvalOfficer: user._id,
-                                //@ts-ignore
-                                nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
-                            };
+                            // let track = {
+                            //   title:"Initiate complaint",
+                            //   stage:stagesOfApproval.STAGE2,
+                            //   status:ApprovalStatus.APPROVED,
+                            //   dateApproved:new Date().toISOString(),
+                            //   approvalOfficer:user._id,
+                            //   //@ts-ignore
+                            //   nextApprovalOfficer:hod?.branch.branchAdmin
+                            // }
                             // console.log(track);
                             let checkOfficer = complaint.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                             if (checkOfficer.length == 0) {
@@ -454,10 +458,10 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchApprovedCOmplaints(query) {
+    fetchApprovedComplaints(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaints = yield this.complaint.find(query);
+                const complaints = yield this.complaint.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 let approved = complaints.filter(complaint => complaint.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED);
                 return Promise.resolve(approved);
             }
@@ -547,6 +551,17 @@ class Customer extends module_1.default {
                 customer.status = walk_in_customers_1.WalkinCustomerStatus.FILLED;
                 yield customer.save();
                 return Promise.resolve(customer);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchFilledCustomerCylinders(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.walkin.find(Object.assign(Object.assign({}, query), { status: walk_in_customers_1.WalkinCustomerStatus.FILLED, branch: user.branch }));
+                return cylinders;
             }
             catch (e) {
                 this.handleException(e);

@@ -96,7 +96,15 @@ class Sale extends Module{
 
   public async approveSalesRequisition(data:SalesApproval, user:UserInterface):Promise<SalesRequisitionInterface|undefined>{
     try {
+      let loginUser = await this.user.findById(user._id).select('+password');
+      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+      if(!matchPWD) {
+        throw new BadInputFormatException('Incorrect password... please check the password');
+      }
       const sales = await this.sales.findById(data.salesId);
+      if(!sales) {
+        throw new BadInputFormatException('sales requisition not found')
+      }
       if(data.status == ApprovalStatus.REJECTED) {
         if(sales?.approvalStage == stagesOfApproval.STAGE1){
           let AO = sales.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE1);
@@ -129,8 +137,8 @@ class Sale extends Module{
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
-            subject: "Sales Requisition", 
-            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            subject: "Sales Requisition",
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)
@@ -165,8 +173,8 @@ class Sale extends Module{
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
-            subject: "Sales Requisition", 
-            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            subject: "Sales Requisition",
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales);
@@ -207,8 +215,8 @@ class Sale extends Module{
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
-            subject: "Sales Requisition", 
-            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            subject: "Sales Requisition",
+            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)
@@ -245,8 +253,8 @@ class Sale extends Module{
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
-            subject: "Sales Requisition", 
-            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            subject: "Sales Requisition",
+            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales);
@@ -282,8 +290,8 @@ class Sale extends Module{
           await sales.save();
           let approvalUser = await this.user.findById(sales.initiator);
           new Notify().push({
-            subject: "Sales Requisition", 
-            content: `A Sales requisition has been approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`, 
+            subject: "Sales Requisition",
+            content: `A Sales requisition has been approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)

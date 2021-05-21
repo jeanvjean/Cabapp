@@ -77,7 +77,8 @@ export const complaintSchema = new Schema({
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
   approvalStatus:{type:String},
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  complaintType:{type:String}
 },{
   timestamps:true
 });

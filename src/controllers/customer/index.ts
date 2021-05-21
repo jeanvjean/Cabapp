@@ -23,9 +23,10 @@ class customerCtrl extends Ctrl{
             //@ts-ignore
             cac = await uploadFile(req.files.CAC, 'customer-document/cac');
             //@ts-ignore
-              validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
+            validId = await uploadFile(req.files.validId, 'customer-document/valid-id');
         }
-        const data = await this.module.createCustomer({...req.body, CAC:cac, validID:validId});
+        //@ts-ignore
+        const data = await this.module.createCustomer({...req.body, CAC:cac, validID:validId}, req.user);
         this.ok(res, 'Created', data);
       } catch (e) {
         this.handleError(e, req, res)
@@ -36,7 +37,8 @@ class customerCtrl extends Ctrl{
   fetchCustomers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchCustomers(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchCustomers(req.query, req.user);
         this.ok(res, 'Fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -111,7 +113,7 @@ class customerCtrl extends Ctrl{
         const { title, issue, comment } = req.body;
         const { customerId } = req.params;
         //@ts-ignore
-        const data = await this.module.makeComplaint({customer:customerId, title, issue, comment});
+        const data = await this.module.makeComplaint({...req.body}, req.user);
         this.ok(res, 'complain registered', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -158,7 +160,8 @@ class customerCtrl extends Ctrl{
   fetchApprovedComplaints():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchApprovedCOmplaints(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchApprovedComplaints(req.query, req.user);
         this.ok(res, 'complaints fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -240,6 +243,18 @@ class customerCtrl extends Ctrl{
       try {
         const data = await this.module.deleteWalkinCustomer(req.params.customerId);
         this.ok(res,'customer deleted',data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchFilledCustomerCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchFilledCustomerCylinders(req.query, req.user);
+        this.ok(res, 'Filled cylinders', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

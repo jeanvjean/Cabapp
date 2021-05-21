@@ -69,6 +69,18 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    branchUsers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.branchUsers(req.query, req.user);
+                this.ok(res, 'branch users', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchUser() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

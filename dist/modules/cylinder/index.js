@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const bcryptjs_1 = require("bcryptjs");
 const exceptions_1 = require("../../exceptions");
 const cylinder_1 = require("../../models/cylinder");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
@@ -244,11 +243,15 @@ class Cylinder extends module_1.default {
     approveTransfer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
                 let transfer = yield this.transfer.findById(data.id);
+                if (!transfer) {
+                    throw new exceptions_1.BadInputFormatException('cylinder transfer not found');
+                }
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((transfer === null || transfer === void 0 ? void 0 : transfer.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = transfer.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

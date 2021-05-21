@@ -19,6 +19,7 @@ exports.customerSchema = new mongoose_1.Schema({
     unitPrice: Number,
     CAC: String,
     validID: String,
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' }
 }, {
     timestamps: true
 });

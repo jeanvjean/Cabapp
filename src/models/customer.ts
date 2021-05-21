@@ -23,6 +23,7 @@ export interface CustomerInterface extends Document{
   unitPrice:number
   CAC:string
   validID:string
+  branch:Schema.Types.ObjectId
 }
 
 export const customerSchema = new Schema({
@@ -42,6 +43,7 @@ export const customerSchema = new Schema({
   unitPrice:Number,
   CAC:String,
   validID:String,
+  branch:{type:Schema.Types.ObjectId, ref:'customer'}
 },{
   timestamps:true
 });

@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
 const transferCylinder_1 = require("../../models/transferCylinder");
-const bcryptjs_1 = require("bcryptjs");
 const exceptions_1 = require("../../exceptions");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
@@ -85,11 +84,15 @@ class PurchaseOrder extends module_1.default {
     approvePurchaseOrder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
                 const purchase = yield this.purchase.findById(data.purchaseId);
+                if (!purchase) {
+                    throw new exceptions_1.BadInputFormatException('purchase order not found');
+                }
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = purchase.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

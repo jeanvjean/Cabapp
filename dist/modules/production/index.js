@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
-const bcryptjs_1 = require("bcryptjs");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 class ProductionSchedule extends module_1.default {
@@ -58,11 +57,15 @@ class ProductionSchedule extends module_1.default {
     approveProductionSchedule(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let matchPWD = bcryptjs_1.compareSync(data.password, user.password);
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
                 const production = yield this.production.findById(data.productionId);
+                if (!production) {
+                    throw new exceptions_1.BadInputFormatException('production schedule not found');
+                }
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((production === null || production === void 0 ? void 0 : production.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = production.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);

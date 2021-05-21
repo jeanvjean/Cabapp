@@ -34,7 +34,8 @@ exports.complaintSchema = new mongoose_1.Schema({
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     comments: [transferCylinder_1.commentSchema],
     approvalStatus: { type: String },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    complaintType: { type: String }
 }, {
     timestamps: true
 });

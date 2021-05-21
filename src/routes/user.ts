@@ -30,13 +30,15 @@ const router: expressRouter = expressRouter();
 
   router.get('/get-users', auth.verify(), userCtrl.fetchUsers());
 
+  router.get('/get-branch-users', auth.verify(), userCtrl.branchUsers());
+
   router.get('/user-details/:id/:email', auth.verify(), userCtrl.fetchUser());
 
   router.post(
-    '/update-user/:id', 
+    '/update-user/:id',
     Validator.validateUserUpdate(),
     val.validate(),
-    auth.verify(), 
+    auth.verify(),
     userCtrl.updateUser()
   );
 

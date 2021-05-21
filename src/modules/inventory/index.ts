@@ -316,8 +316,8 @@ class Product extends Module{
       await disbursement.save();
       let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal process has been initiated and requires your approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal process has been initiated and requires your approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
       return Promise.resolve(disbursement);
@@ -328,11 +328,15 @@ class Product extends Module{
 
   public async approveDisbursment(data:ApprovalInput, user:UserInterface):Promise<DisburseProductInterface|undefined> {
     try {
-      let matchPWD = compareSync(data.password, user.password);
+      let loginUser = await this.user.findById(user._id).select('+password');
+      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
       const disbursement = await this.disburse.findById(data.id);
+      if(!disbursement) {
+        throw new BadInputFormatException('product disbursal not found')
+      }
       //@ts-ignore
       disbursement?.products = data.products;
       await disbursement?.save();
@@ -356,7 +360,7 @@ class Product extends Module{
             });
           }
           disbursement.tracking.push(track);
-          
+
           disbursement.nextApprovalOfficer = AO[0].id;
           disbursement.approvalStage = stagesOfApproval.START;
           disbursement.comments.push({
@@ -366,8 +370,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -399,8 +403,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -432,8 +436,8 @@ class Product extends Module{
           disbursement.nextApprovalOfficer = AO[0].id;
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -465,8 +469,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -506,8 +510,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -543,8 +547,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement);
@@ -588,8 +592,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.initiator);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -626,8 +630,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)
@@ -666,8 +670,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement);
@@ -713,8 +717,8 @@ class Product extends Module{
           await disbursement.save();
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
-            subject: "Product disbursal", 
-            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`, 
+            subject: "Product disbursal",
+            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
             user: apUser
           });
           return Promise.resolve(disbursement)

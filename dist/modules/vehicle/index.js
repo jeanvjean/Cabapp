@@ -129,8 +129,14 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const vehicle = yield this.vehicle.findById(data.vehicleId);
+                if (!vehicle) {
+                    throw new exceptions_1.BadInputFormatException('this vehicle was not found');
+                }
                 //@ts-ignore
                 let inspection = vehicle === null || vehicle === void 0 ? void 0 : vehicle.maintainace.filter(inspect => `${inspect._id}` == `${data.inspectionId}`);
+                if (!inspection[0]) {
+                    throw new exceptions_1.BadInputFormatException('maintainance request not found');
+                }
                 if (data.status == vehicle_1.InspectApproval.APPROVED) {
                     //@ts-ignore
                     inspection[0].approvalStatus = vehicle_1.InspectApproval.APPROVED;

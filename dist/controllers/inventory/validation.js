@@ -62,9 +62,7 @@ class InventoryValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('Provide Location'),
             express_validator_1.check('referer'),
-            express_validator_1.check('division')
-                .exists()
-                .withMessage('Provide division'),
+            express_validator_1.check('division'),
             express_validator_1.check('supplier')
         ];
         return rules;

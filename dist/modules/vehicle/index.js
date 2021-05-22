@@ -177,12 +177,8 @@ class Vehicle extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('selected vehicle was not found please pick an available vehicle');
                 }
                 let routePlan = new this.pickup(data);
-                let availableRoutes = yield this.pickup.find();
-                let docs = availableRoutes.map(doc => doc.serialNo);
-                //@ts-ignore
-                let maxNumber = Math.max(...docs);
-                let sn = maxNumber + 1;
-                routePlan.serialNo = sn | 1;
+                let availableRoutes = yield this.pickup.find({});
+                routePlan.serialNo = availableRoutes.length + 1;
                 yield routePlan.save();
                 return Promise.resolve(routePlan);
             }
@@ -222,6 +218,7 @@ class Vehicle extends module_1.default {
             catch (e) {
                 this.handleException(e);
             }
+            ;
         });
     }
     removeDriver(data) {
@@ -247,7 +244,7 @@ class Vehicle extends module_1.default {
             try {
                 const { vehicleId } = data;
                 //@ts-ignore
-                const routePlan = yield this.pickup.find({ vehicle: `${vehicleId}` });
+                const routePlan = yield this.pickup.find({ vehicle: `${vehicleId}`, deleted: false });
                 return Promise.resolve(routePlan);
             }
             catch (e) {

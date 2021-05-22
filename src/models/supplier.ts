@@ -13,6 +13,7 @@ export interface SupplierInterface extends Document {
   emailAddress:string
   phoneNumber:number
   supplierType:string
+  branch:Schema.Types.ObjectId
 }
 
 export const supplierSchema = new Schema({
@@ -22,7 +23,8 @@ export const supplierSchema = new Schema({
   contactPerson:{type:String},
   emailAddress:{type:String},
   phoneNumber:{type:Number},
-  supplierType:{type:String}
+  supplierType:{type:String},
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
 
 export default function factory(conn:Connection):Model<SupplierInterface> {

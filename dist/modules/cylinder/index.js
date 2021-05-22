@@ -87,7 +87,7 @@ class Cylinder extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('this cylinder has been registered');
                 }
                 let manDate = new Date(data.dateManufactured);
-                let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString() });
+                let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString(), branch: user.branch });
                 let newRegistration = yield this.registerCylinder.create(payload);
                 return Promise.resolve(newRegistration);
             }
@@ -99,7 +99,7 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const registeredCylinders = yield this.registerCylinder.find(query).populate([
+                const registeredCylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' }
                 ]);
@@ -134,10 +134,10 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fetchFaultyCylinders(query) {
+    fetchFaultyCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.registerCylinder.find(query).populate([
+                const cylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' }
                 ]);
@@ -169,7 +169,8 @@ class Cylinder extends module_1.default {
                     testingPresure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.testingPresure,
                     fillingPreasure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.fillingPreasure,
                     gasVolumeContent: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasVolumeContent,
-                    cylinderNumber: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderNumber
+                    cylinderNumber: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderNumber,
+                    branch: cylinder.branch
                 };
                 const archive = yield this.archive.create(saveInfo);
                 yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.remove());
@@ -180,10 +181,10 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fetchArchivedCylinder(query) {
+    fetchArchivedCylinder(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.archive.find(query).populate([
+                const cylinders = yield this.archive.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' }
                 ]);
@@ -197,10 +198,10 @@ class Cylinder extends module_1.default {
     transferCylinders(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let transfer = new this.transfer(data);
+                const date = new Date();
+                date.setDate(date.getDate() + data.holdingTime);
+                let transfer = new this.transfer(Object.assign(Object.assign({}, data), { branch: user.branch, holdingTime: date.toISOString() }));
                 transfer.initiator = user._id;
-                transfer.transferStatus = transferCylinder_1.TransferStatus.PENDING;
-                transfer.approvalStage = transferCylinder_1.stagesOfApproval.STAGE1; //stage has been approved
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
                 transfer.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                 let track = {
@@ -226,7 +227,6 @@ class Cylinder extends module_1.default {
                 };
                 //@ts-ignore
                 transfer.comments.push(com);
-                transfer.transferStatus = transferCylinder_1.TransferStatus.PENDING;
                 yield transfer.save();
                 yield new mail_1.default().push({
                     subject: "New cylinder transfer",

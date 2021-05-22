@@ -187,7 +187,8 @@ class ProductCtrl extends Ctrl{
   fetchSuppliers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchSuppliers(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchSuppliers(req.query, req.user);
         this.ok(res,'suppliers fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

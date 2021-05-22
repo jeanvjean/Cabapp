@@ -164,7 +164,8 @@ class CylinderController extends Ctrl{
   fetchFaultyCylinders():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchFaultyCylinders(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchFaultyCylinders(req.query, req.user);
         this.ok(res, 'fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -219,7 +220,8 @@ class CylinderController extends Ctrl{
   fetchCondemnCylinders():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchArchivedCylinder(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchArchivedCylinder(req.query, req.user);
         this.ok(res,'archive fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

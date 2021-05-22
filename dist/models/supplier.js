@@ -9,7 +9,8 @@ exports.supplierSchema = new mongoose_1.Schema({
     contactPerson: { type: String },
     emailAddress: { type: String },
     phoneNumber: { type: Number },
-    supplierType: { type: String }
+    supplierType: { type: String },
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 });
 function factory(conn) {
     return conn.model('supplier', exports.supplierSchema);

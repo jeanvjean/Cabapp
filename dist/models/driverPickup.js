@@ -26,6 +26,7 @@ const routeSchema = new mongoose_1.Schema({
     vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' },
     recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    deleted: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

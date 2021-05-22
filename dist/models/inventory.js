@@ -17,10 +17,12 @@ exports.productSchema = new mongoose_1.Schema({
     reorderLevel: { type: Number },
     location: { type: String },
     referer: { type: String },
-    division: { type: String },
+    division: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     supplier: { type: String },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branch' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    deleted: { type: Boolean, default: false }
 }, {
+    collection: 'products',
     timestamps: true
 });
 function factory(conn) {

@@ -173,7 +173,8 @@ class Cylinder extends Module {
       let manDate = new Date(data.dateManufactured);
       let payload = {
         ...data,
-        dateManufactured:manDate.toISOString()
+        dateManufactured:manDate.toISOString(),
+        branch:user.branch
       }
       let newRegistration:NewCylinderRegisterationInterface|undefined = await this.registerCylinder.create(payload);
       return Promise.resolve(newRegistration as RegisteredCylinderInterface);
@@ -184,7 +185,7 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
-      const registeredCylinders = await this.registerCylinder.find(query).populate([
+      const registeredCylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
         {path:'assignedTo', model:'customer'},
         {path:'branch', model:'branches'}
       ]);
@@ -215,9 +216,9 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchFaultyCylinders(query:QueryInterface):Promise<FilterCylinderResponse|undefined>{
+  public async fetchFaultyCylinders(query:QueryInterface, user:UserInterface):Promise<FilterCylinderResponse|undefined>{
     try {
-      const cylinders = await this.registerCylinder.find(query).populate([
+      const cylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
         {path:'assignedTo', model:'customer'},
         {path:'branch', model:'branches'}
       ]);
@@ -247,7 +248,8 @@ class Cylinder extends Module {
         testingPresure: cylinder?.testingPresure,
         fillingPreasure: cylinder?.fillingPreasure,
         gasVolumeContent: cylinder?.gasVolumeContent,
-        cylinderNumber: cylinder?.cylinderNumber
+        cylinderNumber: cylinder?.cylinderNumber,
+        branch: cylinder.branch
       }
       const archive = await this.archive.create(saveInfo);
       await cylinder?.remove();
@@ -257,9 +259,9 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchArchivedCylinder(query:QueryInterface):Promise<ArchivedCylinder[]|undefined>{
+  public async fetchArchivedCylinder(query:QueryInterface, user:UserInterface):Promise<ArchivedCylinder[]|undefined>{
     try {
-      const cylinders = await this.archive.find(query).populate([
+      const cylinders = await this.archive.find({...query, branch:user.branch}).populate([
         {path:'assignedTo', model:'customer'},
         {path:'branch', model:'branches'}
       ]);
@@ -271,10 +273,10 @@ class Cylinder extends Module {
 
   public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<TransferCylinder|undefined>{
     try {
-      let transfer = new this.transfer(data);
-      transfer.initiator = user._id
-      transfer.transferStatus = TransferStatus.PENDING
-      transfer.approvalStage = stagesOfApproval.STAGE1 //stage has been approved
+      const date = new Date();
+      date.setDate(date.getDate() + data.holdingTime);
+      let transfer = new this.transfer({...data, branch:user.branch, holdingTime:date.toISOString()});
+      transfer.initiator = user._id;
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
       transfer.nextApprovalOfficer = hod?._id;
       let track = {
@@ -300,7 +302,6 @@ class Cylinder extends Module {
       }
       //@ts-ignore
       transfer.comments.push(com);
-      transfer.transferStatus = TransferStatus.PENDING;
       await transfer.save();
       await new Notify().push({
         subject: "New cylinder transfer",

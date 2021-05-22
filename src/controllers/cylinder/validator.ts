@@ -61,7 +61,8 @@ class CylinderValidator extends Ctrl{
       check('gasVolumeContent')
         .exists()
         .withMessage('Gas Volume Content required'),
-      check('cylinderNumber')
+      check('cylinderNumber'),
+      check('holdingTime')
     ]
     return rules;
   }

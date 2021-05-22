@@ -17,6 +17,7 @@ router.post(
 
 router.get(
   '/fetch-products',
+  auth.verify(),
   productCtrl.fetchProducts()
 );
 
@@ -27,6 +28,7 @@ router.get(
 
 router.post(
   '/create-supplier',
+  auth.verify(),
   productCtrl.createSupplier()
 );
 

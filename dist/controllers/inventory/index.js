@@ -192,7 +192,8 @@ class ProductCtrl extends ctrl_1.default {
     fetchSuppliers() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchSuppliers(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchSuppliers(req.query, req.user);
                 this.ok(res, 'suppliers fetched', data);
             }
             catch (e) {

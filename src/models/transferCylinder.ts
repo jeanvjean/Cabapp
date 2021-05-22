@@ -65,7 +65,7 @@ export interface TransferCylinder extends Document {
   approvalOfficers:ApprovalOfficers[]
   comments:commentInterface[]
   nextApprovalOfficer:Schema.Types.ObjectId
-  holdingTime:Date
+  holdingTime:number
   type:TransferType
   purchaseDate:Date
   purchasePrice:number
@@ -113,11 +113,13 @@ export const TransferSchema = new Schema({
   },
   transferStatus:{
     type:String,
-    enum:Object.values(TransferStatus)
+    enum:Object.values(TransferStatus),
+    default:TransferStatus.PENDING
   },
   approvalStage:{
     type:String,
-    enum:Object.values(stagesOfApproval)
+    enum:Object.values(stagesOfApproval),
+    default:stagesOfApproval.STAGE1
   },
   type:{
     type:String,

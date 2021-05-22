@@ -57,9 +57,7 @@ export class InventoryValidator extends Ctrl{
         .exists()
         .withMessage('Provide Location'),
       check('referer'),
-      check('division')
-        .exists()
-        .withMessage('Provide division'),
+      check('division'),
       check('supplier')
     ]
     return rules;

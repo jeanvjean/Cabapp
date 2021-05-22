@@ -160,22 +160,16 @@ class Product extends Module{
 
   public async createProduct(data:NewProductInterface, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
-      let findProduct = await this.product.findOne({
-        partNumber:data.partNumber,
-        asnlNumber:data.asnlNumber
-      });
-      // if(findProduct) {
-      //   throw new BadInputFormatException('this product serial number, asnl number and part number is already in the system');
-      // }
-      let sn;
-      let documents = await this.product.find()
-      let docs = documents.map(doc=> doc.serialNumber);
-      //@ts-ignore
-      let maxNumber = Math.max(...docs);
-      sn = maxNumber + 1
+      let findProduct = await this.product.findOne({asnlNumber:data.asnlNumber, branch:user.branch});
+      if(findProduct) {
+        throw new BadInputFormatException('a product with this ASNL number already exists in your branch');
+      }
+      const products = await this.product.find({});
+
       let product = await this.product.create({
         ...data,
-        serialNumber:sn|1
+        branch:user.branch,
+        serialNumber:products.length + 1
       });
       const branch = await this.branch.findById(user.branch);
       branch?.products.push(product._id);
@@ -187,7 +181,7 @@ class Product extends Module{
 
   public async fetchProducts(query:QueryInterface, user:UserInterface): Promise<ProductInterface[]|undefined>{
     try {
-      const products = await this.product.find(query);
+      const products = await this.product.find({...query, branch:user.branch, deleted:false});
       // console.log(products);
       return Promise.resolve(products);
     } catch (e) {
@@ -219,7 +213,7 @@ class Product extends Module{
       if(!product){
         throw new BadInputFormatException('product not found')
       }
-      await product.remove();
+      product.deleted = true;
       return Promise.resolve({
         message:'Product deleted'
       })
@@ -230,16 +224,16 @@ class Product extends Module{
 
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
-      const supplier = await this.supplier.create(data);
+      const supplier = await this.supplier.create({...data,branch:user.branch});
       return Promise.resolve(supplier);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchSuppliers(query:QueryInterface):Promise<SupplierInterface[]|undefined>{
+  public async fetchSuppliers(query:QueryInterface, user:UserInterface):Promise<SupplierInterface[]|undefined>{
     try {
-      const suppliers = await this.supplier.find(query);
+      const suppliers = await this.supplier.find({...query, branch:user.branch});
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);

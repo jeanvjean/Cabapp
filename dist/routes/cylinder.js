@@ -19,12 +19,12 @@ router.get('/fetch-transfers', controllers_1.cylinderCtrl.fetchTransferRequests(
 router.get('/fetch-transfer/:id', controllers_1.cylinderCtrl.fetchTransferDetails());
 router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersPendingApprovals());
 router.delete('/remove-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.deleteRegisteredCylinder());
-router.get('/fetch-faulty-cylinders', controllers_1.cylinderCtrl.fetchFaultyCylinders());
+router.get('/fetch-faulty-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchFaultyCylinders());
 router.get('/fetch-customer-cylinders/:customerId', controllers_1.cylinderCtrl.fetchCustomerCylinders());
-router.get('/fetch-cylinder-transfer-report', controllers_1.cylinderCtrl.fetchCompletedTransfers());
-router.get('/mark-faulty-cylinder/:cylinderId', controllers_1.cylinderCtrl.faultyCylinder());
+router.get('/fetch-cylinder-transfer-report', auth.verify(), controllers_1.cylinderCtrl.fetchCompletedTransfers());
+router.get('/mark-faulty-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.faultyCylinder());
 router.get('/condemn-cylinder/:cylinderId', controllers_1.cylinderCtrl.condemnCylinder());
-router.get('/fetch-archived-cylinders', controllers_1.cylinderCtrl.fetchCondemnCylinders());
+router.get('/fetch-archived-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchCondemnCylinders());
 router.get('/fixed-cylinder/:cylinderId', controllers_1.cylinderCtrl.fixFaultyCylinder());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

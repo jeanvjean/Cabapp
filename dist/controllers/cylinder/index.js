@@ -165,7 +165,8 @@ class CylinderController extends ctrl_1.default {
     fetchFaultyCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchFaultyCylinders(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchFaultyCylinders(req.query, req.user);
                 this.ok(res, 'fetched', data);
             }
             catch (e) {
@@ -220,7 +221,8 @@ class CylinderController extends ctrl_1.default {
     fetchCondemnCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchArchivedCylinder(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchArchivedCylinder(req.query, req.user);
                 this.ok(res, 'archive fetched', data);
             }
             catch (e) {

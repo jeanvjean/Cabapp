@@ -63,11 +63,13 @@ exports.TransferSchema = new mongoose_1.Schema({
     },
     transferStatus: {
         type: String,
-        enum: Object.values(TransferStatus)
+        enum: Object.values(TransferStatus),
+        default: TransferStatus.PENDING
     },
     approvalStage: {
         type: String,
-        enum: Object.values(stagesOfApproval)
+        enum: Object.values(stagesOfApproval),
+        default: stagesOfApproval.STAGE1
     },
     type: {
         type: String,

@@ -73,6 +73,7 @@ router.delete(
 
 router.get(
   '/fetch-faulty-cylinders',
+  auth.verify(),
   cylinderCtrl.fetchFaultyCylinders()
 );
 
@@ -83,11 +84,13 @@ router.get(
 
 router.get(
   '/fetch-cylinder-transfer-report',
+  auth.verify(),
   cylinderCtrl.fetchCompletedTransfers()
 );
 
 router.get(
   '/mark-faulty-cylinder/:cylinderId',
+  auth.verify(),
   cylinderCtrl.faultyCylinder()
 );
 
@@ -98,6 +101,7 @@ router.get(
 
 router.get(
   '/fetch-archived-cylinders',
+  auth.verify(),
   cylinderCtrl.fetchCondemnCylinders()
 );
 

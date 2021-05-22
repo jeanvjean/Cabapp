@@ -33,6 +33,7 @@ export interface PickupInterface extends Document{
   vehicle:Schema.Types.ObjectId
   recievedBy:Schema.Types.ObjectId
   security:Schema.Types.ObjectId
+  deleted:boolean
 }
 
 
@@ -61,6 +62,7 @@ const routeSchema = new Schema({
   vehicle:{type:Schema.Types.ObjectId, ref:'vehicle'},
   recievedBy:{type:Schema.Types.ObjectId, ref:'User'},
   security:{type:Schema.Types.ObjectId, ref:'User'},
+  deleted:{type:Boolean, default:false}
 },{
   timestamps:true
 });

@@ -77,20 +77,12 @@ class Product extends module_1.default {
     createProduct(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let findProduct = yield this.product.findOne({
-                    partNumber: data.partNumber,
-                    asnlNumber: data.asnlNumber
-                });
-                // if(findProduct) {
-                //   throw new BadInputFormatException('this product serial number, asnl number and part number is already in the system');
-                // }
-                let sn;
-                let documents = yield this.product.find();
-                let docs = documents.map(doc => doc.serialNumber);
-                //@ts-ignore
-                let maxNumber = Math.max(...docs);
-                sn = maxNumber + 1;
-                let product = yield this.product.create(Object.assign(Object.assign({}, data), { serialNumber: sn | 1 }));
+                let findProduct = yield this.product.findOne({ asnlNumber: data.asnlNumber, branch: user.branch });
+                if (findProduct) {
+                    throw new exceptions_1.BadInputFormatException('a product with this ASNL number already exists in your branch');
+                }
+                const products = yield this.product.find({});
+                let product = yield this.product.create(Object.assign(Object.assign({}, data), { branch: user.branch, serialNumber: products.length + 1 }));
                 const branch = yield this.branch.findById(user.branch);
                 branch === null || branch === void 0 ? void 0 : branch.products.push(product._id);
                 return Promise.resolve(product);
@@ -103,7 +95,7 @@ class Product extends module_1.default {
     fetchProducts(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const products = yield this.product.find(query);
+                const products = yield this.product.find(Object.assign(Object.assign({}, query), { branch: user.branch, deleted: false }));
                 // console.log(products);
                 return Promise.resolve(products);
             }
@@ -141,7 +133,7 @@ class Product extends module_1.default {
                 if (!product) {
                     throw new exceptions_1.BadInputFormatException('product not found');
                 }
-                yield product.remove();
+                product.deleted = true;
                 return Promise.resolve({
                     message: 'Product deleted'
                 });
@@ -154,7 +146,7 @@ class Product extends module_1.default {
     createSupplier(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const supplier = yield this.supplier.create(data);
+                const supplier = yield this.supplier.create(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 return Promise.resolve(supplier);
             }
             catch (e) {
@@ -162,10 +154,10 @@ class Product extends module_1.default {
             }
         });
     }
-    fetchSuppliers(query) {
+    fetchSuppliers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const suppliers = yield this.supplier.find(query);
+                const suppliers = yield this.supplier.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 return Promise.resolve(suppliers);
             }
             catch (e) {

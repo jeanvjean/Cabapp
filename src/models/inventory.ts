@@ -5,6 +5,8 @@ import {
   Model
 } from 'mongoose';
 import * as autoIncrement from 'mongoose-auto-increment';
+
+
 export interface ProductInterface extends Document{
   productName:string
   itemDescription:string
@@ -21,7 +23,7 @@ export interface ProductInterface extends Document{
   location:string,
   referer:string
   division:string
-  supplier:string
+  supplier:Schema.Types.ObjectId
   branch:Schema.Types.ObjectId
   deleted:boolean
 }
@@ -34,7 +36,7 @@ export const productSchema = new Schema({
   areaOfSpecialization:{type:String},
   asnlNumber:{type:String},
   partNumber:{type:String},
-  serialNumber:{type:Number, unique:true},
+  serialNumber:{type:Number},
   quantity:{type:Number},
   unitCost:{type:Number},
   totalCost:{type:Number},
@@ -42,7 +44,7 @@ export const productSchema = new Schema({
   location:{type:String},
   referer:{type:String},
   division:{type:Schema.Types.ObjectId, ref:'branches'},
-  supplier:{type:String},
+  supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   deleted:{type:Boolean, default:false}
 },{

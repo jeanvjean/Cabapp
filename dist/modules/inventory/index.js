@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
+const receivedProduct_1 = require("../../models/receivedProduct");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const resolve_template_1 = require("../../util/resolve-template");
 const token_1 = require("../../util/token");
@@ -81,10 +82,13 @@ class Product extends module_1.default {
                 if (findProduct) {
                     throw new exceptions_1.BadInputFormatException('a product with this ASNL number already exists in your branch');
                 }
-                const products = yield this.product.find({});
-                let product = yield this.product.create(Object.assign(Object.assign({}, data), { branch: user.branch, serialNumber: products.length + 1 }));
-                const branch = yield this.branch.findById(user.branch);
-                branch === null || branch === void 0 ? void 0 : branch.products.push(product._id);
+                let product = new this.product(Object.assign({}, data));
+                let findP = yield this.product.find({});
+                product.serialNumber = findP.length + 1;
+                product.branch = user.branch;
+                // const branch = await this.branch.findById(user.branch);
+                // branch?.products.push(product._id);
+                yield product.save();
                 return Promise.resolve(product);
             }
             catch (e) {
@@ -118,7 +122,10 @@ class Product extends module_1.default {
     updateProduct(productId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield this.product.findByIdAndUpdate(productId, { $set: data }, { new: true });
+                const product = yield this.product.findByIdAndUpdate(productId, {
+                    $set: data
+                }, { new: true
+                });
                 return Promise.resolve(product);
             }
             catch (e) {
@@ -196,14 +203,29 @@ class Product extends module_1.default {
     addInventory(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const inventory = new this.inventory(data);
+                const inventory = new this.inventory(Object.assign(Object.assign({}, data), { inspectingOfficer: user._id }));
                 let products = inventory.products;
-                for (let product of products) {
-                    let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
-                    //@ts-ignore
-                    (prod === null || prod === void 0 ? void 0 : prod.quantity) + product.passed;
-                    //@ts-ignore
-                    yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                if (inventory.direction == receivedProduct_1.productDirection.IN) {
+                    for (let product of products) {
+                        let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.quantity += +product.passed;
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                        //@ts-ignore
+                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                    }
+                }
+                else if (inventory.direction == receivedProduct_1.productDirection.OUT) {
+                    for (let product of products) {
+                        let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.quantity -= +product.quantity;
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                        //@ts-ignore
+                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                    }
                 }
                 yield inventory.save();
                 return Promise.resolve(inventory);
@@ -217,7 +239,7 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
-                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id }));
+                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch }));
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,
@@ -569,6 +591,7 @@ class Product extends module_1.default {
                         let brenchRequestApproval = yield this.user.findOne({ branch: user.branch, subrole: 'head of department' }).populate({
                             path: 'branch', model: 'branches'
                         });
+                        // console.log(brenchRequestApproval)
                         let track = {
                             title: "Approval Prorcess",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -797,10 +820,10 @@ class Product extends module_1.default {
             }
         });
     }
-    fetchDisburseRequests(query) {
+    fetchDisburseRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursements = yield this.disburse.find(query);
+                const disbursements = yield this.disburse.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 let totalApproved = disbursements.filter(transfer => transfer.disburseStatus == transferCylinder_1.TransferStatus.COMPLETED);
                 let totalPending = disbursements.filter(transfer => transfer.disburseStatus == transferCylinder_1.TransferStatus.PENDING);
                 return Promise.resolve({
@@ -817,10 +840,10 @@ class Product extends module_1.default {
             }
         });
     }
-    fetchProductRequests(query) {
+    fetchProductRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursements = yield this.disburse.find(query);
+                const disbursements = yield this.disburse.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 let totalApproved = disbursements.filter(transfer => transfer.requestApproval == transferCylinder_1.TransferStatus.COMPLETED);
                 let totalPending = disbursements.filter(transfer => transfer.requestApproval == transferCylinder_1.TransferStatus.PENDING);
                 return Promise.resolve({
@@ -837,10 +860,10 @@ class Product extends module_1.default {
             }
         });
     }
-    disburseReport(query) {
+    disburseReport(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursements = yield this.disburse.find(query);
+                const disbursements = yield this.disburse.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 let completed = disbursements.filter(disburse => disburse.disburseStatus == transferCylinder_1.TransferStatus.COMPLETED);
                 return Promise.resolve(completed);
             }

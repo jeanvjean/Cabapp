@@ -135,7 +135,8 @@ class ProductCtrl extends ctrl_1.default {
     fetchDisbursements() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursement = yield this.module.fetchDisburseRequests(req.query);
+                //@ts-ignore
+                const disbursement = yield this.module.fetchDisburseRequests(req.query, req.user);
                 this.ok(res, 'Fetched', disbursement);
             }
             catch (e) {
@@ -146,7 +147,8 @@ class ProductCtrl extends ctrl_1.default {
     disburseReport() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.disburseReport(req.query);
+                //@ts-ignore
+                const data = yield this.module.disburseReport(req.query, req.user);
                 this.ok(res, 'disburse report fetched successfully', data);
             }
             catch (e) {
@@ -239,7 +241,7 @@ class ProductCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { productId } = req.params;
-                const data = this.module.updateProduct(productId, req.body);
+                const data = this.module.updateProduct(productId, Object.assign({}, req.body));
                 this.ok(res, 'product updated', data);
             }
             catch (e) {
@@ -250,7 +252,8 @@ class ProductCtrl extends ctrl_1.default {
     fetchProductsRequest() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchProductRequests(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchProductRequests(req.query, req.user);
                 this.ok(res, 'all restock requests fetched', data);
             }
             catch (e) {

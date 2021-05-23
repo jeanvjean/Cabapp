@@ -67,6 +67,37 @@ class InventoryValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static approveInput() {
+        const rules = [
+            express_validator_1.check('password')
+                .exists()
+                .withMessage('provide password for authentication'),
+            express_validator_1.check('products')
+                .isArray()
+                .withMessage('products shoult be an array'),
+            express_validator_1.check('id')
+                .exists()
+                .withMessage('provide the disbursal id'),
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('provide status approve/reject'),
+            express_validator_1.check('comment')
+        ];
+        return rules;
+    }
+    static validateUpdateInventory() {
+        const rules = [
+            express_validator_1.check('products')
+                .exists()
+                .withMessage('Products are required to br logged')
+                .isArray()
+                .withMessage('products must be an array'),
+            express_validator_1.check('direction')
+                .exists()
+                .withMessage('Direction is required in-coming/out-going')
+        ];
+        return rules;
+    }
 }
 exports.InventoryValidator = InventoryValidator;
 exports.default = InventoryValidator;

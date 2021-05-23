@@ -30,7 +30,8 @@ class VehicleController extends ctrl_1.default {
     fetchVehicles() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicles = yield this.module.fetchVehicles(req.query);
+                //@ts-ignore
+                const vehicles = yield this.module.fetchVehicles(req.query, req.user);
                 this.ok(res, 'Fetched list', vehicles);
             }
             catch (e) {

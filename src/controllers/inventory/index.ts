@@ -130,7 +130,8 @@ class ProductCtrl extends Ctrl{
   fetchDisbursements():RequestHandler{
     return async(req:Request, res:Response) =>{
       try {
-        const disbursement = await this.module.fetchDisburseRequests(req.query);
+        //@ts-ignore
+        const disbursement = await this.module.fetchDisburseRequests(req.query, req.user);
         this.ok(res, 'Fetched', disbursement);
       } catch (e) {
         this.handleError(e, req, res);
@@ -141,7 +142,8 @@ class ProductCtrl extends Ctrl{
   disburseReport():RequestHandler{
     return async(req:Request, res:Response) =>{
       try {
-        const data = await this.module.disburseReport(req.query);
+        //@ts-ignore
+        const data = await this.module.disburseReport(req.query, req.user);
         this.ok(res, 'disburse report fetched successfully', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -234,7 +236,7 @@ class ProductCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { productId } = req.params
-        const data = this.module.updateProduct(productId, req.body);
+        const data = this.module.updateProduct(productId, {...req.body});
         this.ok(res, 'product updated', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -245,7 +247,8 @@ class ProductCtrl extends Ctrl{
   fetchProductsRequest():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchProductRequests(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchProductRequests(req.query, req.user);
         this.ok(res, 'all restock requests fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

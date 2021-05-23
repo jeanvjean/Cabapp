@@ -63,6 +63,39 @@ export class InventoryValidator extends Ctrl{
     return rules;
   }
 
+  static approveInput():ValidationChain[]{
+    const rules = [
+      check('password')
+        .exists()
+        .withMessage('provide password for authentication'),
+      check('products')
+        .isArray()
+        .withMessage('products shoult be an array'),
+      check('id')
+        .exists()
+        .withMessage('provide the disbursal id'),
+      check('status')
+        .exists()
+        .withMessage('provide status approve/reject'),
+      check('comment')
+    ]
+    return rules;
+  }
+
+  static validateUpdateInventory():ValidationChain[]{
+    const rules = [
+      check('products')
+        .exists()
+        .withMessage('Products are required to br logged')
+        .isArray()
+        .withMessage('products must be an array'),
+      check('direction')
+        .exists()
+        .withMessage('Direction is required in-coming/out-going')
+    ]
+    return rules;
+  }
+
 }
 
 export default InventoryValidator;

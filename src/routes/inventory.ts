@@ -35,6 +35,8 @@ router.post(
 router.post(
   '/register-inventory',
   auth.verify(),
+  Validator.validateUpdateInventory(),
+  val.validate(),
   productCtrl.addInventory()
 );
 
@@ -47,6 +49,8 @@ router.post(
 router.post(
   '/approve-disbursement',
   auth.verify(),
+  Validator.approveInput(),
+  val.validate(),
   productCtrl.approveDisbursement()
 );
 
@@ -75,6 +79,7 @@ router.get(
 
 router.get(
   '/fetch-disbursement-report',
+  auth.verify(),
   productCtrl.disburseReport()
 );
 
@@ -90,30 +95,36 @@ router.get(
 
 router.get(
   '/fetch-suppliers',
+  auth.verify(),
   productCtrl.fetchSuppliers()
 );
 router.post(
   '/update-supplier/:supplierId',
+  auth.verify(),
   productCtrl.updateSupplier()
 );
 
 router.delete(
   '/remove-supplier/:supplierId',
+  auth.verify(),
   productCtrl.deleteSupplier()
 );
 
 router.post(
   '/update-product/:productId',
+  auth.verify(),
   productCtrl.updateProduct()
 );
 
 router.delete(
   '/delete-product/:productId',
+  auth.verify(),
   productCtrl.deleteProduct()
 );
 
 router.get(
   '/fetch-restock-requests',
+  auth.verify(),
   productCtrl.fetchProductsRequest()
 );
 

@@ -10,7 +10,7 @@ exports.productSchema = new mongoose_1.Schema({
     areaOfSpecialization: { type: String },
     asnlNumber: { type: String },
     partNumber: { type: String },
-    serialNumber: { type: Number, unique: true },
+    serialNumber: { type: Number },
     quantity: { type: Number },
     unitCost: { type: Number },
     totalCost: { type: Number },
@@ -18,7 +18,7 @@ exports.productSchema = new mongoose_1.Schema({
     location: { type: String },
     referer: { type: String },
     division: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    supplier: { type: String },
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     deleted: { type: Boolean, default: false }
 }, {

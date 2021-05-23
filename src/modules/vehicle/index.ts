@@ -109,9 +109,9 @@ class Vehicle extends Module{
     }
   }
 
-  public async fetchVehicles(query:QueryInterface):Promise<VehicleInterface[]|undefined> {
+  public async fetchVehicles(query:QueryInterface, user:UserInterface):Promise<VehicleInterface[]|undefined> {
     try {
-      const vehicles = await this.vehicle.find(query);
+      const vehicles = await this.vehicle.find({...query, branch:user.branch});
       return Promise.resolve(vehicles)
     } catch (e) {
       this.handleException(e);
@@ -148,8 +148,8 @@ class Vehicle extends Module{
       //@ts-ignore
       vehicle?.maintainace.push({...vinspection, comments:[com]});
       await vehicle?.save();
-      let approvalUser = await this.user.findById({role:'sales', subrole:'head of department', branch:vehicle?.branch});
-      new Notify().push({
+      let approvalUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:vehicle?.branch});
+      await new Notify().push({
         subject: "Vehicle inspection",
         content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
         user: approvalUser

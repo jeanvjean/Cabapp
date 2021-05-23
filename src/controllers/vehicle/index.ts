@@ -26,7 +26,8 @@ class VehicleController extends Ctrl{
   fetchVehicles():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const vehicles = await this.module.fetchVehicles(req.query);
+        //@ts-ignore
+        const vehicles = await this.module.fetchVehicles(req.query, req.user);
         this.ok(res, 'Fetched list', vehicles);
       } catch (e) {
         this.handleError(e, req, res);

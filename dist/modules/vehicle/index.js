@@ -32,10 +32,10 @@ class Vehicle extends module_1.default {
             }
         });
     }
-    fetchVehicles(query) {
+    fetchVehicles(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicles = yield this.vehicle.find(query);
+                const vehicles = yield this.vehicle.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
                 return Promise.resolve(vehicles);
             }
             catch (e) {
@@ -76,8 +76,8 @@ class Vehicle extends module_1.default {
                 //@ts-ignore
                 vehicle === null || vehicle === void 0 ? void 0 : vehicle.maintainace.push(Object.assign(Object.assign({}, vinspection), { comments: [com] }));
                 yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
-                let approvalUser = yield this.user.findById({ role: 'sales', subrole: 'head of department', branch: vehicle === null || vehicle === void 0 ? void 0 : vehicle.branch });
-                new mail_1.default().push({
+                let approvalUser = yield this.user.findOne({ role: 'sales', subrole: 'head of department', branch: vehicle === null || vehicle === void 0 ? void 0 : vehicle.branch });
+                yield new mail_1.default().push({
                     subject: "Vehicle inspection",
                     content: `A vehicle inspection request requires your approval. click to view ${static_1.default.FRONTEND_URL}/view-inspection-history/${vehicle === null || vehicle === void 0 ? void 0 : vehicle._id}`,
                     user: approvalUser

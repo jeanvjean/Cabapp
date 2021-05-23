@@ -3,7 +3,7 @@ import { BadInputFormatException } from "../../exceptions";
 import { BranchInterface } from "../../models/branch";
 import { DisburseProduct, DisburseProductInterface } from "../../models/disburseStock";
 import { ProductInterface } from "../../models/inventory";
-import { InventoryInterface, ReceivedProduct } from "../../models/receivedProduct";
+import { InventoryInterface, productDirection, ReceivedProduct } from "../../models/receivedProduct";
 import { SupplierInterface } from "../../models/supplier";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
@@ -38,7 +38,19 @@ interface NewProductInterface{
   reorderLevel:number
   location?:string
   referer?:string
-  productName?:string
+  productName?:string,
+  supplier?:ProductInterface['supplier']
+}
+
+interface updateProduct {
+  asnlNumber?:ProductInterface['asnlNumber']
+  partNumber?:ProductInterface['partNumber']
+  quantity?:ProductInterface['quantity']
+  unitCost?:ProductInterface['unitCost']
+  totalCost?:ProductInterface['totalCost']
+  location?:ProductInterface['location']
+  productName?:ProductInterface['productName'],
+  supplier?:ProductInterface['supplier']
 }
 
 type NewSupplierInterface = {
@@ -58,8 +70,8 @@ type NewInventory={
   invoiceNumber:string,
   dateReceived:string,
   products:ReceivedProduct[],
-  inspectingOfficer:string,
-  grnDocument:string
+  grnDocument:string,
+  direction:string
 }
 
 interface NewDisburseInterface{
@@ -164,15 +176,14 @@ class Product extends Module{
       if(findProduct) {
         throw new BadInputFormatException('a product with this ASNL number already exists in your branch');
       }
-      const products = await this.product.find({});
 
-      let product = await this.product.create({
-        ...data,
-        branch:user.branch,
-        serialNumber:products.length + 1
-      });
-      const branch = await this.branch.findById(user.branch);
-      branch?.products.push(product._id);
+      let product = new this.product({...data});
+      let findP = await this.product.find({})
+      product.serialNumber = findP.length + 1;
+      product.branch = user.branch;
+      // const branch = await this.branch.findById(user.branch);
+      // branch?.products.push(product._id);
+      await product.save();
       return Promise.resolve(product);
     } catch (e) {
       this.handleException(e)
@@ -198,9 +209,15 @@ class Product extends Module{
     }
   }
 
-  public async updateProduct(productId:string,data:NewProductInterface):Promise<ProductInterface|undefined>{
+  public async updateProduct(productId:string,data:updateProduct):Promise<ProductInterface|undefined>{
     try {
-      const product = await this.product.findByIdAndUpdate(productId,{$set:data}, {new:true});
+      const product = await this.product.findByIdAndUpdate(
+          productId,
+          {
+            $set:data
+          },
+          {new:true
+        });
       return Promise.resolve(product as ProductInterface);
     } catch (e) {
       this.handleException(e)
@@ -266,15 +283,28 @@ class Product extends Module{
 
   public async addInventory(data:NewInventory, user:UserInterface):Promise<InventoryInterface|undefined> {
     try {
-      const inventory = new this.inventory(data);
+      const inventory = new this.inventory({...data, inspectingOfficer:user._id});
       let products = inventory.products;
-
-      for(let product of products) {
-        let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
-        //@ts-ignore
-        prod?.quantity + product.passed;
-        //@ts-ignore
-        await prod?.save()
+      if(inventory.direction == productDirection.IN){
+        for(let product of products) {
+          let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+          //@ts-ignore
+          prod?.quantity += +product.passed;
+          //@ts-ignore
+          prod?.totalCost = prod?.unitCost * prod?.quantity;
+          //@ts-ignore
+          await prod?.save()
+        }
+      }else if(inventory.direction == productDirection.OUT) {
+        for(let product of products) {
+          let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+          //@ts-ignore
+          prod?.quantity -= +product.quantity;
+          //@ts-ignore
+          prod?.totalCost = prod?.unitCost * prod?.quantity;
+          //@ts-ignore
+          await prod?.save()
+        }
       }
       await inventory.save();
       return Promise.resolve(inventory);
@@ -286,7 +316,12 @@ class Product extends Module{
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
-      const disbursement = new this.disburse({...data, nextApprovalOfficer:hod?._id, initiator:user._id});
+      const disbursement = new this.disburse({
+        ...data,
+        nextApprovalOfficer:hod?._id,
+        initiator:user._id,
+        branch:user.branch
+      });
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,
@@ -333,6 +368,7 @@ class Product extends Module{
       }
       //@ts-ignore
       disbursement?.products = data.products;
+
       await disbursement?.save();
       if(data.status == ApprovalStatus.REJECTED) {
         if(disbursement?.approvalStage == stagesOfApproval.STAGE1) {
@@ -633,6 +669,7 @@ class Product extends Module{
           let brenchRequestApproval = await this.user.findOne({branch:user.branch, subrole:'head of department'}).populate({
             path:'branch', model:'branches'
           });
+          // console.log(brenchRequestApproval)
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE2,
@@ -849,9 +886,9 @@ class Product extends Module{
     }
   }
 
-  public async fetchDisburseRequests(query:QueryInterface):Promise<DisbursePoolResponse|undefined>{
+  public async fetchDisburseRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try {
-      const disbursements = await this.disburse.find(query);
+      const disbursements = await this.disburse.find({...query, branch:user.branch});
       let totalApproved = disbursements.filter(
         transfer=>transfer.disburseStatus == TransferStatus.COMPLETED
       );
@@ -871,9 +908,9 @@ class Product extends Module{
     }
   }
 
-  public async fetchProductRequests(query:QueryInterface):Promise<DisbursePoolResponse|undefined>{
+  public async fetchProductRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try{
-      const disbursements = await this.disburse.find(query);
+      const disbursements = await this.disburse.find({...query, branch:user.branch});
       let totalApproved = disbursements.filter(
         transfer=>transfer.requestApproval == TransferStatus.COMPLETED
       );
@@ -894,9 +931,9 @@ class Product extends Module{
   }
 
 
-  public async disburseReport(query:QueryInterface):Promise<DisburseProductInterface[]|undefined>{
+  public async disburseReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursements = await this.disburse.find(query);
+      const disbursements = await this.disburse.find({...query, branch:user.branch});
       let completed = disbursements.filter(disburse=> disburse.disburseStatus == TransferStatus.COMPLETED);
       return Promise.resolve(completed)
     } catch (e) {

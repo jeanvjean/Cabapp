@@ -7,6 +7,11 @@ import {
 import { commentInterface, commentSchema } from './transferCylinder';
 
 
+export enum productDirection {
+  IN="in-coming",
+  OUT="out-going"
+}
+
 export interface InventoryInterface extends Document{
   supplier:string,
   LPOnumber:string,
@@ -16,6 +21,7 @@ export interface InventoryInterface extends Document{
   products:ReceivedProduct[],
   inspectingOfficer:Schema.Types.ObjectId,
   grnDocument:string
+  direction:productDirection
 }
 
 export interface ReceivedProduct {
@@ -31,7 +37,7 @@ export interface ReceivedProduct {
 }
 
 export const productRecievedSchema = new Schema({
-  productNumber:{type:Number},
+  productNumber:{type:String},
   productName:{type:String},
   quantity:{type:Number},
   passed:{type:Number},
@@ -52,7 +58,8 @@ export const inventorySchema = new Schema({
   dateReceived:{type:Date},
   products:[productRecievedSchema],
   inspectingOfficer:{type:Schema.Types.ObjectId, ref:'User'},
-  grnDocument:{type:String}
+  grnDocument:{type:String},
+  direction:{type:String, enum:Object.values(productDirection)}
 });
 
 export default function factory(conn:Connection):Model<InventoryInterface> {

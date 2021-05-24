@@ -1,7 +1,7 @@
 import {
-Schema, 
-Model, 
-Document, 
+Schema,
+Model,
+Document,
 Connection
 } from 'mongoose';
 import { commentInterface, ApprovalOfficers, stagesOfApproval, TransferStatus, ApprovalStatus, commentSchema, ApprovalOfficerSchema } from './transferCylinder';
@@ -35,8 +35,8 @@ const purchaseOrderSchema = new Schema({
     customer:{type:Schema.Types.ObjectId, ref:'customer'},
     date:Date,
     cylinders:{type:[cylinderSchema]},
-    comments:{type:commentSchema},
-    approvalOfficer:{type:[ApprovalOfficerSchema]},
+    comments:{type:[commentSchema]},
+    approvalOfficers:{type:[ApprovalOfficerSchema]},
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     approvalStage:{type:String, default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, default:TransferStatus.PENDING},

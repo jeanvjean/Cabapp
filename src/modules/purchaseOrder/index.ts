@@ -47,24 +47,27 @@ class PurchaseOrder extends Module{
     public async createPurchaseOrder(data:newPurchaseOrder, user:UserInterface):Promise<PurchaseOrderInterface|undefined>{
         try {
             const purchase = new this.purchase(data);
+
             purchase.branch = user.branch
+
             purchase.initiator = user._id
+
             purchase.comments.push({
                 comment:data.comment,
                 commentBy:user._id
             });
             purchase.approvalOfficers.push({
-                name:user.name,
-                id:user._id,
-                office:user.subrole,
-                department:user.role,
-                stageOfApproval:stagesOfApproval.STAGE1
+              name:user.name,
+              id:user._id,
+              office:user.subrole,
+              department:user.role,
+              stageOfApproval:stagesOfApproval.STAGE1
             });
             let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
             purchase.nextApprovalOfficer = hod?._id
             await purchase.save();
             let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
-            new Notify().push({
+            await new Notify().push({
               subject: "Purchase Order",
               content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
               user: approvalUser
@@ -141,7 +144,7 @@ class PurchaseOrder extends Module{
                   });
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
-                  new Notify().push({
+                  await new Notify().push({
                     subject: "Purchase Order",
                     content: `A purchase order you scheduled failed approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
@@ -177,7 +180,7 @@ class PurchaseOrder extends Module{
                   })
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
-                  new Notify().push({
+                  await new Notify().push({
                     subject: "Purchase Order",
                     content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
@@ -219,7 +222,7 @@ class PurchaseOrder extends Module{
                   })
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
-                  new Notify().push({
+                  await new Notify().push({
                     subject: "Purchase Order",
                     content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
@@ -258,7 +261,7 @@ class PurchaseOrder extends Module{
                   });
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
-                  new Notify().push({
+                  await new Notify().push({
                     subject: "Purchase Order",
                     content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
@@ -289,14 +292,14 @@ class PurchaseOrder extends Module{
                   purchase.approvalStatus = TransferStatus.COMPLETED
                   //@ts-ignore
                   // transfer.nextApprovalOfficer = data.nextApprovalOfficer
-                  transfer.comments.push({
+                  purchase.comments.push({
                     comment:data.comment,
                     commentBy:user._id,
                     officer:'Approving officer'
                   });
                   await purchase.save();
                   let approvalUser = await this.user.findById(purchase.initiator);
-                  new Notify().push({
+                  await new Notify().push({
                     subject: "Purchase Order",
                     content: `A purchase order has been approved. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser

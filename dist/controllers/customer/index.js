@@ -112,6 +112,30 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    assignOrderToVehicle() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.assignOrderToVehicle(Object.assign(Object.assign({}, req.body), { orderId: req.params.orderId }), req.user);
+                this.ok(res, 'order assigned to vehicle', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchOrdersForVehicle() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchOrdersAssignedToVehicle({ vehicle: req.params.vehicleId });
+                this.ok(res, 'orders fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     createComplaint() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

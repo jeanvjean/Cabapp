@@ -4,7 +4,7 @@ Connection,
 Model,
 Document
 } from 'mongoose';
-import { ApprovalOfficers, ApprovalOfficerSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
+import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
 
 interface saleCylinder{
@@ -22,6 +22,7 @@ export interface SalesRequisitionInterface extends Document{
   cylinders:saleCylinder[]
   initiator:Schema.Types.ObjectId
   approvalStage:stagesOfApproval
+  tracking:ApprovalStage[]
   approvalOfficers:ApprovalOfficers[]
   branch:Schema.Types.ObjectId
   status:TransferStatus
@@ -42,6 +43,7 @@ const salesReqSchema = new Schema({
   ecrNo:{type:String},
   date:{type:Date},
   cylinders:[saleCylinderSchema],
+  tracking:[approvalStageShema],
   initiator:{type:Schema.Types.ObjectId, ref:'users'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.START},
   approvalOfficers:[ApprovalOfficerSchema],

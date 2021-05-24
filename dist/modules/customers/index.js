@@ -53,7 +53,11 @@ class Customer extends module_1.default {
     fetchCustomerDetails(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customer = yield this.customer.findById(id);
+                const customer = yield this.customer.findById(id).populate({
+                    path: 'vehicle', model: 'vehicle', populate: {
+                        path: 'assignedTo', model: 'User'
+                    }
+                });
                 return Promise.resolve(customer);
             }
             catch (e) {
@@ -69,7 +73,38 @@ class Customer extends module_1.default {
                     location: user.role,
                     status: 'pending'
                 });
+                yield order.save();
                 return Promise.resolve(order);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    assignOrderToVehicle(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const order = yield this.order.findByIdAndUpdate(data.orderId, { $set: data }, { new: true }).populate({
+                    path: 'vehicle', model: 'vehicle', populate: {
+                        path: 'assignedTo', model: 'User'
+                    }
+                });
+                return Promise.resolve(order);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchOrdersAssignedToVehicle(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const orders = yield this.order.find({ vehicle: data.vehicle }).populate({
+                    path: 'vehicle', model: 'vehicle', populate: {
+                        path: 'assignedTo', model: 'User'
+                    }
+                });
+                return orders;
             }
             catch (e) {
                 this.handleException(e);

@@ -52,6 +52,18 @@ router.get(
 );
 
 router.post(
+  '/assign-vehicle/:orderId',
+  auth.verify(),
+  customerCtrl.assignOrderToVehicle()
+);
+
+router.get(
+  '/fetch-vehicle-orders/:vehicleId',
+  auth.verify(),
+  customerCtrl.fetchOrdersForVehicle()
+);
+
+router.post(
   '/make-complain/:customerId',
   auth.verify(),
   customerCtrl.createComplaint()

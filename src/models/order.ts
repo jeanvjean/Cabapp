@@ -26,7 +26,8 @@ export interface OrderInterface extends Document{
   cylinderSize?:string
   gasType?:string
   gasColor?:string,
-  tracking:trackingOrder[]
+  tracking:trackingOrder[],
+  branch:Schema.Types.ObjectId
 }
 
 const trackingSchema = new Schema({
@@ -44,7 +45,8 @@ const OrderSchema = new Schema({
   cylinderSize:{type:String},
   gasType:{type:String},
   gasColor:{type:String},
-  tracking:[trackingSchema]
+  tracking:[trackingSchema],
+  branch:{type:Schema.Types.ObjectId, ref:'vehicle'}
 },{
   timestamps:true
 });

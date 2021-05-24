@@ -96,6 +96,8 @@ class Sale extends module_1.default {
                         //@ts-ignore
                         sales.tracking.push(track);
                         sales.approvalStage = transferCylinder_1.stagesOfApproval.START;
+                        sales.initiated = true;
+                        sales.initiator = user._id;
                         sales.nextApprovalOfficer = AO[0].id;
                         // sales.comments.push({
                         //   comment:data.comment,
@@ -183,7 +185,7 @@ class Sale extends module_1.default {
                         // })
                         yield sales.save();
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Sales Requisition",
                             content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
@@ -222,7 +224,7 @@ class Sale extends module_1.default {
                         // })
                         yield sales.save();
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Sales Requisition",
                             content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
@@ -251,15 +253,15 @@ class Sale extends module_1.default {
                         sales.tracking.push(track);
                         sales.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
                         sales.status = transferCylinder_1.TransferStatus.COMPLETED;
-                        //@ts-ignore
                         // transfer.nextApprovalOfficer = data.nextApprovalOfficer
-                        transfer.comments.push({
-                            comment: data.comment,
-                            commentBy: user._id
-                        });
+                        // sales.comments.push({
+                        //   comment:data.comment,
+                        //   commentBy:user._id
+                        // });
+                        // console.log(sales);
                         yield sales.save();
                         let approvalUser = yield this.user.findById(sales.initiator);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Sales Requisition",
                             content: `A Sales requisition has been approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser

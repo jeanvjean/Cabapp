@@ -41,7 +41,7 @@ class PurchaseOrder extends module_1.default {
                 purchase.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                 yield purchase.save();
                 let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
-                new mail_1.default().push({
+                yield new mail_1.default().push({
                     subject: "Purchase Order",
                     content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
@@ -124,7 +124,7 @@ class PurchaseOrder extends module_1.default {
                         });
                         yield purchase.save();
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Purchase Order",
                             content: `A purchase order you scheduled failed approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
@@ -161,7 +161,7 @@ class PurchaseOrder extends module_1.default {
                         });
                         yield purchase.save();
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Purchase Order",
                             content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
@@ -204,7 +204,7 @@ class PurchaseOrder extends module_1.default {
                         });
                         yield purchase.save();
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Purchase Order",
                             content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
@@ -244,7 +244,7 @@ class PurchaseOrder extends module_1.default {
                         });
                         yield purchase.save();
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Purchase Order",
                             content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
@@ -276,14 +276,14 @@ class PurchaseOrder extends module_1.default {
                         purchase.approvalStatus = transferCylinder_1.TransferStatus.COMPLETED;
                         //@ts-ignore
                         // transfer.nextApprovalOfficer = data.nextApprovalOfficer
-                        transfer.comments.push({
+                        purchase.comments.push({
                             comment: data.comment,
                             commentBy: user._id,
                             officer: 'Approving officer'
                         });
                         yield purchase.save();
                         let approvalUser = yield this.user.findById(purchase.initiator);
-                        new mail_1.default().push({
+                        yield new mail_1.default().push({
                             subject: "Purchase Order",
                             content: `A purchase order has been approved. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser

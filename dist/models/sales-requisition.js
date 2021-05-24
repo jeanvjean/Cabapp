@@ -13,6 +13,7 @@ const salesReqSchema = new mongoose_1.Schema({
     ecrNo: { type: String },
     date: { type: Date },
     cylinders: [saleCylinderSchema],
+    tracking: [transferCylinder_1.approvalStageShema],
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval), default: transferCylinder_1.stagesOfApproval.START },
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],

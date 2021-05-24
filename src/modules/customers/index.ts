@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, Schema } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { ComplaintInterface, complaintStatus } from "../../models/complaint";
 import { CustomerInterface } from "../../models/customer";
@@ -59,6 +59,11 @@ type TrackingDataInput = {
   orderId:string
 }
 
+type OrderAssignVehicle = {
+  orderId:string,
+  vehicle:OrderInterface['vehicle']
+}
+
 type NewComplainInterface = {
   customer:ComplaintInterface['customer'],
   complaintType?:ComplaintInterface['complaintType']
@@ -89,6 +94,10 @@ type newWalkinCustomer = {
 type OrderDoneInput = {
   status:string,
   orderId:string
+}
+
+type orderVehicle = {
+  vehicle:OrderInterface['vehicle']
 }
 
 class Customer extends Module{
@@ -133,7 +142,11 @@ class Customer extends Module{
 
   public async fetchCustomerDetails(id:string):Promise<CustomerInterface|undefined>{
     try {
-      const customer = await this.customer.findById(id);
+      const customer = await this.customer.findById(id).populate({
+        path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:'User'
+        }
+      });
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e)
@@ -147,7 +160,34 @@ class Customer extends Module{
         location:user.role,
         status:'pending'
       });
+      await order.save();
       return Promise.resolve(order);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async assignOrderToVehicle(data:OrderAssignVehicle, user:UserInterface):Promise<OrderInterface|undefined>{
+    try {
+      const order = await this.order.findByIdAndUpdate(data.orderId, {$set:data}, {new:true}).populate({
+        path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:'User'
+        }
+      });
+      return Promise.resolve(order as OrderInterface)
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchOrdersAssignedToVehicle(data:orderVehicle):Promise<OrderInterface[]|undefined>{
+    try {
+      const orders = await this.order.find({vehicle:data.vehicle}).populate({
+        path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:'User'
+        }
+      });
+      return orders
     } catch (e) {
       this.handleException(e);
     }

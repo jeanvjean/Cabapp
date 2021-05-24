@@ -21,7 +21,8 @@ const OrderSchema = new mongoose_1.Schema({
     cylinderSize: { type: String },
     gasType: { type: String },
     gasColor: { type: String },
-    tracking: [trackingSchema]
+    tracking: [trackingSchema],
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' }
 }, {
     timestamps: true
 });

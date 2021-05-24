@@ -107,6 +107,30 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  assignOrderToVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.assignOrderToVehicle({...req.body, orderId:req.params.orderId}, req.user);
+        this.ok(res, 'order assigned to vehicle', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchOrdersForVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchOrdersAssignedToVehicle({vehicle:req.params.vehicleId});
+        this.ok(res, 'orders fetched', data)
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   createComplaint():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

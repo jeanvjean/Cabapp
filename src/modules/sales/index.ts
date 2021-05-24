@@ -129,6 +129,8 @@ class Sale extends Module{
           //@ts-ignore
           sales.tracking.push(track)
           sales.approvalStage = stagesOfApproval.START
+          sales.initiated = true;
+          sales.initiator = user._id
           sales.nextApprovalOfficer = AO[0].id
           // sales.comments.push({
           //   comment:data.comment,
@@ -193,6 +195,7 @@ class Sale extends Module{
             approvalOfficer:user._id,
             nextApprovalOfficer:hod?._id
           }
+
           let checkOfficer = sales.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
             sales.approvalOfficers.push({
@@ -205,6 +208,7 @@ class Sale extends Module{
           }
           //@ts-ignore
           sales.tracking.push(track)
+
           sales.approvalStage = stagesOfApproval.STAGE1;
           //@ts-ignore
           sales.nextApprovalOfficer = hod?._id;
@@ -214,7 +218,7 @@ class Sale extends Module{
           // })
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
-          new Notify().push({
+          await new Notify().push({
             subject: "Sales Requisition",
             content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
@@ -252,7 +256,7 @@ class Sale extends Module{
           // })
           await sales.save();
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
-          new Notify().push({
+          await new Notify().push({
             subject: "Sales Requisition",
             content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
@@ -280,16 +284,17 @@ class Sale extends Module{
           //@ts-ignore
           sales.tracking.push(track)
           sales.approvalStage = stagesOfApproval.APPROVED;
-          sales.status = TransferStatus.COMPLETED
-          //@ts-ignore
+          sales.status = TransferStatus.COMPLETED;
+
           // transfer.nextApprovalOfficer = data.nextApprovalOfficer
-          transfer.comments.push({
-            comment:data.comment,
-            commentBy:user._id
-          });
+          // sales.comments.push({
+          //   comment:data.comment,
+          //   commentBy:user._id
+          // });
+          // console.log(sales);
           await sales.save();
           let approvalUser = await this.user.findById(sales.initiator);
-          new Notify().push({
+         await new Notify().push({
             subject: "Sales Requisition",
             content: `A Sales requisition has been approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser

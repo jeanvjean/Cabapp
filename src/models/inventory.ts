@@ -23,7 +23,7 @@ export interface ProductInterface extends Document{
   location:string,
   referer:string
   division:string
-  supplier:Schema.Types.ObjectId
+  supplier?:Schema.Types.ObjectId
   branch:Schema.Types.ObjectId
   deleted:boolean
 }

@@ -18,6 +18,7 @@ router.post(
 
 router.get(
   '/fetch-sales-requisitions',
+  auth.verify(),
   salesCtrl.fetchSalesReq()
 );
 
@@ -29,7 +30,7 @@ router.get(
 router.post(
   '/approve-sales-requisition',
   auth.verify(),
-  Validator.validateSales(),
+  Validator.validateSalesApproval(),
   val.validate(),
   salesCtrl.approveSalesRequisition()
 );

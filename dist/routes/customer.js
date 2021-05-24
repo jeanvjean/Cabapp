@@ -14,6 +14,8 @@ router.post('/create-order/:customerId', auth.verify(), customer_1.Validator.val
 router.get('/fetch-order/:customerId', controllers_1.customerCtrl.fetchUserOrder());
 router.post('/mark-order/:orderId', auth.verify(), controllers_1.customerCtrl.markOrder());
 router.get('/fetch-order/:orderId', controllers_1.customerCtrl.orderDetails());
+router.post('/assign-vehicle/:orderId', auth.verify(), controllers_1.customerCtrl.assignOrderToVehicle());
+router.get('/fetch-vehicle-orders/:vehicleId', auth.verify(), controllers_1.customerCtrl.fetchOrdersForVehicle());
 router.post('/make-complain/:customerId', auth.verify(), controllers_1.customerCtrl.createComplaint());
 router.get('/fetch-complaints/:customerId', controllers_1.customerCtrl.fetchComplaints());
 router.post('/approve-complaint/:complaintId', auth.verify(), controllers_1.customerCtrl.approveComplaint());

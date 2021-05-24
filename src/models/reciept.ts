@@ -1,7 +1,7 @@
 import {
-Schema, 
-Model, 
-Document, 
+Schema,
+Model,
+Document,
 Connection
 } from 'mongoose';
 
@@ -23,6 +23,7 @@ export interface RecieptInterface extends Document{
     date:Date
     preparedBy:Schema.Types.ObjectId
     amountInWords:string
+    branch:Schema.Types.ObjectId
 }
 
 const recieptSchema = new Schema({
@@ -35,7 +36,8 @@ const recieptSchema = new Schema({
     paymentMode:{type:String, enum:Object.values(paymentMode)},
     date:{type:Date},
     preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
-    amountInWords:{type:String}
+    amountInWords:{type:String},
+    branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{
     timestamps:true
 });

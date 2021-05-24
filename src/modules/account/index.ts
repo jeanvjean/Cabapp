@@ -36,9 +36,9 @@ class Account extends Module{
         this.account = props.account
     }
 
-    public async createReciept(data:newRecieptInterface):Promise<RecieptInterface|undefined>{
+    public async createReciept(data:newRecieptInterface, user:UserInterface):Promise<RecieptInterface|undefined>{
         try {
-            const reciept = new this.account(data);
+            const reciept = new this.account({...data, branch:user.branch});
             reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
             let exists = await this.account.find();
             let sn;
@@ -86,9 +86,9 @@ class Account extends Module{
                 await invoice.save();
             }
             // let updated =  await this.account.findByIdAndUpdate(invoiceId, {$set:update}, {new:true});
-            
+
             let message = invoice?.outstandingBalance <= 0 ? 'Paid out' : 'payment updated';
-            
+
             return Promise.resolve({
                 message,
                 invoice:invoice as RecieptInterface

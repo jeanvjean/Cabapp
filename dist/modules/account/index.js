@@ -16,10 +16,10 @@ class Account extends module_1.default {
         super();
         this.account = props.account;
     }
-    createReciept(data) {
+    createReciept(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const reciept = new this.account(data);
+                const reciept = new this.account(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
                 let exists = yield this.account.find();
                 let sn;

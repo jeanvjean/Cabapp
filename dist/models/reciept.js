@@ -18,7 +18,8 @@ const recieptSchema = new mongoose_1.Schema({
     paymentMode: { type: String, enum: Object.values(paymentMode) },
     date: { type: Date },
     preparedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
-    amountInWords: { type: String }
+    amountInWords: { type: String },
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 }, {
     timestamps: true
 });

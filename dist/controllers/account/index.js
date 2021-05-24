@@ -21,7 +21,8 @@ class accountController extends ctrl_1.default {
     createInvoice() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.createReciept(req.body);
+                //@ts-ignore
+                const data = yield this.module.createReciept(req.body, req.user);
                 this.ok(res, 'invoice created', data);
             }
             catch (e) {

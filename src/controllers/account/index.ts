@@ -14,7 +14,8 @@ class accountController extends Ctrl{
     createInvoice():RequestHandler{
         return async(req:Request, res:Response)=>{
             try {
-                const data = await this.module.createReciept(req.body);
+              //@ts-ignore
+                const data = await this.module.createReciept(req.body, req.user);
                 this.ok(res, 'invoice created', data);
             } catch (e) {
                 this.handleError(e, req, res);

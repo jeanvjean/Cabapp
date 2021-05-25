@@ -91,8 +91,20 @@ class VehicleController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.recordRoute(req.body, req.params, req.user);
+                const data = yield this.module.recordRoute(Object.assign(Object.assign({}, req.body), { vehicle: req.params.vehicleId }), req.params, req.user);
                 this.ok(res, 'Recorded', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchRoutePlan() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { vehicleId } = req.params;
+                const data = yield this.module.fetchRoutePlan({ vehicleId });
+                this.ok(res, 'fetched route plans', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

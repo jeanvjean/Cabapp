@@ -87,8 +87,20 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response) =>{
       try {
         //@ts-ignore
-        const data = await this.module.recordRoute(req.body, req.params, req.user);
+        const data = await this.module.recordRoute({...req.body,vehicle:req.params.vehicleId}, req.params, req.user);
         this.ok(res, 'Recorded', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchRoutePlan():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const {vehicleId} = req.params;
+        const data = await this.module.fetchRoutePlan({vehicleId});
+        this.ok(res, 'fetched route plans', data)
       } catch (e) {
         this.handleError(e, req, res);
       }

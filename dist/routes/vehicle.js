@@ -13,6 +13,7 @@ router.get('/view-inspection-history/:vehicleId', controllers_1.vehicleCtrl.fetc
 router.post('/approve-inspection/:vehicleId/:inspectionId', auth.verify(), controllers_1.vehicleCtrl.approveInspection());
 router.get('/approve-inspection/:vehicleId/:inspectionId', auth.verify(), controllers_1.vehicleCtrl.viewInspectionDetails());
 router.post('/record-route/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.recordRoute());
+router.get('/fetch-route-plan/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.fetchRoutePlan());
 router.post('/assign-driver/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.assignDriver());
 router.delete('/delete-vehicle/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.deleteVehicle());
 router.get('/remove-driver/:vehicleId/:driver', auth.verify(), controllers_1.vehicleCtrl.removeDriver());

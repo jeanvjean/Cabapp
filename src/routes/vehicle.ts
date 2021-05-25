@@ -50,6 +50,12 @@ router.post(
   vehicleCtrl.recordRoute()
 );
 
+router.get(
+  '/fetch-route-plan/:vehicleId',
+  auth.verify(),
+  vehicleCtrl.fetchRoutePlan()
+);
+
 router.post(
   '/assign-driver/:vehicleId',
   auth.verify(),

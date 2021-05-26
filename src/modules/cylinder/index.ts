@@ -45,8 +45,7 @@ interface CylinderCountInterface{
 }
 
 interface FetchCylinderInterface {
-  cylinders:CylinderInterface[],
-  counts:CylinderCountInterface
+  cylinders:CylinderInterface[]
 }
 
 interface TransferCylinderInput {
@@ -137,12 +136,7 @@ class Cylinder extends Module {
       let bufferCylinders = cylinders.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
       let assignedCylinders = cylinders.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
       return Promise.resolve({
-        cylinders,
-        counts:{
-          totalCylinders:cylinders.length|0,
-          totalBufferCylinders:bufferCylinders.length|0,
-          totalAssignedCylinders:assignedCylinders.length|0
-        }
+        cylinders
       });
     } catch (e) {
       this.handleException(e);

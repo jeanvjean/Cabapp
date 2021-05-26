@@ -48,12 +48,7 @@ class Cylinder extends module_1.default {
                 let bufferCylinders = cylinders.filter(cylinder => cylinder.type == cylinder_1.cylinderTypes.BUFFER);
                 let assignedCylinders = cylinders.filter(cylinder => cylinder.type == cylinder_1.cylinderTypes.ASSIGNED);
                 return Promise.resolve({
-                    cylinders,
-                    counts: {
-                        totalCylinders: cylinders.length | 0,
-                        totalBufferCylinders: bufferCylinders.length | 0,
-                        totalAssignedCylinders: assignedCylinders.length | 0
-                    }
+                    cylinders
                 });
             }
             catch (e) {

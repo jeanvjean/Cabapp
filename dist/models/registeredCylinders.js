@@ -15,7 +15,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     waterCapacity: { type: String },
     dateManufactured: { type: Date },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
-    gasType: { type: String },
+    gasType: { type: mongoose_1.Schema.Types.ObjectId, ref: 'cylinder' },
     standardColor: { type: String },
     assignedNumber: { type: String },
     testingPresure: { type: String },

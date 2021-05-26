@@ -13,6 +13,7 @@ router.post(
 
 router.get(
   '/fetch-vehicles',
+  auth.verify(),
   vehicleCtrl.fetchVehicles()
 );
 

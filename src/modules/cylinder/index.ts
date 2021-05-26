@@ -159,7 +159,6 @@ class Cylinder extends Module {
   }
 
   public async regCylinder(data:NewCylinderRegisterationInterface, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
-    // console.log(data)
     try {
       let foundCylinder
       if(data.cylinderNumber) {
@@ -187,7 +186,8 @@ class Cylinder extends Module {
     try {
       const registeredCylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
         {path:'assignedTo', model:'customer'},
-        {path:'branch', model:'branches'}
+        {path:'branch', model:'branches'},
+        {path:'gasType', model:'cylinder'}
       ]);
       const bufferCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
       const assignedCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);

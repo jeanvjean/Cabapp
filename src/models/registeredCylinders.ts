@@ -118,7 +118,7 @@ export const registerCylinderSchema = new Schema({
 
   assignedTo:{type:Schema.Types.ObjectId, ref:'customer'},
 
-  gasType:{type:String},
+  gasType:{type:Schema.Types.ObjectId, ref:'cylinder'},
 
   standardColor:{type:String},
 

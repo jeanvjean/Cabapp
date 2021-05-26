@@ -74,7 +74,6 @@ class Cylinder extends module_1.default {
     }
     regCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            // console.log(data)
             try {
                 let foundCylinder;
                 if (data.cylinderNumber) {
@@ -101,7 +100,8 @@ class Cylinder extends module_1.default {
             try {
                 const registeredCylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
                     { path: 'assignedTo', model: 'customer' },
-                    { path: 'branch', model: 'branches' }
+                    { path: 'branch', model: 'branches' },
+                    { path: 'gasType', model: 'cylinder' }
                 ]);
                 const bufferCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
                 const assignedCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);

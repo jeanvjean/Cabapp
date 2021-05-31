@@ -214,6 +214,12 @@ class User extends module_1.default {
             try {
                 let updatedUser;
                 const user = yield this.model.findById(data.userId);
+                if (!user) {
+                    throw new exceptions_1.BadInputFormatException('user not found');
+                }
+                if (user.subrole == 'superadmin') {
+                    throw new exceptions_1.BadInputFormatException('this role cannot be changed');
+                }
                 if (data.subrole == 'head of department') {
                     if ((user === null || user === void 0 ? void 0 : user.subrole) !== 'head of department') {
                         let hod = yield this.model.findOne({ role: user === null || user === void 0 ? void 0 : user.role, subrole: 'head of department' });

@@ -294,6 +294,12 @@ class User extends Module {
     try {
       let updatedUser;
       const user = await this.model.findById(data.userId);
+      if(!user) {
+        throw new BadInputFormatException('user not found')
+      }
+      if(user.subrole == 'superadmin') {
+        throw new BadInputFormatException('this role cannot be changed');
+      }
       if(data.subrole == 'head of department') {
         if(user?.subrole !== 'head of department') {
           let hod = await this.model.findOne({role:user?.role, subrole:'head of department'});

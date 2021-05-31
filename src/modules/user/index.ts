@@ -10,6 +10,7 @@ import { constants } from '../../util/constants';
 import Environment from '../../configs/static';
 import { compareSync, genSaltSync, hash } from 'bcryptjs';
 import { getTemplate } from '../../util/resolve-template';
+import { user } from '..';
 export const signTokenKey = "loremipsumdolorsitemet";
 
 interface UserConstructorInterface {
@@ -26,6 +27,12 @@ interface NewUserInterface {
 
 interface inviteUserInput {
   users:UserInterface[]
+}
+
+interface RoleUpdateInterface {
+  userId:string,
+  role:string,
+  subrole:string
 }
 
 export interface TokenInterface {
@@ -278,6 +285,41 @@ class User extends Module {
         options
       )
       return Promise.resolve(updateUser as UserInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async changeUserRole(data:RoleUpdateInterface):Promise<UserInterface|undefined>{
+    try {
+      let updatedUser;
+      const user = await this.model.findById(data.userId);
+      if(data.subrole == 'head of department') {
+        if(user?.subrole !== 'head of department') {
+          let hod = await this.model.findOne({role:user?.role, subrole:'head of department'});
+          if(!hod){
+            updatedUser = await this.model.findByIdAndUpdate(
+              user?._id,
+              {
+                $set:data
+              },
+              {new:true}
+            )
+            return Promise.resolve(updatedUser as UserInterface);
+          }else {
+            throw new BadInputFormatException('this department already has a head')
+          }
+        }
+      }else {
+        updatedUser = await this.model.findByIdAndUpdate(
+          user?._id,
+          {
+            $set:{role:data.role, subrole:data.subrole}
+          },
+          {new:true}
+        );
+        return Promise.resolve(updatedUser as UserInterface);
+      }
     } catch (e) {
       this.handleException(e);
     }

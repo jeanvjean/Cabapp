@@ -42,6 +42,14 @@ const router: expressRouter = expressRouter();
     userCtrl.updateUser()
   );
 
+  router.post(
+    '/change-role/:userId',
+    Validator.validateRoleChange(),
+    val.validate(),
+    auth.verify(),
+    userCtrl.changeUserRole()
+  );
+
   router.post('/request-password-reset', userCtrl.requestPasswordReset());
 
   router.post('/reset-password',

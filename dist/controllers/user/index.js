@@ -123,6 +123,18 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    changeUserRole() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                const data = yield this.module.changeUserRole(Object.assign(Object.assign({}, req.body), { userId }));
+                this.ok(res, 'updated user role', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     requestPasswordReset() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

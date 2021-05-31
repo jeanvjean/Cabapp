@@ -123,6 +123,18 @@ class UserController extends Ctrl{
     }
   }
 
+  changeUserRole():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { userId } = req.params;
+        const data = await this.module.changeUserRole({...req.body,userId});
+        this.ok(res, 'updated user role',data );
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   requestPasswordReset():RequestHandler{
     return async (req:Request, res:Response)=>{
       try {

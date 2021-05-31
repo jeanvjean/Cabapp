@@ -209,6 +209,37 @@ class User extends module_1.default {
             }
         });
     }
+    changeUserRole(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let updatedUser;
+                const user = yield this.model.findById(data.userId);
+                if (data.subrole == 'head of department') {
+                    if ((user === null || user === void 0 ? void 0 : user.subrole) !== 'head of department') {
+                        let hod = yield this.model.findOne({ role: user === null || user === void 0 ? void 0 : user.role, subrole: 'head of department' });
+                        if (!hod) {
+                            updatedUser = yield this.model.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
+                                $set: data
+                            }, { new: true });
+                            return Promise.resolve(updatedUser);
+                        }
+                        else {
+                            throw new exceptions_1.BadInputFormatException('this department already has a head');
+                        }
+                    }
+                }
+                else {
+                    updatedUser = yield this.model.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
+                        $set: { role: data.role, subrole: data.subrole }
+                    }, { new: true });
+                    return Promise.resolve(updatedUser);
+                }
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     requestPasswordReset(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

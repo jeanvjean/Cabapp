@@ -121,6 +121,18 @@ class UserValidator extends Ctrl {
     return rules;
   }
 
+  static validateRoleChange():ValidationChain[]{
+    const rules = [
+      check('role')
+        .exists()
+        .withMessage('please provide a role'),
+      check('subrole')
+        .exists()
+        .withMessage('please provide a subrole')
+    ]
+    return rules;
+  }
+
 }
 
 export default UserValidator;

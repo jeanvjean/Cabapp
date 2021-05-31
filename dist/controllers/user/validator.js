@@ -115,6 +115,17 @@ class UserValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateRoleChange() {
+        const rules = [
+            express_validator_1.check('role')
+                .exists()
+                .withMessage('please provide a role'),
+            express_validator_1.check('subrole')
+                .exists()
+                .withMessage('please provide a subrole')
+        ];
+        return rules;
+    }
 }
 exports.default = UserValidator;
 //# sourceMappingURL=validator.js.map

@@ -21,7 +21,8 @@ import {
   Production,
   PurchaseOrder,
   OCN,
-  Reciept
+  Reciept,
+  Activity
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -69,7 +70,8 @@ export const product = new ProductModule({
 export const vehicle = new VehicleModule({
   vehicle:Vehicle,
   pickup:PickupRoutes,
-  user:User
+  user:User,
+  activity:Activity
 });
 
 export const driver = new DriverModule({

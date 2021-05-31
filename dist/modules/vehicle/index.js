@@ -14,17 +14,27 @@ const vehicle_1 = require("../../models/vehicle");
 const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const logs_1 = require("../../util/logs");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
         this.vehicle = props.vehicle;
         this.pickup = props.pickup;
         this.user = props.user;
+        this.activity = props.activity;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const vehicle = yield this.vehicle.create(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'create vehicle',
+                        activity: `You added a vehicle to your vehicle list`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(vehicle);
             }
             catch (e) {
@@ -81,6 +91,14 @@ class Vehicle extends module_1.default {
                     subject: "Vehicle inspection",
                     content: `A vehicle inspection request requires your approval. click to view ${static_1.default.FRONTEND_URL}/view-inspection-history/${vehicle === null || vehicle === void 0 ? void 0 : vehicle._id}`,
                     user: approvalUser
+                });
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'vehicle Inspection',
+                        activity: `You created an inspection request`,
+                        time: new Date().toISOString()
+                    }
                 });
                 return Promise.resolve(vehicle);
             }
@@ -162,6 +180,14 @@ class Vehicle extends module_1.default {
                     }
                 }
                 yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'vehicle Inspection',
+                        activity: `You ${inspection[0].approvalStatus} an inspection request from ${vehicle.regNo}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(vehicle);
             }
             catch (e) {
@@ -180,6 +206,14 @@ class Vehicle extends module_1.default {
                 let availableRoutes = yield this.pickup.find({});
                 routePlan.serialNo = availableRoutes.length + 1;
                 yield routePlan.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Route plan',
+                        activity: `You added a route plan for ${vehicle.regNo}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(routePlan);
             }
             catch (e) {
@@ -199,6 +233,14 @@ class Vehicle extends module_1.default {
                     commentBy: user._id
                 });
                 yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Assign driver',
+                        activity: `You assigned a driver for ${vehicle === null || vehicle === void 0 ? void 0 : vehicle.regNo}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(vehicle);
             }
             catch (e) {
@@ -260,6 +302,18 @@ class Vehicle extends module_1.default {
                 //@ts-ignore
                 pickup === null || pickup === void 0 ? void 0 : pickup.status = status;
                 return Promise.resolve(pickup);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchActivityLogs(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let user = yield this.user.findById(userId);
+                const logs = yield this.activity.findOne({ user: user === null || user === void 0 ? void 0 : user._id });
+                return Promise.resolve(logs);
             }
             catch (e) {
                 this.handleException(e);

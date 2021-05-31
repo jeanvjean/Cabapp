@@ -169,6 +169,17 @@ class VehicleController extends Ctrl{
     }
   }
 
+  fetchActivityLogs():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchActivityLogs(req.params.userId);
+        this.ok(res, 'activity logs fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export default VehicleController;

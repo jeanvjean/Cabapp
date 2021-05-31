@@ -7,11 +7,14 @@ import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteA
 import Module, { QueryInterface } from "../module";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
+import { createLog } from "../../util/logs";
+import { ActivityLogInterface } from "../../models/logs";
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
   pickup:Model<PickupInterface>
   user:Model<UserInterface>
+  activity:Model<ActivityLogInterface>
 }
 
 type NewVehicle = {
@@ -93,16 +96,26 @@ class Vehicle extends Module{
   private vehicle:Model<VehicleInterface>
   private pickup:Model<PickupInterface>
   private user:Model<UserInterface>
+  private activity:Model<ActivityLogInterface>
 
   constructor(props:vehicleProps) {
     super()
     this.vehicle = props.vehicle
     this.pickup = props.pickup;
     this.user = props.user
+    this.activity = props.activity
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
       const vehicle = await this.vehicle.create({...data, branch:user.branch});
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'create vehicle',
+          activity:`You added a vehicle to your vehicle list`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(vehicle);
     } catch (e) {
       this.handleException(e);
@@ -153,6 +166,14 @@ class Vehicle extends Module{
         subject: "Vehicle inspection",
         content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
         user: approvalUser
+      });
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'vehicle Inspection',
+          activity:`You created an inspection request`,
+          time: new Date().toISOString()
+        }
       });
       return Promise.resolve(vehicle as VehicleInterface);
     } catch (e) {
@@ -225,7 +246,16 @@ class Vehicle extends Module{
           inspection[0].comments?.push(com);
         }
       }
+
       await vehicle?.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'vehicle Inspection',
+          activity:`You ${inspection[0].approvalStatus} an inspection request from ${vehicle.regNo}`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(vehicle as VehicleInterface);
     } catch (e) {
       this.handleException(e);
@@ -246,6 +276,14 @@ class Vehicle extends Module{
       let availableRoutes = await this.pickup.find({});
       routePlan.serialNo = availableRoutes.length + 1;
       await routePlan.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Route plan',
+          activity:`You added a route plan for ${vehicle.regNo}`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(routePlan as PickupInterface);
     } catch (e) {
       this.handleException(e)
@@ -263,6 +301,14 @@ class Vehicle extends Module{
         commentBy:user._id
       });
       await vehicle?.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Assign driver',
+          activity:`You assigned a driver for ${vehicle?.regNo}`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(vehicle as VehicleInterface);
     } catch (e) {
       this.handleException(e)
@@ -315,6 +361,16 @@ class Vehicle extends Module{
       //@ts-ignore
       pickup?.status = status;
       return Promise.resolve(pickup as PickupInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchActivityLogs(userId:string):Promise<ActivityLogInterface|undefined>{
+    try {
+      let user = await this.user.findById(userId);
+      const logs = await this.activity.findOne({user:user?._id});
+      return Promise.resolve(logs as ActivityLogInterface);
     } catch (e) {
       this.handleException(e);
     }

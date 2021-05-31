@@ -127,7 +127,8 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { userId } = req.params;
-                const data = yield this.module.changeUserRole(Object.assign(Object.assign({}, req.body), { userId }));
+                //@ts-ignore
+                const data = yield this.module.changeUserRole(Object.assign(Object.assign({}, req.body), { userId }), req.user);
                 this.ok(res, 'updated user role', data);
             }
             catch (e) {

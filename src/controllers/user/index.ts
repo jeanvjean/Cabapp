@@ -127,7 +127,8 @@ class UserController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { userId } = req.params;
-        const data = await this.module.changeUserRole({...req.body,userId});
+        //@ts-ignore
+        const data = await this.module.changeUserRole({...req.body,userId}, req.user);
         this.ok(res, 'updated user role',data );
       } catch (e) {
         this.handleError(e, req, res);

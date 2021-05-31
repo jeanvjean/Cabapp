@@ -81,4 +81,10 @@ router.post(
   vehicleCtrl.markRouteAsComplete()
 );
 
+router.get(
+  '/fetch-activityLogs/:userId',
+  auth.verify(),
+  vehicleCtrl.fetchActivityLogs()
+);
+
 export default router;

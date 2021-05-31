@@ -173,6 +173,17 @@ class VehicleController extends ctrl_1.default {
             }
         });
     }
+    fetchActivityLogs() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchActivityLogs(req.params.userId);
+                this.ok(res, 'activity logs fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = VehicleController;
 //# sourceMappingURL=index.js.map

@@ -20,6 +20,7 @@ const constants_1 = require("../../util/constants");
 const static_1 = require("../../configs/static");
 const bcryptjs_1 = require("bcryptjs");
 const resolve_template_1 = require("../../util/resolve-template");
+const logs_1 = require("../../util/logs");
 exports.signTokenKey = "loremipsumdolorsitemet";
 class User extends module_1.default {
     constructor(props) {
@@ -71,25 +72,60 @@ class User extends module_1.default {
                         exists.push(user.email);
                     }
                     else {
-                        let password = yield token_1.generateToken(4);
-                        //@ts-ignore
-                        yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
-                        const html = yield resolve_template_1.getTemplate('invite', {
-                            team: user.role,
-                            role: user.subrole,
-                            link: static_1.default.FRONTEND_URL,
+                        if (user.subrole == 'head of department') {
+                            let hod = yield this.model.findOne({ role: user.role, subrole: user.subrole });
+                            if (!hod) {
+                                let password = yield token_1.generateToken(4);
+                                //@ts-ignore
+                                yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
+                                const html = yield resolve_template_1.getTemplate('invite', {
+                                    team: user.role,
+                                    role: user.subrole,
+                                    link: static_1.default.FRONTEND_URL,
+                                    //@ts-ignore
+                                    branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
+                                    password
+                                });
+                                let mailLoad = {
+                                    content: html,
+                                    subject: 'New User registeration',
+                                    email: user.email,
+                                };
+                                new mail_1.default().sendMail(mailLoad);
+                            }
+                            else {
+                                exists.push(user.email);
+                            }
+                        }
+                        else {
+                            let password = yield token_1.generateToken(4);
                             //@ts-ignore
-                            branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
-                            password
-                        });
-                        let mailLoad = {
-                            content: html,
-                            subject: 'New User registeration',
-                            email: user.email,
-                        };
-                        new mail_1.default().sendMail(mailLoad);
+                            yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
+                            const html = yield resolve_template_1.getTemplate('invite', {
+                                team: user.role,
+                                role: user.subrole,
+                                link: static_1.default.FRONTEND_URL,
+                                //@ts-ignore
+                                branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
+                                password
+                            });
+                            let mailLoad = {
+                                content: html,
+                                subject: 'New User registeration',
+                                email: user.email,
+                            };
+                            new mail_1.default().sendMail(mailLoad);
+                        }
                     }
                 }
+                yield logs_1.createLog({
+                    user: userInfo._id,
+                    activities: {
+                        title: 'Invited new Users',
+                        activity: 'You invited some new users to join the team',
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve({
                     message: 'An email has been sent to your new user(s)',
                     failedInvites: exists
@@ -155,6 +191,14 @@ class User extends module_1.default {
                 };
                 let expiresIn = 1000 * 60 * 60 * 24;
                 let token = jsonwebtoken_1.sign(payload, exports.signTokenKey, { expiresIn });
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Logged in',
+                        activity: 'You logged into your account',
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve({
                     user,
                     accessToken: {
@@ -202,6 +246,14 @@ class User extends module_1.default {
                 let updateUser = yield this.model.findByIdAndUpdate(user._id, {
                     $set: set
                 }, options);
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Update profine',
+                        activity: 'You updated your profile',
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(updateUser);
             }
             catch (e) {
@@ -209,7 +261,7 @@ class User extends module_1.default {
             }
         });
     }
-    changeUserRole(data) {
+    changeUserRole(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let updatedUser;
@@ -238,6 +290,14 @@ class User extends module_1.default {
                     updatedUser = yield this.model.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
                         $set: { role: data.role, subrole: data.subrole }
                     }, { new: true });
+                    yield logs_1.createLog({
+                        user: user._id,
+                        activities: {
+                            title: 'Change role',
+                            activity: `You changed ${updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.name}\'s role`,
+                            time: new Date().toISOString()
+                        }
+                    });
                     return Promise.resolve(updatedUser);
                 }
             }
@@ -289,6 +349,15 @@ class User extends module_1.default {
                 let password = yield bcryptjs_1.hash(data.password, salt);
                 //@ts-ignore
                 yield this.model.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
+                yield logs_1.createLog({
+                    //@ts-ignore
+                    user: user._id,
+                    activities: {
+                        title: 'change password',
+                        activity: `You changed your password`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve({
                     message: 'password reset success'
                 });
@@ -317,6 +386,14 @@ class User extends module_1.default {
                 const salt = bcryptjs_1.genSaltSync(10);
                 const password = yield bcryptjs_1.hash(newPassword, salt);
                 let updated = yield this.model.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Change password',
+                        activity: `Password Changed`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(updated);
             }
             catch (e) {

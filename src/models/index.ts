@@ -27,6 +27,7 @@ import productionFactory, { ProductionScheduleInterface } from './productionSche
 import purchaseFactory, { PurchaseOrderInterface } from './purchaseOrder';
 import ocnFactory, { OutgoingCylinderInterface } from './ocn';
 import recieptFactory, { RecieptInterface } from './reciept';
+import activityLog, { ActivityLogInterface } from './logs';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -75,5 +76,7 @@ export const PurchaseOrder:Model<PurchaseOrderInterface> = purchaseFactory(conn)
 export const OCN:Model<OutgoingCylinderInterface> = ocnFactory(conn);
 
 export const Reciept:Model<RecieptInterface> = recieptFactory(conn);
+
+export const Activity:Model<ActivityLogInterface> = activityLog(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

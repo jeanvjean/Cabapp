@@ -42,7 +42,8 @@ exports.product = new inventory_1.default({
 exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle,
     pickup: index_1.PickupRoutes,
-    user: index_1.User
+    user: index_1.User,
+    activity: index_1.Activity
 });
 exports.driver = new driver_1.default({
     driver: index_1.User

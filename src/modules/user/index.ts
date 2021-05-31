@@ -10,6 +10,7 @@ import { constants } from '../../util/constants';
 import Environment from '../../configs/static';
 import { compareSync, genSaltSync, hash } from 'bcryptjs';
 import { getTemplate } from '../../util/resolve-template';
+import { createLog } from '../../util/logs';
 import { user } from '..';
 export const signTokenKey = "loremipsumdolorsitemet";
 
@@ -153,25 +154,58 @@ class User extends Module {
         if(existUser){
           exists.push(user.email);
         } else {
-          let password = await generateToken(4);
-          //@ts-ignore
-          await this.model.create({...user, branch:branch?.branch._id, password});
-          const html = await getTemplate('invite', {
-            team: user.role,
-            role:user.subrole,
-            link:Environment.FRONTEND_URL,
+          if(user.subrole == 'head of department') {
+                let hod = await this.model.findOne({role:user.role, subrole:user.subrole});
+                if(!hod) {
+                  let password = await generateToken(4);
+                  //@ts-ignore
+                  await this.model.create({...user, branch:branch?.branch._id, password});
+                  const html = await getTemplate('invite', {
+                    team: user.role,
+                    role:user.subrole,
+                    link:Environment.FRONTEND_URL,
+                    //@ts-ignore
+                    branch:branch?.branch.name,
+                    password
+                  });
+                  let mailLoad = {
+                    content:html,
+                    subject:'New User registeration',
+                    email:user.email,
+                  }
+                  new Notify().sendMail(mailLoad);
+            }else {
+              exists.push(user.email);
+            }
+          } else {
+            let password = await generateToken(4);
             //@ts-ignore
-            branch:branch?.branch.name,
-            password
-          });
-          let mailLoad = {
-            content:html,
-            subject:'New User registeration',
-            email:user.email,
+            await this.model.create({...user, branch:branch?.branch._id, password});
+            const html = await getTemplate('invite', {
+              team: user.role,
+              role:user.subrole,
+              link:Environment.FRONTEND_URL,
+              //@ts-ignore
+              branch:branch?.branch.name,
+              password
+            });
+            let mailLoad = {
+              content:html,
+              subject:'New User registeration',
+              email:user.email,
+            }
+            new Notify().sendMail(mailLoad);
           }
-          new Notify().sendMail(mailLoad);
         }
       }
+      await createLog({
+        user:userInfo._id,
+        activities:{
+          title:'Invited new Users',
+          activity:'You invited some new users to join the team',
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve({
         message:'An email has been sent to your new user(s)',
         failedInvites:exists
@@ -230,6 +264,14 @@ class User extends Module {
       }
       let expiresIn = 1000 * 60 * 60 * 24
       let token = sign(payload, signTokenKey, {expiresIn});
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Logged in',
+          activity:'You logged into your account',
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve({
         user,
         accessToken:{
@@ -284,13 +326,21 @@ class User extends Module {
         },
         options
       )
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Update profine',
+          activity:'You updated your profile',
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(updateUser as UserInterface);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async changeUserRole(data:RoleUpdateInterface):Promise<UserInterface|undefined>{
+  public async changeUserRole(data:RoleUpdateInterface, user:UserInterface):Promise<UserInterface|undefined>{
     try {
       let updatedUser;
       const user = await this.model.findById(data.userId);
@@ -324,6 +374,14 @@ class User extends Module {
           },
           {new:true}
         );
+        await createLog({
+          user:user._id,
+          activities:{
+            title:'Change role',
+            activity:`You changed ${updatedUser?.name}\'s role`,
+            time: new Date().toISOString()
+          }
+        });
         return Promise.resolve(updatedUser as UserInterface);
       }
     } catch (e) {
@@ -371,6 +429,15 @@ class User extends Module {
       let password = await hash(data.password, salt);
       //@ts-ignore
       await this.model.findByIdAndUpdate(user._id,{password, isVerified:true},{new:true});
+      await createLog({
+        //@ts-ignore
+        user:user._id,
+        activities:{
+          title:'change password',
+          activity:`You changed your password`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve({
         message:'password reset success'
       })
@@ -397,6 +464,14 @@ class User extends Module {
       const salt = genSaltSync(10);
       const password = await hash(newPassword, salt);
       let updated = await this.model.findByIdAndUpdate(user._id, {password, isVerified:true}, {new:true});
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Change password',
+          activity:`Password Changed`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(updated as UserInterface);
     } catch (e) {
      this.handleException(e);

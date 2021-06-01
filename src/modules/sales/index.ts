@@ -8,6 +8,7 @@ import { BadInputFormatException } from "../../exceptions";
 import { PurchaseOrderInterface } from "../../models/purchaseOrder";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
+import { createLog } from "../../util/logs";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -70,6 +71,14 @@ class Sale extends Module{
       sales.status = TransferStatus.PENDING;
       sales.preparedBy = user._id;
       await sales.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Sales requisition',
+          activity:'Created asales requisition awaiting approval',
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(sales);
     } catch (e) {
       this.handleException(e);
@@ -101,7 +110,9 @@ class Sale extends Module{
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      const sales = await this.sales.findById(data.salesId);
+      const sales = await this.sales.findById(data.salesId).populate({
+        path:'initiator', model:'User'
+      });
       if(!sales) {
         throw new BadInputFormatException('sales requisition not found')
       }
@@ -137,6 +148,15 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Sales requisition',
+              //@ts-ignore
+              activity:`rejected a requisition made by ${sales.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
             subject: "Sales Requisition",
@@ -173,6 +193,15 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Sales requisition',
+              //@ts-ignore
+              activity:`rejected a requisition made by ${sales.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
             subject: "Sales Requisition",
@@ -217,6 +246,15 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Sales requisition',
+              //@ts-ignore
+              activity:`Approved a sales requisition made by ${sales.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           await new Notify().push({
             subject: "Sales Requisition",
@@ -255,6 +293,15 @@ class Sale extends Module{
           //   commentBy:user._id
           // })
           await sales.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Sales requisition',
+              //@ts-ignore
+              activity:`Approved a sales requisition made by ${sales.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           await new Notify().push({
             subject: "Sales Requisition",
@@ -293,6 +340,15 @@ class Sale extends Module{
           // });
           // console.log(sales);
           await sales.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Sales requisition',
+              //@ts-ignore
+              activity:`Approved a sales requisition made by ${sales.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(sales.initiator);
          await new Notify().push({
             subject: "Sales Requisition",

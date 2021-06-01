@@ -7,6 +7,7 @@ import Module, { QueryInterface } from "../module";
 import { compareSync } from "bcryptjs";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
+import { createLog } from "../../util/logs";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -73,6 +74,15 @@ class ProductionSchedule extends Module{
         commentBy:user._id
       });
       await production.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Production Schedule',
+          //@ts-ignore
+          activity:`You Created a new production schedule`,
+          time: new Date().toISOString()
+        }
+      });
       let approvalUser = await this.user.findById(production.nextApprovalOfficer);
       new Notify().push({
         subject: "Production Schedule",
@@ -92,7 +102,9 @@ class ProductionSchedule extends Module{
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      const production = await this.production.findById(data.productionId);
+      const production = await this.production.findById(data.productionId).populate({
+        path:'initiator', model:'User'
+      });
       if(!production) {
         throw new BadInputFormatException('production schedule not found');
       }
@@ -127,6 +139,15 @@ class ProductionSchedule extends Module{
             officer:'Authorizing officer'
           });
           await production.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Production Schedule',
+              //@ts-ignore
+              activity:`You rejected a production Schedule approval request made by ${production.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(production.nextApprovalOfficer);
           await new Notify().push({
             subject: "Production Schedule",
@@ -164,6 +185,15 @@ class ProductionSchedule extends Module{
             officer:'Approving officer'
           });
           await production.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'production schedule',
+              //@ts-ignore
+              activity:`You Rejected a production schedule approval request made by ${production.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(production.nextApprovalOfficer);
           await new Notify().push({
             subject: "Production Schedule",
@@ -206,6 +236,15 @@ class ProductionSchedule extends Module{
             commentBy:user._id,
           })
           await production.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'production schedule',
+              //@ts-ignore
+              activity:`You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(production.nextApprovalOfficer);
           await new Notify().push({
             subject: "Production Schedule",
@@ -245,6 +284,15 @@ class ProductionSchedule extends Module{
             officer:'Authorizing officer'
           })
           await production.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'production schedule',
+              //@ts-ignore
+              activity:`You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(production.nextApprovalOfficer);
           await new Notify().push({
             subject: "Production Schedule",
@@ -283,6 +331,15 @@ class ProductionSchedule extends Module{
             officer:'Approving officer'
           });
           await production.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'production schedule',
+              //@ts-ignore
+              activity:`You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let approvalUser = await this.user.findById(production.initiator);
           await new Notify().push({
             subject: "Production Schedule",

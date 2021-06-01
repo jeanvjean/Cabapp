@@ -12,6 +12,7 @@ import Module, { QueryInterface } from "../module";
 import { compareSync } from "bcryptjs";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
+import { createLog } from "../../util/logs";
 
 
 
@@ -125,6 +126,15 @@ class Customer extends Module{
         cylinderHoldingTime:date.toISOString(),
         branch:user.branch
       });
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Customers',
+          //@ts-ignore
+          activity:`You added ${customer.name} to the customer list`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e);
@@ -161,6 +171,15 @@ class Customer extends Module{
         status:'pending'
       });
       await order.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Order',
+          //@ts-ignore
+          activity:`You created a new order`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(order);
     } catch (e) {
       this.handleException(e);
@@ -206,7 +225,7 @@ class Customer extends Module{
     }
   }
 
-  public async markOrderAsDone(data:OrderDoneInput ):Promise<OrderInterface|undefined>{
+  public async markOrderAsDone(data:OrderDoneInput, user:UserInterface ):Promise<OrderInterface|undefined>{
     try {
       const order = await this.order.findById(data.orderId);
       if(data.status == PickupStatus.DONE) {
@@ -217,6 +236,15 @@ class Customer extends Module{
         order?.status = PickupStatus.PENDING;
       }
       await order?.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Order',
+          //@ts-ignore
+          activity:`You completed this order`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(order as OrderInterface);
     } catch (e) {
       this.handleException(e);
@@ -277,6 +305,15 @@ class Customer extends Module{
       }
 
       await complaint.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Complaint',
+          //@ts-ignore
+          activity:`You created a complaint for a customer`,
+          time: new Date().toISOString()
+        }
+      });
       new Notify().push({
         subject: "Complaint",
         content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
@@ -296,7 +333,7 @@ class Customer extends Module{
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      const complaint = await this.complaint.findById(data.id);
+      const complaint = await this.complaint.findById(data.id).populate('customer');
       if(!complaint){
         throw new BadInputFormatException('complaint not found')
       }
@@ -331,6 +368,15 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Complaint',
+                //@ts-ignore
+                activity:`You Rejected a complaint approval for ${complaint.customer.name}`,
+                time: new Date().toISOString()
+              }
+            });
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
@@ -367,6 +413,15 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Complaint',
+                //@ts-ignore
+                activity:`You Rejected a complaint approval for ${complaint.customer.name}`,
+                time: new Date().toISOString()
+              }
+            });
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
@@ -399,6 +454,15 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Complaint',
+                //@ts-ignore
+                activity:`You Approved a complaint approval for ${complaint.customer.name}`,
+                time: new Date().toISOString()
+              }
+            });
             new Notify().push({
               subject: "Complaint",
               content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
@@ -435,6 +499,15 @@ class Customer extends Module{
               commentBy:user._id
             })
             await complaint.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Complaint',
+                //@ts-ignore
+                activity:`You Approved a complaint approval for ${complaint.customer.name}`,
+                time: new Date().toISOString()
+              }
+            });
             let approvalUser = await this.user.findById(complaint.nextApprovalOfficer);
             new Notify().push({
               subject: "Complaint",
@@ -472,6 +545,15 @@ class Customer extends Module{
               commentBy:user._id
             });
             await complaint.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Complaint',
+                //@ts-ignore
+                activity:`You Approved a complaint approval for ${complaint.customer.name}`,
+                time: new Date().toISOString()
+              }
+            });
             let approvalUser = await this.user.findById(complaint.initiator);
             new Notify().push({
               subject: "Complaint",
@@ -568,13 +650,23 @@ class Customer extends Module{
     }
   }
 
-  public async resolveComplaint(complaintId:string):Promise<ComplaintInterface|undefined>{
+  public async resolveComplaint(complaintId:string, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try{
-      const complaint = await this.complaint.findById(complaintId);
+      const complaint = await this.complaint.findById(complaintId).populate('customer');
       if(!complaint) {
         throw new BadInputFormatException('complaint not found');
       }
       complaint.status = complaintStatus.RESOLVED;
+      await complaint.save()
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Complaint',
+          //@ts-ignore
+          activity:`You resolved a complaint for ${complaint.customer.name}`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(complaint);
     }catch(e){
       this.handleException(e);
@@ -590,6 +682,15 @@ class Customer extends Module{
       let sn = maxNumber + 1
       customer.serialNo = sn | 1;
       await customer.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Walk in customer',
+          //@ts-ignore
+          activity:`You registered ${customer.name} as a walk in customer`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(customer);
     }catch(e){
       this.handleException(e);
@@ -614,12 +715,21 @@ class Customer extends Module{
     }
   }
 
-  public async deleteWalkinCustomer(customerId:string):Promise<any>{
+  public async deleteWalkinCustomer(customerId:string, user:UserInterface):Promise<any>{
     try {
       const customer = await this.walkin.findById(customerId);
       if(!customer) {
         throw new BadInputFormatException('customer not found');
       }
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Walk in customer',
+          //@ts-ignore
+          activity:`You Removed ${customer.name}`,
+          time: new Date().toISOString()
+        }
+      });
       await customer.remove();
       return Promise.resolve({
         message:'Done'

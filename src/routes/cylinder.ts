@@ -107,6 +107,7 @@ router.get(
 
 router.get(
   '/fixed-cylinder/:cylinderId',
+  auth.verify(),
   cylinderCtrl.fixFaultyCylinder()
 );
 

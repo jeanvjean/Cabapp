@@ -10,6 +10,7 @@ import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
+import { createLog } from "../../util/logs";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -124,6 +125,15 @@ class Cylinder extends Module {
         creator:user._id
       }
       let newGas = await this.cylinder.create(payload);
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Cylinder type',
+          //@ts-ignore
+          activity:`You added a new cylinder type`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(newGas);
     } catch (e) {
       this.handleException(e)
@@ -170,6 +180,15 @@ class Cylinder extends Module {
         branch:user.branch
       }
       let newRegistration:NewCylinderRegisterationInterface|undefined = await this.registerCylinder.create(payload);
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Register Cylinder',
+          //@ts-ignore
+          activity:`You registered a new ${newRegistration.cylinderType} cylinder`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(newRegistration as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);
@@ -297,6 +316,15 @@ class Cylinder extends Module {
       //@ts-ignore
       transfer.comments.push(com);
       await transfer.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Cylinder transfer',
+          //@ts-ignore
+          activity:`You started a new cylinder transfer process`,
+          time: new Date().toISOString()
+        }
+      });
       await new Notify().push({
         subject: "New cylinder transfer",
         content: `A cylinder transfer has been initiated and requires your approval click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
@@ -315,7 +343,7 @@ class Cylinder extends Module {
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      let transfer = await this.transfer.findById(data.id);
+      let transfer = await this.transfer.findById(data.id).populate('initiator');
       if(!transfer){
         throw new BadInputFormatException('cylinder transfer not found');
       }
@@ -349,6 +377,15 @@ class Cylinder extends Module {
             commentBy:user._id
           })
           await transfer.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Cylinder Transfer',
+              //@ts-ignore
+              activity:`You Rejected a cylinder transfer request from ${transfer.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
@@ -388,6 +425,15 @@ class Cylinder extends Module {
             commentBy:user._id
           })
           await transfer.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Cylinder Transfer',
+              //@ts-ignore
+              activity:`You Rejected a cylinder transfer request from ${transfer.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
@@ -433,6 +479,15 @@ class Cylinder extends Module {
             commentBy:user._id
           })
           await transfer.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Cylinder Transfer',
+              //@ts-ignore
+              activity:`You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
@@ -474,6 +529,15 @@ class Cylinder extends Module {
             commentBy:user._id
           })
           await transfer.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Cylinder Transfer',
+              //@ts-ignore
+              activity:`You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
@@ -512,6 +576,15 @@ class Cylinder extends Module {
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id
+          });
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Cylinder Transfer',
+              //@ts-ignore
+              activity:`You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+              time: new Date().toISOString()
+            }
           });
           let apUser = await this.user.findById(transfer.initiator);
           await new Notify().push({
@@ -574,7 +647,7 @@ class Cylinder extends Module {
     }
   }
 
-  public async faultyCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+  public async faultyCylinder(cylinderId:string, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     try {
       const cylinder = await this.registerCylinder.findById(cylinderId);
       if(!cylinder) {
@@ -583,6 +656,15 @@ class Cylinder extends Module {
       //@ts-ignore
       cylinder.condition = CylinderCondition.FAULTY;
       await cylinder?.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Cylinder Faulty',
+          //@ts-ignore
+          activity:`You marked ${cylinder.cylinderNumber | cylinder.assignedNumber} as a faulty cylinder`,
+          time: new Date().toISOString()
+        }
+      });
       let apUser = await this.user.findOne({role:'production', subrole:'head of department', branch:cylinder.branch});
           await new Notify().push({
             subject: "Faulty cylinder",
@@ -595,7 +677,7 @@ class Cylinder extends Module {
     }
   }
 
-  public async fixedFaultyCylinder(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+  public async fixedFaultyCylinder(cylinderId:string, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     try {
       const cylinder = await this.registerCylinder.findById(cylinderId);
       if(!cylinder) {
@@ -604,6 +686,15 @@ class Cylinder extends Module {
       //@ts-ignore
       cylinder.condition = CylinderCondition.GOOD;
       await cylinder?.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Cylinder Faulty',
+          //@ts-ignore
+          activity:`You marked ${cylinder.cylinderNumber | cylinder.assignedNumber} as a fixed cylinder`,
+          time: new Date().toISOString()
+        }
+      });
       let apUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:cylinder.branch});
           await new Notify().push({
             subject: "Faulty cylinder",
@@ -711,6 +802,15 @@ class Cylinder extends Module {
         throw new BadInputFormatException('This cylinder was not found');
       }
       await cylinder.remove();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Registered cylinder',
+          //@ts-ignore
+          activity:`You deleted a registered cylinder`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve({
         message:'Cylinder deleted'
       });

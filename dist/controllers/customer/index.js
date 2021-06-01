@@ -93,7 +93,8 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const { orderId } = req.params;
                 const { status } = req.body;
-                const data = yield this.module.markOrderAsDone({ orderId, status });
+                //@ts-ignore
+                const data = yield this.module.markOrderAsDone({ orderId, status }, req.user);
                 this.ok(res, 'changed status', data);
             }
             catch (e) {
@@ -213,7 +214,8 @@ class customerCtrl extends ctrl_1.default {
     resolveComplaint() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.resolveComplaint(req.params.complaintId);
+                //@ts-ignore
+                const data = yield this.module.resolveComplaint(req.params.complaintId, req.user);
                 this.ok(res, 'Complaint resolved', data);
             }
             catch (e) {
@@ -270,7 +272,8 @@ class customerCtrl extends ctrl_1.default {
     deleteWalkinCustomer() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.deleteWalkinCustomer(req.params.customerId);
+                //@ts-ignore
+                const data = yield this.module.deleteWalkinCustomer(req.params.customerId, req.user);
                 this.ok(res, 'customer deleted', data);
             }
             catch (e) {

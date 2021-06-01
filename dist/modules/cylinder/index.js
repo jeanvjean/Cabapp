@@ -16,6 +16,7 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
+const logs_1 = require("../../util/logs");
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -34,6 +35,15 @@ class Cylinder extends module_1.default {
                 }
                 let payload = Object.assign(Object.assign({}, data), { creator: user._id });
                 let newGas = yield this.cylinder.create(payload);
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder type',
+                        //@ts-ignore
+                        activity: `You added a new cylinder type`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(newGas);
             }
             catch (e) {
@@ -83,6 +93,15 @@ class Cylinder extends module_1.default {
                 let manDate = new Date(data.dateManufactured);
                 let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString(), branch: user.branch });
                 let newRegistration = yield this.registerCylinder.create(payload);
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Register Cylinder',
+                        //@ts-ignore
+                        activity: `You registered a new ${newRegistration.cylinderType} cylinder`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(newRegistration);
             }
             catch (e) {
@@ -223,6 +242,15 @@ class Cylinder extends module_1.default {
                 //@ts-ignore
                 transfer.comments.push(com);
                 yield transfer.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder transfer',
+                        //@ts-ignore
+                        activity: `You started a new cylinder transfer process`,
+                        time: new Date().toISOString()
+                    }
+                });
                 yield new mail_1.default().push({
                     subject: "New cylinder transfer",
                     content: `A cylinder transfer has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
@@ -243,7 +271,7 @@ class Cylinder extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                let transfer = yield this.transfer.findById(data.id);
+                let transfer = yield this.transfer.findById(data.id).populate('initiator');
                 if (!transfer) {
                     throw new exceptions_1.BadInputFormatException('cylinder transfer not found');
                 }
@@ -277,6 +305,15 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         yield transfer.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Transfer',
+                                //@ts-ignore
+                                activity: `You Rejected a cylinder transfer request from ${transfer.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
@@ -317,6 +354,15 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         yield transfer.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Transfer',
+                                //@ts-ignore
+                                activity: `You Rejected a cylinder transfer request from ${transfer.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
@@ -363,6 +409,15 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         yield transfer.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Transfer',
+                                //@ts-ignore
+                                activity: `You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
@@ -405,6 +460,15 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         yield transfer.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Transfer',
+                                //@ts-ignore
+                                activity: `You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
@@ -443,6 +507,15 @@ class Cylinder extends module_1.default {
                         transfer.comments.push({
                             comment: data.comment,
                             commentBy: user._id
+                        });
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Transfer',
+                                //@ts-ignore
+                                activity: `You Approved a cylinder transfer request from ${transfer.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
                         });
                         let apUser = yield this.user.findById(transfer.initiator);
                         yield new mail_1.default().push({
@@ -506,7 +579,7 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    faultyCylinder(cylinderId) {
+    faultyCylinder(cylinderId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const cylinder = yield this.registerCylinder.findById(cylinderId);
@@ -516,6 +589,15 @@ class Cylinder extends module_1.default {
                 //@ts-ignore
                 cylinder.condition = cylinder_1.CylinderCondition.FAULTY;
                 yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.save());
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder Faulty',
+                        //@ts-ignore
+                        activity: `You marked ${cylinder.cylinderNumber | cylinder.assignedNumber} as a faulty cylinder`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let apUser = yield this.user.findOne({ role: 'production', subrole: 'head of department', branch: cylinder.branch });
                 yield new mail_1.default().push({
                     subject: "Faulty cylinder",
@@ -529,7 +611,7 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fixedFaultyCylinder(cylinderId) {
+    fixedFaultyCylinder(cylinderId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const cylinder = yield this.registerCylinder.findById(cylinderId);
@@ -539,6 +621,15 @@ class Cylinder extends module_1.default {
                 //@ts-ignore
                 cylinder.condition = cylinder_1.CylinderCondition.GOOD;
                 yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.save());
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder Faulty',
+                        //@ts-ignore
+                        activity: `You marked ${cylinder.cylinderNumber | cylinder.assignedNumber} as a fixed cylinder`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let apUser = yield this.user.findOne({ role: 'sales', subrole: 'head of department', branch: cylinder.branch });
                 yield new mail_1.default().push({
                     subject: "Faulty cylinder",
@@ -655,6 +746,15 @@ class Cylinder extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('This cylinder was not found');
                 }
                 yield cylinder.remove();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Registered cylinder',
+                        //@ts-ignore
+                        activity: `You deleted a registered cylinder`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve({
                     message: 'Cylinder deleted'
                 });

@@ -15,6 +15,7 @@ const registeredCylinders_1 = require("../../models/registeredCylinders");
 const exceptions_1 = require("../../exceptions");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const logs_1 = require("../../util/logs");
 class Sale extends module_1.default {
     constructor(props) {
         super();
@@ -31,6 +32,14 @@ class Sale extends module_1.default {
                 sales.status = transferCylinder_1.TransferStatus.PENDING;
                 sales.preparedBy = user._id;
                 yield sales.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Sales requisition',
+                        activity: 'Created asales requisition awaiting approval',
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(sales);
             }
             catch (e) {
@@ -68,7 +77,9 @@ class Sale extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const sales = yield this.sales.findById(data.salesId);
+                const sales = yield this.sales.findById(data.salesId).populate({
+                    path: 'initiator', model: 'User'
+                });
                 if (!sales) {
                     throw new exceptions_1.BadInputFormatException('sales requisition not found');
                 }
@@ -104,6 +115,15 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Sales requisition',
+                                //@ts-ignore
+                                activity: `rejected a requisition made by ${sales.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         new mail_1.default().push({
                             subject: "Sales Requisition",
@@ -141,6 +161,15 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Sales requisition',
+                                //@ts-ignore
+                                activity: `rejected a requisition made by ${sales.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         new mail_1.default().push({
                             subject: "Sales Requisition",
@@ -184,6 +213,15 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Sales requisition',
+                                //@ts-ignore
+                                activity: `Approved a sales requisition made by ${sales.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",
@@ -223,6 +261,15 @@ class Sale extends module_1.default {
                         //   commentBy:user._id
                         // })
                         yield sales.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Sales requisition',
+                                //@ts-ignore
+                                activity: `Approved a sales requisition made by ${sales.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",
@@ -260,6 +307,15 @@ class Sale extends module_1.default {
                         // });
                         // console.log(sales);
                         yield sales.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Sales requisition',
+                                //@ts-ignore
+                                activity: `Approved a sales requisition made by ${sales.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(sales.initiator);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",

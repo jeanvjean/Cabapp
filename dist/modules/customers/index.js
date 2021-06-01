@@ -17,6 +17,7 @@ const walk_in_customers_1 = require("../../models/walk-in-customers");
 const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
+const logs_1 = require("../../util/logs");
 class Customer extends module_1.default {
     constructor(props) {
         super();
@@ -32,6 +33,15 @@ class Customer extends module_1.default {
                 const date = new Date();
                 date.setDate(date.getDate() + data.cylinderHoldingTime);
                 const customer = yield this.customer.create(Object.assign(Object.assign({}, data), { cylinderHoldingTime: date.toISOString(), branch: user.branch }));
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Customers',
+                        //@ts-ignore
+                        activity: `You added ${customer.name} to the customer list`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(customer);
             }
             catch (e) {
@@ -74,6 +84,15 @@ class Customer extends module_1.default {
                     status: 'pending'
                 });
                 yield order.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Order',
+                        //@ts-ignore
+                        activity: `You created a new order`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(order);
             }
             catch (e) {
@@ -126,7 +145,7 @@ class Customer extends module_1.default {
             }
         });
     }
-    markOrderAsDone(data) {
+    markOrderAsDone(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const order = yield this.order.findById(data.orderId);
@@ -139,6 +158,15 @@ class Customer extends module_1.default {
                     order === null || order === void 0 ? void 0 : order.status = order_1.PickupStatus.PENDING;
                 }
                 yield (order === null || order === void 0 ? void 0 : order.save());
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Order',
+                        //@ts-ignore
+                        activity: `You completed this order`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(order);
             }
             catch (e) {
@@ -201,6 +229,15 @@ class Customer extends module_1.default {
                     complaint.comments.push(com);
                 }
                 yield complaint.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Complaint',
+                        //@ts-ignore
+                        activity: `You created a complaint for a customer`,
+                        time: new Date().toISOString()
+                    }
+                });
                 new mail_1.default().push({
                     subject: "Complaint",
                     content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
@@ -222,7 +259,7 @@ class Customer extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const complaint = yield this.complaint.findById(data.id);
+                const complaint = yield this.complaint.findById(data.id).populate('customer');
                 if (!complaint) {
                     throw new exceptions_1.BadInputFormatException('complaint not found');
                 }
@@ -257,6 +294,15 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            yield logs_1.createLog({
+                                user: user._id,
+                                activities: {
+                                    title: 'Complaint',
+                                    //@ts-ignore
+                                    activity: `You Rejected a complaint approval for ${complaint.customer.name}`,
+                                    time: new Date().toISOString()
+                                }
+                            });
                             let approvalUser = yield this.user.findById(AO[0].id);
                             new mail_1.default().push({
                                 subject: "Complaint",
@@ -294,6 +340,15 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            yield logs_1.createLog({
+                                user: user._id,
+                                activities: {
+                                    title: 'Complaint',
+                                    //@ts-ignore
+                                    activity: `You Rejected a complaint approval for ${complaint.customer.name}`,
+                                    time: new Date().toISOString()
+                                }
+                            });
                             let approvalUser = yield this.user.findById(AO[0].id);
                             new mail_1.default().push({
                                 subject: "Complaint",
@@ -327,6 +382,15 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            yield logs_1.createLog({
+                                user: user._id,
+                                activities: {
+                                    title: 'Complaint',
+                                    //@ts-ignore
+                                    activity: `You Approved a complaint approval for ${complaint.customer.name}`,
+                                    time: new Date().toISOString()
+                                }
+                            });
                             new mail_1.default().push({
                                 subject: "Complaint",
                                 content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
@@ -363,6 +427,15 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            yield logs_1.createLog({
+                                user: user._id,
+                                activities: {
+                                    title: 'Complaint',
+                                    //@ts-ignore
+                                    activity: `You Approved a complaint approval for ${complaint.customer.name}`,
+                                    time: new Date().toISOString()
+                                }
+                            });
                             let approvalUser = yield this.user.findById(complaint.nextApprovalOfficer);
                             new mail_1.default().push({
                                 subject: "Complaint",
@@ -401,6 +474,15 @@ class Customer extends module_1.default {
                                 commentBy: user._id
                             });
                             yield complaint.save();
+                            yield logs_1.createLog({
+                                user: user._id,
+                                activities: {
+                                    title: 'Complaint',
+                                    //@ts-ignore
+                                    activity: `You Approved a complaint approval for ${complaint.customer.name}`,
+                                    time: new Date().toISOString()
+                                }
+                            });
                             let approvalUser = yield this.user.findById(complaint.initiator);
                             new mail_1.default().push({
                                 subject: "Complaint",
@@ -505,14 +587,24 @@ class Customer extends module_1.default {
             }
         });
     }
-    resolveComplaint(complaintId) {
+    resolveComplaint(complaintId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaint = yield this.complaint.findById(complaintId);
+                const complaint = yield this.complaint.findById(complaintId).populate('customer');
                 if (!complaint) {
                     throw new exceptions_1.BadInputFormatException('complaint not found');
                 }
                 complaint.status = complaint_1.complaintStatus.RESOLVED;
+                yield complaint.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Complaint',
+                        //@ts-ignore
+                        activity: `You resolved a complaint for ${complaint.customer.name}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(complaint);
             }
             catch (e) {
@@ -530,6 +622,15 @@ class Customer extends module_1.default {
                 let sn = maxNumber + 1;
                 customer.serialNo = sn | 1;
                 yield customer.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Walk in customer',
+                        //@ts-ignore
+                        activity: `You registered ${customer.name} as a walk in customer`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(customer);
             }
             catch (e) {
@@ -559,13 +660,22 @@ class Customer extends module_1.default {
             }
         });
     }
-    deleteWalkinCustomer(customerId) {
+    deleteWalkinCustomer(customerId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const customer = yield this.walkin.findById(customerId);
                 if (!customer) {
                     throw new exceptions_1.BadInputFormatException('customer not found');
                 }
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Walk in customer',
+                        //@ts-ignore
+                        activity: `You Removed ${customer.name}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 yield customer.remove();
                 return Promise.resolve({
                     message: 'Done'

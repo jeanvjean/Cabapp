@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
 const exceptions_1 = require("../../exceptions");
+const logs_1 = require("../../util/logs");
 class Account extends module_1.default {
     constructor(props) {
         super();
@@ -28,6 +29,15 @@ class Account extends module_1.default {
                 sn = maxNum + 1;
                 reciept.invoiceNo = sn | 1;
                 yield reciept.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Reciept',
+                        //@ts-ignore
+                        activity: `You issued a reciept for purchase`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(reciept);
             }
             catch (e) {

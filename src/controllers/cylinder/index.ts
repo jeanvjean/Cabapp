@@ -198,7 +198,8 @@ class CylinderController extends Ctrl{
   faultyCylinder():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.faultyCylinder(req.params.cylinderId);
+        //@ts-ignore
+        const data = await this.module.faultyCylinder(req.params.cylinderId, req.user);
         this.ok(res,'cylinder marked as faulty', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -232,7 +233,8 @@ class CylinderController extends Ctrl{
   fixFaultyCylinder():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fixedFaultyCylinder(req.params.cylinderId);
+        //@ts-ignore
+        const data = await this.module.fixedFaultyCylinder(req.params.cylinderId, req.user);
         this.ok(res,'cylinder fixed', data);
       } catch (e) {
         this.handleError(e, req, res);

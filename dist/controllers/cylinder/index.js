@@ -199,7 +199,8 @@ class CylinderController extends ctrl_1.default {
     faultyCylinder() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.faultyCylinder(req.params.cylinderId);
+                //@ts-ignore
+                const data = yield this.module.faultyCylinder(req.params.cylinderId, req.user);
                 this.ok(res, 'cylinder marked as faulty', data);
             }
             catch (e) {
@@ -233,7 +234,8 @@ class CylinderController extends ctrl_1.default {
     fixFaultyCylinder() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fixedFaultyCylinder(req.params.cylinderId);
+                //@ts-ignore
+                const data = yield this.module.fixedFaultyCylinder(req.params.cylinderId, req.user);
                 this.ok(res, 'cylinder fixed', data);
             }
             catch (e) {

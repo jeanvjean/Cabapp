@@ -17,6 +17,7 @@ const token_1 = require("../../util/token");
 const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const logs_1 = require("../../util/logs");
 class Product extends module_1.default {
     constructor(props) {
         super();
@@ -89,6 +90,15 @@ class Product extends module_1.default {
                 // const branch = await this.branch.findById(user.branch);
                 // branch?.products.push(product._id);
                 yield product.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Inventory',
+                        //@ts-ignore
+                        activity: `You Added a new product to product list`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(product);
             }
             catch (e) {
@@ -215,6 +225,15 @@ class Product extends module_1.default {
                         //@ts-ignore
                         yield (prod === null || prod === void 0 ? void 0 : prod.save());
                     }
+                    yield logs_1.createLog({
+                        user: user._id,
+                        activities: {
+                            title: 'Inventory',
+                            //@ts-ignore
+                            activity: `You recorded new inventories coming in`,
+                            time: new Date().toISOString()
+                        }
+                    });
                 }
                 else if (inventory.direction == receivedProduct_1.productDirection.OUT) {
                     for (let product of products) {
@@ -226,6 +245,15 @@ class Product extends module_1.default {
                         //@ts-ignore
                         yield (prod === null || prod === void 0 ? void 0 : prod.save());
                     }
+                    yield logs_1.createLog({
+                        user: user._id,
+                        activities: {
+                            title: 'Inventory',
+                            //@ts-ignore
+                            activity: `You recorded new inventories going out`,
+                            time: new Date().toISOString()
+                        }
+                    });
                 }
                 yield inventory.save();
                 return Promise.resolve(inventory);
@@ -261,6 +289,15 @@ class Product extends module_1.default {
                     commentBy: user._id
                 });
                 yield disbursement.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Product disbursal',
+                        //@ts-ignore
+                        activity: `You started a product disbursal process`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                 yield new mail_1.default().push({
                     subject: "Product disbursal",
@@ -282,7 +319,9 @@ class Product extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const disbursement = yield this.disburse.findById(data.id);
+                const disbursement = yield this.disburse.findById(data.id).populate({
+                    path: 'initiator', model: 'User'
+                });
                 if (!disbursement) {
                     throw new exceptions_1.BadInputFormatException('product disbursal not found');
                 }
@@ -316,6 +355,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -350,6 +398,15 @@ class Product extends module_1.default {
                         });
                         disbursement.nextApprovalOfficer = AO[0].id;
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -383,6 +440,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         disbursement.nextApprovalOfficer = AO[0].id;
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
@@ -418,6 +484,15 @@ class Product extends module_1.default {
                         });
                         disbursement.nextApprovalOfficer = AO[0].id;
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -460,6 +535,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -498,6 +582,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -540,6 +633,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.initiator);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -579,6 +681,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -621,6 +732,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
@@ -666,6 +786,15 @@ class Product extends module_1.default {
                             commentBy: user._id
                         });
                         yield disbursement.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Product Disbursal',
+                                //@ts-ignore
+                                activity: `You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",

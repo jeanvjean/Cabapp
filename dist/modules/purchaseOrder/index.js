@@ -14,6 +14,7 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const exceptions_1 = require("../../exceptions");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const logs_1 = require("../../util/logs");
 class PurchaseOrder extends module_1.default {
     constructor(props) {
         super();
@@ -40,6 +41,15 @@ class PurchaseOrder extends module_1.default {
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
                 purchase.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                 yield purchase.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Purchase order',
+                        //@ts-ignore
+                        activity: `You created a new purchase order`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                 yield new mail_1.default().push({
                     subject: "Purchase Order",
@@ -89,7 +99,9 @@ class PurchaseOrder extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const purchase = yield this.purchase.findById(data.purchaseId);
+                const purchase = yield this.purchase.findById(data.purchaseId).populate({
+                    path: 'initiator', model: 'User'
+                });
                 if (!purchase) {
                     throw new exceptions_1.BadInputFormatException('purchase order not found');
                 }
@@ -123,6 +135,15 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Purchase Order',
+                                //@ts-ignore
+                                activity: `You rejected a purchase order approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
@@ -160,6 +181,15 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Purchase Order',
+                                //@ts-ignore
+                                activity: `You rejected a purchase order approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
@@ -203,6 +233,15 @@ class PurchaseOrder extends module_1.default {
                             commentBy: user._id
                         });
                         yield purchase.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Purchase Order',
+                                //@ts-ignore
+                                activity: `You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
@@ -243,6 +282,15 @@ class PurchaseOrder extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield purchase.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Purchase Order',
+                                //@ts-ignore
+                                activity: `You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
@@ -282,6 +330,15 @@ class PurchaseOrder extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield purchase.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Purchase Order',
+                                //@ts-ignore
+                                activity: `You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(purchase.initiator);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",

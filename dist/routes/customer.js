@@ -21,12 +21,12 @@ router.get('/fetch-complaints/:customerId', controllers_1.customerCtrl.fetchComp
 router.post('/approve-complaint/:complaintId', auth.verify(), controllers_1.customerCtrl.approveComplaint());
 router.get('/fetch-pending-comment-approval', auth.verify(), controllers_1.customerCtrl.fetchPendingComplaintApproval());
 router.get('/fetch-approved-complaints', auth.verify(), controllers_1.customerCtrl.fetchApprovedComplaints());
-router.get('/resolve-complaint/:complaintId', controllers_1.customerCtrl.resolveComplaint());
+router.get('/resolve-complaint/:complaintId', auth.verify(), controllers_1.customerCtrl.resolveComplaint());
 router.post('/register-walkin-customer', auth.verify(), customer_1.Validator.validateValkinCustomer(), val.validate(), controllers_1.customerCtrl.registerWalkinCustomer());
 router.get('/fetch-walkin-customers', auth.verify(), controllers_1.customerCtrl.fetchWalkinCustomers());
 router.get('/fetch-walkin-customer/:customerId', controllers_1.customerCtrl.fetchWalkinCustomer());
-router.delete('/delete-walkin-customer/:customerId', controllers_1.customerCtrl.deleteWalkinCustomer());
-router.get('/mark-filled-cylinder/:customerId', controllers_1.customerCtrl.markCustomerAsFilled());
+router.delete('/delete-walkin-customer/:customerId', auth.verify(), controllers_1.customerCtrl.deleteWalkinCustomer());
+router.get('/mark-filled-cylinder/:customerId', auth.verify(), controllers_1.customerCtrl.markCustomerAsFilled());
 router.get('/fetch-filled-walkincylinders', auth.verify(), controllers_1.customerCtrl.fetchFilledCustomerCylinders());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

@@ -14,6 +14,7 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
+const logs_1 = require("../../util/logs");
 class ProductionSchedule extends module_1.default {
     constructor(props) {
         super();
@@ -41,6 +42,15 @@ class ProductionSchedule extends module_1.default {
                     commentBy: user._id
                 });
                 yield production.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Production Schedule',
+                        //@ts-ignore
+                        activity: `You Created a new production schedule`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                 new mail_1.default().push({
                     subject: "Production Schedule",
@@ -62,7 +72,9 @@ class ProductionSchedule extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const production = yield this.production.findById(data.productionId);
+                const production = yield this.production.findById(data.productionId).populate({
+                    path: 'initiator', model: 'User'
+                });
                 if (!production) {
                     throw new exceptions_1.BadInputFormatException('production schedule not found');
                 }
@@ -97,6 +109,15 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield production.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Production Schedule',
+                                //@ts-ignore
+                                activity: `You rejected a production Schedule approval request made by ${production.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
@@ -135,6 +156,15 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield production.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'production schedule',
+                                //@ts-ignore
+                                activity: `You Rejected a production schedule approval request made by ${production.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
@@ -178,6 +208,15 @@ class ProductionSchedule extends module_1.default {
                             commentBy: user._id,
                         });
                         yield production.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'production schedule',
+                                //@ts-ignore
+                                activity: `You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
@@ -218,6 +257,15 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Authorizing officer'
                         });
                         yield production.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'production schedule',
+                                //@ts-ignore
+                                activity: `You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
@@ -257,6 +305,15 @@ class ProductionSchedule extends module_1.default {
                             officer: 'Approving officer'
                         });
                         yield production.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'production schedule',
+                                //@ts-ignore
+                                activity: `You Approved a production schedule approval request made by ${purchase.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let approvalUser = yield this.user.findById(production.initiator);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",

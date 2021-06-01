@@ -14,6 +14,7 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 const exceptions_1 = require("../../exceptions");
+const logs_1 = require("../../util/logs");
 class OutGoingCylinder extends module_1.default {
     constructor(props) {
         super();
@@ -35,6 +36,15 @@ class OutGoingCylinder extends module_1.default {
                     stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
                 });
                 yield ocn.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'OCN request',
+                        //@ts-ignore
+                        activity: `You created a new out going cylinder note awaiting approval`,
+                        time: new Date().toISOString()
+                    }
+                });
                 let apUser = yield this.user.findOne({ role: 'security', subrole: 'head of department', branch: ocn.branch });
                 yield new mail_1.default().push({
                     subject: "Outgoing cylinder note (OCN)",
@@ -52,7 +62,9 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { ocnId, status } = data;
-                const ocn = yield this.ocn.findById(ocnId);
+                const ocn = yield this.ocn.findById(ocnId).populate({
+                    path: 'customer', model: 'customer'
+                });
                 if (!ocn) {
                     throw new exceptions_1.BadInputFormatException('OCN not found');
                 }
@@ -86,6 +98,15 @@ class OutGoingCylinder extends module_1.default {
                         //     commentBy:user._id
                         //   })
                         yield ocn.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'OCN',
+                                //@ts-ignore
+                                activity: `You Rejected an Ocn approval request`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
@@ -123,6 +144,15 @@ class OutGoingCylinder extends module_1.default {
                         //     commentBy:user._id
                         //   })
                         yield ocn.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'OCN',
+                                //@ts-ignore
+                                activity: `You Rejected an Ocn approval request`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
@@ -166,6 +196,15 @@ class OutGoingCylinder extends module_1.default {
                         //     commentBy:user._id
                         //   })
                         yield ocn.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'OCN',
+                                //@ts-ignore
+                                activity: `You Approved an OCN approval request for ${ocn.customer.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
@@ -205,6 +244,15 @@ class OutGoingCylinder extends module_1.default {
                         //     commentBy:user._id
                         //   })
                         yield ocn.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'OCN',
+                                //@ts-ignore
+                                activity: `You Approved an OCN approval request for ${ocn.customer.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
@@ -240,6 +288,15 @@ class OutGoingCylinder extends module_1.default {
                         // transfer.nextApprovalOfficer = data.nextApprovalOfficer
                         //   transfer.comments.push(ocn);
                         yield ocn.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'OCN',
+                                //@ts-ignore
+                                activity: `You Approved an OCN approval request for ${ocn.customer.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
                         let apUser = yield this.user.findOne({ role: 'security', subrole: 'head of department', branch: ocn.branch });
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note (OCN)",

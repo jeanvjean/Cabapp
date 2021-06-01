@@ -7,6 +7,7 @@ import { compareSync } from "bcryptjs";
 import { BadInputFormatException } from "../../exceptions";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
+import { createLog } from "../../util/logs";
 
 
 interface purchaseOrderProps{
@@ -66,6 +67,15 @@ class PurchaseOrder extends Module{
             let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
             purchase.nextApprovalOfficer = hod?._id
             await purchase.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Purchase order',
+                //@ts-ignore
+                activity:`You created a new purchase order`,
+                time: new Date().toISOString()
+              }
+            });
             let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
             await new Notify().push({
               subject: "Purchase Order",
@@ -109,7 +119,9 @@ class PurchaseOrder extends Module{
           if(!matchPWD) {
             throw new BadInputFormatException('Incorrect password... please check the password');
           }
-            const purchase = await this.purchase.findById(data.purchaseId);
+            const purchase = await this.purchase.findById(data.purchaseId).populate({
+              path:'initiator', model:'User'
+            });
             if(!purchase) {
               throw new BadInputFormatException('purchase order not found');
             }
@@ -143,6 +155,15 @@ class PurchaseOrder extends Module{
                     commentBy:user._id
                   });
                   await purchase.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'Purchase Order',
+                      //@ts-ignore
+                      activity:`You rejected a purchase order approval request made by ${purchase.initiator.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
@@ -179,6 +200,15 @@ class PurchaseOrder extends Module{
                     commentBy:user._id
                   })
                   await purchase.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'Purchase Order',
+                      //@ts-ignore
+                      activity:`You rejected a purchase order approval request made by ${purchase.initiator.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
@@ -221,6 +251,15 @@ class PurchaseOrder extends Module{
                     commentBy:user._id
                   })
                   await purchase.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'Purchase Order',
+                      //@ts-ignore
+                      activity:`You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
@@ -260,6 +299,15 @@ class PurchaseOrder extends Module{
                     officer:'Authorizing officer'
                   });
                   await purchase.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'Purchase Order',
+                      //@ts-ignore
+                      activity:`You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
@@ -298,6 +346,15 @@ class PurchaseOrder extends Module{
                     officer:'Approving officer'
                   });
                   await purchase.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'Purchase Order',
+                      //@ts-ignore
+                      activity:`You Approved a purchase order approval request made by ${purchase.initiator.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let approvalUser = await this.user.findById(purchase.initiator);
                   await new Notify().push({
                     subject: "Purchase Order",

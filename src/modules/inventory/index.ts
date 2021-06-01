@@ -15,6 +15,7 @@ import Environment from '../../configs/static';
 import Notify from '../../util/mail'
 import { DeleteResponse } from "../vehicle";
 import { compareSync } from "bcryptjs";
+import { createLog } from "../../util/logs";
 
 interface ProductProp {
   product:Model<ProductInterface>
@@ -184,6 +185,15 @@ class Product extends Module{
       // const branch = await this.branch.findById(user.branch);
       // branch?.products.push(product._id);
       await product.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Inventory',
+          //@ts-ignore
+          activity:`You Added a new product to product list`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(product);
     } catch (e) {
       this.handleException(e)
@@ -295,6 +305,15 @@ class Product extends Module{
           //@ts-ignore
           await prod?.save()
         }
+        await createLog({
+          user:user._id,
+          activities:{
+            title:'Inventory',
+            //@ts-ignore
+            activity:`You recorded new inventories coming in`,
+            time: new Date().toISOString()
+          }
+        });
       }else if(inventory.direction == productDirection.OUT) {
         for(let product of products) {
           let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
@@ -305,6 +324,15 @@ class Product extends Module{
           //@ts-ignore
           await prod?.save()
         }
+        await createLog({
+          user:user._id,
+          activities:{
+            title:'Inventory',
+            //@ts-ignore
+            activity:`You recorded new inventories going out`,
+            time: new Date().toISOString()
+          }
+        });
       }
       await inventory.save();
       return Promise.resolve(inventory);
@@ -343,6 +371,15 @@ class Product extends Module{
         commentBy:user._id
       });
       await disbursement.save();
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Product disbursal',
+          //@ts-ignore
+          activity:`You started a product disbursal process`,
+          time: new Date().toISOString()
+        }
+      });
       let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -362,7 +399,9 @@ class Product extends Module{
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      const disbursement = await this.disburse.findById(data.id);
+      const disbursement = await this.disburse.findById(data.id).populate({
+        path:'initiator', model:'User'
+      });
       if(!disbursement) {
         throw new BadInputFormatException('product disbursal not found')
       }
@@ -398,6 +437,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -431,6 +479,15 @@ class Product extends Module{
           });
           disbursement.nextApprovalOfficer = AO[0].id;
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -463,6 +520,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           disbursement.nextApprovalOfficer = AO[0].id;
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
@@ -497,6 +563,15 @@ class Product extends Module{
           });
           disbursement.nextApprovalOfficer = AO[0].id
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Rejected a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -538,6 +613,15 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -575,6 +659,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -620,6 +713,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.initiator);
           await new Notify().push({
             subject: "Product disbursal",
@@ -658,6 +760,15 @@ class Product extends Module{
             commentBy:user._id
           })
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -699,6 +810,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",
@@ -746,6 +866,15 @@ class Product extends Module{
             commentBy:user._id
           });
           await disbursement.save();
+          await createLog({
+            user:user._id,
+            activities:{
+              title:'Product Disbursal',
+              //@ts-ignore
+              activity:`You Approved a disbursal approval request from ${disbursement.initiator.name}`,
+              time: new Date().toISOString()
+            }
+          });
           let apUser = await this.user.findById(disbursement.nextApprovalOfficer);
           await new Notify().push({
             subject: "Product disbursal",

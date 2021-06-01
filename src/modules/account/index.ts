@@ -3,6 +3,7 @@ import { RecieptInterface } from "../../models/reciept";
 import { Model } from "mongoose";
 import { UserInterface } from "../../models/user";
 import { BadInputFormatException } from "../../exceptions";
+import { createLog } from "../../util/logs";
 
 interface accountPropInterface {
     account:Model<RecieptInterface>
@@ -48,6 +49,15 @@ class Account extends Module{
             reciept.invoiceNo = sn | 1;
 
             await reciept.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'Reciept',
+                //@ts-ignore
+                activity:`You issued a reciept for purchase`,
+                time: new Date().toISOString()
+              }
+            });
             return Promise.resolve(reciept);
         } catch (e) {
             this.handleException(e);

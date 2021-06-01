@@ -6,6 +6,7 @@ import { stagesOfApproval, ApprovalStatus, TransferStatus } from "../../models/t
 import Notify from '../../util/mail';
 import Environment from '../../configs/static';
 import { BadInputFormatException } from "../../exceptions";
+import { createLog } from "../../util/logs";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
@@ -53,6 +54,15 @@ class OutGoingCylinder extends Module{
                 stageOfApproval:stagesOfApproval.STAGE1
             });
             await ocn.save();
+            await createLog({
+              user:user._id,
+              activities:{
+                title:'OCN request',
+                //@ts-ignore
+                activity:`You created a new out going cylinder note awaiting approval`,
+                time: new Date().toISOString()
+              }
+            });
             let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
             await new Notify().push({
               subject: "Outgoing cylinder note (OCN)",
@@ -68,7 +78,9 @@ class OutGoingCylinder extends Module{
     public async approveOcn(data:ocnApproval, user:UserInterface):Promise<OutgoingCylinderInterface|undefined>{
         try {
             const { ocnId, status } = data;
-            const ocn = await this.ocn.findById(ocnId);
+            const ocn = await this.ocn.findById(ocnId).populate({
+              path:'customer', model:'customer'
+            });
             if(!ocn) {
               throw new BadInputFormatException('OCN not found')
             }
@@ -102,6 +114,15 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'OCN',
+                      //@ts-ignore
+                      activity:`You Rejected an Ocn approval request`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
@@ -138,6 +159,15 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'OCN',
+                      //@ts-ignore
+                      activity:`You Rejected an Ocn approval request`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
@@ -180,6 +210,15 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'OCN',
+                      //@ts-ignore
+                      activity:`You Approved an OCN approval request for ${ocn.customer.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
@@ -218,6 +257,15 @@ class OutGoingCylinder extends Module{
                 //     commentBy:user._id
                 //   })
                   await ocn.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'OCN',
+                      //@ts-ignore
+                      activity:`You Approved an OCN approval request for ${ocn.customer.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
@@ -252,6 +300,15 @@ class OutGoingCylinder extends Module{
                   // transfer.nextApprovalOfficer = data.nextApprovalOfficer
                 //   transfer.comments.push(ocn);
                   await ocn.save();
+                  await createLog({
+                    user:user._id,
+                    activities:{
+                      title:'OCN',
+                      //@ts-ignore
+                      activity:`You Approved an OCN approval request for ${ocn.customer.name}`,
+                      time: new Date().toISOString()
+                    }
+                  });
                   let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
                   await new Notify().push({
                     subject: "Outgoing cylinder note (OCN)",

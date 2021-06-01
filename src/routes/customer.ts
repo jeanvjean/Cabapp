@@ -94,6 +94,7 @@ router.get(
 
 router.get(
   '/resolve-complaint/:complaintId',
+  auth.verify(),
   customerCtrl.resolveComplaint()
 );
 
@@ -118,11 +119,13 @@ router.get(
 
 router.delete(
   '/delete-walkin-customer/:customerId',
+  auth.verify(),
   customerCtrl.deleteWalkinCustomer()
 );
 
 router.get(
   '/mark-filled-cylinder/:customerId',
+  auth.verify(),
   customerCtrl.markCustomerAsFilled()
 );
 

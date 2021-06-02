@@ -202,7 +202,7 @@ class Vehicle extends module_1.default {
                 if (!vehicle) {
                     throw new exceptions_1.BadInputFormatException('selected vehicle was not found please pick an available vehicle');
                 }
-                let routePlan = new this.pickup(data);
+                let routePlan = new this.pickup(Object.assign(Object.assign({}, data), { branch: user.branch, vehicle: vehicle._id }));
                 let availableRoutes = yield this.pickup.find({});
                 routePlan.serialNo = availableRoutes.length + 1;
                 yield routePlan.save();

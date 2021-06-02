@@ -6,7 +6,6 @@ import {
 } from 'mongoose';
 
 export interface SupplierInterface extends Document {
-  productType:Schema.Types.ObjectId[]
   name:string
   location:string
   contactPerson:string
@@ -17,7 +16,6 @@ export interface SupplierInterface extends Document {
 }
 
 export const supplierSchema = new Schema({
-  productType:[{type:Schema.Types.ObjectId, ref:'products'}],
   name:{type:String},
   location:{type:String},
   contactPerson:{type:String},

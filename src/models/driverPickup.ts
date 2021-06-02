@@ -16,7 +16,8 @@ interface RouteCylinderInterface{
 
 
 export interface PickupInterface extends Document{
-  customer:Schema.Types.ObjectId,
+  customer:Schema.Types.ObjectId
+  supplier:Schema.Types.ObjectId
   startDate:Date
   endDate?:Date
   activity:RouteActivity
@@ -46,6 +47,7 @@ const routeCylinderSchema = new Schema({
 
 const routeSchema = new Schema({
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
+  supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
   startDate:{type:Date},
   endDate:{type:Date},
   activity:{type:String, enum:Object.values(RouteActivity)},

@@ -28,7 +28,7 @@ router.get(
 );
 
 router.post(
-  '/create-order/:customerId',
+  '/create-order',
   auth.verify(),
   Validator.validateOrder(),
   val.validate(),
@@ -51,6 +51,12 @@ router.get(
   customerCtrl.orderDetails()
 );
 
+router.delete(
+  '/delete-pickup/:orderId',
+  auth.verify(),
+  customerCtrl.deletePickupOrder()
+);
+
 router.post(
   '/assign-vehicle/:orderId',
   auth.verify(),
@@ -67,6 +73,12 @@ router.post(
   '/make-complain/:customerId',
   auth.verify(),
   customerCtrl.createComplaint()
+);
+
+router.get(
+  '/get-all-pickup-orders',
+  auth.verify(),
+  customerCtrl.fetchCreatedOrders()
 );
 
 router.get(

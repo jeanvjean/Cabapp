@@ -78,7 +78,7 @@ class Customer extends module_1.default {
     createOrder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const order = new this.order(data);
+                const order = new this.order(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 order.tracking.push({
                     location: user.role,
                     status: 'pending'
@@ -118,12 +118,27 @@ class Customer extends module_1.default {
     fetchOrdersAssignedToVehicle(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const orders = yield this.order.find({ vehicle: data.vehicle }).populate({
-                    path: 'vehicle', model: 'vehicle', populate: {
-                        path: 'assignedTo', model: 'User'
+                const orders = yield this.order.find({ vehicle: data.vehicle }).populate([
+                    {
+                        path: 'vehicle', model: 'vehicle', populate: {
+                            path: 'assignedTo', model: 'User'
+                        }
+                    },
+                    {
+                        path: 'supplier', model: 'supplier'
+                    },
+                    {
+                        path: 'customer', model: 'customer'
                     }
+                ]);
+                let customerOrder = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER && order.status == order_1.PickupStatus.PENDING);
+                let supplierOrder = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER && order.status == order_1.PickupStatus.PENDING);
+                let completed = orders.filter(order => order.status == order_1.PickupStatus.DONE);
+                return Promise.resolve({
+                    supplier: supplierOrder,
+                    customer: customerOrder,
+                    completed
                 });
-                return orders;
             }
             catch (e) {
                 this.handleException(e);
@@ -139,6 +154,28 @@ class Customer extends module_1.default {
                     { path: 'vehicle', model: 'vehicle' }
                 ]);
                 return Promise.resolve(orders);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchAllOrders(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const orders = yield this.order.find({ branch: user.branch }).populate([
+                    { path: 'vehicle', model: 'vehicle' },
+                    { path: 'supplier', model: 'supplier' },
+                    { path: 'customer', model: 'customer' }
+                ]);
+                let customerOrders = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER);
+                let supplierOrders = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER);
+                let completedOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE);
+                return Promise.resolve({
+                    customerOrders,
+                    supplierOrders,
+                    completedOrders
+                });
             }
             catch (e) {
                 this.handleException(e);
@@ -199,6 +236,22 @@ class Customer extends module_1.default {
             }
             catch (e) {
                 this.handleException(e);
+            }
+        });
+    }
+    deletePickupOrder(orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const order = yield this.order.findById(orderId);
+                if (!order) {
+                    throw new exceptions_1.BadInputFormatException('this order may have been deleted');
+                }
+                yield order.remove();
+                return Promise.resolve({
+                    message: 'pickup order deleted'
+                });
+            }
+            catch (e) {
             }
         });
     }

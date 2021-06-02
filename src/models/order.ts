@@ -16,18 +16,30 @@ export interface trackingOrder{
   status?:string
 }
 
+export enum pickupType {
+  SUPPLIER='supplier',
+  CUSTOMER='customer'
+};
+
+export enum orderType {
+  PICKUP='pickup',
+  DELIVERY="delivery"
+}
+
 export interface OrderInterface extends Document{
-  pickupType?:string
+  pickupType?:pickupType
   pickupDate?:Date
   status:string
   numberOfCylinders?:number
-  customer:Schema.Types.ObjectId
+  customer?:Schema.Types.ObjectId
+  supplier?:Schema.Types.ObjectId
   vehicle?:Schema.Types.ObjectId
   cylinderSize?:string
   gasType?:string
   gasColor?:string,
   tracking:trackingOrder[],
   branch:Schema.Types.ObjectId
+  orderType:orderType
 }
 
 const trackingSchema = new Schema({
@@ -36,17 +48,19 @@ const trackingSchema = new Schema({
 });
 
 const OrderSchema = new Schema({
-  pickupType:String,
+  pickupType:{type:String, enum:Object.values(pickupType)},
   pickupDate:Date,
   status:{type:String, enum:Object.values(PickupStatus), default:PickupStatus.PENDING},
   numberOfCylinders:Number,
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
+  supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
   vehicle:{type:Schema.Types.ObjectId, ref:'vehicle'},
   cylinderSize:{type:String},
-  gasType:{type:String},
+  gasType:{type:Schema.Types.ObjectId, ref:'cylinder'},
   gasColor:{type:String},
   tracking:[trackingSchema],
-  branch:{type:Schema.Types.ObjectId, ref:'vehicle'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  orderType:{type:String, enum:Object.values(orderType)}
 },{
   timestamps:true
 });

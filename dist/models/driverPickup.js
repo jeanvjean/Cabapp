@@ -10,6 +10,7 @@ const routeCylinderSchema = new mongoose_1.Schema({
 });
 const routeSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     startDate: { type: Date },
     endDate: { type: Date },
     activity: { type: String, enum: Object.values(vehicle_1.RouteActivity) },

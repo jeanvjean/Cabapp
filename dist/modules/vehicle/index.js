@@ -225,19 +225,23 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const vehicle = yield this.vehicle.findById(data.vehicleId);
+                const driver = yield this.user.findById(data.driver);
                 //@ts-ignore
                 vehicle === null || vehicle === void 0 ? void 0 : vehicle.assignedTo = data.driver;
+                //@ts-ignore
+                driver === null || driver === void 0 ? void 0 : driver.vehicle = vehicle === null || vehicle === void 0 ? void 0 : vehicle._id;
                 vehicle === null || vehicle === void 0 ? void 0 : vehicle.comments.push({
                     //@ts-ignore
                     comment: data.comment,
                     commentBy: user._id
                 });
                 yield (vehicle === null || vehicle === void 0 ? void 0 : vehicle.save());
+                yield (driver === null || driver === void 0 ? void 0 : driver.save());
                 yield logs_1.createLog({
                     user: user._id,
                     activities: {
                         title: 'Assign driver',
-                        activity: `You assigned a driver for ${vehicle === null || vehicle === void 0 ? void 0 : vehicle.regNo}`,
+                        activity: `You assigned ${driver === null || driver === void 0 ? void 0 : driver.name} to drive vehicle number ${vehicle === null || vehicle === void 0 ? void 0 : vehicle.regNo}`,
                         time: new Date().toISOString()
                     }
                 });

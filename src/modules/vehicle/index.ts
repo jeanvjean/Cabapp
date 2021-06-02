@@ -293,19 +293,23 @@ class Vehicle extends Module{
   public async assignDriver(data:Parameters, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
       const vehicle = await this.vehicle.findById(data.vehicleId);
+      const driver = await this.user.findById(data.driver);
       //@ts-ignore
       vehicle?.assignedTo = data.driver;
+      //@ts-ignore
+      driver?.vehicle = vehicle?._id
       vehicle?.comments.push({
         //@ts-ignore
         comment:data.comment,
         commentBy:user._id
       });
       await vehicle?.save();
+      await driver?.save();
       await createLog({
         user:user._id,
         activities:{
           title:'Assign driver',
-          activity:`You assigned a driver for ${vehicle?.regNo}`,
+          activity:`You assigned ${driver?.name} to drive vehicle number ${vehicle?.regNo}`,
           time: new Date().toISOString()
         }
       });

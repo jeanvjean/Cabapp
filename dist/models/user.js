@@ -54,6 +54,7 @@ exports.userSchema = new mongoose_1.Schema({
     token: {
         type: String
     },
+    vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     deactivated: {
         type: Boolean,
         default: false

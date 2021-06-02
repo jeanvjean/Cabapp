@@ -61,9 +61,8 @@ class customerCtrl extends Ctrl{
   createOrder():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const { customerId } = req.params;
         //@ts-ignore
-        const data = await this.module.createOrder({...req.body, customer:customerId}, req.user);
+        const data = await this.module.createOrder({...req.body}, req.user);
         this.ok(res, 'Created', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -108,12 +107,35 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  deletePickupOrder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.deletePickupOrder(req.params.orderId);
+        this.ok(res, `${data.message}`);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   assignOrderToVehicle():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
         const data = await this.module.assignOrderToVehicle({...req.body, orderId:req.params.orderId}, req.user);
         this.ok(res, 'order assigned to vehicle', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchCreatedOrders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchAllOrders(req.user);
+        this.ok(res, 'fetched all orders', data)
       } catch (e) {
         this.handleError(e, req, res);
       }

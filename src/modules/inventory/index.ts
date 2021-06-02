@@ -55,7 +55,6 @@ interface updateProduct {
 }
 
 type NewSupplierInterface = {
-  productType:SupplierInterface['productType']
   name:SupplierInterface['name']
   location:SupplierInterface['location']
   contactPerson:SupplierInterface['contactPerson']

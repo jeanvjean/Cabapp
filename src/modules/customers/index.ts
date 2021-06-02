@@ -3,7 +3,7 @@ import { BadInputFormatException } from "../../exceptions";
 import { ComplaintInterface, complaintStatus } from "../../models/complaint";
 import { CustomerInterface } from "../../models/customer";
 import { CylinderInterface } from "../../models/cylinder";
-import { OrderInterface, PickupStatus, trackingOrder } from "../../models/order";
+import { OrderInterface, PickupStatus, pickupType, trackingOrder } from "../../models/order";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { WalkinCustomerInterface, WalkinCustomerStatus } from "../../models/walk-in-customers";
@@ -48,10 +48,12 @@ interface CreateOrderInterface{
   pickupDate?:OrderInterface['pickupDate']
   numberOfCylinders?:OrderInterface['numberOfCylinders']
   customer:OrderInterface['customer']
+  supplier?:OrderInterface['supplier']
   vehicle?:OrderInterface['vehicle']
   cylinderSize?:OrderInterface['cylinderSize']
   gasType?:OrderInterface['gasType']
   gasColor?:OrderInterface['gasColor']
+  orderType:OrderInterface['orderType']
 }
 
 type TrackingDataInput = {
@@ -90,6 +92,18 @@ type newWalkinCustomer = {
   cylinderSize:WalkinCustomerInterface['cylinderSize']
   totalVolume:WalkinCustomerInterface['totalVolume']
   totalQuantity:WalkinCustomerInterface['totalQuantity']
+}
+
+type vehicleOrderResponse = {
+  supplier:OrderInterface[],
+  customer:OrderInterface[],
+  completed:OrderInterface[]
+}
+
+type fetchPickupOrderRersponse = {
+  supplierOrders?:OrderInterface[],
+  customerOrders?:OrderInterface[],
+  completedOrders?:OrderInterface[]
 }
 
 type OrderDoneInput = {
@@ -165,7 +179,7 @@ class Customer extends Module{
 
   public async createOrder(data:CreateOrderInterface, user:UserInterface):Promise<OrderInterface|undefined>{
     try {
-      const order = new this.order(data);
+      const order = new this.order({...data, branch:user.branch});
       order.tracking.push({
         location:user.role,
         status:'pending'
@@ -199,14 +213,29 @@ class Customer extends Module{
     }
   }
 
-  public async fetchOrdersAssignedToVehicle(data:orderVehicle):Promise<OrderInterface[]|undefined>{
+  public async fetchOrdersAssignedToVehicle(data:orderVehicle):Promise<vehicleOrderResponse|undefined>{
     try {
-      const orders = await this.order.find({vehicle:data.vehicle}).populate({
-        path:'vehicle', model:'vehicle',populate:{
-          path:'assignedTo', model:'User'
+      const orders = await this.order.find({vehicle:data.vehicle}).populate([
+        {
+          path:'vehicle', model:'vehicle',populate:{
+            path:'assignedTo', model:'User'
+          }
+        },
+        {
+          path:'supplier', model:'supplier'
+        },
+        {
+          path:'customer', model:'customer'
         }
+      ]);
+      let customerOrder = orders.filter(order=> order.pickupType == pickupType.CUSTOMER && order.status == PickupStatus.PENDING);
+      let supplierOrder = orders.filter(order=> order.pickupType == pickupType.SUPPLIER && order.status == PickupStatus.PENDING);
+      let completed = orders.filter(order=> order.status == PickupStatus.DONE);
+      return Promise.resolve({
+        supplier:supplierOrder,
+        customer:customerOrder,
+        completed
       });
-      return orders
     } catch (e) {
       this.handleException(e);
     }
@@ -220,6 +249,28 @@ class Customer extends Module{
         {path:'vehicle', model:'vehicle'}
       ]);
       return Promise.resolve(orders)
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
+  public async fetchAllOrders(user:UserInterface):Promise<fetchPickupOrderRersponse|undefined>{
+    try {
+      const orders = await this.order.find({branch:user.branch}).populate([
+        {path:'vehicle', model:'vehicle'},
+        {path:'supplier', model:'supplier'},
+        {path:'customer', model:'customer'}
+      ]);
+
+      let customerOrders = orders.filter(order=> order.pickupType == pickupType.CUSTOMER);
+      let supplierOrders = orders.filter(order=> order.pickupType == pickupType.SUPPLIER);
+      let completedOrders = orders.filter(order=> order.status == PickupStatus.DONE);
+
+      return Promise.resolve({
+        customerOrders,
+        supplierOrders,
+        completedOrders
+      });
     } catch (e) {
       this.handleException(e)
     }
@@ -272,6 +323,21 @@ class Customer extends Module{
       return Promise.resolve(order as OrderInterface);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async deletePickupOrder(orderId:string):Promise<any>{
+    try {
+      const order = await this.order.findById(orderId);
+      if(!order) {
+        throw new BadInputFormatException('this order may have been deleted');
+      }
+      await order.remove();
+      return Promise.resolve({
+        message:'pickup order deleted'
+      });
+    } catch (e) {
+
     }
   }
 

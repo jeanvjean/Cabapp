@@ -66,6 +66,8 @@ import {
 
     phoneNumber:number
 
+    vehicle:Schema.Types.ObjectId
+
     branch:Schema.Types.ObjectId
 
     permissions:Permissions[]
@@ -117,6 +119,7 @@ import {
     token:{
       type:String
     },
+    vehicle:{type:Schema.Types.ObjectId, ref:'User'},
     deactivated:{
       type:Boolean,
       default:false

@@ -66,9 +66,8 @@ class customerCtrl extends ctrl_1.default {
     createOrder() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { customerId } = req.params;
                 //@ts-ignore
-                const data = yield this.module.createOrder(Object.assign(Object.assign({}, req.body), { customer: customerId }), req.user);
+                const data = yield this.module.createOrder(Object.assign({}, req.body), req.user);
                 this.ok(res, 'Created', data);
             }
             catch (e) {
@@ -113,12 +112,35 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    deletePickupOrder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.deletePickupOrder(req.params.orderId);
+                this.ok(res, `${data.message}`);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     assignOrderToVehicle() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
                 const data = yield this.module.assignOrderToVehicle(Object.assign(Object.assign({}, req.body), { orderId: req.params.orderId }), req.user);
                 this.ok(res, 'order assigned to vehicle', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchCreatedOrders() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchAllOrders(req.user);
+                this.ok(res, 'fetched all orders', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

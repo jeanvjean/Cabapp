@@ -221,7 +221,8 @@ class Cylinder extends Module {
     try {
       const cylinder = await this.registerCylinder.findById(id).populate([
         {path:'assignedTo', model:'customer'},
-        {path:'branch', model:'branches'}
+        {path:'branch', model:'branches'},
+        {path:'gasType', model:'cylinder'}
       ]);
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {

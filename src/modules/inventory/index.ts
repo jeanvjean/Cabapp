@@ -80,6 +80,8 @@ interface NewDisburseInterface{
   releasedTo:DisburseProductInterface['releasedTo']
   comment:string
   nextApprovalOfficer:string
+  customer:DisburseProductInterface['customer']
+  jobTag:DisburseProductInterface['jobTag']
 }
 
 type ApprovalResponseType = {
@@ -292,7 +294,11 @@ class Product extends Module{
 
   public async addInventory(data:NewInventory, user:UserInterface):Promise<InventoryInterface|undefined> {
     try {
-      const inventory = new this.inventory({...data, inspectingOfficer:user._id});
+      const inventory = new this.inventory({
+        ...data,
+        inspectingOfficer:user._id,
+        branch:user.branch
+      });
       let products = inventory.products;
       if(inventory.direction == productDirection.IN){
         for(let product of products) {
@@ -335,6 +341,24 @@ class Product extends Module{
       }
       await inventory.save();
       return Promise.resolve(inventory);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryInterface[]|undefined>{
+    try {
+      const inventories = await this.inventory.find({...query, branch:user.branch});
+      return Promise.resolve(inventories);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async viewInventory(inventoryId:string):Promise<InventoryInterface|undefined>{
+    try {
+      const inventory = await this.inventory.findById(inventoryId);
+      return Promise.resolve(inventory as InventoryInterface)
     } catch (e) {
       this.handleException(e);
     }
@@ -699,12 +723,12 @@ class Product extends Module{
           disbursement.approvalStage = stagesOfApproval.APPROVED;
           disbursement.disburseStatus = TransferStatus.COMPLETED;
 
-          for(let product of disbursement.products) {
-            let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
-            //@ts-ignore
-            pro?.quantity - +product.quantityReleased;
-            await pro?.save();
-          }
+          // for(let product of disbursement.products) {
+          //   let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
+          //   //@ts-ignore
+          //   pro?.quantity -= +product.quantityReleased;
+          //   await pro?.save();
+          // }
 
           //@ts-ignore
           disbursement.comments.push({

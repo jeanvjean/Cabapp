@@ -42,6 +42,9 @@ export interface DisburseProductInterface extends Document{
   requestApproval:TransferStatus
   requestStage:stagesOfApproval,
   initiator:Schema.Types.ObjectId
+  inspectingOfficer:Schema.Types.ObjectId
+  jobTag:string
+  customer:Schema.Types.ObjectId
 }
 
 const requesterSchema = new Schema({
@@ -74,7 +77,9 @@ export const disburseSchema = new Schema({
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   fromBranch:{type:Schema.Types.ObjectId, ref:'branches'},
   requestFrom:{type:requesterSchema},
-  initiator:{type:Schema.Types.ObjectId, ref:'User'}
+  initiator:{type:Schema.Types.ObjectId, ref:'User'},
+  jobTag:{type:String},
+  customer:{type:Schema.Types.ObjectId, ref:'customer'}
 });
 
 export default function factory(conn:Connection):Model<DisburseProductInterface>{

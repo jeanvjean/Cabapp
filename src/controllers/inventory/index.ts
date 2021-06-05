@@ -256,6 +256,29 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  fetchInventories():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchInventories(req.query, req.user);
+        this.ok(res, 'inventories retrieved', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchInventoryDetail():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.viewInventory(req.params.inventoryId);
+        this.ok(res, 'details fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

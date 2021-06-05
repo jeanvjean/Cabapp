@@ -213,7 +213,7 @@ class Product extends module_1.default {
     addInventory(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const inventory = new this.inventory(Object.assign(Object.assign({}, data), { inspectingOfficer: user._id }));
+                const inventory = new this.inventory(Object.assign(Object.assign({}, data), { inspectingOfficer: user._id, branch: user.branch }));
                 let products = inventory.products;
                 if (inventory.direction == receivedProduct_1.productDirection.IN) {
                     for (let product of products) {
@@ -256,6 +256,28 @@ class Product extends module_1.default {
                     });
                 }
                 yield inventory.save();
+                return Promise.resolve(inventory);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchInventories(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const inventories = yield this.inventory.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                return Promise.resolve(inventories);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    viewInventory(inventoryId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const inventory = yield this.inventory.findById(inventoryId);
                 return Promise.resolve(inventory);
             }
             catch (e) {
@@ -621,12 +643,12 @@ class Product extends module_1.default {
                         disbursement.tracking.push(track);
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
                         disbursement.disburseStatus = transferCylinder_1.TransferStatus.COMPLETED;
-                        for (let product of disbursement.products) {
-                            let pro = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
-                            //@ts-ignore
-                            (pro === null || pro === void 0 ? void 0 : pro.quantity) - +product.quantityReleased;
-                            yield (pro === null || pro === void 0 ? void 0 : pro.save());
-                        }
+                        // for(let product of disbursement.products) {
+                        //   let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
+                        //   //@ts-ignore
+                        //   pro?.quantity -= +product.quantityReleased;
+                        //   await pro?.save();
+                        // }
                         //@ts-ignore
                         disbursement.comments.push({
                             comment: data.comment,

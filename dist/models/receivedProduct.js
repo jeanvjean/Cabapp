@@ -29,7 +29,8 @@ exports.inventorySchema = new mongoose_1.Schema({
     products: [exports.productRecievedSchema],
     inspectingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     grnDocument: { type: String },
-    direction: { type: String, enum: Object.values(productDirection) }
+    direction: { type: String, enum: Object.values(productDirection) },
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 });
 function factory(conn) {
     return conn.model('inventory', exports.inventorySchema);

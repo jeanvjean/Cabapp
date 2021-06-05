@@ -40,6 +40,18 @@ router.post(
   productCtrl.addInventory()
 );
 
+router.get(
+  '/fetch-inventories',
+  auth.verify(),
+  productCtrl.fetchInventories()
+);
+
+router.get(
+  '/fetch-inventory/:inventoryId',
+  auth.verify(),
+  productCtrl.fetchInventoryDetail()
+);
+
 router.post(
   '/disburse-products',
   auth.verify(),

@@ -12,6 +12,8 @@ router.get('/fetch-products', auth.verify(), controllers_1.productCtrl.fetchProd
 router.get('/fetch-product/:id', controllers_1.productCtrl.fetchProduct());
 router.post('/create-supplier', auth.verify(), controllers_1.productCtrl.createSupplier());
 router.post('/register-inventory', auth.verify(), inventory_1.Validator.validateUpdateInventory(), val.validate(), controllers_1.productCtrl.addInventory());
+router.get('/fetch-inventories', auth.verify(), controllers_1.productCtrl.fetchInventories());
+router.get('/fetch-inventory/:inventoryId', auth.verify(), controllers_1.productCtrl.fetchInventoryDetail());
 router.post('/disburse-products', auth.verify(), controllers_1.productCtrl.disburseProducts());
 router.post('/approve-disbursement', auth.verify(), inventory_1.Validator.approveInput(), val.validate(), controllers_1.productCtrl.approveDisbursement());
 router.get('/fetch-pending-disburse', auth.verify(), controllers_1.productCtrl.fetchDisburseApprovals());

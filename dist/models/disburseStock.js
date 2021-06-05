@@ -31,7 +31,9 @@ exports.disburseSchema = new mongoose_1.Schema({
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     fromBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     requestFrom: { type: requesterSchema },
-    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    jobTag: { type: String },
+    customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' }
 });
 function factory(conn) {
     return conn.model('disburse-product', exports.disburseSchema);

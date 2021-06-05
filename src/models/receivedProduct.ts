@@ -21,7 +21,8 @@ export interface InventoryInterface extends Document{
   products:ReceivedProduct[],
   inspectingOfficer:Schema.Types.ObjectId,
   grnDocument:string
-  direction:productDirection
+  direction:productDirection,
+  branch:Schema.Types.ObjectId
 }
 
 export interface ReceivedProduct {
@@ -59,7 +60,8 @@ export const inventorySchema = new Schema({
   products:[productRecievedSchema],
   inspectingOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   grnDocument:{type:String},
-  direction:{type:String, enum:Object.values(productDirection)}
+  direction:{type:String, enum:Object.values(productDirection)},
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
 
 export default function factory(conn:Connection):Model<InventoryInterface> {

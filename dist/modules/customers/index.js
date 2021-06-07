@@ -166,7 +166,8 @@ class Customer extends module_1.default {
                 const orders = yield this.order.find({ branch: user.branch }).populate([
                     { path: 'vehicle', model: 'vehicle' },
                     { path: 'supplier', model: 'supplier' },
-                    { path: 'customer', model: 'customer' }
+                    { path: 'customer', model: 'customer' },
+                    { path: 'gasType', model: 'cylinder' }
                 ]);
                 let customerOrders = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER);
                 let supplierOrders = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER);

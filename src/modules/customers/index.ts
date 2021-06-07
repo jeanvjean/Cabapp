@@ -259,7 +259,8 @@ class Customer extends Module{
       const orders = await this.order.find({branch:user.branch}).populate([
         {path:'vehicle', model:'vehicle'},
         {path:'supplier', model:'supplier'},
-        {path:'customer', model:'customer'}
+        {path:'customer', model:'customer'},
+        {path:'gasType', model:'cylinder'}
       ]);
 
       let customerOrders = orders.filter(order=> order.pickupType == pickupType.CUSTOMER);

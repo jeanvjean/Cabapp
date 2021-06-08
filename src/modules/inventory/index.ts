@@ -108,6 +108,12 @@ interface NewBranchInterface{
   branchAdmin:BranchInterface['branchAdmin']
 }
 
+interface InventoryPoolResponse {
+  inventory:InventoryInterface[]
+  issuedOut:InventoryInterface[]
+  recieved:InventoryInterface[]
+}
+
 
 class Product extends Module{
   private product:Model<ProductInterface>
@@ -347,10 +353,17 @@ class Product extends Module{
     }
   }
 
-  public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryInterface[]|undefined>{
+  public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
       const inventories = await this.inventory.find({...query, branch:user.branch});
-      return Promise.resolve(inventories);
+      const issuedOut = inventories.filter(inventory=> inventory.direction == productDirection.OUT);
+      const recieved =  inventories.filter(inventory=> inventory.direction == productDirection.IN);
+
+      return Promise.resolve({
+          inventory:inventories,
+          issuedOut,
+          recieved
+        });
     } catch (e) {
       this.handleException(e);
     }

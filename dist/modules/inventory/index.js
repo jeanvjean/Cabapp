@@ -267,7 +267,13 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const inventories = yield this.inventory.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
-                return Promise.resolve(inventories);
+                const issuedOut = inventories.filter(inventory => inventory.direction == receivedProduct_1.productDirection.OUT);
+                const recieved = inventories.filter(inventory => inventory.direction == receivedProduct_1.productDirection.IN);
+                return Promise.resolve({
+                    inventory: inventories,
+                    issuedOut,
+                    recieved
+                });
             }
             catch (e) {
                 this.handleException(e);

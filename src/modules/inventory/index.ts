@@ -391,8 +391,8 @@ class Product extends Module{
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
       let hod = await this.user.findOne({
-        role:user.role, 
-        subrole:'head of department', 
+        role:user.role,
+        subrole:'head of department',
         branch:user.branch
       });
       const disbursement = new this.disburse({
@@ -947,11 +947,9 @@ class Product extends Module{
 
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursement = await this.disburse.find(query);
-      const pendingDisbursement = disbursement.filter(disburse=>
-          disburse.disburseStatus == TransferStatus.PENDING && disburse.fromBranch == user.branch
-        );
-      let startStage = pendingDisbursement.filter(transfer=> {
+      const disbursement = await this.disburse.find({...query, fromBranch:user.branch});
+      console.log(disbursement);
+      let startStage = disbursement.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -964,7 +962,7 @@ class Product extends Module{
           }
         }
       });
-      let stage1 = pendingDisbursement.filter(transfer=>{
+      let stage1 = disbursement.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE1) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -977,7 +975,7 @@ class Product extends Module{
           }
         }
       });
-      let stage2 = pendingDisbursement.filter(transfer=>{
+      let stage2 = disbursement.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE2) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -990,15 +988,15 @@ class Product extends Module{
           }
         }
       });
-      let disbursements;
+      let disb;
       if(user.subrole == 'superadmin'){
-        disbursements = stage2;
+        disb = stage2;
       }else if(user.subrole == 'head of department'){
-        disbursements = stage1
+        disb = stage1
       }else {
-        disbursements = startStage;
+        disb = startStage;
       }
-      return Promise.resolve(disbursements)
+      return Promise.resolve(disb)
     } catch (e) {
       this.handleException(e);
     }
@@ -1006,10 +1004,9 @@ class Product extends Module{
 
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursement = await this.disburse.find(query);
-      const pendingDisbursement = disbursement.filter(disburse=>
-        disburse.requestApproval == TransferStatus.PENDING && disburse.branch == user.branch);
-      let startStage = pendingDisbursement.filter(transfer=> {
+      const disbursement = await this.disburse.find({...query, branch:user.branch});
+        console.log(disbursement)
+      let startStage = disbursement.filter(transfer=> {
         if(transfer.requestStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -1022,7 +1019,7 @@ class Product extends Module{
           }
         }
       });
-      let stage1 = pendingDisbursement.filter(transfer=>{
+      let stage1 = disbursement.filter(transfer=>{
         if(transfer.requestStage == stagesOfApproval.STAGE1) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -1035,7 +1032,7 @@ class Product extends Module{
           }
         }
       });
-      let stage2 = pendingDisbursement.filter(transfer=>{
+      let stage2 = disbursement.filter(transfer=>{
         if(transfer.requestStage == stagesOfApproval.STAGE2) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -1048,15 +1045,15 @@ class Product extends Module{
           }
         }
       });
-      let disbursements;
+      let disb;
       if(user.subrole == 'superadmin'){
-        disbursements = stage2;
+        disb = stage2;
       }else if(user.subrole == 'head of department'){
-        disbursements = stage1
+        disb = stage1
       }else {
-        disbursements = startStage;
+        disb = startStage;
       }
-      return Promise.resolve(disbursements)
+      return Promise.resolve(disb)
     } catch (e) {
       this.handleException(e);
     }

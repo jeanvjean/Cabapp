@@ -851,9 +851,9 @@ class Product extends module_1.default {
     fetchusersDisburseApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursement = yield this.disburse.find(query);
-                const pendingDisbursement = disbursement.filter(disburse => disburse.disburseStatus == transferCylinder_1.TransferStatus.PENDING && disburse.fromBranch == user.branch);
-                let startStage = pendingDisbursement.filter(transfer => {
+                const disbursement = yield this.disburse.find(Object.assign(Object.assign({}, query), { fromBranch: user.branch }));
+                console.log(disbursement);
+                let startStage = disbursement.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -867,7 +867,7 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let stage1 = pendingDisbursement.filter(transfer => {
+                let stage1 = disbursement.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -881,7 +881,7 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let stage2 = pendingDisbursement.filter(transfer => {
+                let stage2 = disbursement.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -895,17 +895,17 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let disbursements;
+                let disb;
                 if (user.subrole == 'superadmin') {
-                    disbursements = stage2;
+                    disb = stage2;
                 }
                 else if (user.subrole == 'head of department') {
-                    disbursements = stage1;
+                    disb = stage1;
                 }
                 else {
-                    disbursements = startStage;
+                    disb = startStage;
                 }
-                return Promise.resolve(disbursements);
+                return Promise.resolve(disb);
             }
             catch (e) {
                 this.handleException(e);
@@ -915,9 +915,9 @@ class Product extends module_1.default {
     fetchusersDisburseRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursement = yield this.disburse.find(query);
-                const pendingDisbursement = disbursement.filter(disburse => disburse.requestApproval == transferCylinder_1.TransferStatus.PENDING && disburse.branch == user.branch);
-                let startStage = pendingDisbursement.filter(transfer => {
+                const disbursement = yield this.disburse.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                console.log(disbursement);
+                let startStage = disbursement.filter(transfer => {
                     if (transfer.requestStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -931,7 +931,7 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let stage1 = pendingDisbursement.filter(transfer => {
+                let stage1 = disbursement.filter(transfer => {
                     if (transfer.requestStage == transferCylinder_1.stagesOfApproval.STAGE1) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -945,7 +945,7 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let stage2 = pendingDisbursement.filter(transfer => {
+                let stage2 = disbursement.filter(transfer => {
                     if (transfer.requestStage == transferCylinder_1.stagesOfApproval.STAGE2) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -959,17 +959,17 @@ class Product extends module_1.default {
                         }
                     }
                 });
-                let disbursements;
+                let disb;
                 if (user.subrole == 'superadmin') {
-                    disbursements = stage2;
+                    disb = stage2;
                 }
                 else if (user.subrole == 'head of department') {
-                    disbursements = stage1;
+                    disb = stage1;
                 }
                 else {
-                    disbursements = startStage;
+                    disb = startStage;
                 }
-                return Promise.resolve(disbursements);
+                return Promise.resolve(disb);
             }
             catch (e) {
                 this.handleException(e);

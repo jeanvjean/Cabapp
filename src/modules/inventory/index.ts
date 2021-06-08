@@ -9,7 +9,6 @@ import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/t
 import { UserInterface } from "../../models/user";
 import { getTemplate } from "../../util/resolve-template";
 import { generateToken } from "../../util/token";
-import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
 import Environment from '../../configs/static';
 import Notify from '../../util/mail'
@@ -24,6 +23,17 @@ interface ProductProp {
   disburse:Model<DisburseProductInterface>
   branch:Model<BranchInterface>
   user:Model<UserInterface>
+}
+
+interface ApprovalInput{
+  comment:string,
+  status:string,
+  id:string,
+  nextApprovalOfficer?:string,
+  password:string,
+  products?:DisburseProductInterface['products']
+  releasedBy?:DisburseProductInterface['releasedBy']
+  releasedTo?:DisburseProductInterface['releasedTo']
 }
 
 interface NewProductInterface{
@@ -448,7 +458,12 @@ class Product extends Module{
       }
       //@ts-ignore
       disbursement?.products = data.products;
-
+      if(data.releasedTo !== null && data.releasedBy !== null) {
+        //@ts-ignore
+        disbursement?.releasedBy = data.releasedBy;
+        //@ts-ignore
+        disbursement?.releasedTo = data.releasedTo;
+      }
       await disbursement?.save();
       if(data.status == ApprovalStatus.REJECTED) {
         if(disbursement?.approvalStage == stagesOfApproval.STAGE1) {

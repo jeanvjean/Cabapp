@@ -154,8 +154,14 @@ class User extends Module {
         if(existUser){
           exists.push(user.email);
         } else {
+
           if(user.subrole == 'head of department') {
-                let hod = await this.model.findOne({role:user.role, subrole:user.subrole});
+            console.log(user)
+                let hod = await this.model.findOne({
+                  role:user.role,
+                  subrole:user.subrole,
+                  branch:branch?.branch
+                });
                 if(!hod) {
                   let password = await generateToken(4);
                   //@ts-ignore

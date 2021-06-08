@@ -359,6 +359,12 @@ class Product extends module_1.default {
                 }
                 //@ts-ignore
                 disbursement === null || disbursement === void 0 ? void 0 : disbursement.products = data.products;
+                if (data.releasedTo !== null && data.releasedBy !== null) {
+                    //@ts-ignore
+                    disbursement === null || disbursement === void 0 ? void 0 : disbursement.releasedBy = data.releasedBy;
+                    //@ts-ignore
+                    disbursement === null || disbursement === void 0 ? void 0 : disbursement.releasedTo = data.releasedTo;
+                }
                 yield (disbursement === null || disbursement === void 0 ? void 0 : disbursement.save());
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {

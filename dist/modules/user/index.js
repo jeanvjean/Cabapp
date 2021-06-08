@@ -73,7 +73,12 @@ class User extends module_1.default {
                     }
                     else {
                         if (user.subrole == 'head of department') {
-                            let hod = yield this.model.findOne({ role: user.role, subrole: user.subrole });
+                            console.log(user);
+                            let hod = yield this.model.findOne({
+                                role: user.role,
+                                subrole: user.subrole,
+                                branch: branch === null || branch === void 0 ? void 0 : branch.branch
+                            });
                             if (!hod) {
                                 let password = yield token_1.generateToken(4);
                                 //@ts-ignore

@@ -33,7 +33,8 @@ exports.disburseSchema = new mongoose_1.Schema({
     requestFrom: { type: requesterSchema },
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     jobTag: { type: String },
-    customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' }
+    customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
+    mrn: { type: String }
 });
 function factory(conn) {
     return conn.model('disburse-product', exports.disburseSchema);

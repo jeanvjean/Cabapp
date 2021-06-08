@@ -288,7 +288,11 @@ class Product extends module_1.default {
     disburseProduct(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
+                let hod = yield this.user.findOne({
+                    role: user.role,
+                    subrole: 'head of department',
+                    branch: user.branch
+                });
                 const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch }));
                 let track = {
                     title: "initiate disbursal process",

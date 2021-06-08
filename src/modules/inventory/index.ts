@@ -81,7 +81,8 @@ interface NewDisburseInterface{
   comment:string
   nextApprovalOfficer:string
   customer:DisburseProductInterface['customer']
-  jobTag:DisburseProductInterface['jobTag']
+  jobTag:DisburseProductInterface['jobTag'],
+  mrn:DisburseProductInterface['mrn']
 }
 
 type ApprovalResponseType = {
@@ -366,7 +367,11 @@ class Product extends Module{
 
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
-      let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
+      let hod = await this.user.findOne({
+        role:user.role, 
+        subrole:'head of department', 
+        branch:user.branch
+      });
       const disbursement = new this.disburse({
         ...data,
         nextApprovalOfficer:hod?._id,

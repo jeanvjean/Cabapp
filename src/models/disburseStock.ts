@@ -45,6 +45,7 @@ export interface DisburseProductInterface extends Document{
   inspectingOfficer:Schema.Types.ObjectId
   jobTag:string
   customer:Schema.Types.ObjectId
+  mrn:string
 }
 
 const requesterSchema = new Schema({
@@ -79,7 +80,8 @@ export const disburseSchema = new Schema({
   requestFrom:{type:requesterSchema},
   initiator:{type:Schema.Types.ObjectId, ref:'User'},
   jobTag:{type:String},
-  customer:{type:Schema.Types.ObjectId, ref:'customer'}
+  customer:{type:Schema.Types.ObjectId, ref:'customer'},
+  mrn:{type:String}
 });
 
 export default function factory(conn:Connection):Model<DisburseProductInterface>{

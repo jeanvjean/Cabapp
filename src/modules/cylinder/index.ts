@@ -39,6 +39,21 @@ interface NewCylinderRegisterationInterface{
   cylinderNumber:RegisteredCylinderInterface['cylinderNumber']
 }
 
+interface UpdateRegisteredCylinder {
+  cylinderType?:RegisteredCylinderInterface['cylinderType'],
+  waterCapacity?:RegisteredCylinderInterface['waterCapacity'],
+  dateManufactured?:RegisteredCylinderInterface['dateManufactured'],
+  assignedTo?:RegisteredCylinderInterface['assignedTo'],
+  gasType?:RegisteredCylinderInterface['gasType'],
+  standardColor?:RegisteredCylinderInterface['standardColor'],
+  assignedNumber?:RegisteredCylinderInterface['assignedNumber'],
+  testingPresure?:RegisteredCylinderInterface['testingPresure'],
+  fillingPreasure?:RegisteredCylinderInterface['fillingPreasure'],
+  gasVolumeContent?:RegisteredCylinderInterface['gasVolumeContent'],
+  cylinderNumber?:RegisteredCylinderInterface['cylinderNumber'],
+  cylinderId:string
+}
+
 interface CylinderCountInterface{
   totalCylinders:number,
   totalBufferCylinders:number,
@@ -190,6 +205,25 @@ class Cylinder extends Module {
         }
       });
       return Promise.resolve(newRegistration as RegisteredCylinderInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async updateRegCylinder(data:UpdateRegisteredCylinder, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      const cylinder = await this.registerCylinder.findById(data.cylinderId)
+      if(!cylinder) {
+        throw new BadInputFormatException('cylinder not found');
+      }
+      let updatedCyliner = await this.registerCylinder.findByIdAndUpdate(
+        cylinder._id,
+        {
+          $set:data
+        },
+        {new:true}
+      )
+      return Promise.resolve(updatedCyliner as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);
     }

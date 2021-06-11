@@ -109,6 +109,23 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    updateRegCylinder(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.registerCylinder.findById(data.cylinderId);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('cylinder not found');
+                }
+                let updatedCyliner = yield this.registerCylinder.findByIdAndUpdate(cylinder._id, {
+                    $set: data
+                }, { new: true });
+                return Promise.resolve(updatedCyliner);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

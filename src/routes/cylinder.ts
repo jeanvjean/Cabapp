@@ -82,6 +82,12 @@ router.get(
   cylinderCtrl.fetchCustomerCylinders()
 );
 
+router.post(
+  '/update-reg-cylinder/:cylinderId',
+  auth.verify(),
+  cylinderCtrl.updateRegCylinder()
+);
+
 router.get(
   '/fetch-cylinder-transfer-report',
   auth.verify(),

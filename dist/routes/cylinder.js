@@ -21,6 +21,7 @@ router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersP
 router.delete('/remove-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.deleteRegisteredCylinder());
 router.get('/fetch-faulty-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchFaultyCylinders());
 router.get('/fetch-customer-cylinders/:customerId', controllers_1.cylinderCtrl.fetchCustomerCylinders());
+router.post('/update-reg-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.updateRegCylinder());
 router.get('/fetch-cylinder-transfer-report', auth.verify(), controllers_1.cylinderCtrl.fetchCompletedTransfers());
 router.get('/mark-faulty-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.faultyCylinder());
 router.get('/condemn-cylinder/:cylinderId', controllers_1.cylinderCtrl.condemnCylinder());

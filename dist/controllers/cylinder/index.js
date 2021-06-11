@@ -65,6 +65,19 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    updateRegCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { cylinderId } = req.params;
+                //@ts-ignore
+                const data = yield this.module.updateRegCylinder(Object.assign(Object.assign({}, req.body), { cylinderId }), req.user);
+                this.ok(res, 'updated registered cylinder', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchRegisteredCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

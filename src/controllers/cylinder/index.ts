@@ -65,6 +65,19 @@ class CylinderController extends Ctrl{
     }
   }
 
+  updateRegCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const {cylinderId} = req.params;
+        //@ts-ignore
+        const data = await this.module.updateRegCylinder({...req.body, cylinderId}, req.user);
+        this.ok(res, 'updated registered cylinder', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchRegisteredCylinders(): RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

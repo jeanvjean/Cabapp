@@ -678,9 +678,8 @@ class Cylinder extends module_1.default {
     fetchUserPendingApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const transfers = yield this.transfer.find(query);
-                let pendingTransfers = transfers.filter(transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.PENDING && transfer.branch == user.branch);
-                let startStage = pendingTransfers.filter(transfer => {
+                const transfers = yield this.transfer.find(Object.assign(Object.assign({}, query), { branch: user.branch, transferStatus: transferCylinder_1.TransferStatus.PENDING }));
+                let startStage = transfers.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -694,7 +693,7 @@ class Cylinder extends module_1.default {
                         }
                     }
                 });
-                let stage1 = pendingTransfers.filter(transfer => {
+                let stage1 = transfers.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -708,7 +707,7 @@ class Cylinder extends module_1.default {
                         }
                     }
                 });
-                let stage2 = pendingTransfers.filter(transfer => {
+                let stage2 = transfers.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {

@@ -272,7 +272,9 @@ class Cylinder extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                let transfer = yield this.transfer.findById(data.id).populate('initiator');
+                let transfer = yield this.transfer.findById(data.id).populate([
+                    { path: 'initiator', model: 'User' }
+                ]);
                 if (!transfer) {
                     throw new exceptions_1.BadInputFormatException('cylinder transfer not found');
                 }
@@ -461,6 +463,9 @@ class Cylinder extends module_1.default {
                             commentBy: user._id
                         });
                         yield transfer.save();
+                        // console.log(transfer)
+                        // let logMan = transfer.initiator;
+                        // console.log(logMan);
                         yield logs_1.createLog({
                             user: user._id,
                             activities: {

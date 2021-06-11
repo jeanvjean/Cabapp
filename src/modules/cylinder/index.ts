@@ -741,9 +741,9 @@ class Cylinder extends Module {
 
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
-      const transfers = await this.transfer.find(query);
-      let pendingTransfers = transfers.filter(transfer=>transfer.transferStatus == TransferStatus.PENDING && transfer.branch == user.branch);
-      let startStage = pendingTransfers.filter(transfer=> {
+      const transfers = await this.transfer.find({...query, branch:user.branch, transferStatus:TransferStatus.PENDING});
+
+      let startStage = transfers.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -756,7 +756,7 @@ class Cylinder extends Module {
           }
         }
       });
-      let stage1 = pendingTransfers.filter(transfer=>{
+      let stage1 = transfers.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE1) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -769,7 +769,7 @@ class Cylinder extends Module {
           }
         }
       });
-      let stage2 = pendingTransfers.filter(transfer=>{
+      let stage2 = transfers.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE2) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){

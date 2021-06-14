@@ -97,13 +97,19 @@ type newWalkinCustomer = {
 type vehicleOrderResponse = {
   supplier:OrderInterface[],
   customer:OrderInterface[],
-  completed:OrderInterface[]
+  completed:{
+    customers:OrderInterface[],
+    suppliers:OrderInterface[],
+  }
 }
 
 type fetchPickupOrderRersponse = {
   supplierOrders?:OrderInterface[],
   customerOrders?:OrderInterface[],
-  completedOrders?:OrderInterface[]
+  completedOrders?:{
+    customers:OrderInterface[],
+    suppliers:OrderInterface[],
+  }
 }
 
 type OrderDoneInput = {
@@ -231,10 +237,15 @@ class Customer extends Module{
       let customerOrder = orders.filter(order=> order.pickupType == pickupType.CUSTOMER && order.status == PickupStatus.PENDING);
       let supplierOrder = orders.filter(order=> order.pickupType == pickupType.SUPPLIER && order.status == PickupStatus.PENDING);
       let completed = orders.filter(order=> order.status == PickupStatus.DONE);
+      let completedCustomerOrders = orders.filter(order=> order.status == PickupStatus.DONE && order.pickupType == pickupType.CUSTOMER);
+      let completedSupplierOrders = orders.filter(order=> order.status == PickupStatus.DONE && order.pickupType == pickupType.CUSTOMER);
       return Promise.resolve({
         supplier:supplierOrder,
         customer:customerOrder,
-        completed
+        completed:{
+          customers:completedCustomerOrders,
+          suppliers:completedSupplierOrders
+        }
       });
     } catch (e) {
       this.handleException(e);
@@ -266,11 +277,16 @@ class Customer extends Module{
       let customerOrders = orders.filter(order=> order.pickupType == pickupType.CUSTOMER);
       let supplierOrders = orders.filter(order=> order.pickupType == pickupType.SUPPLIER);
       let completedOrders = orders.filter(order=> order.status == PickupStatus.DONE);
+      let completedCustomerOrders = orders.filter(order=> order.status == PickupStatus.DONE && order.pickupType == pickupType.CUSTOMER);
+      let completedSupplierOrders = orders.filter(order=> order.status == PickupStatus.DONE && order.pickupType == pickupType.CUSTOMER);
 
       return Promise.resolve({
         customerOrders,
         supplierOrders,
-        completedOrders
+        completedOrders:{
+          customers:completedCustomerOrders,
+          suppliers:completedSupplierOrders
+        }
       });
     } catch (e) {
       this.handleException(e)
@@ -400,7 +416,9 @@ class Customer extends Module{
       if(!matchPWD) {
         throw new BadInputFormatException('Incorrect password... please check the password');
       }
-      const complaint = await this.complaint.findById(data.id).populate('customer');
+      const complaint = await this.complaint.findById(data.id).populate([
+        {path:'customer', ref:'User'}
+      ]);
       if(!complaint){
         throw new BadInputFormatException('complaint not found')
       }
@@ -639,12 +657,9 @@ class Customer extends Module{
 
   public async fetchUserComplaintApproval(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
-      const complaints = await this.complaint.find(query);
-      let pendingComplaints = complaints.filter(complaint=>
-          complaint.approvalStatus == TransferStatus.PENDING && complaint.branch == user.branch
-        );
+      const complaints = await this.complaint.find({...query, branch:user.branch, approvalStatus:TransferStatus.PENDING});
 
-      let startStage = pendingComplaints.filter(transfer=> {
+      let startStage = complaints.filter(transfer=> {
         if(transfer.approvalStage == stagesOfApproval.START) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -657,7 +672,7 @@ class Customer extends Module{
           }
         }
       });
-      let stage1 = pendingComplaints.filter(transfer=>{
+      let stage1 = complaints.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE1) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -670,7 +685,7 @@ class Customer extends Module{
           }
         }
       });
-      let stage2 = pendingComplaints.filter(transfer=>{
+      let stage2 = complaints.filter(transfer=>{
         if(transfer.approvalStage == stagesOfApproval.STAGE2) {
           for(let tofficer of transfer.approvalOfficers) {
             if(`${tofficer.id}` == `${user._id}`){
@@ -719,7 +734,9 @@ class Customer extends Module{
 
   public async resolveComplaint(complaintId:string, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try{
-      const complaint = await this.complaint.findById(complaintId).populate('customer');
+      const complaint = await this.complaint.findById(complaintId).populate([
+        {path:'customer', model:'User'}
+      ]);
       if(!complaint) {
         throw new BadInputFormatException('complaint not found');
       }

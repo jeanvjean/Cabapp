@@ -134,10 +134,15 @@ class Customer extends module_1.default {
                 let customerOrder = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER && order.status == order_1.PickupStatus.PENDING);
                 let supplierOrder = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER && order.status == order_1.PickupStatus.PENDING);
                 let completed = orders.filter(order => order.status == order_1.PickupStatus.DONE);
+                let completedCustomerOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
+                let completedSupplierOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
                 return Promise.resolve({
                     supplier: supplierOrder,
                     customer: customerOrder,
-                    completed
+                    completed: {
+                        customers: completedCustomerOrders,
+                        suppliers: completedSupplierOrders
+                    }
                 });
             }
             catch (e) {
@@ -172,10 +177,15 @@ class Customer extends module_1.default {
                 let customerOrders = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER);
                 let supplierOrders = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER);
                 let completedOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE);
+                let completedCustomerOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
+                let completedSupplierOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
                 return Promise.resolve({
                     customerOrders,
                     supplierOrders,
-                    completedOrders
+                    completedOrders: {
+                        customers: completedCustomerOrders,
+                        suppliers: completedSupplierOrders
+                    }
                 });
             }
             catch (e) {
@@ -313,7 +323,9 @@ class Customer extends module_1.default {
                 if (!matchPWD) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
                 }
-                const complaint = yield this.complaint.findById(data.id).populate('customer');
+                const complaint = yield this.complaint.findById(data.id).populate([
+                    { path: 'customer', ref: 'User' }
+                ]);
                 if (!complaint) {
                     throw new exceptions_1.BadInputFormatException('complaint not found');
                 }
@@ -556,9 +568,8 @@ class Customer extends module_1.default {
     fetchUserComplaintApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaints = yield this.complaint.find(query);
-                let pendingComplaints = complaints.filter(complaint => complaint.approvalStatus == transferCylinder_1.TransferStatus.PENDING && complaint.branch == user.branch);
-                let startStage = pendingComplaints.filter(transfer => {
+                const complaints = yield this.complaint.find(Object.assign(Object.assign({}, query), { branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }));
+                let startStage = complaints.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -572,7 +583,7 @@ class Customer extends module_1.default {
                         }
                     }
                 });
-                let stage1 = pendingComplaints.filter(transfer => {
+                let stage1 = complaints.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -586,7 +597,7 @@ class Customer extends module_1.default {
                         }
                     }
                 });
-                let stage2 = pendingComplaints.filter(transfer => {
+                let stage2 = complaints.filter(transfer => {
                     if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
                         for (let tofficer of transfer.approvalOfficers) {
                             if (`${tofficer.id}` == `${user._id}`) {
@@ -644,7 +655,9 @@ class Customer extends module_1.default {
     resolveComplaint(complaintId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaint = yield this.complaint.findById(complaintId).populate('customer');
+                const complaint = yield this.complaint.findById(complaintId).populate([
+                    { path: 'customer', model: 'User' }
+                ]);
                 if (!complaint) {
                     throw new exceptions_1.BadInputFormatException('complaint not found');
                 }

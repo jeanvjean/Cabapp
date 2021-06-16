@@ -69,11 +69,31 @@ class User extends module_1.default {
                 for (let user of data.users) {
                     let existUser = yield this.model.findOne({ email: user.email });
                     if (existUser) {
-                        exists.push(user.email);
+                        if (!existUser.isVerified) {
+                            let password = yield token_1.generateToken(4);
+                            //@ts-ignore
+                            yield this.model.findByIdAndUpdate(existUser._id, { password }, { new: true });
+                            const html = yield resolve_template_1.getTemplate('invite', {
+                                team: user.role,
+                                role: user.subrole,
+                                link: static_1.default.FRONTEND_URL,
+                                //@ts-ignore
+                                branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
+                                password
+                            });
+                            let mailLoad = {
+                                content: html,
+                                subject: 'RE:Invitiation',
+                                email: user.email,
+                            };
+                            new mail_1.default().sendMail(mailLoad);
+                        }
+                        else {
+                            exists.push(user.email);
+                        }
                     }
                     else {
                         if (user.subrole == 'head of department') {
-                            console.log(user);
                             let hod = yield this.model.findOne({
                                 role: user.role,
                                 subrole: user.subrole,

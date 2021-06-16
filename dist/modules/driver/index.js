@@ -48,12 +48,12 @@ class Driver extends module_1.default {
             }
         });
     }
-    fetchDrivers(query) {
+    fetchDrivers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const users = yield this.driver.find(query);
-                const drivers = users.filter(driver => driver.subrole == 'Driver');
-                return Promise.resolve(drivers);
+                const users = yield this.driver.find(Object.assign(Object.assign({}, query), { branch: user.branch, subrole: 'driver' }));
+                const drivers = users.filter(driver => driver.subrole == 'driver');
+                return Promise.resolve(users);
             }
             catch (e) {
                 this.handleException(e);

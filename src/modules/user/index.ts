@@ -152,11 +152,29 @@ class User extends Module {
       for(let user of data.users) {
         let existUser:UserInterface | null = await this.model.findOne({email:user.email});
         if(existUser){
-          exists.push(user.email);
+          if(!existUser.isVerified) {
+            let password = await generateToken(4);
+                  //@ts-ignore
+                  await this.model.findByIdAndUpdate(existUser._id,{password}, {new:true});
+                  const html = await getTemplate('invite', {
+                    team: user.role,
+                    role:user.subrole,
+                    link:Environment.FRONTEND_URL,
+                    //@ts-ignore
+                    branch:branch?.branch.name,
+                    password
+                  });
+                  let mailLoad = {
+                    content:html,
+                    subject:'RE:Invitiation',
+                    email:user.email,
+                  }
+                  new Notify().sendMail(mailLoad);
+          } else {
+            exists.push(user.email);
+          }
         } else {
-
           if(user.subrole == 'head of department') {
-            console.log(user)
                 let hod = await this.model.findOne({
                   role:user.role,
                   subrole:user.subrole,

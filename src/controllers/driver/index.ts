@@ -41,7 +41,8 @@ class driverCtrl extends Ctrl{
   fetchDrivers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchDrivers(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchDrivers(req.query, req.user);
         this.ok(res,'Fetched',data);
       } catch (e) {
         this.handleError(e, req, res);

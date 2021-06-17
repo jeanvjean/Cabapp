@@ -136,6 +136,20 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    suspendUser() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { userId } = req.params;
+                let { suspend } = req.query;
+                //@ts-ignore
+                const data = yield this.module.suspendUser({ userId, suspend }, req.user);
+                this.ok(res, data === null || data === void 0 ? void 0 : data.message, data === null || data === void 0 ? void 0 : data.user);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     requestPasswordReset() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

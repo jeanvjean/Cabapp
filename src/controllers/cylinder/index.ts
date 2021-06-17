@@ -30,6 +30,18 @@ class CylinderController extends Ctrl{
     }
   }
 
+  cylinderStats():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.cylinderStats(req.user);
+        this.ok(res,'fetched stats', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchCylinders():RequestHandler{
     return async (req:Request, res:Response) =>{
       try {

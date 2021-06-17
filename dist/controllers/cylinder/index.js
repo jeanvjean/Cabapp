@@ -30,6 +30,18 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    cylinderStats() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.cylinderStats(req.user);
+                this.ok(res, 'fetched stats', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

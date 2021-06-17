@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransferSchema = exports.ApprovalOfficerSchema = exports.approvalStageShema = exports.commentSchema = exports.TransferType = exports.ApprovalStatus = exports.TransferStatus = exports.stagesOfApproval = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var stagesOfApproval;
 (function (stagesOfApproval) {
     stagesOfApproval["START"] = "start";
@@ -87,6 +88,7 @@ exports.TransferSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.TransferSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('transfer-cylinder', exports.TransferSchema);
 }

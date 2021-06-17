@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.inventorySchema = exports.productRecievedSchema = exports.productDirection = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var productDirection;
 (function (productDirection) {
     productDirection["IN"] = "in-coming";
@@ -32,6 +33,7 @@ exports.inventorySchema = new mongoose_1.Schema({
     direction: { type: String, enum: Object.values(productDirection) },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 });
+exports.inventorySchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('inventory', exports.inventorySchema);
 }

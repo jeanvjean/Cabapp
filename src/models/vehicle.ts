@@ -6,6 +6,8 @@ Model
 } from 'mongoose';
 import { commentInterface, commentSchema, stagesOfApproval } from './transferCylinder';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 
 export type Disposal = {
   disposalDate:Date,
@@ -156,6 +158,8 @@ export const vehicleSchema = new Schema({
 },{
   timestamps:true
 });
+
+vehicleSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<VehicleInterface> {
   return conn.model('vehicle', vehicleSchema);

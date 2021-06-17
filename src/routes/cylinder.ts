@@ -117,4 +117,10 @@ router.get(
   cylinderCtrl.fixFaultyCylinder()
 );
 
+router.get(
+  '/fetch-cylinder-stats',
+  auth.verify(),
+  cylinderCtrl.cylinderStats()
+);
+
 export default router;

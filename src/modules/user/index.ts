@@ -26,6 +26,16 @@ interface NewUserInterface {
   branch:UserInterface['branch']
 }
 
+type SuspendUserInput = {
+  userId:string,
+  suspend:boolean
+}
+
+type suspendUserResponse = {
+  message:string
+  user:UserInterface
+}
+
 interface inviteUserInput {
   users:UserInterface[]
 }
@@ -251,8 +261,12 @@ class User extends Module {
 
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
-      let users = await this.model.find(query);
-      return users;
+      let options = {
+        ...query
+      }
+      //@ts-ignore
+      let users = await this.model.paginate({},options);
+      return users
     } catch (e) {
       this.handleException(e);
     }
@@ -260,7 +274,8 @@ class User extends Module {
 
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
-      let users = await this.model.find({...query, branch:user.branch});
+      //@ts-ignore
+      let users = await this.model.paginate({branch:user.branch}, {...query});
       return users;
     } catch (e) {
       this.handleException(e);
@@ -499,6 +514,25 @@ class User extends Module {
       return Promise.resolve(updated as UserInterface);
     } catch (e) {
      this.handleException(e);
+    }
+  }
+
+  public async suspendUser(data:SuspendUserInput, user:UserInterface):Promise<suspendUserResponse|undefined>{
+    try{
+      const user = await this.model.findById(data.userId);
+      if(!user) {
+        throw new BadInputFormatException('user not found');
+      }
+      let updatedUser = await this.model.findByIdAndUpdate(user._id,{deactivated:data.suspend}, {new:true});
+      //@ts-ignore
+      let message = updatedUser.deactivated? 'suspended' : 're-activated';
+
+      return Promise.resolve({
+        message,
+        user
+      });
+    }catch(e){
+      this.handleException(e);
     }
   }
 

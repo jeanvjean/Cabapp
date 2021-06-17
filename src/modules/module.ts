@@ -3,8 +3,8 @@ import {DatabaseException, DatabaseValidationException} from '../exceptions';
 import {MongoError} from 'mongodb';
 
 export interface QueryInterface {
-  page?: number;
-  limit?: number;
+  page?: number | 1;
+  limit?: number | 10;
   search?: 'string';
   produced?:boolean;
   sort?: object;

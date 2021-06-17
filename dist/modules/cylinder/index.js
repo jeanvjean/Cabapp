@@ -17,6 +17,7 @@ const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 const logs_1 = require("../../util/logs");
+const walk_in_customers_1 = require("../../models/walk-in-customers");
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -166,16 +167,56 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    cylinderStats(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.registerCylinder.find({ branch: user.branch });
+                const bufferCylinder = cylinders.filter(cylinder => cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER).length;
+                const assignedCylinder = cylinders.filter(cylinder => cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED).length;
+                const withCustomer = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.CUSTOMER).length;
+                const withAsnl = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL).length;
+                const customerBufferCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.CUSTOMER && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER).length;
+                const customerAssignedCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.CUSTOMER && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED).length;
+                const asnlBufferCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER).length;
+                const asnlAssignedCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED).length;
+                const asnlFilledCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.FILLED).length;
+                const asnlEmptyCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.EMPTY).length;
+                const filledBufferCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.FILLED && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER).length;
+                const filledAssignedCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.FILLED && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED).length;
+                const emptyBufferCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.FILLED && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER).length;
+                const emptyAssignedCylinders = cylinders.filter(cylinder => cylinder.holder == registeredCylinders_1.cylinderHolder.ASNL && cylinder.cylinderStatus == walk_in_customers_1.WalkinCustomerStatus.FILLED && cylinder.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED).length;
+                return Promise.resolve({
+                    bufferCylinder,
+                    assignedCylinder,
+                    withCustomer,
+                    withAsnl,
+                    customerBufferCylinders,
+                    customerAssignedCylinders,
+                    asnlBufferCylinders,
+                    asnlAssignedCylinders,
+                    asnlFilledCylinders,
+                    asnlEmptyCylinders,
+                    filledBufferCylinders,
+                    filledAssignedCylinders,
+                    emptyBufferCylinders,
+                    emptyAssignedCylinders
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchFaultyCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
+                //@ts-ignore
+                const cylinders = yield this.registerCylinder.paginate({ branch: user.branch, condition: cylinder_1.CylinderCondition.FAULTY }, Object.assign({}, query)).populate([
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' }
                 ]);
-                const faulty = cylinders.filter(cylinder => cylinder.condition == cylinder_1.CylinderCondition.FAULTY);
                 return Promise.resolve({
-                    faulty
+                    faulty: cylinders
                 });
             }
             catch (e) {

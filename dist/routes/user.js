@@ -22,5 +22,6 @@ router.post('/change-password', user_1.Validator.validatePasswordChange(), val.v
 router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());
 router.get('/fetch-permissions', controllers_1.userCtrl.fetchPermissions());
 router.get('/register-token/:token', auth.verify(), controllers_1.userCtrl.updateToken());
+router.get('/suspend/:userId', auth.verify(), controllers_1.userCtrl.suspendUser());
 exports.default = router;
 //# sourceMappingURL=user.js.map

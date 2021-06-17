@@ -6,6 +6,7 @@ import {
   model
 } from 'mongoose';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 export enum stagesOfApproval {
   START="start",
@@ -137,6 +138,8 @@ export const TransferSchema = new Schema({
 },{
   timestamps:true
 });
+
+TransferSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection) : Model<TransferCylinder> {
   return conn.model('transfer-cylinder', TransferSchema);

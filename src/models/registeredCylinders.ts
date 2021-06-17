@@ -7,11 +7,20 @@ import {
 } from 'mongoose';
 import { CylinderCondition } from './cylinder';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+import { WalkinCustomerStatus } from './walk-in-customers';
+
 export enum TypesOfCylinders {
   BUFFER="buffer",
   ASSIGNED="assigned",
   DAMAGED="damaged",
   REPAIR="repair"
+}
+
+export enum cylinderHolder {
+  CUSTOMER = "customer",
+  ASNL = "asnl",
+  SUPPLIER = "supplier"
 }
 
 
@@ -83,11 +92,15 @@ export interface RegisteredCylinderInterface extends Document{
 
   cylinderNumber:string
 
+  holder:cylinderHolder
+
   /**
    * @param condition cylinder condition
    */
 
   condition:CylinderCondition
+
+  cylinderStatus:WalkinCustomerStatus
 
   branch:Schema.Types.ObjectId
 
@@ -138,10 +151,16 @@ export const registerCylinderSchema = new Schema({
 
   holdingTime:{type:Date},
 
-  department:{type:String}
+  department:{type:String},
+
+  holder:{type:String, enum:Object.values(cylinderHolder), default:cylinderHolder.ASNL},
+
+  cylinderStatus:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY}
 },{
   timestamps:true
 });
+
+registerCylinderSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection): Model<RegisteredCylinderInterface> {
   return conn.model('registered-cylinders', registerCylinderSchema);

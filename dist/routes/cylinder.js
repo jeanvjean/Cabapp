@@ -27,5 +27,6 @@ router.get('/mark-faulty-cylinder/:cylinderId', auth.verify(), controllers_1.cyl
 router.get('/condemn-cylinder/:cylinderId', controllers_1.cylinderCtrl.condemnCylinder());
 router.get('/fetch-archived-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchCondemnCylinders());
 router.get('/fixed-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.fixFaultyCylinder());
+router.get('/fetch-cylinder-stats', auth.verify(), controllers_1.cylinderCtrl.cylinderStats());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

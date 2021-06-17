@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.vehicleSchema = exports.RoutePlanStatus = exports.RouteActivity = exports.InspectApproval = exports.maintType = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var maintType;
 (function (maintType) {
     maintType["CORRECTIVE"] = "corrective";
@@ -84,6 +85,7 @@ exports.vehicleSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.vehicleSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('vehicle', exports.vehicleSchema);
 }

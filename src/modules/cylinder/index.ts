@@ -4,13 +4,14 @@ import { BadInputFormatException } from "../../exceptions";
 import { ArchivedCylinder } from "../../models/archiveCylinder";
 import { CylinderCondition, CylinderInterface, cylinderTypes } from "../../models/cylinder";
 import { DisburseProduct, DisburseProductInterface } from "../../models/disburseStock";
-import { RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
+import { cylinderHolder, RegisteredCylinderInterface, TypesOfCylinders } from "../../models/registeredCylinders";
 import { ApprovalStatus, stagesOfApproval, TransferCylinder, TransferStatus, TransferType } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
+import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -80,6 +81,23 @@ interface TransferCylinderInput {
 interface ApprovalResponse{
   message:string
   transfer:TransferCylinder
+}
+
+type CylinderPoolStats = {
+  bufferCylinder:number,
+  assignedCylinder:number,
+  withCustomer:number,
+  withAsnl:number,
+  customerBufferCylinders:number,
+  customerAssignedCylinders:number,
+  asnlBufferCylinders:number,
+  asnlAssignedCylinders:number,
+  asnlFilledCylinders:number,
+  asnlEmptyCylinders:number,
+  filledBufferCylinders:number,
+  filledAssignedCylinders:number,
+  emptyBufferCylinders:number,
+  emptyAssignedCylinders:number
 }
 
 export interface ApprovalInput{
@@ -264,15 +282,73 @@ class Cylinder extends Module {
     }
   }
 
+  public async cylinderStats(user:UserInterface):Promise<CylinderPoolStats|undefined>{
+    try {
+      const cylinders = await this.registerCylinder.find({branch:user.branch});
+      const bufferCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+      const assignedCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+      const withCustomer = cylinders.filter(cylinder=> cylinder.holder == cylinderHolder.CUSTOMER).length;
+      const withAsnl = cylinders.filter(cylinder=> cylinder.holder == cylinderHolder.ASNL).length;
+
+      const customerBufferCylinders = cylinders.filter(cylinder=>
+          cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+      const customerAssignedCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+
+      const asnlBufferCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+      const asnlAssignedCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+
+      const asnlFilledCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED).length;
+
+      const asnlEmptyCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY).length;
+
+      const filledBufferCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+
+      const filledAssignedCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+
+      const emptyBufferCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+
+      const emptyAssignedCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+
+      return Promise.resolve({
+        bufferCylinder,
+        assignedCylinder,
+        withCustomer,
+        withAsnl,
+        customerBufferCylinders,
+        customerAssignedCylinders,
+        asnlBufferCylinders,
+        asnlAssignedCylinders,
+        asnlFilledCylinders,
+        asnlEmptyCylinders,
+        filledBufferCylinders,
+        filledAssignedCylinders,
+        emptyBufferCylinders,
+        emptyAssignedCylinders
+      })
+
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async fetchFaultyCylinders(query:QueryInterface, user:UserInterface):Promise<FilterCylinderResponse|undefined>{
     try {
-      const cylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
+      //@ts-ignore
+      const cylinders = await this.registerCylinder.paginate({branch:user.branch, condition:CylinderCondition.FAULTY}, {...query,}).populate([
         {path:'assignedTo', model:'customer'},
         {path:'branch', model:'branches'}
       ]);
-      const faulty = cylinders.filter(cylinder=> cylinder.condition == CylinderCondition.FAULTY);
       return Promise.resolve({
-        faulty
+        faulty: cylinders
       });
     } catch (e) {
       this.handleException(e)

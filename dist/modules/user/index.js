@@ -176,7 +176,9 @@ class User extends module_1.default {
     fetchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let users = yield this.model.find(query);
+                let options = Object.assign({}, query);
+                //@ts-ignore
+                let users = yield this.model.paginate({}, options);
                 return users;
             }
             catch (e) {
@@ -187,7 +189,8 @@ class User extends module_1.default {
     branchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let users = yield this.model.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                //@ts-ignore
+                let users = yield this.model.paginate({ branch: user.branch }, Object.assign({}, query));
                 return users;
             }
             catch (e) {
@@ -420,6 +423,26 @@ class User extends module_1.default {
                     }
                 });
                 return Promise.resolve(updated);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    suspendUser(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.model.findById(data.userId);
+                if (!user) {
+                    throw new exceptions_1.BadInputFormatException('user not found');
+                }
+                let updatedUser = yield this.model.findByIdAndUpdate(user._id, { deactivated: data.suspend }, { new: true });
+                //@ts-ignore
+                let message = updatedUser.deactivated ? 'suspended' : 're-activated';
+                return Promise.resolve({
+                    message,
+                    user
+                });
             }
             catch (e) {
                 this.handleException(e);

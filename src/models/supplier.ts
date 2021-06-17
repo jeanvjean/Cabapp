@@ -5,6 +5,8 @@ import {
   Connection
 } from 'mongoose';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 export interface SupplierInterface extends Document {
   name:string
   location:string
@@ -24,6 +26,8 @@ export const supplierSchema = new Schema({
   supplierType:{type:String},
   branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
+
+supplierSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<SupplierInterface> {
   return conn.model('supplier', supplierSchema);

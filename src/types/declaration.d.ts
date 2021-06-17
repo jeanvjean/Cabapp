@@ -8,4 +8,5 @@ declare module 'cloudinary';
 declare module 'crypto';
 declare module 'firebase-admin';
 declare module 'mongoose-auto-increment'
+declare module 'mongoose-paginate-v2';
 

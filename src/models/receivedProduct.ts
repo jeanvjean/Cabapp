@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 import { commentInterface, commentSchema } from './transferCylinder';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 export enum productDirection {
   IN="in-coming",
@@ -63,6 +64,8 @@ export const inventorySchema = new Schema({
   direction:{type:String, enum:Object.values(productDirection)},
   branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
+
+inventorySchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<InventoryInterface> {
   return conn.model('inventory', inventorySchema);

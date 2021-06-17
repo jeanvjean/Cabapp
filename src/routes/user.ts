@@ -81,4 +81,10 @@ const router: expressRouter = expressRouter();
     userCtrl.updateToken()
   );
 
+  router.get(
+    '/suspend/:userId',
+    auth.verify(),
+    userCtrl.suspendUser()
+  );
+
 export default router;

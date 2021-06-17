@@ -136,6 +136,20 @@ class UserController extends Ctrl{
     }
   }
 
+  suspendUser():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try{
+        const { userId } = req.params;
+        let { suspend } = req.query;
+        //@ts-ignore
+        const data = await this.module.suspendUser({userId, suspend}, req.user);
+        this.ok(res, data?.message, data?.user);
+      }catch(e){
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   requestPasswordReset():RequestHandler{
     return async (req:Request, res:Response)=>{
       try {

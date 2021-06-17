@@ -4,8 +4,10 @@ import {
   Model,
   Document
 }
- from "mongoose";
- import { hash, compare, genSaltSync } from 'bcryptjs';
+from "mongoose";
+import * as mongoosePaginator from 'mongoose-paginate-v2';
+
+import { hash, compare, genSaltSync } from 'bcryptjs';
  export const salt = genSaltSync(10);
  const permissions = require('../util/permissions.json');
 
@@ -141,6 +143,8 @@ import {
    collection:'users',
    timestamps:true
  });
+
+ userSchema.plugin(mongoosePaginator);
 
  userSchema.methods.comparePWD = async function(
    value: string

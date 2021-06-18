@@ -182,7 +182,8 @@ class Product extends Module{
 
   public async fetchBranches(query:QueryInterface):Promise<BranchInterface[]|undefined>{
     try {
-      const branches = await this.branch.find(query);
+      //@ts-ignore
+      const branches = await this.branch.paginate({},{...query});
       return Promise.resolve(branches);
     } catch (e) {
       this.handleException(e)
@@ -220,7 +221,8 @@ class Product extends Module{
 
   public async fetchProducts(query:QueryInterface, user:UserInterface): Promise<ProductInterface[]|undefined>{
     try {
-      const products = await this.product.find({...query, branch:user.branch, deleted:false});
+      //@ts-ignore
+      const products = await this.product.paginate({ branch:user.branch, deleted:false},{...query});
       // console.log(products);
       return Promise.resolve(products);
     } catch (e) {
@@ -267,6 +269,63 @@ class Product extends Module{
     }
   }
 
+  public async inventoryStats(user:UserInterface):Promise<any>{
+    try {
+      const inventories = await this.inventory.find({branch:user.branch});
+      const issuedOut = inventories.filter(inventory=> inventory.direction == productDirection.OUT);
+      const totalProducts = await this.product.find({branch:user.branch});
+      let p1Name = totalProducts[0].productName
+      let p1Qty = 0;
+      let p1totalInstock = totalProducts[0].quantity
+      for(let prod of issuedOut){
+        for(let p of prod.products) {
+          if(p.productName == p1Name) {
+            p1Qty += +p.quantity
+          }
+        }
+      }
+      let p2Name = totalProducts[1].productName
+      let p2Qty = 0;
+      let p2totalInstock = totalProducts[1].quantity
+      for(let prod of issuedOut){
+        for(let p of prod.products) {
+          if(p.productName == p2Name) {
+            p2Qty += +p.quantity
+          }
+        }
+      }
+      let p3Name = totalProducts[1].productName
+      let p3Qty = 0;
+      let p3totalInstock = totalProducts[1].quantity
+      for(let prod of issuedOut){
+        for(let p of prod.products) {
+          if(p.productName == p3Name) {
+            p3Qty += +p.quantity
+          }
+        }
+      }
+      return Promise.resolve({
+        product1: {
+          name:p1Name,
+          quantityInStock:p1totalInstock,
+          issuedOut:p1Qty
+        },
+        product2: {
+          name:p2Name,
+          quantityInStock:p2totalInstock,
+          issuedOut:p2Qty
+        },
+        product3: {
+          name:p3Name,
+          quantityInStock:p3totalInstock,
+          issuedOut:p3Qty
+        }
+      })
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
       const supplier = await this.supplier.create({...data,branch:user.branch});
@@ -278,7 +337,8 @@ class Product extends Module{
 
   public async fetchSuppliers(query:QueryInterface, user:UserInterface):Promise<SupplierInterface[]|undefined>{
     try {
-      const suppliers = await this.supplier.find({...query, branch:user.branch});
+      //@ts-ignore
+      const suppliers = await this.supplier.paginate({branch:user.branch},{...query});
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);
@@ -365,9 +425,12 @@ class Product extends Module{
 
   public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
-      const inventories = await this.inventory.find({...query, branch:user.branch});
-      const issuedOut = inventories.filter(inventory=> inventory.direction == productDirection.OUT);
-      const recieved =  inventories.filter(inventory=> inventory.direction == productDirection.IN);
+      //@ts-ignore
+      const inventories = await this.inventory.paginate({ branch:user.branch },{...query});
+      //@ts-ignore
+      const issuedOut = await this.inventory.paginate({ branch:user.branch, direction: productDirection.OUT},{...query});
+      //@ts-ignore
+      const recieved =  await this.inventory.paginate({ branch:user.branch, direction: productDirection.IN},{...query});
 
       return Promise.resolve({
           inventory:inventories,
@@ -947,56 +1010,57 @@ class Product extends Module{
 
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursement = await this.disburse.find({...query, fromBranch:user.branch});
-      console.log(disbursement);
-      let startStage = disbursement.filter(transfer=> {
-        if(transfer.approvalStage == stagesOfApproval.START) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage1 = disbursement.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage2 = disbursement.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let disb;
-      if(user.subrole == 'superadmin'){
-        disb = stage2;
-      }else if(user.subrole == 'head of department'){
-        disb = stage1
-      }else {
-        disb = startStage;
-      }
-      return Promise.resolve(disb)
+      //@ts-ignore
+      const disbursement = await this.disburse.paginate({fromBranch:user.branch, nextApprovalOfficer:user._id},{...query});
+
+      // let startStage = disbursement.filter(transfer=> {
+      //   if(transfer.approvalStage == stagesOfApproval.START) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage1 = disbursement.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage2 = disbursement.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let disb;
+      // if(user.subrole == 'superadmin'){
+      //   disb = stage2;
+      // }else if(user.subrole == 'head of department'){
+      //   disb = stage1
+      // }else {
+      //   disb = startStage;
+      // }
+      return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
     }
@@ -1004,56 +1068,57 @@ class Product extends Module{
 
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursement = await this.disburse.find({...query, branch:user.branch});
-        console.log(disbursement)
-      let startStage = disbursement.filter(transfer=> {
-        if(transfer.requestStage == stagesOfApproval.START) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage1 = disbursement.filter(transfer=>{
-        if(transfer.requestStage == stagesOfApproval.STAGE1) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage2 = disbursement.filter(transfer=>{
-        if(transfer.requestStage == stagesOfApproval.STAGE2) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let disb;
-      if(user.subrole == 'superadmin'){
-        disb = stage2;
-      }else if(user.subrole == 'head of department'){
-        disb = stage1
-      }else {
-        disb = startStage;
-      }
-      return Promise.resolve(disb)
+      //@ts-ignore
+      const disbursement = await this.disburse.paginate({ branch:user.branch, nextApprovalOfficer:user._id}, {...query});
+      //   console.log(disbursement)
+      // let startStage = disbursement.filter(transfer=> {
+      //   if(transfer.requestStage == stagesOfApproval.START) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage1 = disbursement.filter(transfer=>{
+      //   if(transfer.requestStage == stagesOfApproval.STAGE1) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage2 = disbursement.filter(transfer=>{
+      //   if(transfer.requestStage == stagesOfApproval.STAGE2) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let disb;
+      // if(user.subrole == 'superadmin'){
+      //   disb = stage2;
+      // }else if(user.subrole == 'head of department'){
+      //   disb = stage1
+      // }else {
+      //   disb = startStage;
+      // }
+      return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
     }
@@ -1070,13 +1135,11 @@ class Product extends Module{
 
   public async fetchDisburseRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try {
-      const disbursements = await this.disburse.find({...query, branch:user.branch});
-      let totalApproved = disbursements.filter(
-        transfer=>transfer.disburseStatus == TransferStatus.COMPLETED
-      );
-    let totalPending = disbursements.filter(
-      transfer=>transfer.disburseStatus == TransferStatus.PENDING
-    );
+      //@ts-ignore
+      const disbursements = await this.disburse.paginate({branch:user.branch},{...query});
+
+      let totalApproved = await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.COMPLETED});
+    let totalPending =  await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.PENDING});
     return Promise.resolve({
       disburse:disbursements,
       count:{
@@ -1092,13 +1155,10 @@ class Product extends Module{
 
   public async fetchProductRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try{
-      const disbursements = await this.disburse.find({...query, branch:user.branch});
-      let totalApproved = disbursements.filter(
-        transfer=>transfer.requestApproval == TransferStatus.COMPLETED
-      );
-    let totalPending = disbursements.filter(
-      transfer=>transfer.requestApproval == TransferStatus.PENDING
-    );
+      //@ts-ignore
+      const disbursements = await this.disburse.paginate({branch:user.branch},{...query});
+      let totalApproved = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.COMPLETED});
+    let totalPending = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.PENDING});
     return Promise.resolve({
       disburse:disbursements,
       count:{
@@ -1115,9 +1175,9 @@ class Product extends Module{
 
   public async disburseReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
-      const disbursements = await this.disburse.find({...query, branch:user.branch});
-      let completed = disbursements.filter(disburse=> disburse.disburseStatus == TransferStatus.COMPLETED);
-      return Promise.resolve(completed)
+      //@ts-ignore
+      const disbursements = await this.disburse.paginate({branch:user.branch, disburseStatus:TransferStatus.COMPLETED},{...query});
+      return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);
     }

@@ -11,7 +11,7 @@ router.post('/create-sales-requisition', sales_1.Validator.validateSales(), val.
 router.get('/fetch-sales-requisitions', auth.verify(), controllers_1.salesCtrl.fetchSalesReq());
 router.get('/fetch-sales-req/:salesId', controllers_1.salesCtrl.fetchRequisitionDetails());
 router.post('/approve-sales-requisition', auth.verify(), sales_1.Validator.validateSalesApproval(), val.validate(), controllers_1.salesCtrl.approveSalesRequisition());
-router.get('/fetch-pending-req-approval', auth.verify(), controllers_1.salesCtrl.approveSalesRequisition());
+router.get('/fetch-pending-req-approval', auth.verify(), controllers_1.salesCtrl.fetchPendingSaleRequisition());
 router.get('/returned-cylinder/:cylinderId', auth.verify(), controllers_1.salesCtrl.returnedCylinder());
 router.get('/sales-cylinder-transactions', auth.verify(), controllers_1.salesCtrl.salesReportCylinders());
 router.get('/sales-purchase-order', auth.verify(), controllers_1.salesCtrl.purchaseOrderReport());

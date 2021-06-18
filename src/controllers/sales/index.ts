@@ -63,7 +63,7 @@ class SalesCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.fetchPendingRequisitionApproval(req.user);
+        const data = await this.module.fetchPendingRequisitionApproval(req.query, req.user);
         this.ok(res, 'fetched pending approvals', data);
       } catch (e) {
         this.handleError(e, req, res);

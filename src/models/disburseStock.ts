@@ -5,7 +5,7 @@ import {
   Model
 } from 'mongoose';
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
-
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 export interface DisburseProduct {
   productNumber:string,
   productName:string
@@ -83,6 +83,8 @@ export const disburseSchema = new Schema({
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
   mrn:{type:String}
 });
+
+disburseSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<DisburseProductInterface>{
   return conn.model('disburse-product', disburseSchema);

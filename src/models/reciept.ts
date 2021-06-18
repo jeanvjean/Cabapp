@@ -5,6 +5,8 @@ Document,
 Connection
 } from 'mongoose';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 
 export enum paymentMode {
     CASH='cash',
@@ -41,6 +43,8 @@ const recieptSchema = new Schema({
 },{
     timestamps:true
 });
+
+recieptSchema.plugin(mongoosePaginate)
 
 
 export default function factory(conn:Connection):Model<RecieptInterface>{

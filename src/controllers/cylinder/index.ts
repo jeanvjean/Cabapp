@@ -201,8 +201,20 @@ class CylinderController extends Ctrl{
   fetchCustomerCylinders():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchCustomerCylinders(req.params.customerId);
+        //
+        const data = await this.module.fetchCustomerCylinders(req.query, req.params.customerId);
         this.ok(res, 'fetched cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  cylinderReturned():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.cylinderReturned(req.params.cylinderId);
+        this.ok(res, 'cylinder returned', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -212,8 +224,21 @@ class CylinderController extends Ctrl{
   fetchCompletedTransfers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchTransferReport(req.query);
+        //@ts-ignore
+        const data = await this.module.fetchTransferReport(req.query, req.user);
         this.ok(res, 'transfer report fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  transferCylinderStats():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.cylinderTransferStats(req.user);
+        this.ok(res, 'transfer stats', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

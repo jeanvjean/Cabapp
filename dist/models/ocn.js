@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
+const mongoosePaginate = require("mongoose-paginate-v2");
 const ocnCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     volume: String,
@@ -22,6 +23,7 @@ const ocnSchema = new mongoose_1.Schema({
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 });
+ocnSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('out-going-cylinders', ocnSchema);
 }

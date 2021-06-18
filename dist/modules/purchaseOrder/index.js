@@ -77,9 +77,12 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const purchases = yield this.purchase.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
-                const approved = purchases.filter(purchase => purchase.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED);
-                const pending = purchases.filter(purchase => purchase.approvalStatus == transferCylinder_1.TransferStatus.PENDING);
+                //@ts-ignore
+                const purchases = yield this.purchase.paginate({ branch: user.branch }, Object.assign({}, query));
+                //@ts-ignore
+                const approved = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                //@ts-ignore
+                const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
                 return Promise.resolve({
                     purchaseOrders: purchases,
                     approvedOrders: approved,
@@ -357,60 +360,56 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrderRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const purchaseOrders = yield this.purchase.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
-                let startStage = purchaseOrders.filter(purchase => {
-                    if (purchase.approvalStage == transferCylinder_1.stagesOfApproval.START) {
-                        for (let tofficer of purchase.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1) {
-                                    return purchase;
-                                }
-                            }
-                            else if (`${purchase.nextApprovalOfficer}` == `${user._id}`) {
-                                return purchase;
-                            }
-                        }
-                    }
-                });
-                let stage1 = purchaseOrders.filter(purchase => {
-                    if (purchase.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        for (let tofficer of purchase.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2) {
-                                    return purchase;
-                                }
-                            }
-                            else if (`${purchase.nextApprovalOfficer}` == `${user._id}`) {
-                                return purchase;
-                            }
-                        }
-                    }
-                });
-                let stage2 = purchaseOrders.filter(purchase => {
-                    if (purchase.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        for (let tofficer of purchase.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE3) {
-                                    return purchase;
-                                }
-                            }
-                            else if (`${purchase.nextApprovalOfficer}` == `${user._id}`) {
-                                return purchase;
-                            }
-                        }
-                    }
-                });
-                let pendingApprovals;
-                if (user.subrole == 'superadmin') {
-                    pendingApprovals = stage2;
-                }
-                else if (user.subrole == 'head of department') {
-                    pendingApprovals = stage1;
-                }
-                else {
-                    pendingApprovals = startStage;
-                }
-                return Promise.resolve(pendingApprovals);
+                //@ts-ignore
+                const purchaseOrders = yield this.purchase.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                // let startStage = purchaseOrders.filter(purchase=> {
+                //     if(purchase.approvalStage == stagesOfApproval.START) {
+                //       for(let tofficer of purchase.approvalOfficers) {
+                //         if(`${tofficer.id}` == `${user._id}`){
+                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                //             return purchase
+                //           }
+                //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+                //           return purchase
+                //         }
+                //       }
+                //     }
+                //   });
+                //   let stage1 = purchaseOrders.filter(purchase=>{
+                //     if(purchase.approvalStage == stagesOfApproval.STAGE1) {
+                //       for(let tofficer of purchase.approvalOfficers) {
+                //         if(`${tofficer.id}` == `${user._id}`){
+                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                //             return purchase
+                //           }
+                //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+                //           return purchase
+                //         }
+                //       }
+                //     }
+                //   });
+                // let stage2 = purchaseOrders.filter(purchase=>{
+                //   if(purchase.approvalStage == stagesOfApproval.STAGE2) {
+                //     for(let tofficer of purchase.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                //           return purchase
+                //         }
+                //       }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+                //         return purchase
+                //       }
+                //     }
+                //   }
+                // });
+                // let pendingApprovals;
+                // if(user.subrole == 'superadmin'){
+                //   pendingApprovals = stage2;
+                // }else if(user.subrole == 'head of department'){
+                //   pendingApprovals = stage1
+                // }else {
+                //   pendingApprovals = startStage;
+                // }
+                return Promise.resolve(purchaseOrders);
             }
             catch (e) {
                 this.handleException(e);

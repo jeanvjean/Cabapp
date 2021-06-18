@@ -65,8 +65,8 @@ class Driver extends Module{
 
   public async fetchDrivers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
-      const users = await this.driver.find({...query, branch:user.branch, subrole:'driver'});
-      const drivers = users.filter(driver=>driver.subrole == 'driver');
+      //@ts-ignore
+      const users = await this.driver.paginate({...query, branch:user.branch, subrole:'driver'});
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);

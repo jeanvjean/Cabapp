@@ -9,12 +9,16 @@ import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { ActivityLogInterface } from "../../models/logs";
+import { pickupType } from "../../models/order";
+import router from "../../routes/person";
+import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
   pickup:Model<PickupInterface>
   user:Model<UserInterface>
-  activity:Model<ActivityLogInterface>
+  activity:Model<ActivityLogInterface>,
+  registerCylinder:Model<RegisteredCylinderInterface>
 }
 
 type NewVehicle = {
@@ -97,6 +101,7 @@ class Vehicle extends Module{
   private pickup:Model<PickupInterface>
   private user:Model<UserInterface>
   private activity:Model<ActivityLogInterface>
+  private registerCylinder:Model<RegisteredCylinderInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -104,6 +109,7 @@ class Vehicle extends Module{
     this.pickup = props.pickup;
     this.user = props.user
     this.activity = props.activity
+    this.registerCylinder = props.registerCylinder
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -124,7 +130,8 @@ class Vehicle extends Module{
 
   public async fetchVehicles(query:QueryInterface, user:UserInterface):Promise<VehicleInterface[]|undefined> {
     try {
-      const vehicles = await this.vehicle.find({...query, branch:user.branch});
+      //@ts-ignore
+      const vehicles = await this.vehicle.paginate({ branch:user.branch }, {...query});
       return Promise.resolve(vehicles)
     } catch (e) {
       this.handleException(e);
@@ -355,7 +362,7 @@ class Vehicle extends Module{
     try {
       const { vehicleId } = data;
       //@ts-ignore
-      const routePlan = await this.pickup.find({vehicle:`${vehicleId}`, deleted:false});
+      const routePlan = await this.pickup.paginate({vehicle:`${vehicleId}`, deleted:false}, {...query});
       return Promise.resolve(routePlan);
     } catch (e) {
       this.handleException(e);
@@ -366,6 +373,28 @@ class Vehicle extends Module{
     try {
       const { status, routeId } = data;
       const pickup = await this.pickup.findById(routeId);
+      if(pickup?.orderType == pickupType.SUPPLIER && pickup.activity == RouteActivity.DELIVERY) {
+        for(var cylinder of pickup.cylinders) {
+          let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+          //@ts-ignore
+          cyl?.holder = cylinderHolder.SUPPLIER;
+          await cyl?.save();
+        }
+      }else if(pickup?.orderType == pickupType.CUSTOMER && pickup.activity == RouteActivity.DELIVERY){
+        for(var cylinder of pickup.cylinders) {
+          let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+          //@ts-ignore
+          cyl?.holder = cylinderHolder.CUSTOMER;
+          await cyl?.save();
+        }
+      }else if(pickup?.activity == RouteActivity.PICKUP){
+        for(var cylinder of pickup.cylinders) {
+          let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+          //@ts-ignore
+          cyl?.holder = cylinderHolder.ASNL;
+          await cyl?.save();
+        }
+      }
       //@ts-ignore
       pickup?.status = status;
       return Promise.resolve(pickup as PickupInterface);

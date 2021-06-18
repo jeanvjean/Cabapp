@@ -4,7 +4,7 @@ import {
   Document,
   Model
 } from 'mongoose';
-
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 export enum PickupStatus{
   PENDING='pending',
@@ -22,7 +22,7 @@ export enum pickupType {
 };
 
 export enum orderType {
-  PICKUP='pickup',
+  PICKUP='pick-up',
   DELIVERY="delivery"
 }
 
@@ -64,7 +64,7 @@ const OrderSchema = new Schema({
 },{
   timestamps:true
 });
-
+OrderSchema.plugin(mongoosePaginate)
 export default function factory(conn:Connection):Model<OrderInterface>{
   return conn.model('orders', OrderSchema);
 };

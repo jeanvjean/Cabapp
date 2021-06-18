@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.paymentMode = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var paymentMode;
 (function (paymentMode) {
     paymentMode["CASH"] = "cash";
@@ -23,6 +24,7 @@ const recieptSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+recieptSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('reciept', recieptSchema);
 }

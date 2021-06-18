@@ -6,7 +6,7 @@ import {
 } from 'mongoose';
 import { CylinderCondition } from './cylinder';
 
-
+import * as mongoosePagination from 'mongoose-paginate-v2';
 
 export interface ArchivedCylinder extends Document{
     /**
@@ -132,6 +132,8 @@ export const archiveCylinderSchema = new Schema({
 
   department:{type:String}
 });
+
+archiveCylinderSchema.plugin(mongoosePagination)
 
 export default function factory(conn:Connection):Model<ArchivedCylinder> {
   return conn.model('archive-cylinders', archiveCylinderSchema);

@@ -55,9 +55,10 @@ class Cylinder extends module_1.default {
     fetchCylinders(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.cylinder.find(query);
-                let bufferCylinders = cylinders.filter(cylinder => cylinder.type == cylinder_1.cylinderTypes.BUFFER);
-                let assignedCylinders = cylinders.filter(cylinder => cylinder.type == cylinder_1.cylinderTypes.ASSIGNED);
+                //@ts-ignore
+                const cylinders = yield this.cylinder.paginate({}, Object.assign({}, query));
+                // let bufferCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
+                // let assignedCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
                 return Promise.resolve({
                     cylinders
                 });
@@ -130,13 +131,17 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const registeredCylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
-                    { path: 'assignedTo', model: 'customer' },
-                    { path: 'branch', model: 'branches' },
-                    { path: 'gasType', model: 'cylinder' }
-                ]);
-                const bufferCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
-                const assignedCylinders = registeredCylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
+                let options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'assignedTo', model: 'customer' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'gasType', model: 'cylinder' }
+                    ] });
+                //@ts-ignore
+                const registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch }, options);
+                //@ts-ignore
+                const bufferCylinders = registeredCylinders.docs.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
+                //@ts-ignore
+                const assignedCylinders = registeredCylinders.docs.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
                 return Promise.resolve({
                     cylinders: registeredCylinders,
                     counts: {
@@ -207,17 +212,35 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    cylinderTransferStats(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.transfer.find({ branch: user.branch });
+                //@ts-ignore
+                const approvedTransfers = cyinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED).length | 0;
+                //@ts-ignore
+                const pendingTransfers = cyinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.PENDING).length | 0;
+                return Promise.resolve({
+                    all_transfers: cylinders.length | 0,
+                    approvedTransfers,
+                    pendingTransfers
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchFaultyCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'assignedTo', model: 'customer' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
                 //@ts-ignore
-                const cylinders = yield this.registerCylinder.paginate({ branch: user.branch, condition: cylinder_1.CylinderCondition.FAULTY }, Object.assign({}, query)).populate([
-                    { path: 'assignedTo', model: 'customer' },
-                    { path: 'branch', model: 'branches' }
-                ]);
-                return Promise.resolve({
-                    faulty: cylinders
-                });
+                const cylinders = yield this.registerCylinder.paginate({ branch: user.branch, condition: cylinder_1.CylinderCondition.FAULTY }, options);
+                return Promise.resolve(cylinders);
             }
             catch (e) {
                 this.handleException(e);
@@ -257,10 +280,12 @@ class Cylinder extends module_1.default {
     fetchArchivedCylinder(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.archive.find(Object.assign(Object.assign({}, query), { branch: user.branch })).populate([
-                    { path: 'assignedTo', model: 'customer' },
-                    { path: 'branch', model: 'branches' }
-                ]);
+                let options = Object.assign(Object.assign({}, query), { options: [
+                        { path: 'assignedTo', model: 'customer' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                //@ts-ignore
+                const cylinders = yield this.archive.paginate({ branch: user.branch }, options);
                 return Promise.resolve(cylinders);
             }
             catch (e) {
@@ -594,6 +619,8 @@ class Cylinder extends module_1.default {
                                 //@ts-ignore
                                 cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
                                 //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                                //@ts-ignore
                                 cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
                                 if (transfer.type == transferCylinder_1.TransferType.TEMPORARY) {
                                     //@ts-ignore
@@ -710,9 +737,14 @@ class Cylinder extends module_1.default {
     fetchTransferRequets(query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const transfers = yield this.transfer.find(query);
-                let totalApproved = transfers.filter(transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.COMPLETED);
-                let totalPending = transfers.filter(transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.PENDING);
+                //@ts-ignore
+                const transfers = yield this.transfer.paginate({}, Object.assign({}, query));
+                let totalApproved = transfers.docs.filter(
+                //@ts-ignore
+                transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.COMPLETED);
+                let totalPending = transfers.docs.filter(
+                //@ts-ignore
+                transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.PENDING);
                 return Promise.resolve({
                     transfer: transfers,
                     counts: {
@@ -741,60 +773,64 @@ class Cylinder extends module_1.default {
     fetchUserPendingApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const transfers = yield this.transfer.find(Object.assign(Object.assign({}, query), { branch: user.branch, transferStatus: transferCylinder_1.TransferStatus.PENDING }));
-                let startStage = transfers.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let stage1 = transfers.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let stage2 = transfers.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE3) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let pendingApprovals;
-                if (user.subrole == 'superadmin') {
-                    pendingApprovals = stage2;
-                }
-                else if (user.subrole == 'head of department') {
-                    pendingApprovals = stage1;
-                }
-                else {
-                    pendingApprovals = startStage;
-                }
-                return Promise.resolve(pendingApprovals);
+                //@ts-ignore
+                const transfers = yield this.transfer.paginate({
+                    branch: user.branch,
+                    transferStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: `${user._id}`
+                }, Object.assign({}, query));
+                console.log(transfers.docs);
+                //@ts-ignore
+                // let startStage = transfers.docs.filter(transfer=> {
+                //   if(transfer.approvalStage == stagesOfApproval.START) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                //@ts-ignore
+                // let stage1 = transfers.filter(transfer=>{
+                //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                //@ts-ignore
+                // let stage2 = transfers.filter(transfer=>{
+                //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                // let pendingApprovals;
+                // if(user.subrole == 'superadmin'){
+                //   pendingApprovals = stage2;
+                // }else if(user.subrole == 'head of department'){
+                //   pendingApprovals = stage1
+                // }else {
+                //   pendingApprovals = startStage;
+                // }
+                return Promise.resolve(transfers);
             }
             catch (e) {
                 this.handleException(e);
@@ -827,11 +863,15 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fetchCustomerCylinders(customerId) {
+    fetchCustomerCylinders(query, customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'gasType', model: 'cylinder' },
+                        { path: 'assignedTo', model: 'customer' }
+                    ] });
                 //@ts-ignore
-                const cylinders = yield this.registerCylinder.find({ assignedTo: customerId });
+                const cylinders = yield this.registerCylinder.paginate({ assignedTo: customerId }, options);
                 return Promise.resolve(cylinders);
             }
             catch (e) {
@@ -839,12 +879,30 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fetchTransferReport(query) {
+    fetchTransferReport(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const transfers = yield this.transfer.find(query);
-                const completed = transfers.filter(transfer => transfer.transferStatus == `${transferCylinder_1.TransferStatus.COMPLETED}`);
-                return Promise.resolve(completed);
+                //@ts-ignore
+                const transfers = yield this.transfer.paginate({ branch: user.branch, TransferStatus: `${transferCylinder_1.TransferStatus.COMPLETED}` }, Object.assign({}, query));
+                //@ts-ignore
+                // const completed = transfers.docs.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
+                return Promise.resolve(transfers);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    cylinderReturned(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.registerCylinder.findById(cylinderId);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('this cylinder mat have been deleted');
+                }
+                cylinder.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                yield cylinder.save();
+                return cylinder;
             }
             catch (e) {
                 this.handleException(e);

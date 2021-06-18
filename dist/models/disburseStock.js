@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.disburseSchema = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
+const mongoosePaginate = require("mongoose-paginate-v2");
 const requesterSchema = new mongoose_1.Schema({
     requestingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId }
@@ -36,6 +37,7 @@ exports.disburseSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     mrn: { type: String }
 });
+exports.disburseSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('disburse-product', exports.disburseSchema);
 }

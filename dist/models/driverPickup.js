@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
+const order_1 = require("./order");
 const vehicle_1 = require("./vehicle");
+const mongoosePaginate = require("mongoose-paginate-v2");
 const routeCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     cylinderSize: String,
@@ -19,7 +21,7 @@ const routeSchema = new mongoose_1.Schema({
     status: { type: String, enum: Object.values(vehicle_1.RoutePlanStatus) },
     ecrNo: { type: String },
     icnNo: { type: String },
-    orderType: { type: String },
+    orderType: { type: String, enum: Object.values(order_1.pickupType) },
     modeOfService: { type: String },
     date: { type: Date },
     serialNo: { type: Number },
@@ -32,6 +34,7 @@ const routeSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+routeSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('pickup-routes', routeSchema);
 }

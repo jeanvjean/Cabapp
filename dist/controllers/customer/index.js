@@ -79,7 +79,7 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { customerId } = req.params;
-                const data = yield this.module.fetchCustomerOrder(customerId);
+                const data = yield this.module.fetchCustomerOrder(req.query, customerId);
                 this.ok(res, 'Fetched Orders', data);
             }
             catch (e) {
@@ -139,7 +139,7 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.fetchAllOrders(req.user);
+                const data = yield this.module.fetchAllOrders(req.query, req.user);
                 this.ok(res, 'fetched all orders', data);
             }
             catch (e) {
@@ -151,7 +151,7 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.fetchOrdersAssignedToVehicle({ vehicle: req.params.vehicleId });
+                const data = yield this.module.fetchOrdersAssignedToVehicle(req.query, { vehicle: req.params.vehicleId });
                 this.ok(res, 'orders fetched', data);
             }
             catch (e) {
@@ -189,7 +189,7 @@ class customerCtrl extends ctrl_1.default {
     fetchComplaints() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchComplaints(req.params.customerId);
+                const data = yield this.module.fetchComplaints(req.query, req.params.customerId);
                 this.ok(res, 'complaints fetched', data);
             }
             catch (e) {

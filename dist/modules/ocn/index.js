@@ -312,63 +312,59 @@ class OutGoingCylinder extends module_1.default {
             }
         });
     }
-    fetchOcnApprovals(user) {
+    fetchOcnApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const outgoing = yield this.ocn.find({ branch: user.branch });
-                let startStage = outgoing.filter(outgoing => {
-                    if (outgoing.approvalStage == transferCylinder_1.stagesOfApproval.START) {
-                        for (let tofficer of outgoing.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1) {
-                                    return outgoing;
-                                }
-                            }
-                            else if (`${outgoing.nextApprovalOfficer}` == `${user._id}`) {
-                                return outgoing;
-                            }
-                        }
-                    }
-                });
-                let stage1 = outgoing.filter(outgoing => {
-                    if (outgoing.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        for (let tofficer of outgoing.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2) {
-                                    return outgoing;
-                                }
-                            }
-                            else if (`${outgoing.nextApprovalOfficer}` == `${user._id}`) {
-                                return outgoing;
-                            }
-                        }
-                    }
-                });
-                let stage2 = outgoing.filter(outgoing => {
-                    if (outgoing.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        for (let tofficer of outgoing.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE3) {
-                                    return outgoing;
-                                }
-                            }
-                            else if (`${outgoing.nextApprovalOfficer}` == `${user._id}`) {
-                                return outgoing;
-                            }
-                        }
-                    }
-                });
-                let pendingApprovals;
-                if (user.subrole == 'superadmin') {
-                    pendingApprovals = stage2;
-                }
-                else if (user.subrole == 'head of department') {
-                    pendingApprovals = stage1;
-                }
-                else {
-                    pendingApprovals = startStage;
-                }
-                return Promise.resolve(pendingApprovals);
+                //@ts-ignore
+                const outgoing = yield this.ocn.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                // let startStage = outgoing.filter(outgoing=> {
+                //     if(outgoing.approvalStage == stagesOfApproval.START) {
+                //       for(let tofficer of outgoing.approvalOfficers) {
+                //         if(`${tofficer.id}` == `${user._id}`){
+                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                //             return outgoing
+                //           }
+                //         }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
+                //           return outgoing
+                //         }
+                //       }
+                //     }
+                //   });
+                //   let stage1 = outgoing.filter(outgoing=>{
+                //     if(outgoing.approvalStage == stagesOfApproval.STAGE1) {
+                //       for(let tofficer of outgoing.approvalOfficers) {
+                //         if(`${tofficer.id}` == `${user._id}`){
+                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                //             return outgoing
+                //           }
+                //         }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
+                //           return outgoing
+                //         }
+                //       }
+                //     }
+                //   });
+                // let stage2 = outgoing.filter(outgoing=>{
+                //   if(outgoing.approvalStage == stagesOfApproval.STAGE2) {
+                //     for(let tofficer of outgoing.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                //           return outgoing
+                //         }
+                //       }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
+                //         return outgoing
+                //       }
+                //     }
+                //   }
+                // });
+                // let pendingApprovals;
+                // if(user.subrole == 'superadmin'){
+                //   pendingApprovals = stage2;
+                // }else if(user.subrole == 'head of department'){
+                //   pendingApprovals = stage1
+                // }else {
+                //   pendingApprovals = startStage;
+                // }
+                return Promise.resolve(outgoing);
             }
             catch (e) {
                 this.handleException(e);

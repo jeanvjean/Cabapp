@@ -27,7 +27,7 @@ class accountController extends Ctrl{
         return async(req:Request, res:Response)=>{
             try {
                 //@ts-ignore
-                const data = await this.module.fetchInvoices(req.user);
+                const data = await this.module.fetchInvoices(req.query, req.user);
                 this.ok(res, 'invoices fetched', data);
             } catch (e) {
                 this.handleError(e, req, res);

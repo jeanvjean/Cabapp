@@ -279,6 +279,17 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  inventoryStats():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.inventoryStats(req.user);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

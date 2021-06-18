@@ -332,60 +332,56 @@ class ProductionSchedule extends module_1.default {
     fetchPendingProductionApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productions = yield this.production.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
-                let startStage = productions.filter(production => {
-                    if (production.approvalStage == transferCylinder_1.stagesOfApproval.START) {
-                        for (let tofficer of production.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1) {
-                                    return production;
-                                }
-                            }
-                            else if (`${production.nextApprovalOfficer}` == `${user._id}`) {
-                                return production;
-                            }
-                        }
-                    }
-                });
-                let stage1 = productions.filter(production => {
-                    if (production.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        for (let tofficer of production.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2) {
-                                    return production;
-                                }
-                            }
-                            else if (`${production.nextApprovalOfficer}` == `${user._id}`) {
-                                return production;
-                            }
-                        }
-                    }
-                });
-                let stage2 = productions.filter(production => {
-                    if (production.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        for (let tofficer of production.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE3) {
-                                    return production;
-                                }
-                            }
-                            else if (`${production.nextApprovalOfficer}` == `${user._id}`) {
-                                return production;
-                            }
-                        }
-                    }
-                });
-                let pendingApprovals;
-                if (user.subrole == 'superadmin') {
-                    pendingApprovals = stage2;
-                }
-                else if (user.subrole == 'head of department') {
-                    pendingApprovals = stage1;
-                }
-                else {
-                    pendingApprovals = startStage;
-                }
-                return Promise.resolve(pendingApprovals);
+                //@ts-ignore
+                const productions = yield this.production.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                // let startStage = productions.filter(production=> {
+                //   if(production.approvalStage == stagesOfApproval.START) {
+                //     for(let tofficer of production.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                //           return production
+                //         }
+                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+                //         return production
+                //       }
+                //     }
+                //   }
+                // });
+                // let stage1 = productions.filter(production=>{
+                //   if(production.approvalStage == stagesOfApproval.STAGE1) {
+                //     for(let tofficer of production.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                //           return production
+                //         }
+                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+                //         return production
+                //       }
+                //     }
+                //   }
+                // });
+                // let stage2 = productions.filter(production=>{
+                //   if(production.approvalStage == stagesOfApproval.STAGE2) {
+                //     for(let tofficer of production.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                //           return production
+                //         }
+                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+                //         return production
+                //       }
+                //     }
+                //   }
+                // });
+                // let pendingApprovals;
+                // if(user.subrole == 'superadmin'){
+                //   pendingApprovals = stage2;
+                // }else if(user.subrole == 'head of department'){
+                //   pendingApprovals = stage1
+                // }else {
+                //   pendingApprovals = startStage;
+                // }
+                return Promise.resolve(productions);
             }
             catch (e) {
                 this.handleException(e);
@@ -409,7 +405,8 @@ class ProductionSchedule extends module_1.default {
     fetchApprovedSchedules(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const productions = yield this.production.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                //@ts-ignore
+                const productions = yield this.production.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(productions);
             }
             catch (e) {

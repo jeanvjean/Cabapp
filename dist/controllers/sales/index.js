@@ -69,7 +69,7 @@ class SalesCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.fetchPendingRequisitionApproval(req.user);
+                const data = yield this.module.fetchPendingRequisitionApproval(req.query, req.user);
                 this.ok(res, 'fetched pending approvals', data);
             }
             catch (e) {

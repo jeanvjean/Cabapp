@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.archiveCylinderSchema = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePagination = require("mongoose-paginate-v2");
 exports.archiveCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String },
     waterCapacity: { type: String },
@@ -19,6 +20,7 @@ exports.archiveCylinderSchema = new mongoose_1.Schema({
     holdingTime: { type: Date },
     department: { type: String }
 });
+exports.archiveCylinderSchema.plugin(mongoosePagination);
 function factory(conn) {
     return conn.model('archive-cylinders', exports.archiveCylinderSchema);
 }

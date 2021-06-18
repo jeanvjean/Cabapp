@@ -202,8 +202,20 @@ class CylinderController extends ctrl_1.default {
     fetchCustomerCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchCustomerCylinders(req.params.customerId);
+                //
+                const data = yield this.module.fetchCustomerCylinders(req.query, req.params.customerId);
                 this.ok(res, 'fetched cylinders', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    cylinderReturned() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.cylinderReturned(req.params.cylinderId);
+                this.ok(res, 'cylinder returned', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -213,8 +225,21 @@ class CylinderController extends ctrl_1.default {
     fetchCompletedTransfers() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchTransferReport(req.query);
+                //@ts-ignore
+                const data = yield this.module.fetchTransferReport(req.query, req.user);
                 this.ok(res, 'transfer report fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    transferCylinderStats() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.cylinderTransferStats(req.user);
+                this.ok(res, 'transfer stats', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

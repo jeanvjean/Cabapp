@@ -4,8 +4,8 @@ import {
   Connection,
   Model
 } from 'mongoose';
-import * as autoIncrement from 'mongoose-auto-increment';
-
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+import ProductionSchedule from '../modules/production';
 
 export interface ProductInterface extends Document{
   productName:string
@@ -51,7 +51,7 @@ export const productSchema = new Schema({
   collection:'products',
   timestamps:true
 });
-
+productSchema.plugin(mongoosePaginate)
 
 export default function factory(conn:Connection): Model<ProductInterface> {
   return conn.model('products',productSchema);

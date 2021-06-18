@@ -140,4 +140,10 @@ router.get(
   productCtrl.fetchProductsRequest()
 );
 
+router.get(
+  '/inventory-stats',
+  auth.verify(),
+  productCtrl.inventoryStats()
+);
+
 export default router;

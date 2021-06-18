@@ -15,6 +15,8 @@ const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
+const order_1 = require("../../models/order");
+const registeredCylinders_1 = require("../../models/registeredCylinders");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
@@ -22,6 +24,7 @@ class Vehicle extends module_1.default {
         this.pickup = props.pickup;
         this.user = props.user;
         this.activity = props.activity;
+        this.registerCylinder = props.registerCylinder;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -45,7 +48,8 @@ class Vehicle extends module_1.default {
     fetchVehicles(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicles = yield this.vehicle.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                //@ts-ignore
+                const vehicles = yield this.vehicle.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(vehicles);
             }
             catch (e) {
@@ -290,7 +294,7 @@ class Vehicle extends module_1.default {
             try {
                 const { vehicleId } = data;
                 //@ts-ignore
-                const routePlan = yield this.pickup.find({ vehicle: `${vehicleId}`, deleted: false });
+                const routePlan = yield this.pickup.paginate({ vehicle: `${vehicleId}`, deleted: false }, Object.assign({}, query));
                 return Promise.resolve(routePlan);
             }
             catch (e) {
@@ -303,6 +307,30 @@ class Vehicle extends module_1.default {
             try {
                 const { status, routeId } = data;
                 const pickup = yield this.pickup.findById(routeId);
+                if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.SUPPLIER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
+                    for (var cylinder of pickup.cylinders) {
+                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                        //@ts-ignore
+                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                    }
+                }
+                else if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.CUSTOMER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
+                    for (var cylinder of pickup.cylinders) {
+                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                        //@ts-ignore
+                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                    }
+                }
+                else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP) {
+                    for (var cylinder of pickup.cylinders) {
+                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                        //@ts-ignore
+                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                    }
+                }
                 //@ts-ignore
                 pickup === null || pickup === void 0 ? void 0 : pickup.status = status;
                 return Promise.resolve(pickup);

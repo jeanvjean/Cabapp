@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.customerSchema = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 exports.customerSchema = new mongoose_1.Schema({
     name: String,
     customerType: String,
@@ -23,6 +24,7 @@ exports.customerSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.customerSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('customer', exports.customerSchema);
 }

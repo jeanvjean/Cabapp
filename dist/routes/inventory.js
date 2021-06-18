@@ -29,5 +29,6 @@ router.delete('/remove-supplier/:supplierId', auth.verify(), controllers_1.produ
 router.post('/update-product/:productId', auth.verify(), controllers_1.productCtrl.updateProduct());
 router.delete('/delete-product/:productId', auth.verify(), controllers_1.productCtrl.deleteProduct());
 router.get('/fetch-restock-requests', auth.verify(), controllers_1.productCtrl.fetchProductsRequest());
+router.get('/inventory-stats', auth.verify(), controllers_1.productCtrl.inventoryStats());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

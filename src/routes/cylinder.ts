@@ -122,5 +122,16 @@ router.get(
   auth.verify(),
   cylinderCtrl.cylinderStats()
 );
+router.get(
+  '/returned-cylinder/:cylinderId',
+  auth.verify(),
+  cylinderCtrl.cylinderReturned()
+);
+
+router.get(
+  '/cylinder-transfer-stats',
+  auth.verify(),
+  cylinderCtrl.transferCylinderStats()
+);
 
 export default router;

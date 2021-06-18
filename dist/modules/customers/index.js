@@ -52,7 +52,8 @@ class Customer extends module_1.default {
     fetchCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customers = yield this.customer.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                //@ts-ignore
+                const customers = yield this.customer.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -115,27 +116,29 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchOrdersAssignedToVehicle(data) {
+    fetchOrdersAssignedToVehicle(query, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const orders = yield this.order.find({ vehicle: data.vehicle }).populate([
-                    {
-                        path: 'vehicle', model: 'vehicle', populate: {
-                            path: 'assignedTo', model: 'User'
-                        }
-                    },
-                    {
-                        path: 'supplier', model: 'supplier'
-                    },
-                    {
-                        path: 'customer', model: 'customer'
-                    }
-                ]);
-                let customerOrder = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER && order.status == order_1.PickupStatus.PENDING);
-                let supplierOrder = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER && order.status == order_1.PickupStatus.PENDING);
-                let completed = orders.filter(order => order.status == order_1.PickupStatus.DONE);
-                let completedCustomerOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
-                let completedSupplierOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'vehicle', model: 'vehicle', populate: {
+                                path: 'assignedTo', model: 'User'
+                            }
+                        },
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'customer', model: 'customer' }
+                    ] });
+                //@ts-ignore
+                const orders = yield this.order.paginate({ vehicle: data.vehicle }, options);
+                //@ts-ignore
+                let customerOrder = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.PENDING, pickupType: order_1.pickupType.CUSTOMER }, options);
+                //@ts-ignore
+                let supplierOrder = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.PENDING, pickupType: order_1.pickupType.SUPPLIER }, options);
+                //@ts-ignore
+                let completed = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE }, options);
+                //@ts-ignore
+                let completedCustomerOrders = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE, pickupType: order_1.pickupType.CUSTOMER }, options);
+                //@ts-ignore
+                let completedSupplierOrders = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE, pickupType: order_1.pickupType.SUPPLIER }, options);
                 return Promise.resolve({
                     supplier: supplierOrder,
                     customer: customerOrder,
@@ -150,14 +153,15 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchCustomerOrder(customerId) {
+    fetchCustomerOrder(query, customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'vehicle', model: 'vehicle' }
+                    ] });
                 //@ts-ignore
-                const orders = yield this.order.find({ customer: `${customerId}` }).populate([
-                    { path: 'customer', model: 'customer' },
-                    { path: 'vehicle', model: 'vehicle' }
-                ]);
+                const orders = yield this.order.paginate({ customer: `${customerId}` }, options);
                 return Promise.resolve(orders);
             }
             catch (e) {
@@ -165,20 +169,37 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchAllOrders(user) {
+    fetchAllOrders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const orders = yield this.order.find({ branch: user.branch }).populate([
-                    { path: 'vehicle', model: 'vehicle' },
-                    { path: 'supplier', model: 'supplier' },
-                    { path: 'customer', model: 'customer' },
-                    { path: 'gasType', model: 'cylinder' }
-                ]);
-                let customerOrders = orders.filter(order => order.pickupType == order_1.pickupType.CUSTOMER);
-                let supplierOrders = orders.filter(order => order.pickupType == order_1.pickupType.SUPPLIER);
-                let completedOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE);
-                let completedCustomerOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
-                let completedSupplierOrders = orders.filter(order => order.status == order_1.PickupStatus.DONE && order.pickupType == order_1.pickupType.CUSTOMER);
+                let options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'vehicle', model: 'vehicle' },
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'gasType', model: 'cylinder' }
+                    ] });
+                console.log(options);
+                //@ts-ignore
+                const orders = yield this.order.paginate({ branch: user.branch }, options);
+                //@ts-ignore
+                let customerOrders = yield this.order.paginate({ branch: user.branch, pickupType: order_1.pickupType.CUSTOMER }, options);
+                console.log(customerOrders);
+                //@ts-ignore
+                let supplierOrders = yield this.order.paginate({ branch: user.branch, pickupType: order_1.pickupType.SUPPLIER }, options);
+                //@ts-ignore
+                let completedOrders = yield this.order.paginate({ branch: user.branch, status: order_1.PickupStatus.DONE }, options);
+                //@ts-ignore
+                let completedCustomerOrders = yield this.order.paginate({
+                    branch: user.branch,
+                    pickupType: order_1.pickupType.CUSTOMER,
+                    status: order_1.PickupStatus.DONE
+                }, options);
+                //@ts-ignore
+                let completedSupplierOrders = yield this.order.paginate({
+                    branch: user.branch,
+                    pickupType: order_1.pickupType.SUPPLIER,
+                    status: order_1.PickupStatus.DONE
+                }, options);
                 return Promise.resolve({
                     customerOrders,
                     supplierOrders,
@@ -568,71 +589,71 @@ class Customer extends module_1.default {
     fetchUserComplaintApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaints = yield this.complaint.find(Object.assign(Object.assign({}, query), { branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }));
-                let startStage = complaints.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.START) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let stage1 = complaints.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let stage2 = complaints.filter(transfer => {
-                    if (transfer.approvalStage == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        for (let tofficer of transfer.approvalOfficers) {
-                            if (`${tofficer.id}` == `${user._id}`) {
-                                if (tofficer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE3) {
-                                    return transfer;
-                                }
-                            }
-                            else if (`${transfer.nextApprovalOfficer}` == `${user._id}`) {
-                                return transfer;
-                            }
-                        }
-                    }
-                });
-                let pendingApprovals;
-                if (user.subrole == 'superadmin') {
-                    pendingApprovals = stage2;
-                }
-                else if (user.subrole == 'head of department') {
-                    pendingApprovals = stage1;
-                }
-                else {
-                    pendingApprovals = startStage;
-                }
-                return Promise.resolve(pendingApprovals);
+                //@ts-ignore
+                const complaints = yield this.complaint.paginate({
+                    branch: user.branch,
+                    approvalStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id
+                }, Object.assign({}, query));
+                // let startStage = complaints.filter(transfer=> {
+                //   if(transfer.approvalStage == stagesOfApproval.START) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                // let stage1 = complaints.filter(transfer=>{
+                //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                // let stage2 = complaints.filter(transfer=>{
+                //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
+                //     for(let tofficer of transfer.approvalOfficers) {
+                //       if(`${tofficer.id}` == `${user._id}`){
+                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+                //           return transfer
+                //         }
+                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+                //         return transfer
+                //       }
+                //     }
+                //   }
+                // });
+                // let pendingApprovals;
+                // if(user.subrole == 'superadmin'){
+                //   pendingApprovals = stage2;
+                // }else if(user.subrole == 'head of department'){
+                //   pendingApprovals = stage1
+                // }else {
+                //   pendingApprovals = startStage;
+                // }
+                return Promise.resolve(complaints);
             }
             catch (e) {
                 this.handleException(e);
             }
         });
     }
-    fetchComplaints(customerId) {
+    fetchComplaints(query, customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const complains = yield this.complaint.find({ customer: customerId });
+                const complains = yield this.complaint.paginate({ customer: customerId }, Object.assign({}, query));
                 return Promise.resolve(complains);
             }
             catch (e) {
@@ -643,9 +664,9 @@ class Customer extends module_1.default {
     fetchApprovedComplaints(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const complaints = yield this.complaint.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
-                let approved = complaints.filter(complaint => complaint.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED);
-                return Promise.resolve(approved);
+                //@ts-ignore
+                const complaints = yield this.complaint.paginate({ branch: user.branch, ApprovalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                return Promise.resolve(complaints);
             }
             catch (e) {
                 this.handleException(e);
@@ -708,7 +729,8 @@ class Customer extends module_1.default {
     fetchWalkinCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customers = yield this.walkin.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                //@ts-ignore
+                const customers = yield this.walkin.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -772,7 +794,8 @@ class Customer extends module_1.default {
     fetchFilledCustomerCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinders = yield this.walkin.find(Object.assign(Object.assign({}, query), { status: walk_in_customers_1.WalkinCustomerStatus.FILLED, branch: user.branch }));
+                //@ts-ignore
+                const cylinders = yield this.walkin.paginate({ status: walk_in_customers_1.WalkinCustomerStatus.FILLED, branch: user.branch }, Object.assign({}, query));
                 return cylinders;
             }
             catch (e) {

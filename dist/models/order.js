@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.orderType = exports.pickupType = exports.PickupStatus = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var PickupStatus;
 (function (PickupStatus) {
     PickupStatus["PENDING"] = "pending";
@@ -15,7 +16,7 @@ var pickupType;
 ;
 var orderType;
 (function (orderType) {
-    orderType["PICKUP"] = "pickup";
+    orderType["PICKUP"] = "pick-up";
     orderType["DELIVERY"] = "delivery";
 })(orderType = exports.orderType || (exports.orderType = {}));
 const trackingSchema = new mongoose_1.Schema({
@@ -39,6 +40,7 @@ const OrderSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+OrderSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('orders', OrderSchema);
 }

@@ -43,7 +43,8 @@ exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle,
     pickup: index_1.PickupRoutes,
     user: index_1.User,
-    activity: index_1.Activity
+    activity: index_1.Activity,
+    registerCylinder: index_1.RegisteredCylinder
 });
 exports.driver = new driver_1.default({
     driver: index_1.User

@@ -1,4 +1,4 @@
-import Module from "../module";
+import Module, { QueryInterface } from "../module";
 import { RecieptInterface } from "../../models/reciept";
 import { Model } from "mongoose";
 import { UserInterface } from "../../models/user";
@@ -64,9 +64,10 @@ class Account extends Module{
         }
     }
 
-    public async fetchInvoices(user:UserInterface):Promise<RecieptInterface[]|undefined>{
+    public async fetchInvoices(query:QueryInterface, user:UserInterface):Promise<RecieptInterface[]|undefined>{
         try {
-            const invoices = await this.account.find({branch:user.branch});
+          //@ts-ignore
+            const invoices = await this.account.paginate({branch:user.branch},{...query});
             return Promise.resolve(invoices);
         } catch (e) {
             this.handleException(e)

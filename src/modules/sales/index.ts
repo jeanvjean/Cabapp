@@ -87,7 +87,8 @@ class Sale extends Module{
 
   public async fetchSalesRequisition(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
-      const sales = await this.sales.find({...query, branch:user.branch});
+      //@ts-ignore
+      const sales = await this.sales.paginate({ branch:user.branch},{...query});
       return Promise.resolve(sales);
     } catch (e) {
       this.handleException(e);
@@ -363,57 +364,58 @@ class Sale extends Module{
     }
   }
 
-  public async fetchPendingRequisitionApproval(user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
+  public async fetchPendingRequisitionApproval(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
-      const sales = await this.sales.find({status:TransferStatus.PENDING, branch:user.branch});
-      let startStage = sales.filter(transfer=> {
-        if(transfer.approvalStage == stagesOfApproval.START) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage1 = sales.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage2 = sales.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let pendingApprovals;
-      if(user.subrole == 'superadmin'){
-        pendingApprovals = stage2;
-      }else if(user.subrole == 'head of department'){
-        pendingApprovals = stage1
-      }else {
-        pendingApprovals = startStage;
-      }
-      return Promise.resolve(pendingApprovals)
+      //@ts-ignore
+      const sales = await this.sales.paginate({status:TransferStatus.PENDING, branch:user.branch, nextApprovalOfficer:user._id},{...query});
+      // let startStage = sales.filter(transfer=> {
+      //   if(transfer.approvalStage == stagesOfApproval.START) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage1 = sales.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage2 = sales.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let pendingApprovals;
+      // if(user.subrole == 'superadmin'){
+      //   pendingApprovals = stage2;
+      // }else if(user.subrole == 'head of department'){
+      //   pendingApprovals = stage1
+      // }else {
+      //   pendingApprovals = startStage;
+      // }
+      return Promise.resolve(sales)
     } catch (e) {
       this.handleException(e);
     }
@@ -433,22 +435,30 @@ class Sale extends Module{
     }
   }
 
-  public async cylinderTransactions(user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
+  public async cylinderTransactions(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
-      const cylinders = await this.cylinder.find({branch:user.branch, cylinderType:TypesOfCylinders.ASSIGNED}).populate(
-        {path:'assignedTo', model:'customer'}
-      );
+      const options = {
+        ...query,
+        populate:[
+          {path:'assignedTo', model:'customer'}
+        ]
+      }
+      //@ts-ignore
+      const cylinders = await this.cylinder.paginate({branch:user.branch, cylinderType:TypesOfCylinders.ASSIGNED}, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async salesOrderTransaction(user:UserInterface):Promise<salesOrderReport|undefined>{
+  public async salesOrderTransaction(query:QueryInterface, user:UserInterface):Promise<salesOrderReport|undefined>{
     try {
-      const salesOrders = await this.sales.find({branch:user.branch});
-      const completed = salesOrders.filter(sales=> sales.status == TransferStatus.COMPLETED);
-      const in_progress = salesOrders.filter(sales=>sales.status == TransferStatus.PENDING);
+      //@ts-ignore
+      const salesOrders = await this.sales.paginate({branch:user.branch},{...query});
+      //@ts-ignore
+      const completed =  await this.sales.paginate({branch:user.branch, status:TransferStatus.COMPLETED},{...query});
+      //@ts-ignore
+      const in_progress = await this.sales.paginate({branch:user.branch, status:TransferStatus.PENDING},{...query});
       return Promise.resolve({
         orders:salesOrders,
         completed,
@@ -459,11 +469,14 @@ class Sale extends Module{
     }
   }
 
-  public async purchaseOrderReport(user:UserInterface):Promise<purchaseOrderReport|undefined>{
+  public async purchaseOrderReport(query:QueryInterface, user:UserInterface):Promise<purchaseOrderReport|undefined>{
     try {
-      const purchaseOrder = await this.purchase.find({branch:user.branch});
-      const completed = purchaseOrder.filter(order=> order.approvalStatus == TransferStatus.COMPLETED);
-      const pending = purchaseOrder.filter(order=> order.approvalStatus == TransferStatus.PENDING);
+      //@ts-ignore
+      const purchaseOrder = await this.purchase.paginate({branch:user.branch},{...query});
+      //@ts-ignore
+      const completed =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.COMPLETED},{...query});
+      //@ts-ignore
+      const pending =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.PENDING},{...query});
       return Promise.resolve({
         orders:purchaseOrder,
         completed,

@@ -175,9 +175,10 @@ class Cylinder extends Module {
 
   public async fetchCylinders(query:QueryInterface): Promise<FetchCylinderInterface|undefined>{
     try {
-      const cylinders = await this.cylinder.find(query);
-      let bufferCylinders = cylinders.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
-      let assignedCylinders = cylinders.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
+      //@ts-ignore
+      const cylinders = await this.cylinder.paginate({},{...query});
+      // let bufferCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
+      // let assignedCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
       return Promise.resolve({
         cylinders
       });
@@ -249,13 +250,20 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
-      const registeredCylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
-        {path:'assignedTo', model:'customer'},
-        {path:'branch', model:'branches'},
-        {path:'gasType', model:'cylinder'}
-      ]);
-      const bufferCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
-      const assignedCylinders = registeredCylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
+      let options = {
+        ...query,
+        populate:[
+          {path:'assignedTo', model:'customer'},
+          {path:'branch', model:'branches'},
+          {path:'gasType', model:'cylinder'}
+        ]
+      }
+      //@ts-ignore
+      const registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch },options);
+      //@ts-ignore
+      const bufferCylinders = registeredCylinders.docs.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
+      //@ts-ignore
+      const assignedCylinders = registeredCylinders.docs.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
       return Promise.resolve({
         cylinders:registeredCylinders,
         counts:{
@@ -340,16 +348,35 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchFaultyCylinders(query:QueryInterface, user:UserInterface):Promise<FilterCylinderResponse|undefined>{
+  public async cylinderTransferStats(user:UserInterface):Promise<any>{
     try {
+      const cylinders = await this.transfer.find({branch:user.branch});
       //@ts-ignore
-      const cylinders = await this.registerCylinder.paginate({branch:user.branch, condition:CylinderCondition.FAULTY}, {...query,}).populate([
-        {path:'assignedTo', model:'customer'},
-        {path:'branch', model:'branches'}
-      ]);
+      const approvedTransfers = cyinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.COMPLETED).length | 0;
+      //@ts-ignore
+      const pendingTransfers = cyinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.PENDING).length | 0;
       return Promise.resolve({
-        faulty: cylinders
+        all_transfers:cylinders.length | 0,
+        approvedTransfers,
+        pendingTransfers
       });
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchFaultyCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
+    try {
+      let options = {
+        ...query,
+        populate:[
+          {path:'assignedTo', model:'customer'},
+          {path:'branch', model:'branches'}
+        ]
+      }
+      //@ts-ignore
+      const cylinders = await this.registerCylinder.paginate({branch:user.branch, condition:CylinderCondition.FAULTY}, options);
+      return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
     }
@@ -385,13 +412,18 @@ class Cylinder extends Module {
 
   public async fetchArchivedCylinder(query:QueryInterface, user:UserInterface):Promise<ArchivedCylinder[]|undefined>{
     try {
-      const cylinders = await this.archive.find({...query, branch:user.branch}).populate([
-        {path:'assignedTo', model:'customer'},
-        {path:'branch', model:'branches'}
-      ]);
+      let options = {
+        ...query,
+        options:[
+          {path:'assignedTo', model:'customer'},
+          {path:'branch', model:'branches'}
+        ]
+      }
+      //@ts-ignore
+      const cylinders = await this.archive.paginate({branch:user.branch}, options);
       return Promise.resolve(cylinders);
     } catch (e) {
-      this.handleException(e)
+      this.handleException(e);
     }
   }
 
@@ -717,6 +749,8 @@ class Cylinder extends Module {
               //@ts-ignore
               cyl?.assignedTo = transfer.to;
               //@ts-ignore
+              cyl?.holder = cylinderHolder.CUSTOMER
+              //@ts-ignore
               cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
               if(transfer.type == TransferType.TEMPORARY){
                 //@ts-ignore
@@ -827,11 +861,14 @@ class Cylinder extends Module {
 
   public async fetchTransferRequets(query:QueryInterface):Promise<TransferRequestPool|undefined>{
     try {
-      const transfers = await this.transfer.find(query);
-      let totalApproved = transfers.filter(
+      //@ts-ignore
+      const transfers = await this.transfer.paginate({},{...query});
+      let totalApproved = transfers.docs.filter(
+        //@ts-ignore
           transfer=>transfer.transferStatus == TransferStatus.COMPLETED
         );
-      let totalPending = transfers.filter(
+      let totalPending = transfers.docs.filter(
+        //@ts-ignore
         transfer=>transfer.transferStatus == TransferStatus.PENDING
       );
       return Promise.resolve({
@@ -858,56 +895,64 @@ class Cylinder extends Module {
 
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
-      const transfers = await this.transfer.find({...query, branch:user.branch, transferStatus:TransferStatus.PENDING});
-
-      let startStage = transfers.filter(transfer=> {
-        if(transfer.approvalStage == stagesOfApproval.START) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage1 = transfers.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let stage2 = transfers.filter(transfer=>{
-        if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-          for(let tofficer of transfer.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                return transfer
-              }
-            }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-              return transfer
-            }
-          }
-        }
-      });
-      let pendingApprovals;
-      if(user.subrole == 'superadmin'){
-        pendingApprovals = stage2;
-      }else if(user.subrole == 'head of department'){
-        pendingApprovals = stage1
-      }else {
-        pendingApprovals = startStage;
-      }
-      return Promise.resolve(pendingApprovals)
+      //@ts-ignore
+      const transfers = await this.transfer.paginate({
+        branch:user.branch,
+        transferStatus:TransferStatus.PENDING,
+        nextApprovalOfficer:`${user._id}`
+      },{...query});
+      console.log(transfers.docs);
+      //@ts-ignore
+      // let startStage = transfers.docs.filter(transfer=> {
+      //   if(transfer.approvalStage == stagesOfApproval.START) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      //@ts-ignore
+      // let stage1 = transfers.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      //@ts-ignore
+      // let stage2 = transfers.filter(transfer=>{
+      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
+      //     for(let tofficer of transfer.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+      //           return transfer
+      //         }
+      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
+      //         return transfer
+      //       }
+      //     }
+      //   }
+      // });
+      // let pendingApprovals;
+      // if(user.subrole == 'superadmin'){
+      //   pendingApprovals = stage2;
+      // }else if(user.subrole == 'head of department'){
+      //   pendingApprovals = stage1
+      // }else {
+      //   pendingApprovals = startStage;
+      // }
+      return Promise.resolve(transfers)
     } catch (e) {
       this.handleException(e);
     }
@@ -937,23 +982,46 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchCustomerCylinders(customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
+  public async fetchCustomerCylinders(query:QueryInterface, customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
+      let options = {
+        ...query,
+        populate:[
+          {path:'gasType', model:'cylinder'},
+          {path:'assignedTo', model:'customer'}
+        ]
+      }
       //@ts-ignore
-      const cylinders = await this.registerCylinder.find({assignedTo:customerId});
+      const cylinders = await this.registerCylinder.paginate({assignedTo:customerId}, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
     }
   }
 
-  public async fetchTransferReport(query:QueryInterface):Promise<TransferCylinder[]|undefined>{
+  public async fetchTransferReport(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
-      const transfers = await this.transfer.find(query);
-      const completed = transfers.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
-      return Promise.resolve(completed);
+      //@ts-ignore
+      const transfers = await this.transfer.paginate({branch:user.branch, TransferStatus:`${TransferStatus.COMPLETED}`},{...query});
+      //@ts-ignore
+      // const completed = transfers.docs.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
+      return Promise.resolve(transfers);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async cylinderReturned(cylinderId:string):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      const cylinder = await this.registerCylinder.findById(cylinderId);
+      if(!cylinder) {
+        throw new BadInputFormatException('this cylinder mat have been deleted');
+      }
+      cylinder.holder = cylinderHolder.ASNL
+      await cylinder.save();
+      return cylinder;
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

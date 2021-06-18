@@ -51,8 +51,8 @@ class Driver extends module_1.default {
     fetchDrivers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const users = yield this.driver.find(Object.assign(Object.assign({}, query), { branch: user.branch, subrole: 'driver' }));
-                const drivers = users.filter(driver => driver.subrole == 'driver');
+                //@ts-ignore
+                const users = yield this.driver.paginate(Object.assign(Object.assign({}, query), { branch: user.branch, subrole: 'driver' }));
                 return Promise.resolve(users);
             }
             catch (e) {

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.complaintSchema = exports.complaintStatus = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var complaintStatus;
 (function (complaintStatus) {
     complaintStatus["RESOLVED"] = "resolved";
@@ -39,6 +40,7 @@ exports.complaintSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.complaintSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('complaint', exports.complaintSchema);
 }

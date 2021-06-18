@@ -38,7 +38,7 @@ router.post(
 router.get(
   '/fetch-pending-req-approval',
   auth.verify(),
-  salesCtrl.approveSalesRequisition()
+  salesCtrl.fetchPendingSaleRequisition()
 );
 
 router.get(

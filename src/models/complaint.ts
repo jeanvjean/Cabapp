@@ -5,6 +5,8 @@ import {
   Model
 } from 'mongoose';
 import { ApprovalOfficers, ApprovalOfficerSchema, commentInterface, commentSchema, stagesOfApproval } from './transferCylinder';
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 
 interface complaintCylinder {
   cylinderNo:string
@@ -82,6 +84,8 @@ export const complaintSchema = new Schema({
 },{
   timestamps:true
 });
+
+complaintSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<ComplaintInterface> {
   return conn.model('complaint', complaintSchema);

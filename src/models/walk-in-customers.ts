@@ -5,6 +5,8 @@ Document,
 Model
 } from 'mongoose';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 export enum WalkinCustomerStatus {
   FILLED="filled",
   EMPTY="empty"
@@ -44,6 +46,8 @@ const walkInCustomerSchema = new Schema({
 },{
   timestamps:true
 });
+
+walkInCustomerSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<WalkinCustomerInterface>{
   return conn.model('walk-in-customer', walkInCustomerSchema);

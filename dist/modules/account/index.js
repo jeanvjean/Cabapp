@@ -45,10 +45,11 @@ class Account extends module_1.default {
             }
         });
     }
-    fetchInvoices(user) {
+    fetchInvoices(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const invoices = yield this.account.find({ branch: user.branch });
+                //@ts-ignore
+                const invoices = yield this.account.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(invoices);
             }
             catch (e) {

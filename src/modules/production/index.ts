@@ -356,55 +356,56 @@ class ProductionSchedule extends Module{
 
   public async fetchPendingProductionApprovals(query:QueryInterface, user:UserInterface):Promise<ProductionScheduleInterface[]|undefined>{
     try {
-      const productions = await this.production.find({...query, branch:user.branch});
-      let startStage = productions.filter(production=> {
-        if(production.approvalStage == stagesOfApproval.START) {
-          for(let tofficer of production.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                return production
-              }
-            }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-              return production
-            }
-          }
-        }
-      });
-      let stage1 = productions.filter(production=>{
-        if(production.approvalStage == stagesOfApproval.STAGE1) {
-          for(let tofficer of production.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                return production
-              }
-            }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-              return production
-            }
-          }
-        }
-      });
-      let stage2 = productions.filter(production=>{
-        if(production.approvalStage == stagesOfApproval.STAGE2) {
-          for(let tofficer of production.approvalOfficers) {
-            if(`${tofficer.id}` == `${user._id}`){
-              if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                return production
-              }
-            }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-              return production
-            }
-          }
-        }
-      });
-      let pendingApprovals;
-      if(user.subrole == 'superadmin'){
-        pendingApprovals = stage2;
-      }else if(user.subrole == 'head of department'){
-        pendingApprovals = stage1
-      }else {
-        pendingApprovals = startStage;
-      }
-      return Promise.resolve(pendingApprovals)
+      //@ts-ignore
+      const productions = await this.production.paginate({branch:user.branch, nextApprovalOfficer:user._id},{...query});
+      // let startStage = productions.filter(production=> {
+      //   if(production.approvalStage == stagesOfApproval.START) {
+      //     for(let tofficer of production.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+      //           return production
+      //         }
+      //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+      //         return production
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage1 = productions.filter(production=>{
+      //   if(production.approvalStage == stagesOfApproval.STAGE1) {
+      //     for(let tofficer of production.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+      //           return production
+      //         }
+      //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+      //         return production
+      //       }
+      //     }
+      //   }
+      // });
+      // let stage2 = productions.filter(production=>{
+      //   if(production.approvalStage == stagesOfApproval.STAGE2) {
+      //     for(let tofficer of production.approvalOfficers) {
+      //       if(`${tofficer.id}` == `${user._id}`){
+      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+      //           return production
+      //         }
+      //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
+      //         return production
+      //       }
+      //     }
+      //   }
+      // });
+      // let pendingApprovals;
+      // if(user.subrole == 'superadmin'){
+      //   pendingApprovals = stage2;
+      // }else if(user.subrole == 'head of department'){
+      //   pendingApprovals = stage1
+      // }else {
+      //   pendingApprovals = startStage;
+      // }
+      return Promise.resolve(productions)
     } catch (e) {
       this.handleException(e);
     }
@@ -424,7 +425,8 @@ class ProductionSchedule extends Module{
 
   public async fetchApprovedSchedules(query:QueryInterface, user:UserInterface):Promise<ProductionScheduleInterface[]|undefined>{
     try {
-      const productions = await this.production.find({...query, branch:user.branch});
+      //@ts-ignore
+      const productions = await this.production.paginate({branch:user.branch},{...query});
       return Promise.resolve(productions);
     } catch (e) {
       this.handleException(e);

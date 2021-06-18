@@ -6,6 +6,8 @@ import {
   model
 } from "mongoose";
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 export enum cylinderTypes{
   BUFFER = "buffer",
   ASSIGNED = "assigned"
@@ -77,6 +79,8 @@ export const cylinderSchema = new Schema({
 {
   timestamps:true
 });
+
+cylinderSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<CylinderInterface> {
   return conn.model('cylinder', cylinderSchema);

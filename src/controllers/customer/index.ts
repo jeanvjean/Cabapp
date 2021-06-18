@@ -74,7 +74,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { customerId } = req.params;
-        const data = await this.module.fetchCustomerOrder(customerId);
+        const data = await this.module.fetchCustomerOrder(req.query, customerId);
         this.ok(res, 'Fetched Orders', data)
       } catch (e) {
           this.handleError(e, req, res);
@@ -134,7 +134,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.fetchAllOrders(req.user);
+        const data = await this.module.fetchAllOrders(req.query, req.user);
         this.ok(res, 'fetched all orders', data)
       } catch (e) {
         this.handleError(e, req, res);
@@ -146,7 +146,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.fetchOrdersAssignedToVehicle({vehicle:req.params.vehicleId});
+        const data = await this.module.fetchOrdersAssignedToVehicle(req.query, {vehicle:req.params.vehicleId});
         this.ok(res, 'orders fetched', data)
       } catch (e) {
         this.handleError(e, req, res);
@@ -184,7 +184,7 @@ class customerCtrl extends Ctrl{
   fetchComplaints():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchComplaints(req.params.customerId);
+        const data = await this.module.fetchComplaints(req.query, req.params.customerId);
         this.ok(res, 'complaints fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

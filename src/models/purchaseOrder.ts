@@ -6,6 +6,7 @@ Connection
 } from 'mongoose';
 import { commentInterface, ApprovalOfficers, stagesOfApproval, TransferStatus, ApprovalStatus, commentSchema, ApprovalOfficerSchema } from './transferCylinder';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 export type purchaseCylinderInterface = {
     cylinderNo:string
@@ -45,6 +46,8 @@ const purchaseOrderSchema = new Schema({
 },{
     timestamps:true
 });
+
+purchaseOrderSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<PurchaseOrderInterface>{
     return conn.model('purchase order', purchaseOrderSchema);

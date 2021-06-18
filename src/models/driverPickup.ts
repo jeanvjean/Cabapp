@@ -4,8 +4,9 @@ import {
   Model,
   Document
 } from 'mongoose';
+import { orderType, pickupType } from './order';
 import { RouteActivity, RoutePlanStatus } from './vehicle';
-
+import * as mongoosePaginate from 'mongoose-paginate-v2';
 
 interface RouteCylinderInterface{
   cylinderNo:string
@@ -26,7 +27,7 @@ export interface PickupInterface extends Document{
   status:RoutePlanStatus
   ecrNo:string
   icnNo:string
-  orderType:string
+  orderType:pickupType
   modeOfService:string
   date:Date
   serialNo:number
@@ -57,7 +58,7 @@ const routeSchema = new Schema({
   status:{type:String, enum:Object.values(RoutePlanStatus)},
   ecrNo:{type:String},
   icnNo:{type:String},
-  orderType:{type:String},
+  orderType:{type:String, enum:Object.values(pickupType)},
   modeOfService:{type:String},
   date:{type:Date},
   serialNo:{type:Number},
@@ -70,6 +71,8 @@ const routeSchema = new Schema({
 },{
   timestamps:true
 });
+
+routeSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<PickupInterface> {
   return conn.model('pickup-routes', routeSchema);

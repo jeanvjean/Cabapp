@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productSchema = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 exports.productSchema = new mongoose_1.Schema({
     productName: { type: String },
     itemDescription: { type: String },
@@ -25,6 +26,7 @@ exports.productSchema = new mongoose_1.Schema({
     collection: 'products',
     timestamps: true
 });
+exports.productSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('products', exports.productSchema);
 }

@@ -5,6 +5,8 @@ import {
   Model
 } from 'mongoose';
 
+import * as mongoosePaginate from 'mongoose-paginate-v2';
+
 export interface CustomerInterface extends Document{
   _id:Schema.Types.ObjectId
   name:string
@@ -47,6 +49,8 @@ export const customerSchema = new Schema({
 },{
   timestamps:true
 });
+
+customerSchema.plugin(mongoosePaginate);
 
 export default function factory(conn:Connection):Model<CustomerInterface> {
   return conn.model('customer', customerSchema);

@@ -99,9 +99,12 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrders(query:QueryInterface, user:UserInterface):Promise<purchaseOrderPool|undefined>{
         try {
-            const purchases = await this.purchase.find({ ...query, branch:user.branch });
-            const approved = purchases.filter(purchase=> purchase.approvalStatus == TransferStatus.COMPLETED);
-            const pending = purchases.filter(purchase=> purchase.approvalStatus == TransferStatus.PENDING);
+          //@ts-ignore
+            const purchases = await this.purchase.paginate({ branch:user.branch },{...query});
+            //@ts-ignore
+            const approved = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.COMPLETED },{...query});
+            //@ts-ignore
+            const pending = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.PENDING },{...query});
             return Promise.resolve({
                 purchaseOrders:purchases,
                 approvedOrders:approved,
@@ -371,55 +374,56 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrderRequests(query:QueryInterface, user:UserInterface):Promise<PurchaseOrderInterface[]|undefined>{
         try {
-            const purchaseOrders = await this.purchase.find({...query, branch:user.branch});
-            let startStage = purchaseOrders.filter(purchase=> {
-                if(purchase.approvalStage == stagesOfApproval.START) {
-                  for(let tofficer of purchase.approvalOfficers) {
-                    if(`${tofficer.id}` == `${user._id}`){
-                      if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                        return purchase
-                      }
-                    }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                      return purchase
-                    }
-                  }
-                }
-              });
-              let stage1 = purchaseOrders.filter(purchase=>{
-                if(purchase.approvalStage == stagesOfApproval.STAGE1) {
-                  for(let tofficer of purchase.approvalOfficers) {
-                    if(`${tofficer.id}` == `${user._id}`){
-                      if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                        return purchase
-                      }
-                    }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                      return purchase
-                    }
-                  }
-                }
-              });
-              let stage2 = purchaseOrders.filter(purchase=>{
-                if(purchase.approvalStage == stagesOfApproval.STAGE2) {
-                  for(let tofficer of purchase.approvalOfficers) {
-                    if(`${tofficer.id}` == `${user._id}`){
-                      if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                        return purchase
-                      }
-                    }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                      return purchase
-                    }
-                  }
-                }
-              });
-              let pendingApprovals;
-              if(user.subrole == 'superadmin'){
-                pendingApprovals = stage2;
-              }else if(user.subrole == 'head of department'){
-                pendingApprovals = stage1
-              }else {
-                pendingApprovals = startStage;
-              }
-            return Promise.resolve(pendingApprovals);
+          //@ts-ignore
+            const purchaseOrders = await this.purchase.paginate({ branch:user.branch, nextApprovalOfficer:user._id}, {...query});
+            // let startStage = purchaseOrders.filter(purchase=> {
+            //     if(purchase.approvalStage == stagesOfApproval.START) {
+            //       for(let tofficer of purchase.approvalOfficers) {
+            //         if(`${tofficer.id}` == `${user._id}`){
+            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
+            //             return purchase
+            //           }
+            //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+            //           return purchase
+            //         }
+            //       }
+            //     }
+            //   });
+            //   let stage1 = purchaseOrders.filter(purchase=>{
+            //     if(purchase.approvalStage == stagesOfApproval.STAGE1) {
+            //       for(let tofficer of purchase.approvalOfficers) {
+            //         if(`${tofficer.id}` == `${user._id}`){
+            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
+            //             return purchase
+            //           }
+            //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+            //           return purchase
+            //         }
+            //       }
+            //     }
+            //   });
+              // let stage2 = purchaseOrders.filter(purchase=>{
+              //   if(purchase.approvalStage == stagesOfApproval.STAGE2) {
+              //     for(let tofficer of purchase.approvalOfficers) {
+              //       if(`${tofficer.id}` == `${user._id}`){
+              //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
+              //           return purchase
+              //         }
+              //       }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
+              //         return purchase
+              //       }
+              //     }
+              //   }
+              // });
+              // let pendingApprovals;
+              // if(user.subrole == 'superadmin'){
+              //   pendingApprovals = stage2;
+              // }else if(user.subrole == 'head of department'){
+              //   pendingApprovals = stage1
+              // }else {
+              //   pendingApprovals = startStage;
+              // }
+            return Promise.resolve(purchaseOrders);
         } catch (e) {
             this.handleException(e)
         }

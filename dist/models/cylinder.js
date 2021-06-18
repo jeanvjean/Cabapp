@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cylinderSchema = exports.CylinderCondition = exports.cylinderTypes = void 0;
 const mongoose_1 = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 var cylinderTypes;
 (function (cylinderTypes) {
     cylinderTypes["BUFFER"] = "buffer";
@@ -27,6 +28,7 @@ exports.cylinderSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.cylinderSchema.plugin(mongoosePaginate);
 function factory(conn) {
     return conn.model('cylinder', exports.cylinderSchema);
 }

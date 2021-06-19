@@ -292,6 +292,18 @@ class CylinderController extends Ctrl{
     }
   }
 
+  returnCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.returnCylinder({cylinders:req.body}, req.user);
+        this.ok(res, data.message, data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

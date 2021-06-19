@@ -139,13 +139,14 @@ class Cylinder extends module_1.default {
                 //@ts-ignore
                 const registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch }, options);
                 //@ts-ignore
-                const bufferCylinders = registeredCylinders.docs.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
+                const cylinders = yield this.registerCylinder.find({});
+                const bufferCylinders = cylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
                 //@ts-ignore
-                const assignedCylinders = registeredCylinders.docs.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
+                const assignedCylinders = cylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.ASSIGNED);
                 return Promise.resolve({
                     cylinders: registeredCylinders,
                     counts: {
-                        totalCylinders: registeredCylinders.length | 0,
+                        totalCylinders: cylinders.length | 0,
                         totalBufferCylinders: bufferCylinders.length | 0,
                         totalAssignedCylinders: assignedCylinders.length | 0
                     }
@@ -163,7 +164,8 @@ class Cylinder extends module_1.default {
                 const cylinder = yield this.registerCylinder.findById(id).populate([
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' },
-                    { path: 'gasType', model: 'cylinder' }
+                    { path: 'gasType', model: 'cylinder' },
+                    { path: 'toBranch', model: 'branches' }
                 ]);
                 return Promise.resolve(cylinder);
             }
@@ -653,7 +655,9 @@ class Cylinder extends module_1.default {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.branch = transfer.toBranch;
+                                cyl === null || cyl === void 0 ? void 0 : cyl.toBranch = transfer.toBranch;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.BRANCH;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
@@ -664,6 +668,26 @@ class Cylinder extends module_1.default {
                         });
                     }
                 }
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    returnCylinder(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                for (let cylinder of data.cylinders) {
+                    let cyl = yield this.registerCylinder.findById(cylinder);
+                    //@ts-ignore
+                    cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                    //@ts-ignore
+                    cyl === null || cyl === void 0 ? void 0 : cyl.toBranch = cyl === null || cyl === void 0 ? void 0 : cyl.branch;
+                    cyl === null || cyl === void 0 ? void 0 : cyl.save();
+                }
+                return Promise.resolve({
+                    message: 'cylinders returned'
+                });
             }
             catch (e) {
                 this.handleException(e);

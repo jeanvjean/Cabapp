@@ -134,4 +134,10 @@ router.get(
   cylinderCtrl.transferCylinderStats()
 );
 
+router.post(
+  '/returning-cylinders',
+  auth.verify(),
+  cylinderCtrl.returnCylinder()
+);
+
 export default router;

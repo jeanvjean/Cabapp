@@ -2,8 +2,7 @@ import {
   Model,
   Document,
   Schema,
-  Connection,
-  model
+  Connection
 } from 'mongoose';
 import { CylinderCondition } from './cylinder';
 
@@ -20,7 +19,8 @@ export enum TypesOfCylinders {
 export enum cylinderHolder {
   CUSTOMER = "customer",
   ASNL = "asnl",
-  SUPPLIER = "supplier"
+  SUPPLIER = "supplier",
+  BRANCH = "other-branch"
 }
 
 
@@ -104,6 +104,8 @@ export interface RegisteredCylinderInterface extends Document{
 
   branch:Schema.Types.ObjectId
 
+  toBranch:Schema.Types.ObjectId
+
   department:string
 
   holdingTime:Date
@@ -148,6 +150,8 @@ export const registerCylinderSchema = new Schema({
   condition:{type:String, enum:Object.values(CylinderCondition), default:CylinderCondition.GOOD},
 
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
+
+  toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
 
   holdingTime:{type:Date},
 

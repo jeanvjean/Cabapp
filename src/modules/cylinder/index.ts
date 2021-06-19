@@ -1,5 +1,5 @@
 import { compareSync } from "bcryptjs";
-import { Model } from "mongoose";
+import { Model, Schema, Types } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { ArchivedCylinder } from "../../models/archiveCylinder";
 import { CylinderCondition, CylinderInterface, cylinderTypes } from "../../models/cylinder";
@@ -53,6 +53,10 @@ interface UpdateRegisteredCylinder {
   gasVolumeContent?:RegisteredCylinderInterface['gasVolumeContent'],
   cylinderNumber?:RegisteredCylinderInterface['cylinderNumber'],
   cylinderId:string
+}
+
+type ReturningCylinderInterface = {
+  cylinders:Schema.Types.ObjectId[]
 }
 
 interface CylinderCountInterface{
@@ -261,13 +265,14 @@ class Cylinder extends Module {
       //@ts-ignore
       const registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch },options);
       //@ts-ignore
-      const bufferCylinders = registeredCylinders.docs.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
+      const cylinders = await this.registerCylinder.find({});
+      const bufferCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
       //@ts-ignore
-      const assignedCylinders = registeredCylinders.docs.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
+      const assignedCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED);
       return Promise.resolve({
         cylinders:registeredCylinders,
         counts:{
-          totalCylinders:registeredCylinders.length|0,
+          totalCylinders:cylinders.length|0,
           totalBufferCylinders:bufferCylinders.length|0,
           totalAssignedCylinders:assignedCylinders.length|0
         }
@@ -282,7 +287,8 @@ class Cylinder extends Module {
       const cylinder = await this.registerCylinder.findById(id).populate([
         {path:'assignedTo', model:'customer'},
         {path:'branch', model:'branches'},
-        {path:'gasType', model:'cylinder'}
+        {path:'gasType', model:'cylinder'},
+        {path:'toBranch', model:'branches'}
       ]);
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {
@@ -782,7 +788,9 @@ class Cylinder extends Module {
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
               //@ts-ignore
-              cyl?.branch = transfer.toBranch;
+              cyl?.toBranch = transfer.toBranch;
+              //@ts-ignore
+              cyl?.holder = cylinderHolder.BRANCH
               await cyl?.save();
             }
           }
@@ -794,6 +802,24 @@ class Cylinder extends Module {
         }
       }
 
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
+  public async returnCylinder(data:ReturningCylinderInterface, user:UserInterface):Promise<any>{
+    try {
+      for(let cylinder of data.cylinders ) {
+        let cyl = await this.registerCylinder.findById(cylinder);
+        //@ts-ignore
+        cyl?.holder = cylinderHolder.ASNL;
+        //@ts-ignore
+        cyl?.toBranch = cyl?.branch;
+        cyl?.save();
+      }
+      return Promise.resolve({
+        message:'cylinders returned'
+      });
     } catch (e) {
       this.handleException(e)
     }

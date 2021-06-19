@@ -30,5 +30,11 @@ router.get(
   driverCtrl.fetchDriver()
 );
 
+router.get(
+  '/fetch-all-drivers',
+  auth.verify(),
+  driverCtrl.fetchallDrivers()
+);
+
 
 export default router;

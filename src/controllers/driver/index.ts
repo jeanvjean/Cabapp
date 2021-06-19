@@ -62,6 +62,17 @@ class driverCtrl extends Ctrl{
     }
   }
 
+  fetchallDrivers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchallDrivers(req.query, req.user);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 export const uploadFile = async(file:object, filePath:string)=>{
   //@ts-ignore

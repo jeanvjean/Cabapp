@@ -220,6 +220,15 @@ class Customer extends Module{
     }
   }
 
+  public async fetchAllCustomers(user:UserInterface):Promise<CustomerInterface[]|undefined>{
+    try {
+      const customers = await this.customer.find({branch:user.branch});
+      return Promise.resolve(customers);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async fetchOrdersAssignedToVehicle(query:QueryInterface,data:orderVehicle):Promise<vehicleOrderResponse|undefined>{
     try {
       const options = {

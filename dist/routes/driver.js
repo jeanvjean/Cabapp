@@ -9,5 +9,6 @@ router.post('/create-driver', auth.verify(), controllers_1.driverCtrl.createDriv
 router.delete('/delete-driver/:driverId', auth.verify(), controllers_1.driverCtrl.deleteDriver());
 router.get('/fetch-drivers', auth.verify(), controllers_1.driverCtrl.fetchDrivers());
 router.get('/fetch-driver/:driverId', auth.verify(), controllers_1.driverCtrl.fetchDriver());
+router.get('/fetch-all-drivers', auth.verify(), controllers_1.driverCtrl.fetchallDrivers());
 exports.default = router;
 //# sourceMappingURL=driver.js.map

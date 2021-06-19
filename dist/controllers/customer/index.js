@@ -147,6 +147,18 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchallCustomers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchAllCustomers(req.user);
+                this.ok(res, 'customers fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchOrdersForVehicle() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

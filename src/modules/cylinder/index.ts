@@ -180,7 +180,7 @@ class Cylinder extends Module {
   public async fetchCylinders(query:QueryInterface): Promise<FetchCylinderInterface|undefined>{
     try {
       //@ts-ignore
-      const cylinders = await this.cylinder.paginate({},{...query});
+      const cylinders = await this.cylinder.find({},{...query});
       // let bufferCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
       // let assignedCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
       return Promise.resolve({
@@ -280,6 +280,15 @@ class Cylinder extends Module {
     } catch (e) {
       this.handleException(e);
     };
+  }
+
+  public async fetchRegisteredCylindersNoP(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
+    try{
+      const cylinders = await this.registerCylinder.find({...query, branch:user.branch});
+      return Promise.resolve(cylinders);
+    }catch(e){
+      this.handleException(e);
+    }
   }
 
   public async fetchRegisteredCylinder(id:string,user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{

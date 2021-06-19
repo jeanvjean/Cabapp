@@ -73,6 +73,15 @@ class Driver extends Module{
     }
   }
 
+  public async fetchallDrivers(user:UserInterface):Promise<UserInterface[]|undefined>{
+    try {
+      const drivers = await this.driver.find({branch:user.branch});
+      return Promise.resolve(drivers);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async fetchDriver(data:Parameters):Promise<UserInterface|undefined>{
     try {
       const driver = await this.driver.findById(data.driverId);

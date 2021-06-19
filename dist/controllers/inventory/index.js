@@ -295,6 +295,18 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchallProducts() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchAllProducts(req.query, req.user);
+                this.ok(res, 'products fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = ProductCtrl;
 //# sourceMappingURL=index.js.map

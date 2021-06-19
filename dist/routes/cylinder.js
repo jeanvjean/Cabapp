@@ -31,5 +31,6 @@ router.get('/fetch-cylinder-stats', auth.verify(), controllers_1.cylinderCtrl.cy
 router.get('/returned-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.cylinderReturned());
 router.get('/cylinder-transfer-stats', auth.verify(), controllers_1.cylinderCtrl.transferCylinderStats());
 router.post('/returning-cylinders', auth.verify(), controllers_1.cylinderCtrl.returnCylinder());
+router.get('/fetch-reg-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchRegistredCylindersWP());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

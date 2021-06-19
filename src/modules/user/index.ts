@@ -536,6 +536,15 @@ class User extends Module {
     }
   }
 
+  public async fetchallUsers():Promise<UserInterface[]|undefined>{
+    try {
+      const users = await this.model.find({});
+      return Promise.resolve(users);
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
   public async deleteUser(id:string):Promise<any>{
     try{
       const user = await this.model.findById(id);

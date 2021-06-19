@@ -116,6 +116,17 @@ class Customer extends module_1.default {
             }
         });
     }
+    fetchAllCustomers(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const customers = yield this.customer.find({ branch: user.branch });
+                return Promise.resolve(customers);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchOrdersAssignedToVehicle(query, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

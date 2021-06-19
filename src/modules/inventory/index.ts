@@ -423,6 +423,15 @@ class Product extends Module{
     }
   }
 
+  public async fetchAllProducts(query:QueryInterface, user:UserInterface):Promise<ProductInterface[]|undefined>{
+    try {
+      const products = await this.product.find({branch:user.branch});
+      return Promise.resolve(products)
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
   public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
       //@ts-ignore

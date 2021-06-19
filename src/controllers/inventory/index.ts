@@ -290,6 +290,18 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  fetchallProducts():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchAllProducts(req.query, req.user);
+        this.ok(res,'products fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

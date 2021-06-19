@@ -449,6 +449,17 @@ class User extends module_1.default {
             }
         });
     }
+    fetchallUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const users = yield this.model.find({});
+                return Promise.resolve(users);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     deleteUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

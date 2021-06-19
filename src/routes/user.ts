@@ -87,4 +87,10 @@ const router: expressRouter = expressRouter();
     userCtrl.suspendUser()
   );
 
+  router.get(
+    '/fetch-all-users',
+    auth.verify(),
+    userCtrl.fetchallUsers()
+  );
+
 export default router;

@@ -56,7 +56,7 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const cylinders = yield this.cylinder.paginate({}, Object.assign({}, query));
+                const cylinders = yield this.cylinder.find({}, Object.assign({}, query));
                 // let bufferCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.BUFFER);
                 // let assignedCylinders = cylinders.docs.filter(cylinder=> cylinder.type == cylinderTypes.ASSIGNED);
                 return Promise.resolve({
@@ -156,6 +156,17 @@ class Cylinder extends module_1.default {
                 this.handleException(e);
             }
             ;
+        });
+    }
+    fetchRegisteredCylindersNoP(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinders = yield this.registerCylinder.find(Object.assign(Object.assign({}, query), { branch: user.branch }));
+                return Promise.resolve(cylinders);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
         });
     }
     fetchRegisteredCylinder(id, user) {

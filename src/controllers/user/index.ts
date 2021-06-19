@@ -220,6 +220,17 @@ class UserController extends Ctrl{
       }
     }
   }
+
+  fetchallUsers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchallUsers();
+        this.ok(res, 'all users fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
 }
 
 export {Validator}

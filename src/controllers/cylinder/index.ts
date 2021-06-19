@@ -304,6 +304,18 @@ class CylinderController extends Ctrl{
     }
   }
 
+  fetchRegistredCylindersWP():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchRegisteredCylindersNoP(req.query, req.user);
+        this.ok(res, 'registered cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

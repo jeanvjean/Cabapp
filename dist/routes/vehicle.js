@@ -19,5 +19,6 @@ router.delete('/delete-vehicle/:vehicleId', auth.verify(), controllers_1.vehicle
 router.get('/remove-driver/:vehicleId/:driver', auth.verify(), controllers_1.vehicleCtrl.removeDriver());
 router.post('/mark-route-as-complete/:vehicleId/:routeId', auth.verify(), controllers_1.vehicleCtrl.markRouteAsComplete());
 router.get('/fetch-activityLogs/:userId', auth.verify(), controllers_1.vehicleCtrl.fetchActivityLogs());
+router.get('/fetch-all-vehicle', auth.verify(), controllers_1.vehicleCtrl.fetchallVehicles());
 exports.default = router;
 //# sourceMappingURL=vehicle.js.map

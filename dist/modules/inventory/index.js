@@ -325,6 +325,17 @@ class Product extends module_1.default {
             }
         });
     }
+    fetchAllProducts(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const products = yield this.product.find({ branch: user.branch });
+                return Promise.resolve(products);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchInventories(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

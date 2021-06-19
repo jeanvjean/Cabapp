@@ -140,4 +140,10 @@ router.post(
   cylinderCtrl.returnCylinder()
 );
 
+router.get(
+  '/fetch-reg-cylinders',
+  auth.verify(),
+  cylinderCtrl.fetchRegistredCylindersWP()
+);
+
 export default router;

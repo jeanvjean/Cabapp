@@ -342,6 +342,15 @@ class Vehicle extends Module{
     };
   }
 
+  public async fetchallVehicles(user:UserInterface):Promise<VehicleInterface[]|undefined>{
+    try {
+      const vehicles = await this.vehicle.find({branch:user.branch});
+      return Promise.resolve(vehicles);
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
   public async removeDriver(data:Parameters):Promise<VehicleInterface|undefined>{
     try {
       const { vehicleId, driver } = data;

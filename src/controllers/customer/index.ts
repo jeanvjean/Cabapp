@@ -142,6 +142,18 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  fetchallCustomers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchAllCustomers(req.user);
+        this.ok(res, 'customers fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchOrdersForVehicle():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

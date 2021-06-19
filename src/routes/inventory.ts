@@ -146,4 +146,10 @@ router.get(
   productCtrl.inventoryStats()
 );
 
+router.get(
+  '/fetch-all-products',
+  auth.verify(),
+  productCtrl.fetchallProducts()
+);
+
 export default router;

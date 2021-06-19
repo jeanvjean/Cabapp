@@ -30,5 +30,6 @@ router.get('/fetch-walkin-customer/:customerId', controllers_1.customerCtrl.fetc
 router.delete('/delete-walkin-customer/:customerId', auth.verify(), controllers_1.customerCtrl.deleteWalkinCustomer());
 router.get('/mark-filled-cylinder/:customerId', auth.verify(), controllers_1.customerCtrl.markCustomerAsFilled());
 router.get('/fetch-filled-walkincylinders', auth.verify(), controllers_1.customerCtrl.fetchFilledCustomerCylinders());
+router.get('/fetch-all-customers', auth.verify(), controllers_1.customerCtrl.fetchallCustomers());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

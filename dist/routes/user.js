@@ -23,5 +23,6 @@ router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());
 router.get('/fetch-permissions', controllers_1.userCtrl.fetchPermissions());
 router.get('/register-token/:token', auth.verify(), controllers_1.userCtrl.updateToken());
 router.get('/suspend/:userId', auth.verify(), controllers_1.userCtrl.suspendUser());
+router.get('/fetch-all-users', auth.verify(), controllers_1.userCtrl.fetchallUsers());
 exports.default = router;
 //# sourceMappingURL=user.js.map

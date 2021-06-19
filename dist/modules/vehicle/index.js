@@ -271,6 +271,17 @@ class Vehicle extends module_1.default {
             ;
         });
     }
+    fetchallVehicles(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const vehicles = yield this.vehicle.find({ branch: user.branch });
+                return Promise.resolve(vehicles);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     removeDriver(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

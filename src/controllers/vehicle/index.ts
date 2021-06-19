@@ -180,6 +180,18 @@ class VehicleController extends Ctrl{
     }
   }
 
+  fetchallVehicles():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchallVehicles(req.user);
+        this.ok(res, 'vehicles fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export default VehicleController;

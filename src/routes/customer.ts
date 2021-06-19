@@ -147,4 +147,10 @@ router.get(
   customerCtrl.fetchFilledCustomerCylinders()
 );
 
+router.get(
+  '/fetch-all-customers',
+  auth.verify(),
+  customerCtrl.fetchallCustomers()
+);
+
 export default router;

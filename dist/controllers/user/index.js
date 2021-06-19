@@ -221,6 +221,17 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    fetchallUsers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchallUsers();
+                this.ok(res, 'all users fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = UserController;
 //# sourceMappingURL=index.js.map

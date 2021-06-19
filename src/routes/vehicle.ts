@@ -87,4 +87,10 @@ router.get(
   vehicleCtrl.fetchActivityLogs()
 );
 
+router.get(
+  '/fetch-all-vehicle',
+  auth.verify(),
+  vehicleCtrl.fetchallVehicles()
+);
+
 export default router;

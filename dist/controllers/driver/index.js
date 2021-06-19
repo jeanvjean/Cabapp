@@ -66,6 +66,17 @@ class driverCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchallDrivers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchallDrivers(req.query, req.user);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.uploadFile = (file, filePath) => __awaiter(void 0, void 0, void 0, function* () {
     //@ts-ignore

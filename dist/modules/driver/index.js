@@ -60,6 +60,17 @@ class Driver extends module_1.default {
             }
         });
     }
+    fetchallDrivers(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const drivers = yield this.driver.find({ branch: user.branch });
+                return Promise.resolve(drivers);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchDriver(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

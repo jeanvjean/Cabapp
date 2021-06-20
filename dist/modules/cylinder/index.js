@@ -829,9 +829,9 @@ class Cylinder extends module_1.default {
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'cylinders', model: 'registered-cylinders' },
-                        { path: 'assignedTo', model: 'customer' },
                         { path: 'gasType', model: 'cylinder' },
-                        { path: 'branch', model: 'branches' }
+                        { path: 'branch', model: 'branches' },
+                        { path: 'to', model: 'customer' }
                     ] });
                 //@ts-ignore
                 const transfers = yield this.transfer.paginate({

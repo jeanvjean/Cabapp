@@ -81,6 +81,7 @@ class OutGoingCylinder extends Module{
             const ocn = await this.ocn.findById(ocnId).populate({
               path:'customer', model:'customer'
             });
+            console.log(ocn)
             if(!ocn) {
               throw new BadInputFormatException('OCN not found')
             }
@@ -191,6 +192,7 @@ class OutGoingCylinder extends Module{
                 //     nextApprovalOfficer:hod?._id
                 //   }
                   let checkOfficer = ocn.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
+                  console.log(checkOfficer);
                   if(checkOfficer.length == 0) {
                     ocn.approvalOfficers.push({
                       name:user.name,
@@ -209,6 +211,7 @@ class OutGoingCylinder extends Module{
                 //     comment:data.comment,
                 //     commentBy:user._id
                 //   })
+                // console.log(ocn)
                   await ocn.save();
                   await createLog({
                     user:user._id,
@@ -248,8 +251,9 @@ class OutGoingCylinder extends Module{
                     });
                   }
                   //@ts-ignore
-                  ocn.tracking.push(track)
+                  // ocn.tracking.push(track)
                   ocn.approvalStage = stagesOfApproval.STAGE2;
+                  // console.log(hod)
                   //@ts-ignore
                   ocn.nextApprovalOfficer = hod?.branch.branchAdmin;
                 //   ocn.comments.push({
@@ -385,7 +389,8 @@ class OutGoingCylinder extends Module{
             const outgoing = await this.ocn.findById(ocnId).populate([
                 {path:'customer', model:'customer' },
                 {path:'approvalOfficers', model:'User'},
-                {path:'nextApprovalOfficer', model:'User'}
+                {path:'nextApprovalOfficer', model:'User'},
+                {path:'branch', model:'branches'}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

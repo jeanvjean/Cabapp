@@ -65,6 +65,7 @@ class OutGoingCylinder extends module_1.default {
                 const ocn = yield this.ocn.findById(ocnId).populate({
                     path: 'customer', model: 'customer'
                 });
+                console.log(ocn);
                 if (!ocn) {
                     throw new exceptions_1.BadInputFormatException('OCN not found');
                 }
@@ -177,6 +178,7 @@ class OutGoingCylinder extends module_1.default {
                         //     nextApprovalOfficer:hod?._id
                         //   }
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        console.log(checkOfficer);
                         if (checkOfficer.length == 0) {
                             ocn.approvalOfficers.push({
                                 name: user.name,
@@ -195,6 +197,7 @@ class OutGoingCylinder extends module_1.default {
                         //     comment:data.comment,
                         //     commentBy:user._id
                         //   })
+                        // console.log(ocn)
                         yield ocn.save();
                         yield logs_1.createLog({
                             user: user._id,
@@ -235,8 +238,9 @@ class OutGoingCylinder extends module_1.default {
                             });
                         }
                         //@ts-ignore
-                        ocn.tracking.push(track);
+                        // ocn.tracking.push(track)
                         ocn.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
+                        // console.log(hod)
                         //@ts-ignore
                         ocn.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
                         //   ocn.comments.push({
@@ -377,7 +381,8 @@ class OutGoingCylinder extends module_1.default {
                 const outgoing = yield this.ocn.findById(ocnId).populate([
                     { path: 'customer', model: 'customer' },
                     { path: 'approvalOfficers', model: 'User' },
-                    { path: 'nextApprovalOfficer', model: 'User' }
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'branch', model: 'branches' }
                 ]);
                 return Promise.resolve(outgoing);
             }

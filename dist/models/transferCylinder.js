@@ -57,8 +57,8 @@ exports.ApprovalOfficerSchema = new mongoose_1.Schema({
 });
 exports.TransferSchema = new mongoose_1.Schema({
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
-    initiator: { type: mongoose_1.Schema.Types.ObjectId },
-    to: { type: mongoose_1.Schema.Types.ObjectId },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    to: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     tracking: {
         type: [exports.approvalStageShema]
     },

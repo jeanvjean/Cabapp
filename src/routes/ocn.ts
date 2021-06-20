@@ -19,7 +19,7 @@ router.post(
 router.post(
     '/approve-ocn/:ocnId',
     auth.verify(),
-    Validator.validateOcn(),
+    Validator.validateApproval(),
     val.validate(),
     ocnController.approveOcn()
 );

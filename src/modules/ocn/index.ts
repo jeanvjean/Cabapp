@@ -384,7 +384,8 @@ class OutGoingCylinder extends Module{
         try {
             const outgoing = await this.ocn.findById(ocnId).populate([
                 {path:'customer', model:'customer' },
-                {path:'approvalOfficers', model:'User'}
+                {path:'approvalOfficers', model:'User'},
+                {path:'nextApprovalOfficer', model:'User'}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

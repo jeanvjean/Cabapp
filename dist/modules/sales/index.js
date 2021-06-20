@@ -62,7 +62,11 @@ class Sale extends module_1.default {
     fetchSalesReqDetails(salesId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const sales = yield this.sales.findById(salesId);
+                const sales = yield this.sales.findById(salesId).populate([
+                    { path: 'initiator', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'preparedBy', model: 'User' }
+                ]);
                 return Promise.resolve(sales);
             }
             catch (e) {

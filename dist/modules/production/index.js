@@ -391,7 +391,11 @@ class ProductionSchedule extends module_1.default {
     viewProductionSchedule(productionId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const production = yield this.production.findById(productionId);
+                const production = yield this.production.findById(productionId).populate([
+                    { path: 'customer', model: 'customer' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' }
+                ]);
                 if (!production) {
                     throw new exceptions_1.BadInputFormatException('Production schedule not found');
                 }

@@ -163,8 +163,14 @@ class Customer extends Module{
 
   public async fetchCustomers(query:QueryInterface, user:UserInterface):Promise<CustomerInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'branch', model:'branches'}
+        ]
+      }
       //@ts-ignore
-      const customers = await this.customer.paginate({branch:user.branch}, {...query});
+      const customers = await this.customer.paginate({branch:user.branch}, options);
       return Promise.resolve(customers);
     } catch (e) {
       this.handleException(e)
@@ -173,11 +179,9 @@ class Customer extends Module{
 
   public async fetchCustomerDetails(id:string):Promise<CustomerInterface|undefined>{
     try {
-      const customer = await this.customer.findById(id).populate({
-        path:'vehicle', model:'vehicle',populate:{
-          path:'assignedTo', model:'User'
-        }
-      });
+      const customer = await this.customer.findById(id).populate([
+        {path:'branch', model:'branches'}
+      ]);
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e)
@@ -274,7 +278,9 @@ class Customer extends Module{
         ...query,
         populate:[
           {path:'customer', model:'customer'},
-          {path:'vehicle', model:'vehicle'}
+          {path:'vehicle', model:'vehicle',populate:{
+            path:'assignedTo', model:'User'
+          }}
         ]
       }
       //@ts-ignore
@@ -375,7 +381,12 @@ class Customer extends Module{
 
   public async viewOrder(orderId:string):Promise<OrderInterface|undefined>{
     try {
-      const order = await this.order.findById(orderId);
+      const order = await this.order.findById(orderId).populate([
+        {path:'customer', model:'customer'},
+        {path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:'User'
+        }}
+      ]);
       return Promise.resolve(order as OrderInterface);
     } catch (e) {
       this.handleException(e);
@@ -696,12 +707,21 @@ class Customer extends Module{
 
   public async fetchUserComplaintApproval(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'branch', model:'branches'}
+        ]
+      }
       //@ts-ignore
       const complaints = await this.complaint.paginate({
         branch:user.branch,
         approvalStatus:TransferStatus.PENDING,
         nextApprovalOfficer:user._id
-      },{...query});
+      },options);
 
       // let startStage = complaints.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -777,6 +797,20 @@ class Customer extends Module{
     }
   }
 
+  public async complaintsDetails(complaintId:string):Promise<ComplaintInterface|undefined>{
+    try {
+      const complaint = await this.complaint.findById(complaintId).populate([
+          {path:'customer', model:'customer'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'branch', model:'branches'}
+      ]);
+      return Promise.resolve(complaint as ComplaintInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async resolveComplaint(complaintId:string, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try{
       const complaint = await this.complaint.findById(complaintId).populate([
@@ -838,7 +872,9 @@ class Customer extends Module{
 
   public async fetchWalkinCustomer(customerId:string):Promise<WalkinCustomerInterface|undefined>{
     try {
-      const customer = await this.walkin.findById(customerId);
+      const customer = await this.walkin.findById(customerId).populate([
+        {path:'branch', model:'branches'},
+      ]);
       return Promise.resolve(customer as WalkinCustomerInterface);
     } catch (e) {
       this.handleException(e);

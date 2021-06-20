@@ -99,7 +99,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const {vehicleId} = req.params;
-        const data = await this.module.fetchRoutePlan({vehicleId});
+        const data = await this.module.fetchRoutePlan({vehicleId, query:req.query});
         this.ok(res, 'fetched route plans', data)
       } catch (e) {
         this.handleError(e, req, res);

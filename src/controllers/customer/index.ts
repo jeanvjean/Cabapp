@@ -166,6 +166,17 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  fetchComplaintDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.complaintsDetails(req.params.complaintId);
+        this.ok(res, 'complaint details', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   createComplaint():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

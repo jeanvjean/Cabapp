@@ -60,7 +60,10 @@ class Vehicle extends module_1.default {
     fetchVehicle(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicle = yield this.vehicle.findById(id);
+                const vehicle = yield this.vehicle.findById(id).populate([
+                    { path: 'assignedTo', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(vehicle);
             }
             catch (e) {
@@ -303,9 +306,16 @@ class Vehicle extends module_1.default {
     fetchRoutePlan(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { vehicleId } = data;
+                const { vehicleId, query } = data;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'vehicle', model: 'vehicle' },
+                        { path: 'security', model: 'User' },
+                        { path: 'recievedBy', model: 'User' }
+                    ] });
                 //@ts-ignore
-                const routePlan = yield this.pickup.paginate({ vehicle: `${vehicleId}`, deleted: false }, Object.assign({}, query));
+                const routePlan = yield this.pickup.paginate({ vehicle: `${vehicleId}`, deleted: false }, options);
                 return Promise.resolve(routePlan);
             }
             catch (e) {

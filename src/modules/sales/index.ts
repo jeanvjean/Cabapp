@@ -97,7 +97,11 @@ class Sale extends Module{
 
   public async fetchSalesReqDetails(salesId:string):Promise<SalesRequisitionInterface|undefined>{
     try {
-      const sales = await this.sales.findById(salesId);
+      const sales = await this.sales.findById(salesId).populate([
+        {path:'initiator', model:'User'},
+        {path:'nextApprovalOfficer', model:'User'},
+        {path:'preparedBy', model:'User'}
+      ]);
       return Promise.resolve(sales as SalesRequisitionInterface);
     } catch (e) {
       this.handleException(e);

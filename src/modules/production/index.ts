@@ -413,7 +413,11 @@ class ProductionSchedule extends Module{
 
   public async viewProductionSchedule(productionId:string):Promise<ProductionScheduleInterface|undefined>{
     try {
-      const production = await this.production.findById(productionId);
+      const production = await this.production.findById(productionId).populate([
+        {path:'customer', model:'customer'},
+        {path:'initiator', model:'User'},
+        {path:'nextApprovalOfficer', model:'User'}
+      ]);
       if(!production) {
         throw new BadInputFormatException('Production schedule not found');
       }

@@ -51,8 +51,11 @@ class Driver extends module_1.default {
     fetchDrivers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'vehicle', model: 'vehicle' }
+                    ] });
                 //@ts-ignore
-                const users = yield this.driver.paginate(Object.assign(Object.assign({}, query), { branch: user.branch, subrole: 'driver' }));
+                const users = yield this.driver.paginate({ branch: user.branch, subrole: 'driver' }, options);
                 return Promise.resolve(users);
             }
             catch (e) {
@@ -74,7 +77,7 @@ class Driver extends module_1.default {
     fetchDriver(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const driver = yield this.driver.findById(data.driverId);
+                const driver = yield this.driver.findById(data.driverId).populate({ path: 'vehicle', model: 'vehicle' });
                 return Promise.resolve(driver);
             }
             catch (e) {

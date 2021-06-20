@@ -123,7 +123,7 @@ class Product extends module_1.default {
     fetchProduct(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield this.product.findById(id);
+                const product = yield this.product.findById(id).populate({ path: 'supplier', model: 'supplier' }, { path: 'branch', model: 'branches' });
                 return Promise.resolve(product);
             }
             catch (e) {
@@ -238,6 +238,19 @@ class Product extends module_1.default {
                 //@ts-ignore
                 const suppliers = yield this.supplier.paginate({ branch: user.branch }, Object.assign({}, query));
                 return Promise.resolve(suppliers);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchSupplierDetails(supplierId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const supplier = yield this.supplier.findById(supplierId).populate([
+                    { path: 'branch', model: 'branches' },
+                ]);
+                return Promise.resolve(supplier);
             }
             catch (e) {
                 this.handleException(e);
@@ -927,8 +940,16 @@ class Product extends module_1.default {
     fetchusersDisburseApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({ fromBranch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const disbursement = yield this.disburse.paginate({ fromBranch: user.branch, nextApprovalOfficer: user._id }, options);
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -986,8 +1007,16 @@ class Product extends module_1.default {
     fetchusersDisburseRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const disbursement = yield this.disburse.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, options);
                 //   console.log(disbursement)
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1046,7 +1075,14 @@ class Product extends module_1.default {
     fetchDisbursement(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const disbursement = yield this.disburse.findById(id);
+                const disbursement = yield this.disburse.findById(id).populate([
+                    { path: 'nextApprovalOffice', model: 'User' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'branch', model: 'branches' },
+                    { path: 'customer', model: 'customer' },
+                    { path: 'releasedTo', model: 'User' },
+                    { path: 'releasedBy', model: 'User' }
+                ]);
                 return Promise.resolve(disbursement);
             }
             catch (e) {

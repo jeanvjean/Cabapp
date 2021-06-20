@@ -284,7 +284,11 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylindersNoP(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
     try{
-      const cylinders = await this.registerCylinder.find({...query, branch:user.branch});
+      const cylinders = await this.registerCylinder.find({...query, branch:user.branch}).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'},
+        {path:'gasType', model:'cylinder'},
+      ]);
       return Promise.resolve(cylinders);
     }catch(e){
       this.handleException(e);
@@ -386,7 +390,8 @@ class Cylinder extends Module {
         ...query,
         populate:[
           {path:'assignedTo', model:'customer'},
-          {path:'branch', model:'branches'}
+          {path:'branch', model:'branches'},
+          {path:'gasType', model:'cylinder'},
         ]
       }
       //@ts-ignore
@@ -866,7 +871,11 @@ class Cylinder extends Module {
 
   public async fixedFaultyCylinder(cylinderId:string, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     try {
-      const cylinder = await this.registerCylinder.findById(cylinderId);
+      const cylinder = await this.registerCylinder.findById(cylinderId).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'},
+        {path:'gasType', model:'cylinder'},
+      ]);
       if(!cylinder) {
         throw new BadInputFormatException('cylinder not found');
       }
@@ -898,11 +907,12 @@ class Cylinder extends Module {
     try {
       //@ts-ignore
       const transfers = await this.transfer.paginate({},{...query});
-      let totalApproved = transfers.docs.filter(
+      const transferReq= await this.transfer.find({})
+      let totalApproved = transferReq.filter(
         //@ts-ignore
           transfer=>transfer.transferStatus == TransferStatus.COMPLETED
         );
-      let totalPending = transfers.docs.filter(
+      let totalPending = transferReq.filter(
         //@ts-ignore
         transfer=>transfer.transferStatus == TransferStatus.PENDING
       );
@@ -911,7 +921,7 @@ class Cylinder extends Module {
         counts:{
           totalApproved:totalApproved.length | 0,
           totalPending:totalPending.length | 0,
-          totalTransfers:transfers.length | 0
+          totalTransfers:transferReq.length | 0
         }
       });
     } catch (e) {
@@ -921,7 +931,14 @@ class Cylinder extends Module {
 
   public async fetchTransferDetails(id:string):Promise<TransferCylinder|undefined>{
     try {
-      const transfer = await this.transfer.findById(id);
+      const transfer = await this.transfer.findById(id).populate([
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'assignedTo', model:'customer'},
+          {path:'gasType', model:'cylinder'},
+          {path:'branch', model:'branches'}
+      ]);
       return Promise.resolve(transfer as TransferCylinder);
     } catch (e) {
       this.handleException(e);
@@ -930,13 +947,24 @@ class Cylinder extends Module {
 
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
+
+      const options = {
+        ...query,
+        populate:[
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'assignedTo', model:'customer'},
+          {path:'gasType', model:'cylinder'},
+          {path:'branch', model:'branches'}
+        ]
+      }
       //@ts-ignore
       const transfers = await this.transfer.paginate({
         branch:user.branch,
         transferStatus:TransferStatus.PENDING,
         nextApprovalOfficer:`${user._id}`
-      },{...query});
-      console.log(transfers.docs);
+      },options);
       //@ts-ignore
       // let startStage = transfers.docs.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {

@@ -232,7 +232,10 @@ class Product extends Module{
 
   public async fetchProduct(id:string, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
-      const product = await this.product.findById(id);
+      const product = await this.product.findById(id).populate(
+        {path:'supplier', model:'supplier'},
+        {path:'branch', model:'branches'}
+      );
       return Promise.resolve(product as ProductInterface);
     } catch (e) {
       this.handleException(e);
@@ -342,6 +345,17 @@ class Product extends Module{
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async fetchSupplierDetails(supplierId:string):Promise<SupplierInterface|undefined>{
+    try {
+      const supplier = await this.supplier.findById(supplierId).populate([
+        {path:'branch', model:'branches'},
+      ]);
+      return Promise.resolve(supplier as SupplierInterface);
+    } catch (e) {
+      this.handleException(e)
     }
   }
 
@@ -1019,8 +1033,19 @@ class Product extends Module{
 
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
+      }
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({fromBranch:user.branch, nextApprovalOfficer:user._id},{...query});
+      const disbursement = await this.disburse.paginate({fromBranch:user.branch, nextApprovalOfficer:user._id},options);
 
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -1077,8 +1102,19 @@ class Product extends Module{
 
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
+      }
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({ branch:user.branch, nextApprovalOfficer:user._id}, {...query});
+      const disbursement = await this.disburse.paginate({ branch:user.branch, nextApprovalOfficer:user._id},options);
       //   console.log(disbursement)
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1135,7 +1171,14 @@ class Product extends Module{
 
   public async fetchDisbursement(id:string):Promise<DisburseProductInterface|undefined>{
     try {
-      const disbursement = await this.disburse.findById(id);
+      const disbursement = await this.disburse.findById(id).populate([
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+      ]);
       return Promise.resolve(disbursement as DisburseProductInterface);
     } catch (e) {
       this.handleException(e);

@@ -302,6 +302,16 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  supplierDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchSupplierDetails(req.params.supplierId);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

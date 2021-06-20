@@ -103,7 +103,7 @@ class VehicleController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { vehicleId } = req.params;
-                const data = yield this.module.fetchRoutePlan({ vehicleId });
+                const data = yield this.module.fetchRoutePlan({ vehicleId, query: req.query });
                 this.ok(res, 'fetched route plans', data);
             }
             catch (e) {

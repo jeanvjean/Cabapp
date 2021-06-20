@@ -376,7 +376,8 @@ class OutGoingCylinder extends module_1.default {
             try {
                 const outgoing = yield this.ocn.findById(ocnId).populate([
                     { path: 'customer', model: 'customer' },
-                    { path: 'approvalOfficers', model: 'User' }
+                    { path: 'approvalOfficers', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' }
                 ]);
                 return Promise.resolve(outgoing);
             }

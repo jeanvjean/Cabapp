@@ -153,4 +153,10 @@ router.get(
   customerCtrl.fetchallCustomers()
 );
 
+router.get(
+  '/fetch-complaint-details/:complaintId',
+  auth.verify(),
+  customerCtrl.fetchComplaintDetails()
+);
+
 export default router;

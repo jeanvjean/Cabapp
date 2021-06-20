@@ -90,7 +90,11 @@ class PurchaseOrder extends Module{
 
     public async fetchOrderDetails(orderId:string):Promise<PurchaseOrderInterface|undefined>{
         try {
-            const order = await this.purchase.findById(orderId);
+            const order = await this.purchase.findById(orderId).populate([
+              {path:'customer', model:'customer'},
+              {path:'initiator', model:'User'},
+              {path:'nextApprovalOfficer', model:'User'}
+            ]);
             return Promise.resolve(order as PurchaseOrderInterface);
         } catch (e) {
             this.handleException(e)

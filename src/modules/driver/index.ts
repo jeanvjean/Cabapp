@@ -65,8 +65,14 @@ class Driver extends Module{
 
   public async fetchDrivers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'vehicle', model:'vehicle'}
+        ]
+      }
       //@ts-ignore
-      const users = await this.driver.paginate({...query, branch:user.branch, subrole:'driver'});
+      const users = await this.driver.paginate({ branch:user.branch, subrole:'driver'},options);
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
@@ -84,7 +90,9 @@ class Driver extends Module{
 
   public async fetchDriver(data:Parameters):Promise<UserInterface|undefined>{
     try {
-      const driver = await this.driver.findById(data.driverId);
+      const driver = await this.driver.findById(data.driverId).populate(
+        {path:'vehicle', model:'vehicle'}
+      );
       return Promise.resolve(driver as UserInterface);
     } catch (e) {
       this.handleException(e);

@@ -12,6 +12,7 @@ import salesRouter from './sales';
 import productionRouter from './production';
 import purchaseRouter from './purchase';
 import accountRouter from './account';
+import ocnRouter from './ocn';
 const uploader = new Uploader();
 
 const router: expressRouter = expressRouter();
@@ -31,6 +32,7 @@ router.use('/sales', salesRouter);
 router.use('/production', productionRouter);
 router.use('/purchase', purchaseRouter);
 router.use('/account', accountRouter);
+router.use('/ocn', ocnRouter);
 
 router.post('/upload', uploader.fileUpload());
 

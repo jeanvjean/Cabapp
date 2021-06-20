@@ -171,6 +171,17 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchComplaintDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.complaintsDetails(req.params.complaintId);
+                this.ok(res, 'complaint details', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     createComplaint() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

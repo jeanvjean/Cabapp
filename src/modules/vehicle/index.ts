@@ -82,7 +82,8 @@ type Parameters = {
   inspectionId?:string
   comment?:string
   driver?:string
-  status?:string
+  status?:string,
+  query?:QueryInterface
 }
 
 interface ApproveInspectionData {
@@ -140,7 +141,10 @@ class Vehicle extends Module{
 
   public async fetchVehicle(id:string):Promise<VehicleInterface|undefined>{
     try {
-      const vehicle = await this.vehicle.findById(id);
+      const vehicle = await this.vehicle.findById(id).populate([
+        {path:'assignedTo', model:'User'},
+        {path:'branch', model:'branches'}
+      ]);
       return Promise.resolve(vehicle as VehicleInterface);
     } catch (e) {
       this.handleException(e);
@@ -369,9 +373,19 @@ class Vehicle extends Module{
 
   public async fetchRoutePlan(data:Parameters):Promise<PickupInterface[]|undefined>{
     try {
-      const { vehicleId } = data;
+      const { vehicleId, query } = data;
+      const options = {
+        ...query,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'supplier', model:'supplier'},
+          {path:'vehicle', model:'vehicle'},
+          {path:'security', model:'User'},
+          {path:'recievedBy', model:'User'}
+        ]
+      }
       //@ts-ignore
-      const routePlan = await this.pickup.paginate({vehicle:`${vehicleId}`, deleted:false}, {...query});
+      const routePlan = await this.pickup.paginate({vehicle:`${vehicleId}`, deleted:false}, options);
       return Promise.resolve(routePlan);
     } catch (e) {
       this.handleException(e);

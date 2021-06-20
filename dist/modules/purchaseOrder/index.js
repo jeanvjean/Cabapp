@@ -66,7 +66,11 @@ class PurchaseOrder extends module_1.default {
     fetchOrderDetails(orderId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const order = yield this.purchase.findById(orderId);
+                const order = yield this.purchase.findById(orderId).populate([
+                    { path: 'customer', model: 'customer' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' }
+                ]);
                 return Promise.resolve(order);
             }
             catch (e) {

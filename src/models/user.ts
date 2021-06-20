@@ -121,7 +121,7 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
     token:{
       type:String
     },
-    vehicle:{type:Schema.Types.ObjectId, ref:'User'},
+    vehicle:{type:Schema.Types.ObjectId, ref:'vehicle'},
     deactivated:{
       type:Boolean,
       default:false

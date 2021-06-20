@@ -152,4 +152,10 @@ router.get(
   productCtrl.fetchallProducts()
 );
 
+router.get(
+  '/supplier-details/:supplierId',
+  auth.verify(),
+  productCtrl.supplierDetails()
+);
+
 export default router;

@@ -52,8 +52,11 @@ class Customer extends module_1.default {
     fetchCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'branch', model: 'branches' }
+                    ] });
                 //@ts-ignore
-                const customers = yield this.customer.paginate({ branch: user.branch }, Object.assign({}, query));
+                const customers = yield this.customer.paginate({ branch: user.branch }, options);
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -64,11 +67,9 @@ class Customer extends module_1.default {
     fetchCustomerDetails(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customer = yield this.customer.findById(id).populate({
-                    path: 'vehicle', model: 'vehicle', populate: {
-                        path: 'assignedTo', model: 'User'
-                    }
-                });
+                const customer = yield this.customer.findById(id).populate([
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(customer);
             }
             catch (e) {
@@ -169,7 +170,9 @@ class Customer extends module_1.default {
             try {
                 let options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'customer', model: 'customer' },
-                        { path: 'vehicle', model: 'vehicle' }
+                        { path: 'vehicle', model: 'vehicle', populate: {
+                                path: 'assignedTo', model: 'User'
+                            } }
                     ] });
                 //@ts-ignore
                 const orders = yield this.order.paginate({ customer: `${customerId}` }, options);
@@ -274,7 +277,12 @@ class Customer extends module_1.default {
     viewOrder(orderId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const order = yield this.order.findById(orderId);
+                const order = yield this.order.findById(orderId).populate([
+                    { path: 'customer', model: 'customer' },
+                    { path: 'vehicle', model: 'vehicle', populate: {
+                            path: 'assignedTo', model: 'User'
+                        } }
+                ]);
                 return Promise.resolve(order);
             }
             catch (e) {
@@ -600,12 +608,18 @@ class Customer extends module_1.default {
     fetchUserComplaintApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
                 //@ts-ignore
                 const complaints = yield this.complaint.paginate({
                     branch: user.branch,
                     approvalStatus: transferCylinder_1.TransferStatus.PENDING,
                     nextApprovalOfficer: user._id
-                }, Object.assign({}, query));
+                }, options);
                 // let startStage = complaints.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -684,6 +698,22 @@ class Customer extends module_1.default {
             }
         });
     }
+    complaintsDetails(complaintId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const complaint = yield this.complaint.findById(complaintId).populate([
+                    { path: 'customer', model: 'customer' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
+                return Promise.resolve(complaint);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     resolveComplaint(complaintId, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -752,7 +782,9 @@ class Customer extends module_1.default {
     fetchWalkinCustomer(customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const customer = yield this.walkin.findById(customerId);
+                const customer = yield this.walkin.findById(customerId).populate([
+                    { path: 'branch', model: 'branches' },
+                ]);
                 return Promise.resolve(customer);
             }
             catch (e) {

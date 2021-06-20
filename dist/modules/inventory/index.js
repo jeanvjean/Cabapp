@@ -949,7 +949,11 @@ class Product extends module_1.default {
                         { path: 'releasedBy', model: 'User' }
                     ] });
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({ fromBranch: user.branch, nextApprovalOfficer: user._id }, options);
+                const disbursement = yield this.disburse.paginate({
+                    fromBranch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    ApprovalStatus: transferCylinder_1.TransferStatus.PENDING
+                }, options);
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -1016,7 +1020,11 @@ class Product extends module_1.default {
                         { path: 'releasedBy', model: 'User' }
                     ] });
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, options);
+                const disbursement = yield this.disburse.paginate({
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    requestApproval: transferCylinder_1.TransferStatus.PENDING
+                }, options);
                 //   console.log(disbursement)
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.requestStage == stagesOfApproval.START) {

@@ -371,7 +371,11 @@ class Sale extends Module{
   public async fetchPendingRequisitionApproval(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
       //@ts-ignore
-      const sales = await this.sales.paginate({status:TransferStatus.PENDING, branch:user.branch, nextApprovalOfficer:user._id},{...query});
+      const sales = await this.sales.paginate({
+        status:TransferStatus.PENDING, 
+        branch:user.branch, 
+        nextApprovalOfficer:user._id
+      },{...query});
       // let startStage = sales.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
       //     for(let tofficer of transfer.approvalOfficers) {

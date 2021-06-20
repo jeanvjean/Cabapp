@@ -365,7 +365,11 @@ class PurchaseOrder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const purchaseOrders = yield this.purchase.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const purchaseOrders = yield this.purchase.paginate({
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    approvalStatus: transferCylinder_1.TransferStatus.PENDING
+                }, Object.assign({}, query));
                 // let startStage = purchaseOrders.filter(purchase=> {
                 //     if(purchase.approvalStage == stagesOfApproval.START) {
                 //       for(let tofficer of purchase.approvalOfficers) {

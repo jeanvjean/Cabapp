@@ -357,7 +357,11 @@ class ProductionSchedule extends Module{
   public async fetchPendingProductionApprovals(query:QueryInterface, user:UserInterface):Promise<ProductionScheduleInterface[]|undefined>{
     try {
       //@ts-ignore
-      const productions = await this.production.paginate({branch:user.branch, nextApprovalOfficer:user._id},{...query});
+      const productions = await this.production.paginate({
+        branch:user.branch, 
+        nextApprovalOfficer:user._id,
+        status:TransferStatus.PENDING
+      },{...query});
       // let startStage = productions.filter(production=> {
       //   if(production.approvalStage == stagesOfApproval.START) {
       //     for(let tofficer of production.approvalOfficers) {

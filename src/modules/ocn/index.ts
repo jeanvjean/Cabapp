@@ -330,7 +330,11 @@ class OutGoingCylinder extends Module{
     public async fetchOcnApprovals(query:QueryInterface, user:UserInterface) :Promise<OutgoingCylinderInterface[]|undefined>{
         try {
           //@ts-ignore
-            const outgoing = await this.ocn.paginate({branch:user.branch, nextApprovalOfficer:user._id},{...query});
+            const outgoing = await this.ocn.paginate({
+              branch:user.branch, 
+              nextApprovalOfficer:user._id,
+              ApprovalStatus:TransferStatus.PENDING
+            },{...query});
             // let startStage = outgoing.filter(outgoing=> {
             //     if(outgoing.approvalStage == stagesOfApproval.START) {
             //       for(let tofficer of outgoing.approvalOfficers) {

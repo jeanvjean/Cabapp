@@ -340,7 +340,11 @@ class Sale extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const sales = yield this.sales.paginate({ status: transferCylinder_1.TransferStatus.PENDING, branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const sales = yield this.sales.paginate({
+                    status: transferCylinder_1.TransferStatus.PENDING,
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id
+                }, Object.assign({}, query));
                 // let startStage = sales.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {

@@ -1045,7 +1045,11 @@ class Product extends Module{
         ]
       }
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({fromBranch:user.branch, nextApprovalOfficer:user._id},options);
+      const disbursement = await this.disburse.paginate({
+        fromBranch:user.branch, 
+        nextApprovalOfficer:user._id,
+        ApprovalStatus:TransferStatus.PENDING
+      },options);
 
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -1114,7 +1118,11 @@ class Product extends Module{
         ]
       }
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({ branch:user.branch, nextApprovalOfficer:user._id},options);
+      const disbursement = await this.disburse.paginate({
+         branch:user.branch, 
+         nextApprovalOfficer:user._id,
+         requestApproval:TransferStatus.PENDING
+        },options);
       //   console.log(disbursement)
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.requestStage == stagesOfApproval.START) {

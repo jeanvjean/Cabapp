@@ -379,7 +379,11 @@ class PurchaseOrder extends Module{
     public async fetchPurchaseOrderRequests(query:QueryInterface, user:UserInterface):Promise<PurchaseOrderInterface[]|undefined>{
         try {
           //@ts-ignore
-            const purchaseOrders = await this.purchase.paginate({ branch:user.branch, nextApprovalOfficer:user._id}, {...query});
+            const purchaseOrders = await this.purchase.paginate({ 
+              branch:user.branch, 
+              nextApprovalOfficer:user._id,
+              approvalStatus:TransferStatus.PENDING
+            }, {...query});
             // let startStage = purchaseOrders.filter(purchase=> {
             //     if(purchase.approvalStage == stagesOfApproval.START) {
             //       for(let tofficer of purchase.approvalOfficers) {

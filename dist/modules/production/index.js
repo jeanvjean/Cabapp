@@ -333,7 +333,11 @@ class ProductionSchedule extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const productions = yield this.production.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const productions = yield this.production.paginate({
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    status: transferCylinder_1.TransferStatus.PENDING
+                }, Object.assign({}, query));
                 // let startStage = productions.filter(production=> {
                 //   if(production.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of production.approvalOfficers) {

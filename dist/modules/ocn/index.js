@@ -320,7 +320,11 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const outgoing = yield this.ocn.paginate({ branch: user.branch, nextApprovalOfficer: user._id }, Object.assign({}, query));
+                const outgoing = yield this.ocn.paginate({
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    ApprovalStatus: transferCylinder_1.TransferStatus.PENDING
+                }, Object.assign({}, query));
                 // let startStage = outgoing.filter(outgoing=> {
                 //     if(outgoing.approvalStage == stagesOfApproval.START) {
                 //       for(let tofficer of outgoing.approvalOfficers) {

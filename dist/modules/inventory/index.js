@@ -389,6 +389,10 @@ class Product extends module_1.default {
                     branch: user.branch
                 });
                 const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch }));
+                let init = "GRN";
+                let num = yield token_1.generateToken(6);
+                //@ts-ignore
+                disbursement.grnNo = init + num.toString();
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,
@@ -414,7 +418,6 @@ class Product extends module_1.default {
                     user: user._id,
                     activities: {
                         title: 'Product disbursal',
-                        //@ts-ignore
                         activity: `You started a product disbursal process`,
                         time: new Date().toISOString()
                     }

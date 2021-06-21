@@ -13,7 +13,6 @@ import Module, { QueryInterface } from "../module";
 import Environment from '../../configs/static';
 import Notify from '../../util/mail'
 import { DeleteResponse } from "../vehicle";
-import { compareSync } from "bcryptjs";
 import { createLog } from "../../util/logs";
 
 interface ProductProp {
@@ -487,6 +486,10 @@ class Product extends Module{
         initiator:user._id,
         branch:user.branch
       });
+      let init = "GRN"
+      let num = await generateToken(6);
+      //@ts-ignore
+      disbursement.grnNo = init + num.toString();
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,
@@ -512,7 +515,6 @@ class Product extends Module{
         user:user._id,
         activities:{
           title:'Product disbursal',
-          //@ts-ignore
           activity:`You started a product disbursal process`,
           time: new Date().toISOString()
         }

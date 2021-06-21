@@ -26,6 +26,8 @@ export interface PickupInterface extends Document{
   departure:string
   status:RoutePlanStatus
   ecrNo:string
+  tfcrNo:string
+  tecrNo:string
   icnNo:string
   orderType:pickupType
   modeOfService:string
@@ -58,6 +60,8 @@ const routeSchema = new Schema({
   status:{type:String, enum:Object.values(RoutePlanStatus)},
   ecrNo:{type:String},
   icnNo:{type:String},
+  tecrNo:{type:String},
+  tfcrNo:{type:String},
   orderType:{type:String, enum:Object.values(pickupType)},
   modeOfService:{type:String},
   date:{type:Date},

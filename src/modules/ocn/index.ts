@@ -7,6 +7,7 @@ import Notify from '../../util/mail';
 import Environment from '../../configs/static';
 import { BadInputFormatException } from "../../exceptions";
 import { createLog } from "../../util/logs";
+import { generateToken } from "../../util/token";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
@@ -53,6 +54,11 @@ class OutGoingCylinder extends Module{
                 department:user.role,
                 stageOfApproval:stagesOfApproval.STAGE1
             });
+            let init = 'OCN'
+            let num = await generateToken(6)
+            //@ts-ignore
+            let ocnNo = init + num.toString();
+            ocn.ocnNo = ocnNo;
             await ocn.save();
             await createLog({
               user:user._id,

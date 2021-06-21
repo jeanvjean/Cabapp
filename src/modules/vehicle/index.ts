@@ -12,6 +12,7 @@ import { ActivityLogInterface } from "../../models/logs";
 import { pickupType } from "../../models/order";
 import router from "../../routes/person";
 import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
+import { generateToken } from "../../util/token";
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
@@ -290,6 +291,36 @@ class Vehicle extends Module{
       });
       let availableRoutes = await this.pickup.find({});
       routePlan.serialNo = availableRoutes.length + 1;
+      if(routePlan.orderType == pickupType.CUSTOMER) {
+        if(routePlan.activity == RouteActivity.PICKUP) {
+          let init = 'TECR'
+          let num = await generateToken(6);
+          //@ts-ignore
+          let tecrNo = init + num.toString();
+          routePlan.tecrNo = tecrNo
+        } else if(routePlan.activity == RouteActivity.DELIVERY) {
+          let init = 'TFCR'
+          let num = await generateToken(6);
+          //@ts-ignore
+          let tfcrNo = init + num.toString();
+          routePlan.tfcrNo = tfcrNo
+        }
+      }else if(routePlan.orderType == pickupType.SUPPLIER) {
+        if(routePlan.activity == RouteActivity.DELIVERY) {
+          let init = 'TECR'
+          let num = await generateToken(6);
+          //@ts-ignore
+          let tecrNo = init + num.toString();
+          routePlan.tecrNo = tecrNo
+        } else if(routePlan.activity == RouteActivity.PICKUP) {
+          let init = 'TFCR'
+          let num = await generateToken(6);
+          //@ts-ignore
+          let tfcrNo = init + num.toString();
+          routePlan.tfcrNo = tfcrNo
+        }
+      }
+      // console.log(routePlan);
       await routePlan.save();
       await createLog({
         user:user._id,

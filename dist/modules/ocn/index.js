@@ -15,6 +15,7 @@ const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 const exceptions_1 = require("../../exceptions");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
 class OutGoingCylinder extends module_1.default {
     constructor(props) {
         super();
@@ -35,6 +36,11 @@ class OutGoingCylinder extends module_1.default {
                     department: user.role,
                     stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
                 });
+                let init = 'OCN';
+                let num = yield token_1.generateToken(6);
+                //@ts-ignore
+                let ocnNo = init + num.toString();
+                ocn.ocnNo = ocnNo;
                 yield ocn.save();
                 yield logs_1.createLog({
                     user: user._id,

@@ -17,6 +17,7 @@ const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 const order_1 = require("../../models/order");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
+const token_1 = require("../../util/token");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
@@ -212,6 +213,39 @@ class Vehicle extends module_1.default {
                 let routePlan = new this.pickup(Object.assign(Object.assign({}, data), { branch: user.branch, vehicle: vehicle._id }));
                 let availableRoutes = yield this.pickup.find({});
                 routePlan.serialNo = availableRoutes.length + 1;
+                if (routePlan.orderType == order_1.pickupType.CUSTOMER) {
+                    if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
+                        let init = 'TECR';
+                        let num = yield token_1.generateToken(6);
+                        //@ts-ignore
+                        let tecrNo = init + num.toString();
+                        routePlan.tecrNo = tecrNo;
+                    }
+                    else if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
+                        let init = 'TFCR';
+                        let num = yield token_1.generateToken(6);
+                        //@ts-ignore
+                        let tfcrNo = init + num.toString();
+                        routePlan.tfcrNo = tfcrNo;
+                    }
+                }
+                else if (routePlan.orderType == order_1.pickupType.SUPPLIER) {
+                    if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
+                        let init = 'TECR';
+                        let num = yield token_1.generateToken(6);
+                        //@ts-ignore
+                        let tecrNo = init + num.toString();
+                        routePlan.tecrNo = tecrNo;
+                    }
+                    else if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
+                        let init = 'TFCR';
+                        let num = yield token_1.generateToken(6);
+                        //@ts-ignore
+                        let tfcrNo = init + num.toString();
+                        routePlan.tfcrNo = tfcrNo;
+                    }
+                }
+                // console.log(routePlan);
                 yield routePlan.save();
                 yield logs_1.createLog({
                     user: user._id,

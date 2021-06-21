@@ -21,7 +21,8 @@ const ocnSchema = new mongoose_1.Schema({
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval), default: transferCylinder_1.stagesOfApproval.STAGE1 },
     approvalStatus: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), default: transferCylinder_1.TransferStatus.PENDING },
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    ocnNo: { type: String }
 });
 ocnSchema.plugin(mongoosePaginate);
 function factory(conn) {

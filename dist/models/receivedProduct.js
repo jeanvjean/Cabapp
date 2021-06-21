@@ -31,7 +31,8 @@ exports.inventorySchema = new mongoose_1.Schema({
     inspectingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     grnDocument: { type: String },
     direction: { type: String, enum: Object.values(productDirection) },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    grnNo: { type: String }
 });
 exports.inventorySchema.plugin(mongoosePaginate);
 function factory(conn) {

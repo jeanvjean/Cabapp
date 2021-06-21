@@ -35,7 +35,8 @@ exports.disburseSchema = new mongoose_1.Schema({
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     jobTag: { type: String },
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
-    mrn: { type: String }
+    mrn: { type: String },
+    grnNo: { type: String }
 });
 exports.disburseSchema.plugin(mongoosePaginate);
 function factory(conn) {

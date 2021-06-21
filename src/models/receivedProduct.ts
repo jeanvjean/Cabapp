@@ -24,6 +24,7 @@ export interface InventoryInterface extends Document{
   grnDocument:string
   direction:productDirection,
   branch:Schema.Types.ObjectId
+  grnNo:string
 }
 
 export interface ReceivedProduct {
@@ -62,7 +63,8 @@ export const inventorySchema = new Schema({
   inspectingOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   grnDocument:{type:String},
   direction:{type:String, enum:Object.values(productDirection)},
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  grnNo:{type:String}
 });
 
 inventorySchema.plugin(mongoosePaginate);

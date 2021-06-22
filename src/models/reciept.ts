@@ -6,7 +6,18 @@ Connection
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import { productRecievedSchema, ReceivedProduct } from './receivedProduct';
+import { saleCylinder, saleCylinderSchema } from './sales-requisition';
 
+export enum receiptType {
+  PRODUCT = "product",
+  CYLINDER = "cylinder"
+}
+
+export enum CustomerType{
+  WALKIN="walk-in",
+  REGISTERED = "registered"
+}
 
 export enum paymentMode {
     CASH='cash',
@@ -17,6 +28,9 @@ export enum paymentMode {
 export interface RecieptInterface extends Document{
     customer:string
     cylinderType:string
+    type:receiptType
+    cylinders?:saleCylinder[],
+    products?:ReceivedProduct[]
     invoiceNo:number
     totalAmount:number
     amountPaid:number
@@ -31,6 +45,10 @@ export interface RecieptInterface extends Document{
 const recieptSchema = new Schema({
     customer:{type:String},
     cylinderType:{type:String},
+    recieptType:{type:String, enum:Object.values(receiptType)},
+    customerType:{type:String, enum:Object.values(CustomerType)},
+    cylinders:{type:[saleCylinderSchema]},
+    products:{type:[productRecievedSchema]},
     invoiceNo:{type:Number},
     totalAmount:{type:Number},
     amountPaid:{type:Number},

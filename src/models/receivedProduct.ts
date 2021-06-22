@@ -31,12 +31,12 @@ export interface ReceivedProduct {
   productNumber:string,
   productName:string
   quantity:number
-  passed:number
-  rejected:number
+  passed?:number
+  rejected?:number
   unitCost:number
   totalCost:string
-  comment:string
-  totalAvailable:number
+  comment?:string
+  totalAvailable?:number
 }
 
 export const productRecievedSchema = new Schema({

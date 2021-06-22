@@ -8,7 +8,7 @@ import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageSh
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 
-interface saleCylinder{
+export interface saleCylinder{
   noOfCylinders:number
   volume:string
   unitPrice:number
@@ -32,7 +32,7 @@ export interface SalesRequisitionInterface extends Document{
   nextApprovalOfficer:Schema.Types.ObjectId
 }
 
-const saleCylinderSchema = new Schema({
+export const saleCylinderSchema = new Schema({
   noOfCylinders:Number,
   volume:String,
   unitPrice:Number,

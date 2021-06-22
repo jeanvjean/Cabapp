@@ -11,7 +11,10 @@ interface accountPropInterface {
 
 interface newRecieptInterface {
     customer:RecieptInterface['customer']
-    cylinderType:RecieptInterface['cylinderType']
+    cylinderType?:RecieptInterface['cylinderType']
+    receiptType?:RecieptInterface['type']
+    cylinders?:RecieptInterface['cylinders']
+    products?:RecieptInterface['products']
     totalAmount:RecieptInterface['totalAmount']
     amountPaid:RecieptInterface['amountPaid']
     date:RecieptInterface['date']

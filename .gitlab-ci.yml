@@ -1,0 +1,12 @@
+deploy-prod:
+  stage: deploy
+
+  only: 
+    - master
+  
+  tags:
+    - master
+
+  script:
+    - 'pm2 restart ./dist/index.js'
+    - 'service nginx restart'

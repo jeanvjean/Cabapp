@@ -2,17 +2,16 @@ import { Model, Schema } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { ComplaintInterface, complaintStatus } from "../../models/complaint";
 import { CustomerInterface } from "../../models/customer";
-import { CylinderInterface } from "../../models/cylinder";
 import { OrderInterface, PickupStatus, pickupType, trackingOrder } from "../../models/order";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { WalkinCustomerInterface, WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { ApprovalInput } from "../cylinder";
 import Module, { QueryInterface } from "../module";
-import { compareSync } from "bcryptjs";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
+import { generateToken } from "../../util/token";
 
 
 
@@ -83,14 +82,12 @@ type NewComplainInterface = {
 type newWalkinCustomer = {
   customerName:WalkinCustomerInterface['customerName']
   ercNo:WalkinCustomerInterface['ercNo']
+  cylinders:WalkinCustomerInterface['cylinders']
   orderType:WalkinCustomerInterface['orderType']
   date:WalkinCustomerInterface['date']
   icnNo:WalkinCustomerInterface['icnNo']
   modeOfService:WalkinCustomerInterface['modeOfService']
-  serialNo?:WalkinCustomerInterface['serialNo']
-  cylinderNo:WalkinCustomerInterface['cylinderNo']
-  cylinderSize:WalkinCustomerInterface['cylinderSize']
-  totalVolume:WalkinCustomerInterface['totalVolume']
+  serialNo?:WalkinCustomerInterface['serialNo'],
   totalQuantity:WalkinCustomerInterface['totalQuantity']
 }
 
@@ -844,6 +841,15 @@ class Customer extends Module{
       let maxNumber = Math.max(...docs);
       let sn = maxNumber + 1
       customer.serialNo = sn | 1;
+      let init = "ECR"
+      let num = await generateToken(6);
+      //@ts-ignore
+      customer.ecrNo = init + num.toString();
+      let icnInit = "ICN"
+      let icn = await generateToken(6);
+      //@ts-ignore
+      customer.icnNo = icnInit + icn.toString();
+
       await customer.save();
       await createLog({
         user:user._id,

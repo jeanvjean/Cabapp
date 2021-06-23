@@ -12,35 +12,44 @@ export enum WalkinCustomerStatus {
   EMPTY="empty"
 }
 
+export interface WalkinCustomerCylinder {
+  cylinderNo:string
+  cylinderSize:string
+  totalVolume:string
+  totalQuantity:string
+}
+
 
 export interface WalkinCustomerInterface extends Document{
   customerName:string
   ercNo:string
   orderType:string
+  cylinders:WalkinCustomerCylinder[]
   date:Date
   icnNo:string
   modeOfService:string
   serialNo:number
-  cylinderNo:string
-  cylinderSize:string
-  totalVolume:string
   totalQuantity:string
   branch:Schema.Types.ObjectId
   status:WalkinCustomerStatus
 }
 
+const walkinCustomerCylinderSchema = new Schema({
+  cylinderNo:String,
+  cylinderSize:String,
+  totalVolume:String,
+});
+
 const walkInCustomerSchema = new Schema({
   customerName:String,
   ercNo:String,
   orderType:String,
+  cylinders:[walkinCustomerCylinderSchema],
   date:Date,
   icnNo:String,
+  totalQuantity:String,
   modeOfService:String,
   serialNo:Number,
-  cylinderNo:String,
-  cylinderSize:String,
-  totalVolume:String,
-  totalQuantity:String,
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   status:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY}
 },{

@@ -4,7 +4,6 @@ import { ProductionScheduleInterface } from "../../models/productionSchedule";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import Module, { QueryInterface } from "../module";
-import { compareSync } from "bcryptjs";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";

@@ -13,7 +13,7 @@ class Mongo {
     process.env.NODE_ENV === 'production' ||
     process.env.NODE_ENV === 'development';
 
-  static uri = process.env.NODE_ENV === 'production'? "mongodb+srv://tech:Wittercell@development.8h65w.mongodb.net/asnlretryWrites=true&w=majority" : "mongodb://localhost:27017/air-separation";
+  static uri = process.env.MONGODB_URI || "mongodb+srv://tech:Wittercell@development.8h65w.mongodb.net/asnlretryWrites=true&w=majority";
   /**
    * @param {ConnectionOptions} options Mongodb server options
    */

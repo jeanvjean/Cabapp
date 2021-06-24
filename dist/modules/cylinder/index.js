@@ -15,7 +15,6 @@ const registeredCylinders_1 = require("../../models/registeredCylinders");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
-const static_1 = require("../../configs/static");
 const logs_1 = require("../../util/logs");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
 class Cylinder extends module_1.default {
@@ -355,7 +354,7 @@ class Cylinder extends module_1.default {
                 });
                 yield new mail_1.default().push({
                     subject: "New cylinder transfer",
-                    content: `A cylinder transfer has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                    content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                     user: hod
                 });
                 return Promise.resolve(transfer);
@@ -421,7 +420,7 @@ class Cylinder extends module_1.default {
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
-                            content: `A cylinder transfer you initiated has been rejected, check it and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                            content: `A cylinder transfer you initiated has been rejected, check it and try again. click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                             user: apUser
                         });
                         return Promise.resolve({
@@ -470,7 +469,7 @@ class Cylinder extends module_1.default {
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
-                            content: `A cylinder transfer you approved has been rejected. check and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                            content: `A cylinder transfer you approved has been rejected. check and try again. click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                             user: apUser
                         });
                         return Promise.resolve({
@@ -525,7 +524,7 @@ class Cylinder extends module_1.default {
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
-                            content: `A cylinder transfer has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                            content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                             user: apUser
                         });
                         return Promise.resolve({
@@ -579,7 +578,7 @@ class Cylinder extends module_1.default {
                         let apUser = yield this.user.findById(transfer.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
-                            content: `A cylinder transfer has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                            content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                             user: apUser
                         });
                         return Promise.resolve({
@@ -627,7 +626,7 @@ class Cylinder extends module_1.default {
                         let apUser = yield this.user.findById(transfer.initiator);
                         yield new mail_1.default().push({
                             subject: "New cylinder transfer",
-                            content: `A Cylinder transfer you initiated has been approved to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+                            content: `A Cylinder transfer you initiated has been approved to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                             user: apUser
                         });
                         let cylinders = transfer.cylinders;
@@ -732,7 +731,7 @@ class Cylinder extends module_1.default {
                 let apUser = yield this.user.findOne({ role: 'production', subrole: 'head of department', branch: cylinder.branch });
                 yield new mail_1.default().push({
                     subject: "Faulty cylinder",
-                    content: `A cylinder has been assigned as faulty and requires your attenction. click to view ${static_1.default.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
+                    content: `A cylinder has been assigned as faulty and requires your attenction. click to view ${process.env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
                     user: apUser
                 });
                 return Promise.resolve(cylinder);
@@ -768,7 +767,7 @@ class Cylinder extends module_1.default {
                 let apUser = yield this.user.findOne({ role: 'sales', subrole: 'head of department', branch: cylinder.branch });
                 yield new mail_1.default().push({
                     subject: "Faulty cylinder",
-                    content: `A faulty cylinder has been fixed. click to view ${static_1.default.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
+                    content: `A faulty cylinder has been fixed. click to view ${process.env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
                     user: apUser
                 });
                 return Promise.resolve(cylinder);

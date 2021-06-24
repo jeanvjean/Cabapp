@@ -13,7 +13,6 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
 const exceptions_1 = require("../../exceptions");
-const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 class Sale extends module_1.default {
@@ -132,7 +131,7 @@ class Sale extends module_1.default {
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         new mail_1.default().push({
                             subject: "Sales Requisition",
-                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(sales);
@@ -178,7 +177,7 @@ class Sale extends module_1.default {
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         new mail_1.default().push({
                             subject: "Sales Requisition",
-                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(sales);
@@ -230,7 +229,7 @@ class Sale extends module_1.default {
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",
-                            content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            content: `A Sales requisition has been created and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(sales);
@@ -278,7 +277,7 @@ class Sale extends module_1.default {
                         let approvalUser = yield this.user.findById(sales.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",
-                            content: `A Sales requisition has been created and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            content: `A Sales requisition has been created and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(sales);
@@ -324,7 +323,7 @@ class Sale extends module_1.default {
                         let approvalUser = yield this.user.findById(sales.initiator);
                         yield new mail_1.default().push({
                             subject: "Sales Requisition",
-                            content: `A Sales requisition has been approval. click to view ${static_1.default.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+                            content: `A Sales requisition has been approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(sales);

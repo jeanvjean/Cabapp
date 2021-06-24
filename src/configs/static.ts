@@ -5,7 +5,7 @@ class Secret {
   static PORT="3100"
 
   //[Mongo]
-  static MONGODB_URI="mongodb://localhost:27017/air-separation"
+  static MONGODB_URI="mongodb+srv://tech:Wittercell@development.8h65w.mongodb.net/asnlretryWrites=true&w=majority"
   static PUBLIC_SMTP='56c4e79aa88d87130939928a0c28f30d'
   static PRIVATE_SMTP='53e7d95532c54eae01bba10822c7e456'
   static SMTP_FROM_EMAIL='maranathatolulope@gmail.com'
@@ -15,7 +15,7 @@ class Secret {
   static CLOUDINARY_NAME="dorz7hgqx"
   static FCM_SERVER_KEY = ''
 
-  static FRONTEND_URL='http://178.62.127.157/'
+  static FRONTEND_URL='https://asnl-web.netlify.app'
 }
 
 export default Secret

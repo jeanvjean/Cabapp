@@ -6,7 +6,7 @@ let Secret = /** @class */ (() => {
     Secret.NODE_ENV = "development";
     Secret.PORT = "3100";
     //[Mongo]
-    Secret.MONGODB_URI = "mongodb://localhost:27017/air-separation";
+    Secret.MONGODB_URI = "mongodb+srv://tech:Wittercell@development.8h65w.mongodb.net/asnlretryWrites=true&w=majority";
     Secret.PUBLIC_SMTP = '56c4e79aa88d87130939928a0c28f30d';
     Secret.PRIVATE_SMTP = '53e7d95532c54eae01bba10822c7e456';
     Secret.SMTP_FROM_EMAIL = 'maranathatolulope@gmail.com';
@@ -15,7 +15,7 @@ let Secret = /** @class */ (() => {
     Secret.CLOUDINARY_SECRET = "iMeFPISULshzgunCBP-cpdOO6kk";
     Secret.CLOUDINARY_NAME = "dorz7hgqx";
     Secret.FCM_SERVER_KEY = '';
-    Secret.FRONTEND_URL = 'http://178.62.127.157/';
+    Secret.FRONTEND_URL = 'https://asnl-web.netlify.app';
     return Secret;
 })();
 exports.default = Secret;

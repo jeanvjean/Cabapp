@@ -72,7 +72,7 @@ class OutGoingCylinder extends Module{
             let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
             await new Notify().push({
               subject: "Outgoing cylinder note (OCN)",
-              content: `OCN generated. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+              content: `OCN generated. click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
               user: apUser
             });
             return Promise.resolve(ocn);
@@ -133,7 +133,7 @@ class OutGoingCylinder extends Module{
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
-                    content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);
@@ -178,7 +178,7 @@ class OutGoingCylinder extends Module{
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
-                    content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);
@@ -231,7 +231,7 @@ class OutGoingCylinder extends Module{
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
-                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn)
@@ -279,7 +279,7 @@ class OutGoingCylinder extends Module{
                   let apUser = await this.user.findById(ocn.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Outgoing cylinder note(OCN)",
-                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn)
@@ -322,7 +322,7 @@ class OutGoingCylinder extends Module{
                   let apUser = await this.user.findOne({role:'security', subrole:'head of department', branch:ocn.branch});
                   await new Notify().push({
                     subject: "Outgoing cylinder note (OCN)",
-                    content: `OCN approval complete. click to view ${Environment.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `OCN approval complete. click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                   });
                   return Promise.resolve(ocn);
@@ -337,7 +337,7 @@ class OutGoingCylinder extends Module{
         try {
           //@ts-ignore
             const outgoing = await this.ocn.paginate({
-              branch:user.branch, 
+              branch:user.branch,
               nextApprovalOfficer:user._id,
               ApprovalStatus:TransferStatus.PENDING
             },{...query});

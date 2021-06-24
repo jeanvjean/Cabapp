@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const mail_1 = require("../../util/mail");
-const static_1 = require("../../configs/static");
 const exceptions_1 = require("../../exceptions");
 const logs_1 = require("../../util/logs");
 const token_1 = require("../../util/token");
@@ -54,7 +53,7 @@ class OutGoingCylinder extends module_1.default {
                 let apUser = yield this.user.findOne({ role: 'security', subrole: 'head of department', branch: ocn.branch });
                 yield new mail_1.default().push({
                     subject: "Outgoing cylinder note (OCN)",
-                    content: `OCN generated. click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                    content: `OCN generated. click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                     user: apUser
                 });
                 return Promise.resolve(ocn);
@@ -117,7 +116,7 @@ class OutGoingCylinder extends module_1.default {
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
-                            content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                            content: `An OCN you initiated has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                             user: apUser
                         });
                         return Promise.resolve(ocn);
@@ -163,7 +162,7 @@ class OutGoingCylinder extends module_1.default {
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
-                            content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                            content: `An OCN you Approved has been rejected please check and make adiquate corrections. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                             user: apUser
                         });
                         return Promise.resolve(ocn);
@@ -217,7 +216,7 @@ class OutGoingCylinder extends module_1.default {
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
-                            content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                            content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                             user: apUser
                         });
                         return Promise.resolve(ocn);
@@ -266,7 +265,7 @@ class OutGoingCylinder extends module_1.default {
                         let apUser = yield this.user.findById(ocn.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note(OCN)",
-                            content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                            content: `An OCN has been initiatedand requires your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                             user: apUser
                         });
                         return Promise.resolve(ocn);
@@ -310,7 +309,7 @@ class OutGoingCylinder extends module_1.default {
                         let apUser = yield this.user.findOne({ role: 'security', subrole: 'head of department', branch: ocn.branch });
                         yield new mail_1.default().push({
                             subject: "Outgoing cylinder note (OCN)",
-                            content: `OCN approval complete. click to view ${static_1.default.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
+                            content: `OCN approval complete. click to view ${process.env.FRONTEND_URL}/fetch-ocn-details/${ocn._id}`,
                             user: apUser
                         });
                         return Promise.resolve(ocn);

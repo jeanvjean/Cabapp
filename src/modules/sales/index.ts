@@ -165,7 +165,7 @@ class Sale extends Module{
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
             subject: "Sales Requisition",
-            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)
@@ -210,7 +210,7 @@ class Sale extends Module{
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           new Notify().push({
             subject: "Sales Requisition",
-            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+            content: `A Sales requisition you approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales);
@@ -263,7 +263,7 @@ class Sale extends Module{
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           await new Notify().push({
             subject: "Sales Requisition",
-            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+            content: `A Sales requisition has been created and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)
@@ -310,7 +310,7 @@ class Sale extends Module{
           let approvalUser = await this.user.findById(sales.nextApprovalOfficer);
           await new Notify().push({
             subject: "Sales Requisition",
-            content: `A Sales requisition has been created and requires your approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+            content: `A Sales requisition has been created and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales);
@@ -357,7 +357,7 @@ class Sale extends Module{
           let approvalUser = await this.user.findById(sales.initiator);
          await new Notify().push({
             subject: "Sales Requisition",
-            content: `A Sales requisition has been approval. click to view ${env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
+            content: `A Sales requisition has been approval. click to view ${process.env.FRONTEND_URL}/fetch-sales-req/${sales._id}`,
             user: approvalUser
           });
           return Promise.resolve(sales)
@@ -372,8 +372,8 @@ class Sale extends Module{
     try {
       //@ts-ignore
       const sales = await this.sales.paginate({
-        status:TransferStatus.PENDING, 
-        branch:user.branch, 
+        status:TransferStatus.PENDING,
+        branch:user.branch,
         nextApprovalOfficer:user._id
       },{...query});
       // let startStage = sales.filter(transfer=> {

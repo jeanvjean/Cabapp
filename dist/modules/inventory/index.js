@@ -15,7 +15,6 @@ const transferCylinder_1 = require("../../models/transferCylinder");
 const resolve_template_1 = require("../../util/resolve-template");
 const token_1 = require("../../util/token");
 const module_1 = require("../module");
-const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 class Product extends module_1.default {
@@ -48,7 +47,7 @@ class Product extends module_1.default {
                 const html = yield resolve_template_1.getTemplate('invite', {
                     team: newUser.role,
                     role: newUser.subrole,
-                    link: static_1.default.FRONTEND_URL,
+                    link: process.env.FRONTEND_URL,
                     branch: branch.name,
                     password
                 });
@@ -428,7 +427,7 @@ class Product extends module_1.default {
                 let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                 yield new mail_1.default().push({
                     subject: "Product disbursal",
-                    content: `A disbursal process has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                    content: `A disbursal process has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                     user: apUser
                 });
                 return Promise.resolve(disbursement);
@@ -500,7 +499,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -543,7 +542,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -586,7 +585,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -629,7 +628,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -680,7 +679,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -727,7 +726,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -778,7 +777,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.initiator);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -826,7 +825,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -877,7 +876,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -931,7 +930,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${process.env.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);

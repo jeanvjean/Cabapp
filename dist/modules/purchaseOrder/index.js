@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const exceptions_1 = require("../../exceptions");
-const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 class PurchaseOrder extends module_1.default {
@@ -53,7 +52,7 @@ class PurchaseOrder extends module_1.default {
                 let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                 yield new mail_1.default().push({
                     subject: "Purchase Order",
-                    content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                 });
                 return Promise.resolve(purchase);
@@ -154,7 +153,7 @@ class PurchaseOrder extends module_1.default {
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
-                            content: `A purchase order you scheduled failed approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            content: `A purchase order you scheduled failed approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(purchase);
@@ -200,7 +199,7 @@ class PurchaseOrder extends module_1.default {
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
-                            content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(purchase);
@@ -252,7 +251,7 @@ class PurchaseOrder extends module_1.default {
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
-                            content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(purchase);
@@ -301,7 +300,7 @@ class PurchaseOrder extends module_1.default {
                         let approvalUser = yield this.user.findById(purchase.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
-                            content: `A purchase order has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(purchase);
@@ -349,7 +348,7 @@ class PurchaseOrder extends module_1.default {
                         let approvalUser = yield this.user.findById(purchase.initiator);
                         yield new mail_1.default().push({
                             subject: "Purchase Order",
-                            content: `A purchase order has been approved. click to view ${static_1.default.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                            content: `A purchase order has been approved. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(purchase);

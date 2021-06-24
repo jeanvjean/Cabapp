@@ -490,7 +490,7 @@ class Cylinder extends Module {
       });
       await new Notify().push({
         subject: "New cylinder transfer",
-        content: `A cylinder transfer has been initiated and requires your approval click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+        content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
         user: hod
       });
       return Promise.resolve(transfer);
@@ -556,7 +556,7 @@ class Cylinder extends Module {
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
-            content: `A cylinder transfer you initiated has been rejected, check it and try again. click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+            content: `A cylinder transfer you initiated has been rejected, check it and try again. click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
             user: apUser
           });
           return Promise.resolve({
@@ -604,7 +604,7 @@ class Cylinder extends Module {
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
-            content: `A cylinder transfer you approved has been rejected. check and try again. click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+            content: `A cylinder transfer you approved has been rejected. check and try again. click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
             user: apUser
           });
           return Promise.resolve({
@@ -658,7 +658,7 @@ class Cylinder extends Module {
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
-            content: `A cylinder transfer has been initiated and requires your approval click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+            content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
             user: apUser
           });
           return Promise.resolve({
@@ -711,7 +711,7 @@ class Cylinder extends Module {
           let apUser = await this.user.findById(transfer.nextApprovalOfficer);
           await new Notify().push({
             subject: "New cylinder transfer",
-            content: `A cylinder transfer has been initiated and requires your approval click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+            content: `A cylinder transfer has been initiated and requires your approval click to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
             user: apUser
           });
           return Promise.resolve({
@@ -759,7 +759,7 @@ class Cylinder extends Module {
           let apUser = await this.user.findById(transfer.initiator);
           await new Notify().push({
             subject: "New cylinder transfer",
-            content: `A Cylinder transfer you initiated has been approved to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
+            content: `A Cylinder transfer you initiated has been approved to view ${process.env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
             user: apUser
           });
           let cylinders = transfer.cylinders
@@ -860,7 +860,7 @@ class Cylinder extends Module {
       let apUser = await this.user.findOne({role:'production', subrole:'head of department', branch:cylinder.branch});
           await new Notify().push({
             subject: "Faulty cylinder",
-            content: `A cylinder has been assigned as faulty and requires your attenction. click to view ${env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
+            content: `A cylinder has been assigned as faulty and requires your attenction. click to view ${process.env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
             user: apUser
           });
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
@@ -894,7 +894,7 @@ class Cylinder extends Module {
       let apUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:cylinder.branch});
           await new Notify().push({
             subject: "Faulty cylinder",
-            content: `A faulty cylinder has been fixed. click to view ${env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
+            content: `A faulty cylinder has been fixed. click to view ${process.env.FRONTEND_URL}/registered-cylinder-details/${cylinder._id}`,
             user: apUser
           });
       return Promise.resolve(cylinder as RegisteredCylinderInterface);

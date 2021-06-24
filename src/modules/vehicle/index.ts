@@ -1,7 +1,6 @@
 import { Model } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { PickupInterface } from "../../models/driverPickup";
-import { stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteActivity, VehicleInterface } from "../../models/vehicle";
 import Module, { QueryInterface } from "../module";
@@ -10,7 +9,6 @@ import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { ActivityLogInterface } from "../../models/logs";
 import { pickupType } from "../../models/order";
-import router from "../../routes/person";
 import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { generateToken } from "../../util/token";
 
@@ -176,7 +174,7 @@ class Vehicle extends Module{
       let approvalUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:vehicle?.branch});
       await new Notify().push({
         subject: "Vehicle inspection",
-        content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
+        content: `A vehicle inspection request requires your approval. click to view ${process.env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
         user: approvalUser
       });
       await createLog({

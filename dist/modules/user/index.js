@@ -16,8 +16,6 @@ const jsonwebtoken_1 = require("jsonwebtoken");
 const mail_1 = require("../../util/mail");
 const token_1 = require("../../util/token");
 const constants_1 = require("../../util/constants");
-// import { decodeToken } from '../../middlewares/rpcdecode';
-const static_1 = require("../../configs/static");
 const bcryptjs_1 = require("bcryptjs");
 const resolve_template_1 = require("../../util/resolve-template");
 const logs_1 = require("../../util/logs");
@@ -76,7 +74,7 @@ class User extends module_1.default {
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
-                                link: static_1.default.FRONTEND_URL,
+                                link: process.env.FRONTEND_URL,
                                 //@ts-ignore
                                 branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
                                 password
@@ -106,7 +104,7 @@ class User extends module_1.default {
                                 const html = yield resolve_template_1.getTemplate('invite', {
                                     team: user.role,
                                     role: user.subrole,
-                                    link: static_1.default.FRONTEND_URL,
+                                    link: process.env.FRONTEND_URL,
                                     //@ts-ignore
                                     branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
                                     password
@@ -129,7 +127,7 @@ class User extends module_1.default {
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
-                                link: static_1.default.FRONTEND_URL,
+                                link: process.env.FRONTEND_URL,
                                 //@ts-ignore
                                 branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
                                 password
@@ -349,7 +347,7 @@ class User extends module_1.default {
                 const token = jsonwebtoken_1.sign(payload, exports.signTokenKey, { expiresIn });
                 const html = yield resolve_template_1.getTemplate('reset-password', {
                     name: user.role,
-                    link: static_1.default.FRONTEND_URL + 'reset-password/' + token,
+                    link: process.env.FRONTEND_URL + 'reset-password/' + token,
                 });
                 let mailLoad = {
                     content: html,

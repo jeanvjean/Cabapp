@@ -67,6 +67,7 @@ class driverCtrl extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchallDrivers(req.query, req.user);
+        this.ok(res, 'drivers fetched', data)
       } catch (e) {
         this.handleError(e, req, res);
       }

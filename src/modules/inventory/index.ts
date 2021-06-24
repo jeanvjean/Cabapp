@@ -182,7 +182,7 @@ class Product extends Module{
   public async fetchBranches(query:QueryInterface):Promise<BranchInterface[]|undefined>{
     try {
       //@ts-ignore
-      const branches = await this.branch.paginate({},{...query});
+      const branches = await this.branch.find({});
       return Promise.resolve(branches);
     } catch (e) {
       this.handleException(e)
@@ -231,10 +231,10 @@ class Product extends Module{
 
   public async fetchProduct(id:string, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
-      const product = await this.product.findById(id).populate(
+      const product = await this.product.findById(id).populate([
         {path:'supplier', model:'supplier'},
         {path:'branch', model:'branches'}
-      );
+      ]);
       return Promise.resolve(product as ProductInterface);
     } catch (e) {
       this.handleException(e);
@@ -1048,7 +1048,7 @@ class Product extends Module{
       }
       //@ts-ignore
       const disbursement = await this.disburse.paginate({
-        fromBranch:user.branch, 
+        fromBranch:user.branch,
         nextApprovalOfficer:user._id,
         ApprovalStatus:TransferStatus.PENDING
       },options);
@@ -1121,7 +1121,7 @@ class Product extends Module{
       }
       //@ts-ignore
       const disbursement = await this.disburse.paginate({
-         branch:user.branch, 
+         branch:user.branch,
          nextApprovalOfficer:user._id,
          requestApproval:TransferStatus.PENDING
         },options);

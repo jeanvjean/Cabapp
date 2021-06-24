@@ -69,7 +69,7 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const branches = yield this.branch.paginate({}, Object.assign({}, query));
+                const branches = yield this.branch.find({});
                 return Promise.resolve(branches);
             }
             catch (e) {
@@ -123,7 +123,10 @@ class Product extends module_1.default {
     fetchProduct(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const product = yield this.product.findById(id).populate({ path: 'supplier', model: 'supplier' }, { path: 'branch', model: 'branches' });
+                const product = yield this.product.findById(id).populate([
+                    { path: 'supplier', model: 'supplier' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(product);
             }
             catch (e) {

@@ -18,6 +18,7 @@ const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
 class Customer extends module_1.default {
     constructor(props) {
         super();
@@ -750,6 +751,14 @@ class Customer extends module_1.default {
                 let maxNumber = Math.max(...docs);
                 let sn = maxNumber + 1;
                 customer.serialNo = sn | 1;
+                let init = "ECR";
+                let num = yield token_1.generateToken(6);
+                //@ts-ignore
+                customer.ecrNo = init + num.toString();
+                let icnInit = "ICN";
+                let icn = yield token_1.generateToken(6);
+                //@ts-ignore
+                customer.icnNo = icnInit + icn.toString();
                 yield customer.save();
                 yield logs_1.createLog({
                     user: user._id,

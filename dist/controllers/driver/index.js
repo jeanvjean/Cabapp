@@ -71,6 +71,7 @@ class driverCtrl extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.fetchallDrivers(req.query, req.user);
+                this.ok(res, 'drivers fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

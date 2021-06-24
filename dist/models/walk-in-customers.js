@@ -8,18 +8,21 @@ var WalkinCustomerStatus;
     WalkinCustomerStatus["FILLED"] = "filled";
     WalkinCustomerStatus["EMPTY"] = "empty";
 })(WalkinCustomerStatus = exports.WalkinCustomerStatus || (exports.WalkinCustomerStatus = {}));
+const walkinCustomerCylinderSchema = new mongoose_1.Schema({
+    cylinderNo: String,
+    cylinderSize: String,
+    totalVolume: String,
+});
 const walkInCustomerSchema = new mongoose_1.Schema({
     customerName: String,
     ercNo: String,
     orderType: String,
+    cylinders: [walkinCustomerCylinderSchema],
     date: Date,
     icnNo: String,
+    totalQuantity: String,
     modeOfService: String,
     serialNo: Number,
-    cylinderNo: String,
-    cylinderSize: String,
-    totalVolume: String,
-    totalQuantity: String,
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     status: { type: String, enum: Object.values(WalkinCustomerStatus), default: WalkinCustomerStatus.EMPTY }
 }, {

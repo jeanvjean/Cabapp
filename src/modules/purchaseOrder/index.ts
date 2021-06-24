@@ -79,7 +79,7 @@ class PurchaseOrder extends Module{
             let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
             await new Notify().push({
               subject: "Purchase Order",
-              content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+              content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
               user: approvalUser
             });
             return Promise.resolve(purchase);
@@ -174,7 +174,7 @@ class PurchaseOrder extends Module{
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
-                    content: `A purchase order you scheduled failed approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order you scheduled failed approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase);
@@ -219,7 +219,7 @@ class PurchaseOrder extends Module{
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
-                    content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order you Approved failed secondary approval and requires your attention. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase);
@@ -270,7 +270,7 @@ class PurchaseOrder extends Module{
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
-                    content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)
@@ -318,7 +318,7 @@ class PurchaseOrder extends Module{
                   let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
                   await new Notify().push({
                     subject: "Purchase Order",
-                    content: `A purchase order has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order has been scheduled and requires your approval. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)
@@ -365,7 +365,7 @@ class PurchaseOrder extends Module{
                   let approvalUser = await this.user.findById(purchase.initiator);
                   await new Notify().push({
                     subject: "Purchase Order",
-                    content: `A purchase order has been approved. click to view ${process.env.FRONTEND_URL}/fetch-order/${purchase._id}`,
+                    content: `A purchase order has been approved. click to view ${env.FRONTEND_URL}/fetch-order/${purchase._id}`,
                     user: approvalUser
                   });
                   return Promise.resolve(purchase)

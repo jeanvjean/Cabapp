@@ -13,7 +13,7 @@ class App {
    * The port to run the application
    * @param {number} port
    */
-  public static port = parseInt(process.env.PORT || '3200');
+  public static port = parseInt(process.env.PORT || '3100');
 
   /**
    * The environment of the current running context

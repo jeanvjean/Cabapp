@@ -16,7 +16,7 @@ let App = /** @class */ (() => {
      * The port to run the application
      * @param {number} port
      */
-    App.port = parseInt(process.env.PORT || '3200');
+    App.port = parseInt(process.env.PORT || '3100');
     /**
      * The environment of the current running context
      * @param {string} env

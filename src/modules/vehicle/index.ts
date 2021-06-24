@@ -174,7 +174,7 @@ class Vehicle extends Module{
       let approvalUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:vehicle?.branch});
       await new Notify().push({
         subject: "Vehicle inspection",
-        content: `A vehicle inspection request requires your approval. click to view ${process.env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
+        content: `A vehicle inspection request requires your approval. click to view ${env.FRONTEND_URL}/view-inspection-history/${vehicle?._id}`,
         user: approvalUser
       });
       await createLog({

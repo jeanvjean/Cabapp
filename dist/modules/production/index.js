@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const module_1 = require("../module");
+const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 class ProductionSchedule extends module_1.default {
@@ -53,7 +54,7 @@ class ProductionSchedule extends module_1.default {
                 let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                 new mail_1.default().push({
                     subject: "Production Schedule",
-                    content: `A production has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                    content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                     user: approvalUser
                 });
                 return Promise.resolve(production);
@@ -120,7 +121,7 @@ class ProductionSchedule extends module_1.default {
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
-                            content: `A production schedule You initiated failed approval please attend to the corrections. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            content: `A production schedule You initiated failed approval please attend to the corrections. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(production);
@@ -167,7 +168,7 @@ class ProductionSchedule extends module_1.default {
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
-                            content: `A production schedule You Approved failed secondary approval please attend to the corrections. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            content: `A production schedule You Approved failed secondary approval please attend to the corrections. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(production);
@@ -219,7 +220,7 @@ class ProductionSchedule extends module_1.default {
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
-                            content: `A production has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(production);
@@ -268,7 +269,7 @@ class ProductionSchedule extends module_1.default {
                         let approvalUser = yield this.user.findById(production.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
-                            content: `A production has been scheduled and requires your approval. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            content: `A production has been scheduled and requires your approval. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(production);
@@ -316,7 +317,7 @@ class ProductionSchedule extends module_1.default {
                         let approvalUser = yield this.user.findById(production.initiator);
                         yield new mail_1.default().push({
                             subject: "Production Schedule",
-                            content: `A production you scheduled scheduled has been approved. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                            content: `A production you scheduled scheduled has been approved. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                             user: approvalUser
                         });
                         return Promise.resolve(production);
@@ -433,7 +434,7 @@ class ProductionSchedule extends module_1.default {
                 let approvalUser = yield this.user.findOne({ role: 'sales', subrole: 'head of department', branch: production.branch });
                 new mail_1.default().push({
                     subject: "Production complete",
-                    content: `Production schedule completed. click to view ${process.env.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
+                    content: `Production schedule completed. click to view ${static_1.default.FRONTEND_URL}/fetch-prodctionSchedule/${production._id}`,
                     user: approvalUser
                 });
                 return Promise.resolve(production);

@@ -446,7 +446,7 @@ class Customer extends Module{
       });
       new Notify().push({
         subject: "Complaint",
-        content: `A complaint requires your attention click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
         user: hod
       });
       return Promise.resolve(complaint);
@@ -512,7 +512,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -557,7 +557,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);
@@ -597,7 +597,7 @@ class Customer extends Module{
             });
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: hod
             });
             return Promise.resolve(complaint);
@@ -643,7 +643,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(complaint.nextApprovalOfficer);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -689,7 +689,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(complaint.initiator);
             new Notify().push({
               subject: "Complaint",
-              content: `Complaint approval complete. click to view ${process.env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);

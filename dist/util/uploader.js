@@ -11,15 +11,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const cloud = require('cloudinary');
 const cloudinary = cloud.v2;
+const static_1 = require("../configs/static");
 class Uploader {
     constructor() { }
     upload(stream, path, override = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 cloudinary.config({
-                    cloud_name: process.env.CLOUDINARY_NAME,
-                    api_key: process.env.CLOUDINARY_KEY,
-                    api_secret: process.env.CLOUDINARY_SECRET
+                    cloud_name: static_1.default.CLOUDINARY_NAME,
+                    api_key: static_1.default.CLOUDINARY_KEY,
+                    api_secret: static_1.default.CLOUDINARY_SECRET
                 });
                 let result = yield cloudinary.uploader.upload(stream, Object.assign({ folder: path, resource_type: "auto" }, override), () => { });
                 return result.secure_url;
@@ -34,9 +35,9 @@ class Uploader {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 cloudinary.config({
-                    cloud_name: process.env.CLOUDINARY_NAME,
-                    api_key: process.env.CLOUDINARY_KEY,
-                    api_secret: process.env.CLOUDINARY_SECRET
+                    cloud_name: static_1.default.CLOUDINARY_NAME,
+                    api_key: static_1.default.CLOUDINARY_KEY,
+                    api_secret: static_1.default.CLOUDINARY_SECRET
                 });
                 return yield cloudinary.uploader.destroy(file);
             }

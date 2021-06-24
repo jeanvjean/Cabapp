@@ -9,9 +9,9 @@ class Uploader {
 	public async upload(stream: string, path: string, override = {}) {
 		try {
 			cloudinary.config({
-				cloud_name: process.env.CLOUDINARY_NAME,
-				api_key: process.env.CLOUDINARY_KEY,
-				api_secret: process.env.CLOUDINARY_SECRET
+				cloud_name: SecretKeys.CLOUDINARY_NAME,
+				api_key: SecretKeys.CLOUDINARY_KEY,
+				api_secret: SecretKeys.CLOUDINARY_SECRET
 			});
 			let result = await cloudinary.uploader.upload(
 				stream,
@@ -32,9 +32,9 @@ class Uploader {
 	public async destroy(file: string) {
 		try {
 			cloudinary.config({
-				cloud_name: process.env.CLOUDINARY_NAME,
-				api_key: process.env.CLOUDINARY_KEY,
-				api_secret: process.env.CLOUDINARY_SECRET
+				cloud_name: SecretKeys.CLOUDINARY_NAME,
+				api_key: SecretKeys.CLOUDINARY_KEY,
+				api_secret: SecretKeys.CLOUDINARY_SECRET
 			})
 			return await cloudinary.uploader.destroy(file)
 		} catch (err) {

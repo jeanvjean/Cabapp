@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const vehicle_1 = require("../../models/vehicle");
 const module_1 = require("../module");
+const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 const order_1 = require("../../models/order");
@@ -96,7 +97,7 @@ class Vehicle extends module_1.default {
                 let approvalUser = yield this.user.findOne({ role: 'sales', subrole: 'head of department', branch: vehicle === null || vehicle === void 0 ? void 0 : vehicle.branch });
                 yield new mail_1.default().push({
                     subject: "Vehicle inspection",
-                    content: `A vehicle inspection request requires your approval. click to view ${process.env.FRONTEND_URL}/view-inspection-history/${vehicle === null || vehicle === void 0 ? void 0 : vehicle._id}`,
+                    content: `A vehicle inspection request requires your approval. click to view ${static_1.default.FRONTEND_URL}/view-inspection-history/${vehicle === null || vehicle === void 0 ? void 0 : vehicle._id}`,
                     user: approvalUser
                 });
                 yield logs_1.createLog({

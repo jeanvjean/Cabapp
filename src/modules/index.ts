@@ -47,7 +47,7 @@ export const person = new PersonModule({
 });
 
 export const user = new UserModule({
-  model: User
+  user: User
 });
 
 export const cylinder = new CylinderModule({

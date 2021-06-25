@@ -22,7 +22,7 @@ exports.person = new person_1.default({
     model: index_1.Person
 });
 exports.user = new user_1.default({
-    model: index_1.User
+    user: index_1.User
 });
 exports.cylinder = new cylinder_1.default({
     cylinder: index_1.Cylinder,

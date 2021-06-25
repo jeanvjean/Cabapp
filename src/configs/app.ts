@@ -7,13 +7,13 @@ class App {
    * Name of the app
    * @param {string} appName
    */
-  public static appName = 'Bootstrap App';
+  public static appName = 'Air separation app';
 
   /**
    * The port to run the application
    * @param {number} port
    */
-  public static port = parseInt(process.env.PORT || '3100');
+  public static port = process.env.PORT || 3100;
 
   /**
    * The environment of the current running context

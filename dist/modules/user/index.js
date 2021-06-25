@@ -24,17 +24,17 @@ exports.signTokenKey = "loremipsumdolorsitemet";
 class User extends module_1.default {
     constructor(props) {
         super();
-        this.model = props.model;
+        this.user = props.user;
     }
     register(data) {
         return __awaiter(this, void 0, void 0, function* () {
             let newUser;
             try {
-                let existUser = yield this.model.findOne({ email: data.email });
+                let existUser = yield this.user.findOne({ email: data.email });
                 if (existUser) {
                     throw new exceptions_1.BadInputFormatException('A user already exists with this email');
                 }
-                newUser = yield this.model.create(Object.assign(Object.assign({}, data), { subrole: 'superadmin', isVerified: true }));
+                newUser = yield this.user.create(Object.assign(Object.assign({}, data), { subrole: 'superadmin', isVerified: true }));
                 // let payload = {
                 //   id:newUser._id,
                 //   email:newUser.email
@@ -61,17 +61,17 @@ class User extends module_1.default {
     inviteUser(data, userInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const branch = yield this.model.findById(userInfo._id).populate({
+                const branch = yield this.user.findById(userInfo._id).populate({
                     path: 'branch', model: 'branches'
                 });
                 const exists = [];
                 for (let user of data.users) {
-                    let existUser = yield this.model.findOne({ email: user.email });
+                    let existUser = yield this.user.findOne({ email: user.email });
                     if (existUser) {
                         if (!existUser.isVerified) {
                             let password = yield token_1.generateToken(4);
                             //@ts-ignore
-                            yield this.model.findByIdAndUpdate(existUser._id, { password }, { new: true });
+                            yield this.user.findByIdAndUpdate(existUser._id, { password }, { new: true });
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
@@ -93,7 +93,7 @@ class User extends module_1.default {
                     }
                     else {
                         if (user.subrole == 'head of department') {
-                            let hod = yield this.model.findOne({
+                            let hod = yield this.user.findOne({
                                 role: user.role,
                                 subrole: user.subrole,
                                 branch: branch === null || branch === void 0 ? void 0 : branch.branch
@@ -101,7 +101,7 @@ class User extends module_1.default {
                             if (!hod) {
                                 let password = yield token_1.generateToken(4);
                                 //@ts-ignore
-                                yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
+                                yield this.user.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
                                 const html = yield resolve_template_1.getTemplate('invite', {
                                     team: user.role,
                                     role: user.subrole,
@@ -124,7 +124,7 @@ class User extends module_1.default {
                         else {
                             let password = yield token_1.generateToken(4);
                             //@ts-ignore
-                            yield this.model.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
+                            yield this.user.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
@@ -177,7 +177,7 @@ class User extends module_1.default {
             try {
                 let options = Object.assign({}, query);
                 //@ts-ignore
-                let users = yield this.model.paginate({}, options);
+                let users = yield this.user.paginate({}, options);
                 return users;
             }
             catch (e) {
@@ -189,7 +189,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                let users = yield this.model.paginate({ branch: user.branch }, Object.assign({}, query));
+                let users = yield this.user.paginate({ branch: user.branch }, Object.assign({}, query));
                 return users;
             }
             catch (e) {
@@ -200,15 +200,15 @@ class User extends module_1.default {
     login(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log(data)
-                let user = yield this.model.findOne({ email: data.email }).select('+password');
+                const { email, password } = data;
+                let user = yield this.user.findOne({ email: email }).select('+password');
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('User Not Found');
                 }
                 // if(!user.isVerified) {
                 //   throw new BadInputFormatException('Account has not been verified');
                 // }
-                let correctPassword = yield user.comparePWD(data.password);
+                let correctPassword = yield user.comparePWD(password);
                 if (!correctPassword) {
                     throw new exceptions_1.BadInputFormatException('Incorrect password');
                 }
@@ -241,7 +241,7 @@ class User extends module_1.default {
     }
     fetchUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.model.findOne({
+            const user = yield this.user.findOne({
                 _id: data.id,
                 email: data.email
             });
@@ -257,20 +257,20 @@ class User extends module_1.default {
             try {
                 let options = { new: true };
                 // @ts-ignore
-                let exists = yield this.model.findById(user._id);
+                let exists = yield this.user.findById(user._id);
                 if (!exists) {
                     throw new exceptions_1.BadInputFormatException('Not Found');
                 }
                 //@ts-ignore
                 if (data.email && user.email !== data.email) {
                     //@ts-ignore
-                    let thisUser = yield this.model.findOne({ email: data.email });
+                    let thisUser = yield this.user.findOne({ email: data.email });
                     if (thisUser) {
                         throw new exceptions_1.BadInputFormatException('the email is in use by another client');
                     }
                 }
                 let set = Object.assign(Object.assign({}, data), { isVerified: true });
-                let updateUser = yield this.model.findByIdAndUpdate(user._id, {
+                let updateUser = yield this.user.findByIdAndUpdate(user._id, {
                     $set: set
                 }, options);
                 yield logs_1.createLog({
@@ -292,7 +292,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let updatedUser;
-                const user = yield this.model.findById(data.userId);
+                const user = yield this.user.findById(data.userId);
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
@@ -301,9 +301,9 @@ class User extends module_1.default {
                 }
                 if (data.subrole == 'head of department') {
                     if ((user === null || user === void 0 ? void 0 : user.subrole) !== 'head of department') {
-                        let hod = yield this.model.findOne({ role: user === null || user === void 0 ? void 0 : user.role, subrole: 'head of department' });
+                        let hod = yield this.user.findOne({ role: user === null || user === void 0 ? void 0 : user.role, subrole: 'head of department' });
                         if (!hod) {
-                            updatedUser = yield this.model.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
+                            updatedUser = yield this.user.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
                                 $set: data
                             }, { new: true });
                             return Promise.resolve(updatedUser);
@@ -314,7 +314,7 @@ class User extends module_1.default {
                     }
                 }
                 else {
-                    updatedUser = yield this.model.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
+                    updatedUser = yield this.user.findByIdAndUpdate(user === null || user === void 0 ? void 0 : user._id, {
                         $set: { role: data.role, subrole: data.subrole }
                     }, { new: true });
                     yield logs_1.createLog({
@@ -336,7 +336,7 @@ class User extends module_1.default {
     requestPasswordReset(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.model.findOne({ email: data.email });
+                const user = yield this.user.findOne({ email: data.email });
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('No user exists with this email');
                 }
@@ -355,7 +355,7 @@ class User extends module_1.default {
                     subject: 'Reset Password',
                     email: user.email,
                 };
-                new mail_1.default().sendMail(mailLoad);
+                yield new mail_1.default().sendMail(mailLoad);
                 return Promise.resolve({
                     message: 'A reset email has been sent',
                     token
@@ -371,11 +371,11 @@ class User extends module_1.default {
             try {
                 const decode = jsonwebtoken_1.verify(data.token, exports.signTokenKey);
                 //@ts-ignore
-                const user = yield this.model.findOne({ _id: decode.id, email: decode.email }).select('+password');
+                const user = yield this.user.findOne({ _id: decode.id, email: decode.email }).select('+password');
                 const salt = bcryptjs_1.genSaltSync(10);
                 let password = yield bcryptjs_1.hash(data.password, salt);
                 //@ts-ignore
-                yield this.model.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
+                yield this.user.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
                 yield logs_1.createLog({
                     //@ts-ignore
                     user: user._id,
@@ -403,7 +403,7 @@ class User extends module_1.default {
     changePassword(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const findUser = yield this.model.findById(user._id).select('+password');
+                const findUser = yield this.user.findById(user._id).select('+password');
                 const { oldPassword, newPassword } = data;
                 //@ts-ignore
                 const matchPassword = bcryptjs_1.compareSync(oldPassword, findUser.password);
@@ -412,7 +412,7 @@ class User extends module_1.default {
                 }
                 const salt = bcryptjs_1.genSaltSync(10);
                 const password = yield bcryptjs_1.hash(newPassword, salt);
-                let updated = yield this.model.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
+                let updated = yield this.user.findByIdAndUpdate(user._id, { password, isVerified: true }, { new: true });
                 yield logs_1.createLog({
                     user: user._id,
                     activities: {
@@ -431,11 +431,11 @@ class User extends module_1.default {
     suspendUser(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.model.findById(data.userId);
+                const user = yield this.user.findById(data.userId);
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
-                let updatedUser = yield this.model.findByIdAndUpdate(user._id, { deactivated: data.suspend }, { new: true });
+                let updatedUser = yield this.user.findByIdAndUpdate(user._id, { deactivated: data.suspend }, { new: true });
                 //@ts-ignore
                 let message = updatedUser.deactivated ? 'suspended' : 're-activated';
                 return Promise.resolve({
@@ -451,7 +451,7 @@ class User extends module_1.default {
     fetchallUsers() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const users = yield this.model.find({});
+                const users = yield this.user.find({});
                 return Promise.resolve(users);
             }
             catch (e) {
@@ -462,11 +462,11 @@ class User extends module_1.default {
     deleteUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.model.findById(id);
+                const user = yield this.user.findById(id);
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
-                yield this.model.findByIdAndDelete(id);
+                yield this.user.findByIdAndDelete(id);
                 return Promise.resolve({
                     message: 'User deleted'
                 });
@@ -479,7 +479,7 @@ class User extends module_1.default {
     updateToken(userId, token) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.model.findByIdAndUpdate(userId, { token }, { new: true });
+                const user = yield this.user.findByIdAndUpdate(userId, { token }, { new: true });
                 console.log(user);
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');

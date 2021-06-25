@@ -10,11 +10,10 @@ import Environment from '../../configs/static';
 import { compareSync, genSaltSync, hash } from 'bcryptjs';
 import { getTemplate } from '../../util/resolve-template';
 import { createLog } from '../../util/logs';
-import { user } from '..';
 export const signTokenKey = "loremipsumdolorsitemet";
 
 interface UserConstructorInterface {
-  model: Model<UserInterface>
+  user: Model<UserInterface>
 }
 
 interface NewUserInterface {
@@ -110,22 +109,22 @@ export interface InviteUserInterfaceRespone{
 }
 
 class User extends Module {
-  private model: Model<UserInterface>
+  private user: Model<UserInterface>
 
   constructor(props: UserConstructorInterface){
     super();
-    this.model = props.model;
+    this.user = props.user;
   }
 
   public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
     let newUser : UserInterface|undefined;
     try {
-      let existUser:UserInterface | null = await this.model.findOne({email:data.email});
+      let existUser:UserInterface | null = await this.user.findOne({email:data.email});
       if(existUser) {
         throw new BadInputFormatException('A user already exists with this email');
       }
 
-      newUser = await this.model.create({
+      newUser = await this.user.create({
         ...data,
         subrole:'superadmin',
         isVerified:true
@@ -154,17 +153,17 @@ class User extends Module {
 
   public async inviteUser(data:inviteUserInput, userInfo:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
     try {
-      const branch = await this.model.findById(userInfo._id).populate({
+      const branch = await this.user.findById(userInfo._id).populate({
         path:'branch', model:'branches'
       });
       const exists = [];
       for(let user of data.users) {
-        let existUser:UserInterface | null = await this.model.findOne({email:user.email});
+        let existUser:UserInterface | null = await this.user.findOne({email:user.email});
         if(existUser){
           if(!existUser.isVerified) {
             let password = await generateToken(4);
                   //@ts-ignore
-                  await this.model.findByIdAndUpdate(existUser._id,{password}, {new:true});
+                  await this.user.findByIdAndUpdate(existUser._id,{password}, {new:true});
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
@@ -184,7 +183,7 @@ class User extends Module {
           }
         } else {
           if(user.subrole == 'head of department') {
-                let hod = await this.model.findOne({
+                let hod = await this.user.findOne({
                   role:user.role,
                   subrole:user.subrole,
                   branch:branch?.branch
@@ -192,7 +191,7 @@ class User extends Module {
                 if(!hod) {
                   let password = await generateToken(4);
                   //@ts-ignore
-                  await this.model.create({...user, branch:branch?.branch._id, password});
+                  await this.user.create({...user, branch:branch?.branch._id, password});
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
@@ -213,7 +212,7 @@ class User extends Module {
           } else {
             let password = await generateToken(4);
             //@ts-ignore
-            await this.model.create({...user, branch:branch?.branch._id, password});
+            await this.user.create({...user, branch:branch?.branch._id, password});
             const html = await getTemplate('invite', {
               team: user.role,
               role:user.subrole,
@@ -264,7 +263,7 @@ class User extends Module {
         ...query
       }
       //@ts-ignore
-      let users = await this.model.paginate({},options);
+      let users = await this.user.paginate({},options);
       return users
     } catch (e) {
       this.handleException(e);
@@ -274,7 +273,7 @@ class User extends Module {
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
       //@ts-ignore
-      let users = await this.model.paginate({branch:user.branch}, {...query});
+      let users = await this.user.paginate({branch:user.branch}, {...query});
       return users;
     } catch (e) {
       this.handleException(e);
@@ -284,15 +283,15 @@ class User extends Module {
   public async login(data:LoginInterface) : Promise<LoginReturn | undefined>{
 
     try {
-      // console.log(data)
-      let user = await this.model.findOne({email:data.email}).select('+password');
+      const { email, password } = data;
+      let user = await this.user.findOne({email:email}).select('+password');
       if(!user) {
         throw new BadInputFormatException('User Not Found');
       }
       // if(!user.isVerified) {
       //   throw new BadInputFormatException('Account has not been verified');
       // }
-      let correctPassword = await user.comparePWD(data.password);
+      let correctPassword = await user.comparePWD(password);
       if(!correctPassword) {
         throw new BadInputFormatException('Incorrect password');
       }
@@ -325,7 +324,7 @@ class User extends Module {
 
   public async fetchUser(data: TokenPayloadInterface): Promise<UserInterface>{
 
-    const user = await this.model.findOne({
+    const user = await this.user.findOne({
       _id:data.id,
       email: data.email
     });
@@ -341,14 +340,14 @@ class User extends Module {
 
       let options = {new:true}
      // @ts-ignore
-      let exists = await this.model.findById(user._id);
+      let exists = await this.user.findById(user._id);
       if(!exists) {
         throw new BadInputFormatException('Not Found');
       }
       //@ts-ignore
       if(data.email && user.email !== data.email){
         //@ts-ignore
-        let thisUser = await this.model.findOne({email:data.email});
+        let thisUser = await this.user.findOne({email:data.email});
         if(thisUser) {
           throw new BadInputFormatException('the email is in use by another client');
         }
@@ -357,7 +356,7 @@ class User extends Module {
         ...data,
         isVerified:true
       }
-      let updateUser = await this.model.findByIdAndUpdate(
+      let updateUser = await this.user.findByIdAndUpdate(
         user._id,
         {
           $set:set
@@ -381,7 +380,7 @@ class User extends Module {
   public async changeUserRole(data:RoleUpdateInterface, user:UserInterface):Promise<UserInterface|undefined>{
     try {
       let updatedUser;
-      const user = await this.model.findById(data.userId);
+      const user = await this.user.findById(data.userId);
       if(!user) {
         throw new BadInputFormatException('user not found')
       }
@@ -390,9 +389,9 @@ class User extends Module {
       }
       if(data.subrole == 'head of department') {
         if(user?.subrole !== 'head of department') {
-          let hod = await this.model.findOne({role:user?.role, subrole:'head of department'});
+          let hod = await this.user.findOne({role:user?.role, subrole:'head of department'});
           if(!hod){
-            updatedUser = await this.model.findByIdAndUpdate(
+            updatedUser = await this.user.findByIdAndUpdate(
               user?._id,
               {
                 $set:data
@@ -405,7 +404,7 @@ class User extends Module {
           }
         }
       }else {
-        updatedUser = await this.model.findByIdAndUpdate(
+        updatedUser = await this.user.findByIdAndUpdate(
           user?._id,
           {
             $set:{role:data.role, subrole:data.subrole}
@@ -429,7 +428,7 @@ class User extends Module {
 
   public async requestPasswordReset(data:RequestPasswordResetInput):Promise<RequestResponseInterface|undefined> {
     try {
-      const user = await this.model.findOne({email:data.email});
+      const user = await this.user.findOne({email:data.email});
       if(!user) {
         throw new BadInputFormatException('No user exists with this email');
       }
@@ -448,7 +447,7 @@ class User extends Module {
         subject:'Reset Password',
         email:user.email,
       }
-      new Notify().sendMail(mailLoad);
+      await new Notify().sendMail(mailLoad);
       return Promise.resolve({
         message:'A reset email has been sent',
         token
@@ -462,11 +461,11 @@ class User extends Module {
     try {
       const decode = verify(data.token, signTokenKey);
       //@ts-ignore
-      const user = await this.model.findOne({_id:decode.id, email:decode.email}).select('+password');
+      const user = await this.user.findOne({_id:decode.id, email:decode.email}).select('+password');
       const salt = genSaltSync(10);
       let password = await hash(data.password, salt);
       //@ts-ignore
-      await this.model.findByIdAndUpdate(user._id,{password, isVerified:true},{new:true});
+      await this.user.findByIdAndUpdate(user._id,{password, isVerified:true},{new:true});
       await createLog({
         //@ts-ignore
         user:user._id,
@@ -492,7 +491,7 @@ class User extends Module {
 
   public async changePassword(data:ChangePasswordInterface, user:UserInterface):Promise<UserInterface|undefined>{
     try {
-      const findUser = await this.model.findById(user._id).select('+password');
+      const findUser = await this.user.findById(user._id).select('+password');
       const { oldPassword, newPassword } = data;
       //@ts-ignore
       const matchPassword = compareSync(oldPassword, findUser.password);
@@ -501,7 +500,7 @@ class User extends Module {
       }
       const salt = genSaltSync(10);
       const password = await hash(newPassword, salt);
-      let updated = await this.model.findByIdAndUpdate(user._id, {password, isVerified:true}, {new:true});
+      let updated = await this.user.findByIdAndUpdate(user._id, {password, isVerified:true}, {new:true});
       await createLog({
         user:user._id,
         activities:{
@@ -518,11 +517,11 @@ class User extends Module {
 
   public async suspendUser(data:SuspendUserInput, user:UserInterface):Promise<suspendUserResponse|undefined>{
     try{
-      const user = await this.model.findById(data.userId);
+      const user = await this.user.findById(data.userId);
       if(!user) {
         throw new BadInputFormatException('user not found');
       }
-      let updatedUser = await this.model.findByIdAndUpdate(user._id,{deactivated:data.suspend}, {new:true});
+      let updatedUser = await this.user.findByIdAndUpdate(user._id,{deactivated:data.suspend}, {new:true});
       //@ts-ignore
       let message = updatedUser.deactivated? 'suspended' : 're-activated';
 
@@ -537,7 +536,7 @@ class User extends Module {
 
   public async fetchallUsers():Promise<UserInterface[]|undefined>{
     try {
-      const users = await this.model.find({});
+      const users = await this.user.find({});
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e)
@@ -546,11 +545,11 @@ class User extends Module {
 
   public async deleteUser(id:string):Promise<any>{
     try{
-      const user = await this.model.findById(id);
+      const user = await this.user.findById(id);
       if(!user) {
         throw new BadInputFormatException('user not found');
       }
-      await this.model.findByIdAndDelete(id);
+      await this.user.findByIdAndDelete(id);
       return Promise.resolve({
         message:'User deleted'
       })
@@ -561,7 +560,7 @@ class User extends Module {
 
   public async updateToken(userId:string, token:string):Promise<UserInterface|undefined>{
     try {
-      const user = await this.model.findByIdAndUpdate(userId, { token }, {new:true});
+      const user = await this.user.findByIdAndUpdate(userId, { token }, {new:true});
       console.log(user);
       if(!user){
         throw new BadInputFormatException('user not found');

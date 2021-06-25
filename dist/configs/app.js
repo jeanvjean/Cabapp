@@ -11,12 +11,12 @@ let App = /** @class */ (() => {
      * Name of the app
      * @param {string} appName
      */
-    App.appName = 'Bootstrap App';
+    App.appName = 'Air separation app';
     /**
      * The port to run the application
      * @param {number} port
      */
-    App.port = parseInt(process.env.PORT || '3100');
+    App.port = process.env.PORT || 3100;
     /**
      * The environment of the current running context
      * @param {string} env

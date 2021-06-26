@@ -81,7 +81,7 @@ class Driver extends Module{
 
   public async fetchallDrivers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
-      const drivers = await this.driver.find({branch:user.branch});
+      const drivers = await this.driver.find({branch:user.branch ,subrole:'driver'});
       return Promise.resolve(drivers);
     } catch (e) {
       this.handleException(e);

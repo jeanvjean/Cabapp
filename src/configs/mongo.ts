@@ -10,7 +10,6 @@ class Mongo {
    */
   static uri = process.env.MONGODB_URI || "mongodb://localhost:27017/air-separation";
 
-  // static uri = process.env.MONGODB_URI || "mongodb://localhost:27017/air-separation";
   /**
    * @param {ConnectionOptions} options Mongodb server options
    */

@@ -66,7 +66,7 @@ class Driver extends module_1.default {
     fetchallDrivers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const drivers = yield this.driver.find({ branch: user.branch });
+                const drivers = yield this.driver.find({ branch: user.branch, subrole: 'driver' });
                 return Promise.resolve(drivers);
             }
             catch (e) {

@@ -29,6 +29,7 @@ var TransferType;
     TransferType["CONDEMN"] = "condemn";
     TransferType["REPAIR"] = "repair";
     TransferType["BRANCH"] = "branch";
+    TransferType["CHANGEGAS"] = "change-gas";
 })(TransferType = exports.TransferType || (exports.TransferType = {}));
 exports.commentSchema = new mongoose_1.Schema({
     comment: { type: String },
@@ -78,13 +79,14 @@ exports.TransferSchema = new mongoose_1.Schema({
     },
     approvalOfficers: [exports.ApprovalOfficerSchema],
     comments: [exports.commentSchema],
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Users' },
     holdingTime: { type: Date },
     purchaseDate: { type: Date },
     purchasePrice: { type: Number },
     toBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     toDepartment: { type: String },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    gasType: { type: mongoose_1.Schema.Types.ObjectId, ref: 'cylinder' }
 }, {
     timestamps: true
 });

@@ -140,7 +140,6 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
     }],
     image:{type:String}
  },{
-   collection:'users',
    timestamps:true
  });
 

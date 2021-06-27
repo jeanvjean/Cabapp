@@ -238,8 +238,20 @@ class Product extends module_1.default {
     fetchSuppliers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //@ts-ignore
-                const suppliers = yield this.supplier.paginate({ branch: user.branch }, Object.assign({}, query));
+                const { search } = query;
+                // const aggregate = this.supplier.aggregate()
+                const options = Object.assign({}, query);
+                console.log(search === null || search === void 0 ? void 0 : search.length);
+                let suppliers;
+                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
+                    //@ts-ignore
+                    suppliers = yield this.supplier.paginate({ branch: user.branch, $or: [{ supplierType: search }] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    suppliers = yield this.supplier.paginate({ branch: user.branch }, options);
+                }
+                // console.log(suppliers);
                 return Promise.resolve(suppliers);
             }
             catch (e) {

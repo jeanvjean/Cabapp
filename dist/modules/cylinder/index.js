@@ -657,13 +657,11 @@ class Cylinder extends module_1.default {
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
-                        else if (transfer.type == transferCylinder_1.TransferType.REPAIR) {
+                        else if (transfer.type == transferCylinder_1.TransferType.CHANGEGAS) {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toDEPARTMENT;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.condition = transferCylinder_1.TransferType.REPAIR;
+                                cyl === null || cyl === void 0 ? void 0 : cyl.gasType = transfer.gasType;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }

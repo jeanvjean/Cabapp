@@ -339,8 +339,21 @@ class Product extends Module{
 
   public async fetchSuppliers(query:QueryInterface, user:UserInterface):Promise<SupplierInterface[]|undefined>{
     try {
-      //@ts-ignore
-      const suppliers = await this.supplier.paginate({branch:user.branch},{...query});
+      const { search } = query
+    // const aggregate = this.supplier.aggregate()
+      const options = {
+        ...query
+      }
+      console.log(search?.length)
+      let suppliers;
+      if(search?.length !== undefined) {
+        //@ts-ignore
+        suppliers = await this.supplier.paginate({branch:user.branch,$or:[{supplierType:search}]},options);
+      }else{
+        //@ts-ignore
+        suppliers = await this.supplier.paginate({branch:user.branch},options);
+      }
+      // console.log(suppliers);
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);

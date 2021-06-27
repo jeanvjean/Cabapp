@@ -32,7 +32,8 @@ export enum TransferType{
   DIVISION="within-division",
   CONDEMN="condemn",
   REPAIR="repair",
-  BRANCH="branch"
+  BRANCH="branch",
+  CHANGEGAS="change-gas"
 }
 
 export interface ApprovalStage{
@@ -73,6 +74,7 @@ export interface TransferCylinder extends Document {
   toBranch:Schema.Types.ObjectId
   toDepartment:string
   branch:Schema.Types.ObjectId
+  gasType:Schema.Types.ObjectId
   createdAt:Date,
   updatedAt:Date,
 }
@@ -128,13 +130,14 @@ export const TransferSchema = new Schema({
   },
   approvalOfficers:[ApprovalOfficerSchema],
   comments:[commentSchema],
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'},
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'Users'},
   holdingTime:{type:Date},
   purchaseDate:{type:Date},
   purchasePrice:{type:Number},
   toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
   toDepartment:{type:String},
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  gasType:{type:Schema.Types.ObjectId, ref:'cylinder'}
 },{
   timestamps:true
 });

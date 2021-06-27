@@ -6,6 +6,8 @@ import {
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+// import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
+var aggregatePaginate = require('mongoose-aggregate-paginate-v2')
 
 export interface SupplierInterface extends Document {
   name:string
@@ -27,7 +29,9 @@ export const supplierSchema = new Schema({
   branch:{type:Schema.Types.ObjectId, ref:'branches'}
 });
 
+supplierSchema.index({supplierType:'text'})
 supplierSchema.plugin(mongoosePaginate);
+supplierSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection):Model<SupplierInterface> {
   return conn.model('supplier', supplierSchema);

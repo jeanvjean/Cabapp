@@ -74,7 +74,6 @@ exports.userSchema = new mongoose_1.Schema({
         }],
     image: { type: String }
 }, {
-    collection: 'users',
     timestamps: true
 });
 exports.userSchema.plugin(mongoosePaginator);

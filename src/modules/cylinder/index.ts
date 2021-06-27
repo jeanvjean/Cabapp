@@ -110,7 +110,8 @@ export interface ApprovalInput{
   id:string,
   nextApprovalOfficer?:string,
   password:string,
-  products?:DisburseProductInterface['products']
+  products?:DisburseProductInterface['products'],
+  gasType?:TransferCylinder['gasType']
 }
 
 type countTransferedCylinders = {
@@ -788,13 +789,11 @@ class Cylinder extends Module {
 
               await cyl?.save();
             }
-          }else if(transfer.type == TransferType.REPAIR){
+          }else if(transfer.type == TransferType.CHANGEGAS){
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
               //@ts-ignore
-              cyl?.department = transfer.toDEPARTMENT;
-              //@ts-ignore
-              cyl?.condition = TransferType.REPAIR;
+              cyl?.gasType = transfer.gasType;
 
               await cyl?.save();
             }

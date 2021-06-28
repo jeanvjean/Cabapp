@@ -234,13 +234,13 @@ class Cylinder extends module_1.default {
             try {
                 const cylinders = yield this.transfer.find({ branch: user.branch });
                 //@ts-ignore
-                const approvedTransfers = cyinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED).length | 0;
+                const approvedTransfers = cylinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.COMPLETED).length;
                 //@ts-ignore
-                const pendingTransfers = cyinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.PENDING).length | 0;
+                const pendingTransfers = cylinders.filter(cylinder => cylinder.approvalStatus == transferCylinder_1.TransferStatus.PENDING).length;
                 return Promise.resolve({
                     all_transfers: cylinders.length | 0,
-                    approvedTransfers,
-                    pendingTransfers
+                    approvedTransfers: approvedTransfers | 0,
+                    pendingTransfers: pendingTransfers | 0
                 });
             }
             catch (e) {

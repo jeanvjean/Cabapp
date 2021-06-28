@@ -372,13 +372,13 @@ class Cylinder extends Module {
     try {
       const cylinders = await this.transfer.find({branch:user.branch});
       //@ts-ignore
-      const approvedTransfers = cyinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.COMPLETED).length | 0;
+      const approvedTransfers = cylinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.COMPLETED).length;
       //@ts-ignore
-      const pendingTransfers = cyinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.PENDING).length | 0;
+      const pendingTransfers = cylinders.filter(cylinder=> cylinder.approvalStatus == TransferStatus.PENDING).length;
       return Promise.resolve({
         all_transfers:cylinders.length | 0,
-        approvedTransfers,
-        pendingTransfers
+        approvedTransfers:approvedTransfers | 0,
+        pendingTransfers:pendingTransfers | 0
       });
     } catch (e) {
       this.handleException(e);

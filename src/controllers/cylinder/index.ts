@@ -156,6 +156,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchChangeCylinderRequest(req.query, req.user);
+        this.ok(res,'change cylinder requests', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

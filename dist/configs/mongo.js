@@ -10,7 +10,7 @@ let Mongo = /** @class */ (() => {
     /**
      * @param {string} uri Connection string for mongodb database server
      */
-    Mongo.uri = process.env.MONGODB_URI || "mongodb://localhost:27017/air-separation";
+    Mongo.uri = process.env.MONGODB_URI || "mongodb+srv://tech:Wittercell@development.8h65w.mongodb.net/asnlretryWrites=true&w=majority";
     /**
      * @param {ConnectionOptions} options Mongodb server options
      */

@@ -142,8 +142,20 @@ class CylinderController extends Ctrl{
   fetchTransferRequests():RequestHandler{
     return async(req:Request, res:Response) =>{
       try {
-        const transfers = await this.module.fetchTransferRequets(req.query);
+        //@ts-ignore
+        const transfers = await this.module.fetchTransferRequets(req.query, req.user);
         this.ok(res, 'fetched', transfers);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchChangeGasRequests():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchChangeCylinderRequest(req.query, req.user);
       } catch (e) {
         this.handleError(e, req, res);
       }

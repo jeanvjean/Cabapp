@@ -143,8 +143,20 @@ class CylinderController extends ctrl_1.default {
     fetchTransferRequests() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const transfers = yield this.module.fetchTransferRequets(req.query);
+                //@ts-ignore
+                const transfers = yield this.module.fetchTransferRequets(req.query, req.user);
                 this.ok(res, 'fetched', transfers);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchChangeGasRequests() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchChangeCylinderRequest(req.query, req.user);
             }
             catch (e) {
                 this.handleError(e, req, res);

@@ -51,6 +51,7 @@ router.post('/approve-transfer',
 );
 
 router.get('/fetch-transfers',
+  auth.verify(),
   cylinderCtrl.fetchTransferRequests()
 );
 
@@ -144,6 +145,12 @@ router.get(
   '/fetch-reg-cylinders',
   auth.verify(),
   cylinderCtrl.fetchRegistredCylindersWP()
+);
+
+router.get(
+  '/fetch-changecylinder-requests',
+  auth.verify(),
+  cylinderCtrl.fetchChangeGasRequests()
 );
 
 export default router;

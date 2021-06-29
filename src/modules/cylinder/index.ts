@@ -902,10 +902,10 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchTransferRequets(query:QueryInterface):Promise<TransferRequestPool|undefined>{
+  public async fetchTransferRequets(query:QueryInterface, user:UserInterface):Promise<TransferRequestPool|undefined>{
     try {
       //@ts-ignore
-      const transfers = await this.transfer.paginate({},{...query});
+      const transfers = await this.transfer.paginate({branch:user.branch},{...query});
       const transferReq= await this.transfer.find({})
       let totalApproved = transferReq.filter(
         //@ts-ignore
@@ -924,6 +924,16 @@ class Cylinder extends Module {
         }
       });
     } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchChangeCylinderRequest(query:QueryInterface, user:UserInterface):Promise<TransferCylinder|undefined>{
+    try{
+      //@ts-ignore
+      const changeRequests = await this.transfer.paginate({branch:user.branch, type:TransferType.CHANGEGAS}, {...query});
+      return Promise.resolve(changeRequests);
+    }catch(e){
       this.handleException(e);
     }
   }

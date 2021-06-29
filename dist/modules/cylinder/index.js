@@ -776,11 +776,11 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    fetchTransferRequets(query) {
+    fetchTransferRequets(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const transfers = yield this.transfer.paginate({}, Object.assign({}, query));
+                const transfers = yield this.transfer.paginate({ branch: user.branch }, Object.assign({}, query));
                 const transferReq = yield this.transfer.find({});
                 let totalApproved = transferReq.filter(
                 //@ts-ignore
@@ -796,6 +796,18 @@ class Cylinder extends module_1.default {
                         totalTransfers: transferReq.length | 0
                     }
                 });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchChangeCylinderRequest(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const changeRequests = yield this.transfer.paginate({ branch: user.branch, type: transferCylinder_1.TransferType.CHANGEGAS }, Object.assign({}, query));
+                return Promise.resolve(changeRequests);
             }
             catch (e) {
                 this.handleException(e);

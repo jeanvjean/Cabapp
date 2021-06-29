@@ -15,7 +15,7 @@ router.get('/fetch-registered-cylinders', auth.verify(), controllers_1.cylinderC
 router.get('/registered-cylinder-details/:id', auth.verify(), controllers_1.cylinderCtrl.fetchRegisteredCylinder());
 router.post('/transfer-cylinders', auth.verify(), cylinder_1.Validator.validateCylinderTransfer(), val.validate(), controllers_1.cylinderCtrl.transferCylinder());
 router.post('/approve-transfer', auth.verify(), cylinder_1.Validator.validateApproval(), val.validate(), controllers_1.cylinderCtrl.approveTransfer());
-router.get('/fetch-transfers', controllers_1.cylinderCtrl.fetchTransferRequests());
+router.get('/fetch-transfers', auth.verify(), controllers_1.cylinderCtrl.fetchTransferRequests());
 router.get('/fetch-transfer/:id', controllers_1.cylinderCtrl.fetchTransferDetails());
 router.get('/pending-approval', auth.verify(), controllers_1.cylinderCtrl.usersPendingApprovals());
 router.delete('/remove-cylinder/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.deleteRegisteredCylinder());
@@ -32,5 +32,6 @@ router.get('/returned-cylinder/:cylinderId', auth.verify(), controllers_1.cylind
 router.get('/cylinder-transfer-stats', auth.verify(), controllers_1.cylinderCtrl.transferCylinderStats());
 router.post('/returning-cylinders', auth.verify(), controllers_1.cylinderCtrl.returnCylinder());
 router.get('/fetch-reg-cylinders', auth.verify(), controllers_1.cylinderCtrl.fetchRegistredCylindersWP());
+router.get('/fetch-changecylinder-requests', auth.verify(), controllers_1.cylinderCtrl.fetchChangeGasRequests());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

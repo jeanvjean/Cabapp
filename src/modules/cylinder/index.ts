@@ -12,6 +12,7 @@ import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
+import { generateToken } from "../../util/token";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -213,6 +214,17 @@ class Cylinder extends Module {
         throw new BadInputFormatException('this cylinder has been registered');
       }
       let manDate = new Date(data.dateManufactured);
+      if(data.cylinderType == TypesOfCylinders.BUFFER) {
+        let pref = "ASNL"
+        let num = await generateToken(6);
+        //@ts-ignore
+        data.cylinderNumber = pref + num.toString();
+      }else if(data.cylinderType == TypesOfCylinders.ASSIGNED){
+        let pref = "CYL"
+        let num = await generateToken(6);
+        //@ts-ignore
+        data.assignedNumber = pref + num.toString();
+      }
       let payload = {
         ...data,
         dateManufactured:manDate.toISOString(),

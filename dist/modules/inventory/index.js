@@ -259,6 +259,17 @@ class Product extends module_1.default {
             }
         });
     }
+    fetchAllSuppliers(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const suppliers = yield this.supplier.find({ branch: user.branch });
+                return Promise.resolve(suppliers);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     fetchSupplierDetails(supplierId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

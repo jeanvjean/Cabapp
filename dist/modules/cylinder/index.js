@@ -18,6 +18,7 @@ const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
 const logs_1 = require("../../util/logs");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
+const token_1 = require("../../util/token");
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -93,6 +94,18 @@ class Cylinder extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('this cylinder has been registered');
                 }
                 let manDate = new Date(data.dateManufactured);
+                if (data.cylinderType == registeredCylinders_1.TypesOfCylinders.BUFFER) {
+                    let pref = "ASNL";
+                    let num = yield token_1.generateToken(6);
+                    //@ts-ignore
+                    data.cylinderNumber = pref + num.toString();
+                }
+                else if (data.cylinderType == registeredCylinders_1.TypesOfCylinders.ASSIGNED) {
+                    let pref = "CYL";
+                    let num = yield token_1.generateToken(6);
+                    //@ts-ignore
+                    data.assignedNumber = pref + num.toString();
+                }
                 let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString(), branch: user.branch });
                 let newRegistration = yield this.registerCylinder.create(payload);
                 yield logs_1.createLog({
@@ -315,8 +328,13 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const date = new Date();
-                date.setDate(date.getDate() + data.holdingTime);
-                let transfer = new this.transfer(Object.assign(Object.assign({}, data), { branch: user.branch, holdingTime: date.toISOString() }));
+                if (data.holdingTime) {
+                    date.setDate(date.getDate() + data.holdingTime);
+                    //@ts-ignore
+                    data === null || data === void 0 ? void 0 : data.holdingTime = date.toISOString();
+                }
+                console.log(data);
+                let transfer = new this.transfer(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 transfer.initiator = user._id;
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
                 transfer.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;

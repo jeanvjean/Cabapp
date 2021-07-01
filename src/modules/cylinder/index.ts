@@ -72,15 +72,15 @@ interface FetchCylinderInterface {
 
 interface TransferCylinderInput {
   cylinders:TransferCylinder['cylinders']
-  to:TransferCylinder['to']
+  to?:TransferCylinder['to']
   type:TransferCylinder['type']
-  comment?:string
+  comment:string
   nextApprovalOfficer?:TransferCylinder['nextApprovalOfficer'],
-  holdingTime:number
-  purchasePrice:TransferCylinder['purchasePrice']
-  purchaseDate:TransferCylinder['purchaseDate']
-  toBranch:TransferCylinder['toBranch']
-  toDepartment:TransferCylinder['toDepartment']
+  holdingTime?:number
+  purchasePrice?:TransferCylinder['purchasePrice']
+  purchaseDate?:TransferCylinder['purchaseDate']
+  toBranch?:TransferCylinder['toBranch']
+  toDepartment?:TransferCylinder['toDepartment']
 }
 
 interface ApprovalResponse{
@@ -463,8 +463,13 @@ class Cylinder extends Module {
   public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<TransferCylinder|undefined>{
     try {
       const date = new Date();
-      date.setDate(date.getDate() + data.holdingTime);
-      let transfer = new this.transfer({...data, branch:user.branch, holdingTime:date.toISOString()});
+      if(data.holdingTime) {
+        date.setDate(date.getDate() + data.holdingTime);
+         //@ts-ignore
+        data?.holdingTime = date.toISOString()
+      }
+      console.log(data)
+      let transfer = new this.transfer({...data, branch:user.branch});
       transfer.initiator = user._id;
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
       transfer.nextApprovalOfficer = hod?._id;

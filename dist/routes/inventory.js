@@ -32,5 +32,6 @@ router.get('/fetch-restock-requests', auth.verify(), controllers_1.productCtrl.f
 router.get('/inventory-stats', auth.verify(), controllers_1.productCtrl.inventoryStats());
 router.get('/fetch-all-products', auth.verify(), controllers_1.productCtrl.fetchallProducts());
 router.get('/supplier-details/:supplierId', auth.verify(), controllers_1.productCtrl.supplierDetails());
+router.get('/fetch-all-suppliers', auth.verify(), controllers_1.productCtrl.fetchAllSuppliers());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

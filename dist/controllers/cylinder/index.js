@@ -157,6 +157,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.fetchChangeCylinderRequest(req.query, req.user);
+                this.ok(res, 'change cylinder requests', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

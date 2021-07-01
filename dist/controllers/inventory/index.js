@@ -203,6 +203,18 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchAllSuppliers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchAllSuppliers(req.user);
+                this.ok(res, 'suppliers fetched ', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     updateSupplier() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
@@ -289,6 +301,7 @@ class ProductCtrl extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.inventoryStats(req.user);
+                this.ok(res, 'inventory stats ', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

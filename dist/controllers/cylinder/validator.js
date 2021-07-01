@@ -75,9 +75,6 @@ class CylinderValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('provide cylinder(s) to transfer')
                 .isArray(),
-            express_validator_1.check('to')
-                .exists()
-                .withMessage('we need a user to transfer the cylinder to'),
             express_validator_1.check('type')
                 .exists()
                 .withMessage('type of transfer (Permanent/Temporary)'),

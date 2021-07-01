@@ -15,7 +15,7 @@ class Secret {
   static CLOUDINARY_NAME="dorz7hgqx"
   static FCM_SERVER_KEY = ''
 
-  static FRONTEND_URL='https://asnl-web.netlify.app/'
+  static FRONTEND_URL=`https://asnl-web.netlify.app/`
 }
 
 export default Secret

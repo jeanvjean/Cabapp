@@ -167,7 +167,7 @@ class User extends Module {
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
-                    link:Environment.FRONTEND_URL,
+                    link:`${Environment.FRONTEND_URL}`,
                     //@ts-ignore
                     branch:branch?.branch.name,
                     password
@@ -195,7 +195,7 @@ class User extends Module {
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
-                    link:Environment.FRONTEND_URL,
+                    link:`${Environment.FRONTEND_URL}`,
                     //@ts-ignore
                     branch:branch?.branch.name,
                     password
@@ -216,7 +216,7 @@ class User extends Module {
             const html = await getTemplate('invite', {
               team: user.role,
               role:user.subrole,
-              link:Environment.FRONTEND_URL,
+              link:`${Environment.FRONTEND_URL}`,
               //@ts-ignore
               branch:branch?.branch.name,
               password
@@ -440,7 +440,7 @@ class User extends Module {
       const token = sign(payload, signTokenKey, {expiresIn} );
       const html = await getTemplate('reset-password', {
         name: user.role,
-        link:Environment.FRONTEND_URL+'reset-password/'+ token,
+        link:`${Environment.FRONTEND_URL}/reset-password/${token}`,
       });
       let mailLoad = {
         content:html,

@@ -73,9 +73,6 @@ class CylinderValidator extends Ctrl{
         .exists()
         .withMessage('provide cylinder(s) to transfer')
         .isArray(),
-      check('to')
-        .exists()
-        .withMessage('we need a user to transfer the cylinder to'),
       check('type')
         .exists()
         .withMessage('type of transfer (Permanent/Temporary)'),

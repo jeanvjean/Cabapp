@@ -158,4 +158,10 @@ router.get(
   productCtrl.supplierDetails()
 );
 
+router.get(
+  '/fetch-all-suppliers',
+  auth.verify(),
+  productCtrl.fetchAllSuppliers()
+);
+
 export default router;

@@ -360,6 +360,15 @@ class Product extends Module{
     }
   }
 
+  public async fetchAllSuppliers(user:UserInterface):Promise<SupplierInterface[]|undefined>{
+    try{
+      const suppliers = await this.supplier.find({branch:user.branch});
+      return Promise.resolve(suppliers);
+    }catch(e){
+      this.handleException(e);
+    }
+  }
+
   public async fetchSupplierDetails(supplierId:string):Promise<SupplierInterface|undefined>{
     try {
       const supplier = await this.supplier.findById(supplierId).populate([

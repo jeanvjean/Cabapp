@@ -198,6 +198,18 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  fetchAllSuppliers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchAllSuppliers(req,user);
+        this.ok(res, 'suppliers fetched ', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   updateSupplier():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
@@ -284,6 +296,7 @@ class ProductCtrl extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.inventoryStats(req.user);
+        this.ok(res,'inventory stats ', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

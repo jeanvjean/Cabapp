@@ -273,8 +273,56 @@ class CylinderController extends Ctrl{
   condemnCylinder():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.condemnCylinder(req.params.cylinderId);
-        this.ok(res,'archived cylinder', data);
+        //@ts-ignore
+        const data = await this.module.condemingCylinders(req.body, req.user);
+        this.ok(res,'Condemn cylinder process initiated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchCondemnRequests():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchCondemnCylinderRequests(req.query, req.user);
+        this.ok(res,'condemn requests', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchPendingCondemnations():RequestHandler{
+   return async(req:Request, res:Response)=>{
+    try {
+      //@ts-ignore
+      const data = await this.module.fetchPendingCondemnRequests(req.query, req.user);
+      this.ok(res,'pending requests', data);
+    } catch (e) {
+      this.handleError(e, req, res);
+    }
+   }
+  }
+
+  fetchCondemnInfo():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchCondemnationDetatils(req.params.condemnId);
+        this.ok(res, 'condemnation details', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  approveCondemnCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.approveCondemnation({...req.body}, req.user);
+        this.ok(res,'done',data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -287,6 +335,65 @@ class CylinderController extends Ctrl{
         //@ts-ignore
         const data = await this.module.fetchArchivedCylinder(req.query, req.user);
         this.ok(res,'archive fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  changeCylinderType():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.changeGasType(req.body, req.user);
+        this.ok(res, 'gas change initiated', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchGasChangeRequests():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchChangeCylinderRequests(req.query, req.user);
+        this.ok(res,'change cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  changeCylinderDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.fetchChangeCylinderDetails(req.params.cylinderId);
+        this.ok(res, 'details', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchPendingChangeCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchPendingChangeRequest(req.query, req.user);
+        this.ok(res, 'change cylinders', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  approveChangeCylinder():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.approveCylinderChange(req.body, req.user);
+        this.ok(res, 'done', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

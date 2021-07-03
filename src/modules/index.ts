@@ -22,7 +22,9 @@ import {
   PurchaseOrder,
   OCN,
   Reciept,
-  Activity
+  Activity,
+  Condemn,
+  ChangeCylinder
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -55,7 +57,9 @@ export const cylinder = new CylinderModule({
   registerCylinder:RegisteredCylinder,
   transfer:TransferCyl,
   archive:Archive,
-  user:User
+  user:User,
+  condemn:Condemn,
+  change_gas:ChangeCylinder
 });
 
 export const product = new ProductModule({

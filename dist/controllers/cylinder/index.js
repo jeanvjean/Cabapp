@@ -274,8 +274,56 @@ class CylinderController extends ctrl_1.default {
     condemnCylinder() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.condemnCylinder(req.params.cylinderId);
-                this.ok(res, 'archived cylinder', data);
+                //@ts-ignore
+                const data = yield this.module.condemingCylinders(req.body, req.user);
+                this.ok(res, 'Condemn cylinder process initiated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchCondemnRequests() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchCondemnCylinderRequests(req.query, req.user);
+                this.ok(res, 'condemn requests', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchPendingCondemnations() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchPendingCondemnRequests(req.query, req.user);
+                this.ok(res, 'pending requests', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchCondemnInfo() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchCondemnationDetatils(req.params.condemnId);
+                this.ok(res, 'condemnation details', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    approveCondemnCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.approveCondemnation(Object.assign({}, req.body), req.user);
+                this.ok(res, 'done', data);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -288,6 +336,65 @@ class CylinderController extends ctrl_1.default {
                 //@ts-ignore
                 const data = yield this.module.fetchArchivedCylinder(req.query, req.user);
                 this.ok(res, 'archive fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    changeCylinderType() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.changeGasType(req.body, req.user);
+                this.ok(res, 'gas change initiated', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchGasChangeRequests() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchChangeCylinderRequests(req.query, req.user);
+                this.ok(res, 'change cylinders', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    changeCylinderDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchChangeCylinderDetails(req.params.cylinderId);
+                this.ok(res, 'details', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchPendingChangeCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchPendingChangeRequest(req.query, req.user);
+                this.ok(res, 'change cylinders', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    approveChangeCylinder() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.approveCylinderChange(req.body, req.user);
+                this.ok(res, 'done', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

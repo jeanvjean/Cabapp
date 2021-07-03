@@ -29,7 +29,9 @@ exports.cylinder = new cylinder_1.default({
     registerCylinder: index_1.RegisteredCylinder,
     transfer: index_1.TransferCyl,
     archive: index_1.Archive,
-    user: index_1.User
+    user: index_1.User,
+    condemn: index_1.Condemn,
+    change_gas: index_1.ChangeCylinder
 });
 exports.product = new inventory_1.default({
     product: index_1.Product,

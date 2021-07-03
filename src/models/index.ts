@@ -28,6 +28,8 @@ import purchaseFactory, { PurchaseOrderInterface } from './purchaseOrder';
 import ocnFactory, { OutgoingCylinderInterface } from './ocn';
 import recieptFactory, { RecieptInterface } from './reciept';
 import activityLog, { ActivityLogInterface } from './logs';
+import condemnFactory, {CondemnCylinderInterface} from './condemnCylinder';
+import cylinderChangeFactory, {ChangeCylinderInterface} from './change-cylinder';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -78,5 +80,9 @@ export const OCN:Model<OutgoingCylinderInterface> = ocnFactory(conn);
 export const Reciept:Model<RecieptInterface> = recieptFactory(conn);
 
 export const Activity:Model<ActivityLogInterface> = activityLog(conn);
+
+export const Condemn:Model<CondemnCylinderInterface> = condemnFactory(conn);
+
+export const ChangeCylinder:Model<ChangeCylinderInterface> = cylinderChangeFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

@@ -101,8 +101,9 @@ router.get(
   cylinderCtrl.faultyCylinder()
 );
 
-router.get(
-  '/condemn-cylinder/:cylinderId',
+router.post(
+  '/condemn-cylinders',
+  auth.verify(),
   cylinderCtrl.condemnCylinder()
 );
 
@@ -148,9 +149,65 @@ router.get(
 );
 
 router.get(
-  '/fetch-changecylinder-requests',
+  '/fetch-change_cylinder-requests',
   auth.verify(),
   cylinderCtrl.fetchChangeGasRequests()
 );
+
+router.get(
+  '/fetch-condemn-requests',
+  auth.verify(),
+  cylinderCtrl.fetchCondemnRequests()
+);
+
+router.get(
+  '/fetch-pending-condemnations',
+  auth.verify(),
+  cylinderCtrl.fetchPendingCondemnations()
+);
+
+router.get(
+  '/fetch-condemn-details/:condemnId',
+  auth.verify(),
+  cylinderCtrl.fetchCondemnInfo()
+);
+
+router.post(
+  '/approve-condemn-cylinder',
+  auth.verify(),
+  cylinderCtrl.approveCondemnCylinder()
+);
+
+router.post(
+  '/change-cylinder-type',
+  auth.verify(),
+  cylinderCtrl.changeCylinderType()
+);
+
+router.get(
+  '/fetch-change-requests',
+  auth.verify(),
+  cylinderCtrl.fetchGasChangeRequests()
+);
+
+router.post(
+  '/approve-change-request',
+  auth.verify(),
+  cylinderCtrl.approveChangeCylinder()
+);
+
+router.get(
+  '/fetch-pending-cylinder_change',
+  auth.verify(),
+  cylinderCtrl.fetchPendingChangeCylinder()
+);
+
+router.get(
+  '/view-cylinder_change/:cylinderId',
+  auth.verify(),
+  cylinderCtrl.changeCylinderDetails()
+);
+
+
 
 export default router;

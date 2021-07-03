@@ -27,6 +27,8 @@ class Cylinder extends module_1.default {
         this.transfer = props.transfer;
         this.archive = props.archive;
         this.user = props.user;
+        this.condemn = props.condemn;
+        this.change_gas = props.change_gas;
     }
     createCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -135,6 +137,376 @@ class Cylinder extends module_1.default {
                     $set: data
                 }, { new: true });
                 return Promise.resolve(updatedCyliner);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    changeGasType(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const change = new this.change_gas(Object.assign(Object.assign({}, data), { branch: user.branch, initiator: user._id }));
+                let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
+                change.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
+                let track = {
+                    title: "Condemn cylinders",
+                    stage: transferCylinder_1.stagesOfApproval.STAGE1,
+                    status: transferCylinder_1.ApprovalStatus.APPROVED,
+                    dateApproved: new Date().toISOString(),
+                    approvalOfficer: user._id,
+                    nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id
+                };
+                //@ts-ignore
+                change.tracking.push(track);
+                change.approvalOfficers.push({
+                    name: user.name,
+                    id: user._id,
+                    office: user.subrole,
+                    department: user.role,
+                    stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
+                });
+                let com = {
+                    comment: data.comment,
+                    commentBy: user._id
+                };
+                change.comments.push(com);
+                yield change.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder Change',
+                        activity: `You started a new cylinder Change process`,
+                        time: new Date().toISOString()
+                    }
+                });
+                yield new mail_1.default().push({
+                    subject: "New cylinder condemation approval",
+                    content: `A cylinder type change has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                    user: hod
+                });
+                return Promise.resolve(change);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    approveCylinderChange(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
+                let change = yield this.change_gas.findById(data.changeId).populate([
+                    { path: 'initiator', model: 'User' }
+                ]);
+                if (!change) {
+                    throw new exceptions_1.BadInputFormatException('cylinder change request not found');
+                }
+                if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
+                    if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let AO = change.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);
+                        let track = {
+                            title: "Approval Process",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE2,
+                            status: transferCylinder_1.ApprovalStatus.REJECTED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: AO[0].id
+                        };
+                        let checkOfficer = change.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            change.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE2
+                            });
+                        }
+                        //@ts-ignore
+                        change.tracking.push(track);
+                        change.approvalStage = transferCylinder_1.stagesOfApproval.START;
+                        change.nextApprovalOfficer = AO[0].id;
+                        change.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield change.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Change',
+                                //@ts-ignore
+                                activity: `You Rejected a Cylinder Change request from ${change.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(change.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Change",
+                            content: `A Cylinder Change you initiated has been rejected, check it and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(change);
+                    }
+                    else if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
+                        let AO = change.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2);
+                        let track = {
+                            title: "Approval Process",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE3,
+                            status: transferCylinder_1.ApprovalStatus.REJECTED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: AO[0].id
+                        };
+                        let checkOfficer = change.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            change.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE3
+                            });
+                        }
+                        //@ts-ignore
+                        change.tracking.push(track);
+                        change.approvalStage = transferCylinder_1.stagesOfApproval.STAGE1;
+                        change.nextApprovalOfficer = AO[0].id;
+                        change.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield change.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Change',
+                                //@ts-ignore
+                                activity: `You Rejected a Cylinder Change request from ${change.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(change.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Change",
+                            content: `A Cylinder Change you approved has been rejected. check and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(change);
+                    }
+                }
+                else {
+                    let hod = yield this.user.findOne({ branch: user.branch, subrole: 'head of department', role: user.role }).populate({
+                        path: 'branch', model: 'branches'
+                    });
+                    // console.log(hod);
+                    if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
+                        let track = {
+                            title: "Approval Prorcess",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE1,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id
+                        };
+                        let checkOfficer = change.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            change.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
+                            });
+                        }
+                        //@ts-ignore
+                        change.tracking.push(track);
+                        change.approvalStage = transferCylinder_1.stagesOfApproval.STAGE1;
+                        //@ts-ignore
+                        change.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
+                        change.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield change.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Change',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Change request from ${change.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(change.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Change",
+                            content: `A Cylinder Change has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(change);
+                    }
+                    else if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let track = {
+                            title: "Initiate Transfer",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE2,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            //@ts-ignore
+                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                        };
+                        // console.log(track);
+                        let checkOfficer = change.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            change.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE2
+                            });
+                        }
+                        //@ts-ignore
+                        change.tracking.push(track);
+                        change.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
+                        //@ts-ignore
+                        change.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        change.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield change.save();
+                        // console.log(transfer)
+                        // let logMan = condem.initiator;
+                        // console.log(logMan);
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Change',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Change request from ${change.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(change.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Change",
+                            content: `A Cylinder Change has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(change);
+                    }
+                    else if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
+                        let track = {
+                            title: "Initiate Transfer",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE3,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                        };
+                        let checkOfficer = change.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            change.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE3
+                            });
+                        }
+                        //@ts-ignore
+                        change.tracking.push(track);
+                        change.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
+                        change.approvalStatus = transferCylinder_1.TransferStatus.COMPLETED;
+                        //@ts-ignore
+                        // change.nextApprovalOfficer = data.nextApprovalOfficer
+                        change.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Change',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Change request from ${change.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(change.initiator);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Change",
+                            content: `A Cylinder Change you initiated has been approved to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${change._id}`,
+                            user: apUser
+                        });
+                        let cylinders = change.cylinders;
+                        for (let cyl of cylinders) {
+                            let changeCyl = yield this.registerCylinder.findById(cyl);
+                            //@ts-ignore
+                            changeCyl === null || changeCyl === void 0 ? void 0 : changeCyl.gasType = change.gasType;
+                            //@ts-ignore
+                            changeCyl === null || changeCyl === void 0 ? void 0 : changeCyl.cylinderType = change.cylinderType;
+                            if ((changeCyl === null || changeCyl === void 0 ? void 0 : changeCyl.cylinderType) == registeredCylinders_1.TypesOfCylinders.ASSIGNED) {
+                                changeCyl.assignedTo = change.assignedTo;
+                            }
+                            yield (changeCyl === null || changeCyl === void 0 ? void 0 : changeCyl.save());
+                        }
+                        yield change.save();
+                        return Promise.resolve(change);
+                    }
+                }
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchChangeCylinderRequests(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const changes = yield this.change_gas.paginate({ branch: user.branch }, Object.assign({}, query));
+                // console.log(changes)
+                return changes;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchPendingChangeRequest(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const change_requests = yield this.change_gas.find({
+                    branch: user.branch,
+                    approvaStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id
+                }, Object.assign({}, query));
+                return change_requests;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchChangeCylinderDetails(cylinderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const cylinder = yield this.change_gas.findById(cylinderId).populate([
+                    { path: 'cylinders', model: 'registered-cylinders' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'gasType', model: 'cylinder' },
+                    { path: 'branch', model: 'branches' },
+                    { path: 'assignedTo', model: 'customer' }
+                ]);
+                return Promise.resolve(cylinder);
             }
             catch (e) {
                 this.handleException(e);
@@ -278,30 +650,397 @@ class Cylinder extends module_1.default {
             }
         });
     }
-    condemnCylinder(cylinderId) {
+    condemnCylinder(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const cylinder = yield this.registerCylinder.findById(cylinderId);
-                if (!cylinder) {
-                    throw new exceptions_1.BadInputFormatException('No cylinder found with this id');
+                let skipped = [];
+                for (let cyl of data.cylinders) {
+                    const cylinder = yield this.registerCylinder.findById(cyl);
+                    if (!cylinder) {
+                        skipped.push(cyl);
+                    }
+                    const saveInfo = {
+                        cylinderType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderType,
+                        condition: cylinder_1.CylinderCondition.DAMAGED,
+                        waterCapacity: cylinder === null || cylinder === void 0 ? void 0 : cylinder.waterCapacity,
+                        dateManufactured: cylinder === null || cylinder === void 0 ? void 0 : cylinder.dateManufactured,
+                        assignedTo: cylinder === null || cylinder === void 0 ? void 0 : cylinder.assignedTo,
+                        gasType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasType,
+                        standardColor: cylinder === null || cylinder === void 0 ? void 0 : cylinder.standardColor,
+                        testingPresure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.testingPresure,
+                        fillingPreasure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.fillingPreasure,
+                        gasVolumeContent: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasVolumeContent,
+                        cylinderNumber: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderNumber,
+                        branch: cylinder === null || cylinder === void 0 ? void 0 : cylinder.branch
+                    };
+                    yield this.archive.create(saveInfo);
+                    yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.remove());
                 }
-                const saveInfo = {
-                    cylinderType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderType,
-                    condition: cylinder_1.CylinderCondition.DAMAGED,
-                    waterCapacity: cylinder === null || cylinder === void 0 ? void 0 : cylinder.waterCapacity,
-                    dateManufactured: cylinder === null || cylinder === void 0 ? void 0 : cylinder.dateManufactured,
-                    assignedTo: cylinder === null || cylinder === void 0 ? void 0 : cylinder.assignedTo,
-                    gasType: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasType,
-                    standardColor: cylinder === null || cylinder === void 0 ? void 0 : cylinder.standardColor,
-                    testingPresure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.testingPresure,
-                    fillingPreasure: cylinder === null || cylinder === void 0 ? void 0 : cylinder.fillingPreasure,
-                    gasVolumeContent: cylinder === null || cylinder === void 0 ? void 0 : cylinder.gasVolumeContent,
-                    cylinderNumber: cylinder === null || cylinder === void 0 ? void 0 : cylinder.cylinderNumber,
-                    branch: cylinder.branch
+                return Promise.resolve({
+                    message: 'archived cylinders',
+                    skipped
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    condemingCylinders(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const condemn = new this.condemn(Object.assign(Object.assign({}, data), { branch: user.branch, initiator: user._id }));
+                let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
+                condemn.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
+                let track = {
+                    title: "Condemn cylinders",
+                    stage: transferCylinder_1.stagesOfApproval.STAGE1,
+                    status: transferCylinder_1.ApprovalStatus.APPROVED,
+                    dateApproved: new Date().toISOString(),
+                    approvalOfficer: user._id,
+                    nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id
                 };
-                const archive = yield this.archive.create(saveInfo);
-                yield (cylinder === null || cylinder === void 0 ? void 0 : cylinder.remove());
-                return Promise.resolve(archive);
+                //@ts-ignore
+                condemn.tracking.push(track);
+                condemn.approvalOfficers.push({
+                    name: user.name,
+                    id: user._id,
+                    office: user.subrole,
+                    department: user.role,
+                    stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
+                });
+                let com = {
+                    comment: data.comment,
+                    commentBy: user._id
+                };
+                condemn.comments.push(com);
+                yield condemn.save();
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Cylinder Condemn',
+                        activity: `You started a new cylinder condemn process`,
+                        time: new Date().toISOString()
+                    }
+                });
+                yield new mail_1.default().push({
+                    subject: "New cylinder condemation approval",
+                    content: `A cylinder condemnation has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condemn._id}`,
+                    user: hod
+                });
+                return Promise.resolve(condemn);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    approveCondemnation(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let loginUser = yield this.user.findById(user._id).select('+password');
+                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
+                if (!matchPWD) {
+                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                }
+                let condem = yield this.condemn.findById(data.condemnId).populate([
+                    { path: 'initiator', model: 'User' }
+                ]);
+                if (!condem) {
+                    throw new exceptions_1.BadInputFormatException('cylinder condemn request not found');
+                }
+                if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
+                    if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let AO = condem.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);
+                        let track = {
+                            title: "Approval Process",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE2,
+                            status: transferCylinder_1.ApprovalStatus.REJECTED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: AO[0].id
+                        };
+                        let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            condem.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE2
+                            });
+                        }
+                        //@ts-ignore
+                        condem.tracking.push(track);
+                        condem.approvalStage = transferCylinder_1.stagesOfApproval.START;
+                        condem.nextApprovalOfficer = AO[0].id;
+                        condem.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield condem.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Condemnnation',
+                                //@ts-ignore
+                                activity: `You Rejected a Cylinder Condemnnation request from ${condem.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(condem.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Condemnnation",
+                            content: `A Cylinder Condemnnation you initiated has been rejected, check it and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condem._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(condem);
+                    }
+                    else if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
+                        let AO = condem.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2);
+                        let track = {
+                            title: "Approval Process",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE3,
+                            status: transferCylinder_1.ApprovalStatus.REJECTED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: AO[0].id
+                        };
+                        let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            condem.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE3
+                            });
+                        }
+                        //@ts-ignore
+                        condem.tracking.push(track);
+                        condem.approvalStage = transferCylinder_1.stagesOfApproval.STAGE1;
+                        condem.nextApprovalOfficer = AO[0].id;
+                        condem.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield condem.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Condemnnation',
+                                //@ts-ignore
+                                activity: `You Rejected a Cylinder Condemnnation request from ${condem.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(condem.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Condemnnation",
+                            content: `A Cylinder Condemnnation you approved has been rejected. check and try again. click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condem._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(condem);
+                    }
+                }
+                else {
+                    let hod = yield this.user.findOne({ branch: user.branch, subrole: 'head of department', role: user.role }).populate({
+                        path: 'branch', model: 'branches'
+                    });
+                    // console.log(hod);
+                    if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
+                        let track = {
+                            title: "Approval Prorcess",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE1,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id
+                        };
+                        let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            condem.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
+                            });
+                        }
+                        //@ts-ignore
+                        condem.tracking.push(track);
+                        condem.approvalStage = transferCylinder_1.stagesOfApproval.STAGE1;
+                        //@ts-ignore
+                        condem.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
+                        condem.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield condem.save();
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Condemnnation',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Condemnnation request from ${condem.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(condem.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Condemnnation",
+                            content: `A Cylinder Condemnnation has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condem._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(condem);
+                    }
+                    else if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        // console.log(condem)
+                        let track = {
+                            title: "Condemn cylinder",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE2,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                            //@ts-ignore
+                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                        };
+                        // console.log(track);
+                        let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            condem.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE2
+                            });
+                        }
+                        //@ts-ignore
+                        condem.tracking.push(track);
+                        condem.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
+                        //@ts-ignore
+                        condem.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        condem.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield condem.save();
+                        // console.log(transfer)
+                        // let logMan = condem.initiator;
+                        // console.log(logMan);
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Condemnnation',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Condemnnation request from ${condem.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(condem.nextApprovalOfficer);
+                        yield new mail_1.default().push({
+                            subject: "New Cylinder Condemnnation",
+                            content: `A Cylinder Condemnnation has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condem._id}`,
+                            user: apUser
+                        });
+                        return Promise.resolve(condem);
+                    }
+                    else if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
+                        let track = {
+                            title: "condemn cylinder",
+                            stage: transferCylinder_1.stagesOfApproval.STAGE3,
+                            status: transferCylinder_1.ApprovalStatus.APPROVED,
+                            dateApproved: new Date().toISOString(),
+                            approvalOfficer: user._id,
+                        };
+                        let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
+                        if (checkOfficer.length == 0) {
+                            condem.approvalOfficers.push({
+                                name: user.name,
+                                id: user._id,
+                                office: user.subrole,
+                                department: user.role,
+                                stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE3
+                            });
+                        }
+                        // console.log(track)
+                        //@ts-ignore
+                        condem.tracking.push(track);
+                        // console.log(condem)
+                        condem.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
+                        condem.approvalStatus = transferCylinder_1.TransferStatus.COMPLETED;
+                        //@ts-ignore
+                        // condem.nextApprovalOfficer = data.nextApprovalOfficer
+                        condem.comments.push({
+                            comment: data.comment,
+                            commentBy: user._id
+                        });
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Cylinder Condemnnation',
+                                //@ts-ignore
+                                activity: `You Approved a Cylinder Condemnnation request from ${condem.initiator.name}`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                        let apUser = yield this.user.findById(condem.initiator);
+                        yield new mail_1.default().push({
+                            subject: "Cylinder Condemnation",
+                            content: `A Cylinder Condemnnation you initiated has been approved to view ${static_1.default.FRONTEND_URL}/fetch-condemn-details/${condem._id}`,
+                            user: apUser
+                        });
+                        let cylinders = condem.cylinders;
+                        yield this.condemnCylinder({ cylinders });
+                        yield condem.save();
+                        return Promise.resolve(condem);
+                    }
+                }
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchCondemnCylinderRequests(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const requests = yield this.condemn.paginate({ branch: user.branch }, Object.assign({}, query));
+                return requests;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchPendingCondemnRequests(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const requests = yield this.condemn.paginate({
+                    branch: user.branch,
+                    approvaStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id
+                }, Object.assign({}, query));
+                return requests;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchCondemnationDetatils(condemnId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const request = yield this.condemn.findById(condemnId).populate([
+                    { path: 'cylinders', model: 'registered-cylinders' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
+                return Promise.resolve(request);
             }
             catch (e) {
                 this.handleException(e);
@@ -333,7 +1072,6 @@ class Cylinder extends module_1.default {
                     //@ts-ignore
                     data === null || data === void 0 ? void 0 : data.holdingTime = date.toISOString();
                 }
-                console.log(data);
                 let transfer = new this.transfer(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 transfer.initiator = user._id;
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });

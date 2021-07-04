@@ -241,7 +241,7 @@ class Product extends module_1.default {
                 const { search } = query;
                 // const aggregate = this.supplier.aggregate()
                 const options = Object.assign({}, query);
-                console.log(search === null || search === void 0 ? void 0 : search.length);
+                // console.log(search?.length)
                 let suppliers;
                 if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
                     //@ts-ignore
@@ -314,49 +314,50 @@ class Product extends module_1.default {
     addInventory(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                data.products = JSON.parse(data.products);
                 const inventory = new this.inventory(Object.assign(Object.assign({}, data), { inspectingOfficer: user._id, branch: user.branch }));
-                let products = inventory.products;
-                if (inventory.direction == receivedProduct_1.productDirection.IN) {
-                    for (let product of products) {
-                        let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.quantity += +product.passed;
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
-                        //@ts-ignore
-                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
-                    }
-                    yield logs_1.createLog({
-                        user: user._id,
-                        activities: {
-                            title: 'Inventory',
-                            //@ts-ignore
-                            activity: `You recorded new inventories coming in`,
-                            time: new Date().toISOString()
-                        }
-                    });
-                }
-                else if (inventory.direction == receivedProduct_1.productDirection.OUT) {
-                    for (let product of products) {
-                        let prod = yield this.product.findOne({ asnlNumber: product.productNumber, branch: user.branch });
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.quantity -= +product.quantity;
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
-                        //@ts-ignore
-                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
-                    }
-                    yield logs_1.createLog({
-                        user: user._id,
-                        activities: {
-                            title: 'Inventory',
-                            //@ts-ignore
-                            activity: `You recorded new inventories going out`,
-                            time: new Date().toISOString()
-                        }
-                    });
-                }
-                yield inventory.save();
+                console.log(inventory);
+                // let products = inventory.products;
+                // if(inventory.direction == productDirection.IN){
+                //   for(let product of products) {
+                //     let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+                //     //@ts-ignore
+                //     prod?.quantity += +product.passed;
+                //     //@ts-ignore
+                //     prod?.totalCost = prod?.unitCost * prod?.quantity;
+                //     //@ts-ignore
+                //     await prod?.save()
+                //   }
+                //   await createLog({
+                //     user:user._id,
+                //     activities:{
+                //       title:'Inventory',
+                //       //@ts-ignore
+                //       activity:`You recorded new inventories coming in`,
+                //       time: new Date().toISOString()
+                //     }
+                //   });
+                // }else if(inventory.direction == productDirection.OUT) {
+                //   for(let product of products) {
+                //     let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+                //     //@ts-ignore
+                //     prod?.quantity -= +product.quantity;
+                //     //@ts-ignore
+                //     prod?.totalCost = prod?.unitCost * prod?.quantity;
+                //     //@ts-ignore
+                //     await prod?.save()
+                //   }
+                //   await createLog({
+                //     user:user._id,
+                //     activities:{
+                //       title:'Inventory',
+                //       //@ts-ignore
+                //       activity:`You recorded new inventories going out`,
+                //       time: new Date().toISOString()
+                //     }
+                //   });
+                // }
+                // await inventory.save();
                 return Promise.resolve(inventory);
             }
             catch (e) {

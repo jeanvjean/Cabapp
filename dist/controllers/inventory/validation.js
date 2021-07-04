@@ -74,7 +74,7 @@ class InventoryValidator extends ctrl_1.default {
                 .withMessage('provide password for authentication'),
             express_validator_1.check('products')
                 .isArray()
-                .withMessage('products shoult be an array'),
+                .withMessage('products should be an array'),
             express_validator_1.check('id')
                 .exists()
                 .withMessage('provide the disbursal id'),
@@ -89,9 +89,7 @@ class InventoryValidator extends ctrl_1.default {
         const rules = [
             express_validator_1.check('products')
                 .exists()
-                .withMessage('Products are required to br logged')
-                .isArray()
-                .withMessage('products must be an array'),
+                .withMessage('Products are required to be logged'),
             express_validator_1.check('direction')
                 .exists()
                 .withMessage('Direction is required in-coming/out-going')

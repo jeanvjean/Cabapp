@@ -1,9 +1,9 @@
 deploy-prod:
   stage: deploy
 
-  only: 
+  only:
     - master
-  
+
   tags:
     - master
 
@@ -11,6 +11,6 @@ deploy-prod:
     - cp -r -u * $ASNL_BACKEND
     - cd $ASNL_BACKEND
     - npm install
+    - npm run build
     - pm2 restart ./dist/index.js
     - service nginx restart
-    

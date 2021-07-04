@@ -70,7 +70,7 @@ export class InventoryValidator extends Ctrl{
         .withMessage('provide password for authentication'),
       check('products')
         .isArray()
-        .withMessage('products shoult be an array'),
+        .withMessage('products should be an array'),
       check('id')
         .exists()
         .withMessage('provide the disbursal id'),
@@ -86,9 +86,7 @@ export class InventoryValidator extends Ctrl{
     const rules = [
       check('products')
         .exists()
-        .withMessage('Products are required to br logged')
-        .isArray()
-        .withMessage('products must be an array'),
+        .withMessage('Products are required to be logged'),
       check('direction')
         .exists()
         .withMessage('Direction is required in-coming/out-going')

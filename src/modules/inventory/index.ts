@@ -78,7 +78,7 @@ type NewInventory={
   wayBillNumber:string,
   invoiceNumber:string,
   dateReceived:string,
-  products:ReceivedProduct[],
+  products:string,
   grnDocument:string,
   direction:string
 }
@@ -344,7 +344,7 @@ class Product extends Module{
       const options = {
         ...query
       }
-      console.log(search?.length)
+      // console.log(search?.length)
       let suppliers;
       if(search?.length !== undefined) {
         //@ts-ignore
@@ -406,11 +406,13 @@ class Product extends Module{
 
   public async addInventory(data:NewInventory, user:UserInterface):Promise<InventoryInterface|undefined> {
     try {
+      data.products = JSON.parse(data.products);
       const inventory = new this.inventory({
         ...data,
         inspectingOfficer:user._id,
         branch:user.branch
       });
+      // console.log(inventory);
       let products = inventory.products;
       if(inventory.direction == productDirection.IN){
         for(let product of products) {

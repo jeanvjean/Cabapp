@@ -37,7 +37,11 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     holdingTime: { type: Date },
     department: { type: String },
     holder: { type: String, enum: Object.values(cylinderHolder), default: cylinderHolder.ASNL },
-    cylinderStatus: { type: String, enum: Object.values(walk_in_customers_1.WalkinCustomerStatus), default: walk_in_customers_1.WalkinCustomerStatus.EMPTY }
+    cylinderStatus: { type: String, enum: Object.values(walk_in_customers_1.WalkinCustomerStatus), default: walk_in_customers_1.WalkinCustomerStatus.EMPTY },
+    cylNo: { type: Number },
+    purchaseCost: { type: Number },
+    purchaseDate: { type: Date },
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' }
 }, {
     timestamps: true
 });

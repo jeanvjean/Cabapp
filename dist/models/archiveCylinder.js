@@ -18,7 +18,8 @@ exports.archiveCylinderSchema = new mongoose_1.Schema({
     condition: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     holdingTime: { type: Date },
-    department: { type: String }
+    department: { type: String },
+    purchaseCost: { type: Number },
 });
 exports.archiveCylinderSchema.plugin(mongoosePagination);
 function factory(conn) {

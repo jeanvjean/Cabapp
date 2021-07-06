@@ -9,14 +9,25 @@ import * as mongoosePaginate from 'mongoose-paginate-v2';
 // import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 var aggregatePaginate = require('mongoose-aggregate-paginate-v2')
 
+export enum SupplierTypes{
+  INTERNAL="local",
+  EXTERNAL="foreign"
+}
+
+export enum ProductType{
+  GAS='gas-refill',
+  GENERAL="general-inventory"
+}
+
 export interface SupplierInterface extends Document {
   name:string
   location:string
   contactPerson:string
   emailAddress:string
   phoneNumber:number
-  supplierType:string
-  branch:Schema.Types.ObjectId
+  supplierType:SupplierTypes
+  branch:Schema.Types.ObjectId,
+  productType:ProductType
 }
 
 export const supplierSchema = new Schema({
@@ -25,8 +36,9 @@ export const supplierSchema = new Schema({
   contactPerson:{type:String},
   emailAddress:{type:String},
   phoneNumber:{type:Number},
-  supplierType:{type:String},
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  supplierType:{type:String, enum:Object.values(SupplierTypes), required:true},
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  productType:{type:String, enum:Object.values(ProductType)}
 });
 
 supplierSchema.index({supplierType:'text'})

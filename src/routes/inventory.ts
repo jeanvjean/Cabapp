@@ -2,6 +2,7 @@ import { Router as expressRouter } from 'express';
 import Auth from '../middlewares/authentication';
 import {productCtrl} from '../controllers'
 import { Validator } from '../controllers/inventory';
+import { product } from '../modules';
 const auth = new Auth();
 const router:expressRouter = expressRouter();
 
@@ -162,6 +163,18 @@ router.get(
   '/fetch-all-suppliers',
   auth.verify(),
   productCtrl.fetchAllSuppliers()
+);
+
+router.get(
+  '/fetch-mrn-stats',
+  auth.verify(),
+  productCtrl.mrnStats()
+);
+
+router.get(
+  '/fetch-grn-stats',
+  auth.verify(),
+  productCtrl.grnStats()
 );
 
 export default router;

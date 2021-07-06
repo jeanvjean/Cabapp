@@ -12,9 +12,10 @@ import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
-import { generateToken } from "../../util/token";
+import { generateToken, padLeft } from "../../util/token";
 import { CondemnCylinderInterface } from "../../models/condemnCylinder";
 import { ChangeCylinderInterface } from "../../models/change-cylinder";
+import { SupplierTypes } from "../../models/supplier";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -258,21 +259,24 @@ class Cylinder extends Module {
         throw new BadInputFormatException('this cylinder has been registered');
       }
       let manDate = new Date(data.dateManufactured);
-      if(data.cylinderType == TypesOfCylinders.BUFFER) {
-        let pref = "ASNL"
-        let num = await generateToken(6);
-        //@ts-ignore
-        data.cylinderNumber = pref + num.toString();
-      }else if(data.cylinderType == TypesOfCylinders.ASSIGNED){
-        let pref = "CYL"
-        let num = await generateToken(6);
-        //@ts-ignore
-        data.assignedNumber = pref + num.toString();
-      }
+      // let checkReg = await this.registerCylinder.find({branch:user.branch}).sort({cylNo:-1}).limit(1);
+      // let initNum;
+      // if(checkReg[0] == undefined) {
+      //   initNum = 1
+      // }else {
+      //   initNum = checkReg[0].cylNo+1;
+      // }
+      // const num = padLeft(initNum, 6, "");
+      // let asnl = "ASNL";
+      // let cyl = "CYL";
+      // data.cylinderNumber = cyl+num;
+      // data.assignedNumber = asnl+num
+
       let payload = {
         ...data,
         dateManufactured:manDate.toISOString(),
-        branch:user.branch
+        branch:user.branch,
+        // cylNo:initNum
       }
       let newRegistration:NewCylinderRegisterationInterface|undefined = await this.registerCylinder.create(payload);
       await createLog({
@@ -726,9 +730,11 @@ class Cylinder extends Module {
     }
   }
 
-  public async cylinderStats(user:UserInterface):Promise<CylinderPoolStats|undefined>{
+  public async cylinderStats(user:UserInterface):Promise<any>{
     try {
-      const cylinders = await this.registerCylinder.find({branch:user.branch});
+      const cylinders = await this.registerCylinder.find({branch:user.branch}).populate([
+        {path:'supplier', model:'supplier'}
+      ]);
       const bufferCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
       const assignedCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
       const withCustomer = cylinders.filter(cylinder=> cylinder.holder == cylinderHolder.CUSTOMER).length;
@@ -741,6 +747,7 @@ class Cylinder extends Module {
 
       const asnlBufferCylinders = cylinders.filter(cylinder=>
         cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+
       const asnlAssignedCylinders = cylinders.filter(cylinder=>
         cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
 
@@ -762,21 +769,72 @@ class Cylinder extends Module {
       const emptyAssignedCylinders = cylinders.filter(cylinder=>
         cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
 
+      const faultyFilledCustomerCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
+
+      const faultyEmptyCustomerCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
+
+      const goodFilledCustomerCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
+
+      const goodEmptyCustomerCylinders = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
+
+      const asnlTotalGoodBuffer = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER && cylinder.condition == CylinderCondition.GOOD).length;
+
+      const asnlTotalBadBuffer = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER && cylinder.condition == CylinderCondition.FAULTY).length;
+
+      const asnlTotalGoodAssigned = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length;
+
+      const asnlTotalBadAssigned = cylinders.filter(cylinder=>
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length;
+
+        const externalSupplier = cylinders.filter(cylinder=>
+          //@ts-ignore
+          cylinder.holder == cylinderHolder.SUPPLIER && cylinder.supplier.supplierType == SupplierTypes.EXTERNAL).length;
+
+        const internalSupplier = cylinders.filter(cylinder=>
+          //@ts-ignore
+          cylinder.holder == cylinderHolder.SUPPLIER && cylinder.supplier.supplierType == SupplierTypes.INTERNAL).length;
+
       return Promise.resolve({
         bufferCylinder,
         assignedCylinder,
-        withCustomer,
-        withAsnl,
-        customerBufferCylinders,
-        customerAssignedCylinders,
-        asnlBufferCylinders,
-        asnlAssignedCylinders,
-        asnlFilledCylinders,
-        asnlEmptyCylinders,
-        filledBufferCylinders,
         filledAssignedCylinders,
+        customerBufferCylinders,
+        emptyAssignedCylinders,
+        customerAssignedCylinders,
+        filledBufferCylinders,
         emptyBufferCylinders,
-        emptyAssignedCylinders
+        customer:{
+          totalCylinders: withCustomer,
+          totalFilled: faultyFilledCustomerCylinders+goodFilledCustomerCylinders,
+          totalEmpty: faultyEmptyCustomerCylinders+goodEmptyCustomerCylinders,
+          faultyFilledCustomerCylinders,
+          faultyEmptyCustomerCylinders,
+          goodFilledCustomerCylinders,
+          goodEmptyCustomerCylinders
+        },
+        asnl:{
+          totalCylinders:withAsnl,
+          buffer:asnlBufferCylinders,
+          assigned:asnlAssignedCylinders,
+          totalFilled:asnlFilledCylinders,
+          totalEmpty:asnlEmptyCylinders,
+          asnlTotalGoodBuffer,
+          asnlTotalBadBuffer,
+          asnlTotalGoodAssigned,
+          asnlTotalBadAssigned
+        },
+        supplier:{
+          total:internalSupplier+externalSupplier,
+          internalSupplier,
+          externalSupplier
+        }
       })
 
     } catch (e) {
@@ -834,11 +892,13 @@ class Cylinder extends Module {
         dateManufactured: cylinder?.dateManufactured,
         assignedTo: cylinder?.assignedTo,
         gasType: cylinder?.gasType,
+        purchaseCost:cylinder?.purchaseCost,
         standardColor: cylinder?.standardColor,
         testingPresure: cylinder?.testingPresure,
         fillingPreasure: cylinder?.fillingPreasure,
         gasVolumeContent: cylinder?.gasVolumeContent,
         cylinderNumber: cylinder?.cylinderNumber,
+        assignedNumber: cylinder?.assignedNumber,
         branch: cylinder?.branch
       }
       await this.archive.create(saveInfo);

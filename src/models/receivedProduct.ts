@@ -25,10 +25,11 @@ export interface InventoryInterface extends Document{
   direction:productDirection,
   branch:Schema.Types.ObjectId
   grnNo:string
+  grInit:number
 }
 
 export interface ReceivedProduct {
-  productNumber:string,
+  partNumber:string,
   productName:string
   quantity:number
   passed?:number
@@ -36,11 +37,13 @@ export interface ReceivedProduct {
   unitCost:number
   totalCost:string
   comment?:string
-  totalAvailable?:number
+  totalAvailable?:number,
+  equipmentModel?:string,
+  equipmentType?:string
 }
 
 export const productRecievedSchema = new Schema({
-  productNumber:{type:String},
+  partNumber:{type:String},
   productName:{type:String},
   quantity:{type:Number},
   passed:{type:Number},
@@ -48,7 +51,9 @@ export const productRecievedSchema = new Schema({
   unitCost:{type:Number},
   totalCost:{type:Number},
   comment:{type:String},
-  totalAvailable:{type:Number}
+  totalAvailable:{type:Number},
+  equipmentModel:{type:String},
+  equipmentType:{type:String}
 },{
   timestamps:true
 });
@@ -64,7 +69,8 @@ export const inventorySchema = new Schema({
   grnDocument:{type:String},
   direction:{type:String, enum:Object.values(productDirection)},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  grnNo:{type:String}
+  grnNo:{type:String},
+  grInit:{type:Number}
 });
 
 inventorySchema.plugin(mongoosePaginate);

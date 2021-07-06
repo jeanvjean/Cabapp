@@ -303,6 +303,30 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  mrnStats():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.mrnStats(req.user);
+        this.ok(res, 'stats fetched ', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  grnStats():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.grnStats(req.user);
+        this.ok(res, 'stats fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchallProducts():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

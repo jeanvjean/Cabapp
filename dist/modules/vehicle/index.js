@@ -388,6 +388,7 @@ class Vehicle extends module_1.default {
                 }
                 //@ts-ignore
                 pickup === null || pickup === void 0 ? void 0 : pickup.status = status;
+                yield (pickup === null || pickup === void 0 ? void 0 : pickup.save());
                 return Promise.resolve(pickup);
             }
             catch (e) {

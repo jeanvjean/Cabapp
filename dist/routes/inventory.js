@@ -33,5 +33,7 @@ router.get('/inventory-stats', auth.verify(), controllers_1.productCtrl.inventor
 router.get('/fetch-all-products', auth.verify(), controllers_1.productCtrl.fetchallProducts());
 router.get('/supplier-details/:supplierId', auth.verify(), controllers_1.productCtrl.supplierDetails());
 router.get('/fetch-all-suppliers', auth.verify(), controllers_1.productCtrl.fetchAllSuppliers());
+router.get('/fetch-mrn-stats', auth.verify(), controllers_1.productCtrl.mrnStats());
+router.get('/fetch-grn-stats', auth.verify(), controllers_1.productCtrl.grnStats());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

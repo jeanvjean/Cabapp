@@ -9,7 +9,7 @@ var productDirection;
     productDirection["OUT"] = "out-going";
 })(productDirection = exports.productDirection || (exports.productDirection = {}));
 exports.productRecievedSchema = new mongoose_1.Schema({
-    productNumber: { type: String },
+    partNumber: { type: String },
     productName: { type: String },
     quantity: { type: Number },
     passed: { type: Number },
@@ -17,7 +17,9 @@ exports.productRecievedSchema = new mongoose_1.Schema({
     unitCost: { type: Number },
     totalCost: { type: Number },
     comment: { type: String },
-    totalAvailable: { type: Number }
+    totalAvailable: { type: Number },
+    equipmentModel: { type: String },
+    equipmentType: { type: String }
 }, {
     timestamps: true
 });
@@ -32,7 +34,8 @@ exports.inventorySchema = new mongoose_1.Schema({
     grnDocument: { type: String },
     direction: { type: String, enum: Object.values(productDirection) },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    grnNo: { type: String }
+    grnNo: { type: String },
+    grInit: { type: Number }
 });
 exports.inventorySchema.plugin(mongoosePaginate);
 function factory(conn) {

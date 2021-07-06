@@ -449,6 +449,7 @@ class Vehicle extends Module{
       }
       //@ts-ignore
       pickup?.status = status;
+      await pickup?.save();
       return Promise.resolve(pickup as PickupInterface);
     } catch (e) {
       this.handleException(e);

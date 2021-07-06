@@ -8,7 +8,7 @@ import { SupplierInterface } from "../../models/supplier";
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { getTemplate } from "../../util/resolve-template";
-import { generateToken } from "../../util/token";
+import { generateNumber, generateToken, padLeft } from "../../util/token";
 import Module, { QueryInterface } from "../module";
 import Environment from '../../configs/static';
 import Notify from '../../util/mail'
@@ -191,17 +191,23 @@ class Product extends Module{
 
   public async createProduct(data:NewProductInterface, user:UserInterface):Promise<ProductInterface|undefined>{
     try {
-      let findProduct = await this.product.findOne({asnlNumber:data.asnlNumber, branch:user.branch});
+      const {  partNumber } = data;
+      let findProduct = await this.product.findOne({partNumber, branch:user.branch});
       if(findProduct) {
         throw new BadInputFormatException('a product with this ASNL number already exists in your branch');
       }
 
-      let product = new this.product({...data});
-      let findP = await this.product.find({})
-      product.serialNumber = findP.length + 1;
-      product.branch = user.branch;
-      // const branch = await this.branch.findById(user.branch);
-      // branch?.products.push(product._id);
+      let product = new this.product({...data, branch:user.branch});
+      let findP = await this.product.find({}).sort({serialNumber:-1}).limit(1)
+      let sn;
+      if(findP) {
+        //@ts-ignore
+        sn = findP[0].serialNumber+1;
+      }else{
+        sn = 1
+      }
+      //@ts-ignore
+      product.serialNumber = sn
       await product.save();
       await createLog({
         user:user._id,
@@ -328,6 +334,40 @@ class Product extends Module{
     }
   }
 
+  public async mrnStats(user:UserInterface):Promise<any>{
+    try{
+      const disbursal = await this.disburse.find({});
+      const issuedOut = await this.inventory.find({});
+      const totalIssuedOut = issuedOut.filter(inv=> inv.branch == user.branch && inv.direction == productDirection.OUT).length;
+      const totalApproved = disbursal.filter(disb=> disb.fromBranch == user.branch && disb.disburseStatus == TransferStatus.COMPLETED).length;
+      const totalPending = disbursal.filter(disb=> disb.fromBranch == user.branch && disb.disburseStatus == TransferStatus.PENDING).length
+      return Promise.resolve({
+        totalIssuedOut,
+        totalApproved,
+        totalPending
+      });
+    }catch(e){
+      this.handleException(e)
+    }
+  }
+
+  public async grnStats(user:UserInterface):Promise<any>{
+    try {
+      const disbursal = await this.disburse.find({});
+      const issuedOut = await this.inventory.find({});
+      const totalIssuedOut = issuedOut.filter(inv=> inv.branch == user.branch);
+      const totalApproved = disbursal.filter(disb=> disb.fromBranch == user.branch && disb.disburseStatus == TransferStatus.COMPLETED);
+      const totalPending = disbursal.filter(disb=> disb.fromBranch == user.branch && disb.disburseStatus == TransferStatus.PENDING)
+      return Promise.resolve({
+        totalGrn:totalIssuedOut.length |0,
+        totalApprovedGrn:totalApproved.length|0,
+        totalPendingGrn:totalPending.length|0
+      });
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
       const supplier = await this.supplier.create({...data,branch:user.branch});
@@ -412,11 +452,27 @@ class Product extends Module{
         inspectingOfficer:user._id,
         branch:user.branch
       });
-      // console.log(inventory);
+      // let num = await generateNumber(6)
+      let inv = await this.inventory.find({branch:user.branch}).sort({grInit:-1}).limit(1);
+      let initNum
+      if(inv[0] == undefined) {
+        initNum = 1
+      }else {
+        initNum = inv[0].grInit+1
+      }
+      let init = "GRN"
+      // let str = ""+initNum
+      // let pad = "000000"
+      // let ans = pad.substring(0, pad.length - str.length) + str;
+      const num = padLeft(initNum, 6, "");
+      let grnNo = init+num;
+      inventory.grnNo = grnNo;
+      inventory.grInit = initNum
+
       let products = inventory.products;
       if(inventory.direction == productDirection.IN){
         for(let product of products) {
-          let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+          let prod = await this.product.findOne({partNumber: product.partNumber, branch:user.branch});
           //@ts-ignore
           prod?.quantity += +product.passed;
           //@ts-ignore
@@ -435,7 +491,7 @@ class Product extends Module{
         });
       }else if(inventory.direction == productDirection.OUT) {
         for(let product of products) {
-          let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
+          let prod = await this.product.findOne({asnlNumber: product.partNumber, branch:user.branch});
           //@ts-ignore
           prod?.quantity -= +product.quantity;
           //@ts-ignore
@@ -510,10 +566,10 @@ class Product extends Module{
         initiator:user._id,
         branch:user.branch
       });
-      let init = "GRN"
-      let num = await generateToken(6);
+      // let init = "GRN"
+      // let num = await generateToken(6);
       //@ts-ignore
-      disbursement.grnNo = init + num.toString();
+      // disbursement.grnNo = init + num.toString();
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,

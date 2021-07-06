@@ -130,7 +130,9 @@ export const archiveCylinderSchema = new Schema({
 
   holdingTime:{type:Date},
 
-  department:{type:String}
+  department:{type:String},
+
+  purchaseCost:{type:Number},
 });
 
 archiveCylinderSchema.plugin(mongoosePagination)

@@ -80,16 +80,23 @@ class Product extends module_1.default {
     createProduct(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let findProduct = yield this.product.findOne({ asnlNumber: data.asnlNumber, branch: user.branch });
+                const { partNumber } = data;
+                let findProduct = yield this.product.findOne({ partNumber, branch: user.branch });
                 if (findProduct) {
                     throw new exceptions_1.BadInputFormatException('a product with this ASNL number already exists in your branch');
                 }
-                let product = new this.product(Object.assign({}, data));
-                let findP = yield this.product.find({});
-                product.serialNumber = findP.length + 1;
-                product.branch = user.branch;
-                // const branch = await this.branch.findById(user.branch);
-                // branch?.products.push(product._id);
+                let product = new this.product(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                let findP = yield this.product.find({}).sort({ serialNumber: -1 }).limit(1);
+                let sn;
+                if (findP) {
+                    //@ts-ignore
+                    sn = findP[0].serialNumber + 1;
+                }
+                else {
+                    sn = 1;
+                }
+                //@ts-ignore
+                product.serialNumber = sn;
                 yield product.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -224,6 +231,44 @@ class Product extends module_1.default {
             }
         });
     }
+    mrnStats(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const disbursal = yield this.disburse.find({});
+                const issuedOut = yield this.inventory.find({});
+                const totalIssuedOut = issuedOut.filter(inv => inv.branch == user.branch && inv.direction == receivedProduct_1.productDirection.OUT).length;
+                const totalApproved = disbursal.filter(disb => disb.fromBranch == user.branch && disb.disburseStatus == transferCylinder_1.TransferStatus.COMPLETED).length;
+                const totalPending = disbursal.filter(disb => disb.fromBranch == user.branch && disb.disburseStatus == transferCylinder_1.TransferStatus.PENDING).length;
+                return Promise.resolve({
+                    totalIssuedOut,
+                    totalApproved,
+                    totalPending
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    grnStats(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const disbursal = yield this.disburse.find({});
+                const issuedOut = yield this.inventory.find({});
+                const totalIssuedOut = issuedOut.filter(inv => inv.branch == user.branch);
+                const totalApproved = disbursal.filter(disb => disb.fromBranch == user.branch && disb.disburseStatus == transferCylinder_1.TransferStatus.COMPLETED);
+                const totalPending = disbursal.filter(disb => disb.fromBranch == user.branch && disb.disburseStatus == transferCylinder_1.TransferStatus.PENDING);
+                return Promise.resolve({
+                    totalGrn: totalIssuedOut.length | 0,
+                    totalApprovedGrn: totalApproved.length | 0,
+                    totalPendingGrn: totalPending.length | 0
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     createSupplier(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -316,48 +361,65 @@ class Product extends module_1.default {
             try {
                 data.products = JSON.parse(data.products);
                 const inventory = new this.inventory(Object.assign(Object.assign({}, data), { inspectingOfficer: user._id, branch: user.branch }));
-                console.log(inventory);
-                // let products = inventory.products;
-                // if(inventory.direction == productDirection.IN){
-                //   for(let product of products) {
-                //     let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
-                //     //@ts-ignore
-                //     prod?.quantity += +product.passed;
-                //     //@ts-ignore
-                //     prod?.totalCost = prod?.unitCost * prod?.quantity;
-                //     //@ts-ignore
-                //     await prod?.save()
-                //   }
-                //   await createLog({
-                //     user:user._id,
-                //     activities:{
-                //       title:'Inventory',
-                //       //@ts-ignore
-                //       activity:`You recorded new inventories coming in`,
-                //       time: new Date().toISOString()
-                //     }
-                //   });
-                // }else if(inventory.direction == productDirection.OUT) {
-                //   for(let product of products) {
-                //     let prod = await this.product.findOne({asnlNumber: product.productNumber, branch:user.branch});
-                //     //@ts-ignore
-                //     prod?.quantity -= +product.quantity;
-                //     //@ts-ignore
-                //     prod?.totalCost = prod?.unitCost * prod?.quantity;
-                //     //@ts-ignore
-                //     await prod?.save()
-                //   }
-                //   await createLog({
-                //     user:user._id,
-                //     activities:{
-                //       title:'Inventory',
-                //       //@ts-ignore
-                //       activity:`You recorded new inventories going out`,
-                //       time: new Date().toISOString()
-                //     }
-                //   });
-                // }
-                // await inventory.save();
+                // let num = await generateNumber(6)
+                let inv = yield this.inventory.find({ branch: user.branch }).sort({ grInit: -1 }).limit(1);
+                let initNum;
+                if (inv[0] == undefined) {
+                    initNum = 1;
+                }
+                else {
+                    initNum = inv[0].grInit + 1;
+                }
+                let init = "GRN";
+                // let str = ""+initNum
+                // let pad = "000000"
+                // let ans = pad.substring(0, pad.length - str.length) + str;
+                const num = token_1.padLeft(initNum, 6, "");
+                let grnNo = init + num;
+                inventory.grnNo = grnNo;
+                inventory.grInit = initNum;
+                let products = inventory.products;
+                if (inventory.direction == receivedProduct_1.productDirection.IN) {
+                    for (let product of products) {
+                        let prod = yield this.product.findOne({ partNumber: product.partNumber, branch: user.branch });
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.quantity += +product.passed;
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                        //@ts-ignore
+                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                    }
+                    yield logs_1.createLog({
+                        user: user._id,
+                        activities: {
+                            title: 'Inventory',
+                            //@ts-ignore
+                            activity: `You recorded new inventories coming in`,
+                            time: new Date().toISOString()
+                        }
+                    });
+                }
+                else if (inventory.direction == receivedProduct_1.productDirection.OUT) {
+                    for (let product of products) {
+                        let prod = yield this.product.findOne({ asnlNumber: product.partNumber, branch: user.branch });
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.quantity -= +product.quantity;
+                        //@ts-ignore
+                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                        //@ts-ignore
+                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                    }
+                    yield logs_1.createLog({
+                        user: user._id,
+                        activities: {
+                            title: 'Inventory',
+                            //@ts-ignore
+                            activity: `You recorded new inventories going out`,
+                            time: new Date().toISOString()
+                        }
+                    });
+                }
+                yield inventory.save();
                 return Promise.resolve(inventory);
             }
             catch (e) {
@@ -416,10 +478,10 @@ class Product extends module_1.default {
                     branch: user.branch
                 });
                 const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch }));
-                let init = "GRN";
-                let num = yield token_1.generateToken(6);
+                // let init = "GRN"
+                // let num = await generateToken(6);
                 //@ts-ignore
-                disbursement.grnNo = init + num.toString();
+                // disbursement.grnNo = init + num.toString();
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,

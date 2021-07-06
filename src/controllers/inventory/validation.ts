@@ -23,20 +23,19 @@ export class InventoryValidator extends Ctrl{
 
   static validateProduct():ValidationChain[]{
     const rules = [
-      check('itemDescription')
-        .exists()
-        .withMessage('provide item description'),
       check('equipmentModel')
         .exists()
         .withMessage('equipment Model required'),
       check('equipmentType'),
-      check('areaOfSpecialization'),
       check('asnlNumber')
         .exists()
         .withMessage('Provide ASNL number'),
       check('partNumber')
         .exists()
         .withMessage('Part Number is required'),
+      check('productName')
+        .exists()
+        .withMessage('product name is required'),
       check('quantity')
         .exists()
         .withMessage('quantity is required')

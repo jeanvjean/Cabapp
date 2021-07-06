@@ -110,6 +110,14 @@ export interface RegisteredCylinderInterface extends Document{
 
   holdingTime:Date
 
+  cylNo:number
+
+  purchaseCost:number
+
+  purchaseDate:number
+
+  supplier:Schema.Types.ObjectId
+
   /**
    * @param createdAt
    */
@@ -159,7 +167,15 @@ export const registerCylinderSchema = new Schema({
 
   holder:{type:String, enum:Object.values(cylinderHolder), default:cylinderHolder.ASNL},
 
-  cylinderStatus:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY}
+  cylinderStatus:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY},
+
+  cylNo:{type:Number},
+
+  purchaseCost:{type:Number},
+
+  purchaseDate:{type:Date},
+
+  supplier:{type:Schema.Types.ObjectId, ref:'supplier'}
 },{
   timestamps:true
 });

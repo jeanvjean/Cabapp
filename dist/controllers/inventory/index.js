@@ -308,6 +308,30 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    mrnStats() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.mrnStats(req.user);
+                this.ok(res, 'stats fetched ', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    grnStats() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.grnStats(req.user);
+                this.ok(res, 'stats fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchallProducts() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

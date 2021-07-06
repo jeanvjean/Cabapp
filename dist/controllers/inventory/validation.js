@@ -28,20 +28,19 @@ class InventoryValidator extends ctrl_1.default {
     }
     static validateProduct() {
         const rules = [
-            express_validator_1.check('itemDescription')
-                .exists()
-                .withMessage('provide item description'),
             express_validator_1.check('equipmentModel')
                 .exists()
                 .withMessage('equipment Model required'),
             express_validator_1.check('equipmentType'),
-            express_validator_1.check('areaOfSpecialization'),
             express_validator_1.check('asnlNumber')
                 .exists()
                 .withMessage('Provide ASNL number'),
             express_validator_1.check('partNumber')
                 .exists()
                 .withMessage('Part Number is required'),
+            express_validator_1.check('productName')
+                .exists()
+                .withMessage('product name is required'),
             express_validator_1.check('quantity')
                 .exists()
                 .withMessage('quantity is required')

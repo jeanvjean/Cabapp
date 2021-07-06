@@ -430,6 +430,10 @@ class Vehicle extends Module{
           let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
           //@ts-ignore
           cyl?.holder = cylinderHolder.SUPPLIER;
+          cyl?.tracking.push({
+            location:pickup.destination,
+            date:new Date().toISOString()
+          });
           await cyl?.save();
         }
       }else if(pickup?.orderType == pickupType.CUSTOMER && pickup.activity == RouteActivity.DELIVERY){
@@ -437,6 +441,10 @@ class Vehicle extends Module{
           let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
           //@ts-ignore
           cyl?.holder = cylinderHolder.CUSTOMER;
+          cyl?.tracking.push({
+            location:pickup.destination,
+            date:new Date().toISOString()
+          });
           await cyl?.save();
         }
       }else if(pickup?.activity == RouteActivity.PICKUP){
@@ -444,6 +452,10 @@ class Vehicle extends Module{
           let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
           //@ts-ignore
           cyl?.holder = cylinderHolder.ASNL;
+          cyl?.tracking.push({
+            location:pickup.destination,
+            date:new Date().toISOString()
+          });
           await cyl?.save();
         }
       }

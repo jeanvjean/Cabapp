@@ -23,6 +23,11 @@ export enum cylinderHolder {
   BRANCH = "other-branch"
 }
 
+export interface CylinderTracking{
+  location:string,
+  date:string
+}
+
 
 export interface RegisteredCylinderInterface extends Document{
   /**
@@ -108,6 +113,8 @@ export interface RegisteredCylinderInterface extends Document{
 
   department:string
 
+  tracking:CylinderTracking[]
+
   holdingTime:Date
 
   cylNo:number
@@ -131,6 +138,11 @@ export interface RegisteredCylinderInterface extends Document{
   updatedAt: Date
 
 }
+
+const trackingSchema = new Schema({
+  location:String,
+  date:Date
+});
 
 export const registerCylinderSchema = new Schema({
   cylinderType:{type:String, enum:Object.values(TypesOfCylinders), default:TypesOfCylinders.BUFFER},
@@ -175,7 +187,9 @@ export const registerCylinderSchema = new Schema({
 
   purchaseDate:{type:Date},
 
-  supplier:{type:Schema.Types.ObjectId, ref:'supplier'}
+  supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
+
+  tracking:[trackingSchema]
 },{
   timestamps:true
 });

@@ -19,6 +19,10 @@ var cylinderHolder;
     cylinderHolder["SUPPLIER"] = "supplier";
     cylinderHolder["BRANCH"] = "other-branch";
 })(cylinderHolder = exports.cylinderHolder || (exports.cylinderHolder = {}));
+const trackingSchema = new mongoose_1.Schema({
+    location: String,
+    date: Date
+});
 exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
     waterCapacity: { type: String },
@@ -41,7 +45,8 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     cylNo: { type: Number },
     purchaseCost: { type: Number },
     purchaseDate: { type: Date },
-    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' }
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
+    tracking: [trackingSchema]
 }, {
     timestamps: true
 });

@@ -367,6 +367,10 @@ class Vehicle extends module_1.default {
                         let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
                         //@ts-ignore
                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                            location: pickup.destination,
+                            date: new Date().toISOString()
+                        });
                         yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                     }
                 }
@@ -375,6 +379,10 @@ class Vehicle extends module_1.default {
                         let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
                         //@ts-ignore
                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                            location: pickup.destination,
+                            date: new Date().toISOString()
+                        });
                         yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                     }
                 }
@@ -383,6 +391,10 @@ class Vehicle extends module_1.default {
                         let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
                         //@ts-ignore
                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                            location: pickup.destination,
+                            date: new Date().toISOString()
+                        });
                         yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                     }
                 }

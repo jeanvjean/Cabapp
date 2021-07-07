@@ -290,7 +290,7 @@ class Product extends module_1.default {
                 let suppliers;
                 if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
                     //@ts-ignore
-                    suppliers = yield this.supplier.paginate({ branch: user.branch, $or: [{ supplierType: search }] }, options);
+                    suppliers = yield this.supplier.paginate({ branch: user.branch, $or: [{ supplierType: search }, { productType: search }] }, options);
                 }
                 else {
                     //@ts-ignore

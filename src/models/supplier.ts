@@ -41,7 +41,7 @@ export const supplierSchema = new Schema({
   productType:{type:String, enum:Object.values(ProductType)}
 });
 
-supplierSchema.index({supplierType:'text'})
+supplierSchema.index({supplierType:'text', productType:'text'});
 supplierSchema.plugin(mongoosePaginate);
 supplierSchema.plugin(aggregatePaginate);
 

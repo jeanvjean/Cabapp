@@ -25,7 +25,7 @@ exports.supplierSchema = new mongoose_1.Schema({
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     productType: { type: String, enum: Object.values(ProductType) }
 });
-exports.supplierSchema.index({ supplierType: 'text' });
+exports.supplierSchema.index({ supplierType: 'text', productType: 'text' });
 exports.supplierSchema.plugin(mongoosePaginate);
 exports.supplierSchema.plugin(aggregatePaginate);
 function factory(conn) {

@@ -388,7 +388,7 @@ class Product extends Module{
       let suppliers;
       if(search?.length !== undefined) {
         //@ts-ignore
-        suppliers = await this.supplier.paginate({branch:user.branch,$or:[{supplierType:search}]},options);
+        suppliers = await this.supplier.paginate({branch:user.branch,$or:[{supplierType:search}, {productType:search}]},options);
       }else{
         //@ts-ignore
         suppliers = await this.supplier.paginate({branch:user.branch},options);

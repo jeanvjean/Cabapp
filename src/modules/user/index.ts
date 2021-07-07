@@ -259,11 +259,18 @@ class User extends Module {
 
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
+      const { search } = query;
       let options = {
         ...query
       }
-      //@ts-ignore
-      let users = await this.user.paginate({},options);
+      let users;
+      if(search?.length !== undefined){
+        //@ts-ignore
+        users = await this.user.paginate({$or:[{role:search}, {subrole:search}, {branch:search}]},options);
+      }else {
+        //@ts-ignore
+        users = await this.user.paginate({},options);
+      }
       return users
     } catch (e) {
       this.handleException(e);
@@ -272,8 +279,19 @@ class User extends Module {
 
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
+      let { search } = query;
+      let options = {
+        ...query
+      }
       //@ts-ignore
-      let users = await this.user.paginate({branch:user.branch}, {...query});
+      let users;
+      if(search?.length !== undefined){
+        //@ts-ignore
+        users = await this.user.paginate({branch:user.branch, $or:[{role:search}, {subrole:search}, {branch:search}]},options);
+      }else {
+        //@ts-ignore
+        users = await this.user.paginate({branch:user.branch},options);
+      }
       return users;
     } catch (e) {
       this.handleException(e);

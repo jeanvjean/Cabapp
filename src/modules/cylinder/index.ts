@@ -675,6 +675,7 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
+      const {search} = query;
       let options = {
         ...query,
         populate:[
@@ -683,8 +684,23 @@ class Cylinder extends Module {
           {path:'gasType', model:'cylinder'}
         ]
       }
-      //@ts-ignore
-      const registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch },options);
+      var registeredCylinders;
+      if(search?.length !== undefined) {
+        //@ts-ignore
+        registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch, $or:
+          [
+            {gasType:search},
+            {gasVolumeContent:search},
+            {cylinderType:search},
+            {cylinderNumber:search},
+            {assignedNumber:search},
+            {dateManufactured:search}
+          ] },options);
+      } else {
+        //@ts-ignore
+        registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch },options);
+      }
+
       //@ts-ignore
       const cylinders = await this.registerCylinder.find({});
       const bufferCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);

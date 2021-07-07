@@ -516,13 +516,28 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 let options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'assignedTo', model: 'customer' },
                         { path: 'branch', model: 'branches' },
                         { path: 'gasType', model: 'cylinder' }
                     ] });
-                //@ts-ignore
-                const registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch }, options);
+                var registeredCylinders;
+                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
+                    //@ts-ignore
+                    registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch, $or: [
+                            { gasType: search },
+                            { gasVolumeContent: search },
+                            { cylinderType: search },
+                            { cylinderNumber: search },
+                            { assignedNumber: search },
+                            { dateManufactured: search }
+                        ] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch }, options);
+                }
                 //@ts-ignore
                 const cylinders = yield this.registerCylinder.find({});
                 const bufferCylinders = cylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);

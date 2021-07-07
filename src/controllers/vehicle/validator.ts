@@ -44,9 +44,7 @@ class VehicleValidator extends Ctrl{
         .withMessage('Acquisition date must be a date type'),
       check('mileageDate'),
       check('currMile'),
-      check('assignedTo')
-        .exists()
-        .withMessage('Assigned to is required select one'),
+      check('assignedTo'),
       check('vehCategory')
         .exists()
         .withMessage('vehicle category is required'),
@@ -59,17 +57,9 @@ class VehicleValidator extends Ctrl{
       check('fuelType')
         .exists()
         .withMessage('Enter fuel type'),
-      check('grossHeight')
-        .exists()
-        .withMessage('gross height is required'),
-      check('netWeight')
-        .exists()
-        .withMessage('Net height is required'),
-      check('disposal')
-        .exists()
-        .withMessage('Disposal object is required')
-        .isJSON()
-        .withMessage('this field has to be an object')
+      check('grossWeight'),
+      check('netWeight'),
+      check('disposal'),
     ]
     return rules;
   }

@@ -71,14 +71,14 @@ export interface VehicleInterface extends Document{
   vModel:string
   regNo:string
   acqisistionDate:Date
-  mileageDate:Date
+  mileageDate?:Date
   currMile:string
   assignedTo:Schema.Types.ObjectId//driver
   vehCategory:string
   tankCapacity:string
   batteryCapacity:string
   fuelType:string
-  grossHeight:string
+  grossWeight:string
   netWeight:string
   disposal:Disposal
   maintainace:Maintainance[]

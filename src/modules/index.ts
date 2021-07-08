@@ -76,7 +76,8 @@ export const vehicle = new VehicleModule({
   pickup:PickupRoutes,
   user:User,
   activity:Activity,
-  registerCylinder:RegisteredCylinder
+  registerCylinder:RegisteredCylinder,
+  branch:Branch
 });
 
 export const driver = new DriverModule({

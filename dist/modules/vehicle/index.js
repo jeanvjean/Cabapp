@@ -18,6 +18,8 @@ const logs_1 = require("../../util/logs");
 const order_1 = require("../../models/order");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
 const token_1 = require("../../util/token");
+const schedule = require("node-schedule");
+const resolve_template_1 = require("../../util/resolve-template");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
@@ -26,11 +28,15 @@ class Vehicle extends module_1.default {
         this.user = props.user;
         this.activity = props.activity;
         this.registerCylinder = props.registerCylinder;
+        this.branch = props.branch;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const vehicle = yield this.vehicle.create(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                let branch = yield this.branch.findById(vehicle.branch).populate([
+                    { path: 'branchAdmin', model: "User" }
+                ]);
                 yield logs_1.createLog({
                     user: user._id,
                     activities: {
@@ -39,6 +45,70 @@ class Vehicle extends module_1.default {
                         time: new Date().toISOString()
                     }
                 });
+                let date = new Date(vehicle.insuranceDate);
+                let firstDate = date.setDate(date.getDate() - +14);
+                let secondDate = date.setDate(date.getDate() - +7);
+                let thirdDate = date.setDate(date.getDate() - +1);
+                schedule.scheduleJob(new Date(firstDate), function (id) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const html = yield resolve_template_1.getTemplate('licencenotice', {
+                            date: vehicle.insuranceDate,
+                            remaining: 14,
+                            registration: vehicle.regNo,
+                            vehicleType: vehicle.vehicleType,
+                            model: vehicle.vModel,
+                            //@ts-ignore
+                            name: branch.branchAdmin.name
+                        });
+                        let payload = {
+                            content: html,
+                            subject: 'Vehicle licence notification',
+                            //@ts-ignore
+                            email: branch.branchAdmin.email
+                        };
+                        new mail_1.default().sendMail(payload);
+                    });
+                }.bind(null, vehicle._id));
+                schedule.scheduleJob(new Date(secondDate), function (id) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const html = yield resolve_template_1.getTemplate('licencenotice', {
+                            date: vehicle.insuranceDate,
+                            remaining: 7,
+                            registration: vehicle.regNo,
+                            vehicleType: vehicle.vehicleType,
+                            model: vehicle.vModel,
+                            //@ts-ignore
+                            name: branch.branchAdmin.name
+                        });
+                        let payload = {
+                            content: html,
+                            subject: 'Vehicle licence notification',
+                            //@ts-ignore
+                            email: branch.branchAdmin.email
+                        };
+                        new mail_1.default().sendMail(payload);
+                    });
+                }.bind(null, vehicle._id));
+                schedule.scheduleJob(new Date(firstDate), function (id) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const html = yield resolve_template_1.getTemplate('licencenotice', {
+                            date: vehicle.insuranceDate,
+                            remaining: 1,
+                            registration: vehicle.regNo,
+                            vehicleType: vehicle.vehicleType,
+                            model: vehicle.vModel,
+                            //@ts-ignore
+                            name: branch.branchAdmin.name
+                        });
+                        let payload = {
+                            content: html,
+                            subject: 'Vehicle licence notification',
+                            //@ts-ignore
+                            email: branch.branchAdmin.email
+                        };
+                        new mail_1.default().sendMail(payload);
+                    });
+                }.bind(null, vehicle._id));
                 return Promise.resolve(vehicle);
             }
             catch (e) {

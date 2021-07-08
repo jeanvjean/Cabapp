@@ -1,6 +1,7 @@
 import { Model } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { PickupInterface } from "../../models/driverPickup";
+import { BranchInterface } from "../../models/branch";
 import { UserInterface } from "../../models/user";
 import { Disposal, InspectApproval, Maintainance, maintType, RecordRoute, RouteActivity, VehicleInterface } from "../../models/vehicle";
 import Module, { QueryInterface } from "../module";
@@ -11,6 +12,8 @@ import { ActivityLogInterface } from "../../models/logs";
 import { pickupType } from "../../models/order";
 import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { generateToken } from "../../util/token";
+import * as schedule from 'node-schedule'
+import { getTemplate } from '../../util/resolve-template';
 
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
@@ -18,6 +21,7 @@ interface vehicleProps{
   user:Model<UserInterface>
   activity:Model<ActivityLogInterface>,
   registerCylinder:Model<RegisteredCylinderInterface>
+  branch:Model<BranchInterface>
 }
 
 type NewVehicle = {
@@ -102,6 +106,7 @@ class Vehicle extends Module{
   private user:Model<UserInterface>
   private activity:Model<ActivityLogInterface>
   private registerCylinder:Model<RegisteredCylinderInterface>
+  private branch:Model<BranchInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -110,10 +115,14 @@ class Vehicle extends Module{
     this.user = props.user
     this.activity = props.activity
     this.registerCylinder = props.registerCylinder
+    this.branch = props.branch
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
       const vehicle = await this.vehicle.create({...data, branch:user.branch});
+      let branch = await this.branch.findById(vehicle.branch).populate([
+        {path:'branchAdmin', model:"User"}
+      ]);
       await createLog({
         user:user._id,
         activities:{
@@ -122,6 +131,73 @@ class Vehicle extends Module{
           time: new Date().toISOString()
         }
       });
+      let date = new Date(vehicle.insuranceDate);
+      let firstDate = date.setDate(date.getDate() - +14);
+      let secondDate = date.setDate(date.getDate() - +7);
+      let thirdDate = date.setDate(date.getDate() - +1);
+      schedule.scheduleJob(
+        new Date(firstDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:vehicle.insuranceDate,
+            remaining:14,
+            registration:vehicle.regNo,
+            vehicleType:vehicle.vehicleType,
+            model:vehicle.vModel,
+            //@ts-ignore
+            name:branch.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, vehicle._id)
+      );
+      schedule.scheduleJob(
+        new Date(secondDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:vehicle.insuranceDate,
+            remaining:7,
+            registration:vehicle.regNo,
+            vehicleType:vehicle.vehicleType,
+            model:vehicle.vModel,
+            //@ts-ignore
+            name:branch.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, vehicle._id)
+      );
+      schedule.scheduleJob(
+        new Date(firstDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:vehicle.insuranceDate,
+            remaining:1,
+            registration:vehicle.regNo,
+            vehicleType:vehicle.vehicleType,
+            model:vehicle.vModel,
+            //@ts-ignore
+            name:branch.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, vehicle._id)
+      )
       return Promise.resolve(vehicle);
     } catch (e) {
       this.handleException(e);

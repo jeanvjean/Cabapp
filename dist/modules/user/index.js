@@ -75,6 +75,7 @@ class User extends module_1.default {
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
+                                email: user.email,
                                 link: `${static_1.default.FRONTEND_URL}`,
                                 //@ts-ignore
                                 branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
@@ -105,6 +106,7 @@ class User extends module_1.default {
                                 const html = yield resolve_template_1.getTemplate('invite', {
                                     team: user.role,
                                     role: user.subrole,
+                                    email: user.email,
                                     link: `${static_1.default.FRONTEND_URL}`,
                                     //@ts-ignore
                                     branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
@@ -128,6 +130,7 @@ class User extends module_1.default {
                             const html = yield resolve_template_1.getTemplate('invite', {
                                 team: user.role,
                                 role: user.subrole,
+                                email: user.email,
                                 link: `${static_1.default.FRONTEND_URL}`,
                                 //@ts-ignore
                                 branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
@@ -175,9 +178,17 @@ class User extends module_1.default {
     fetchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 let options = Object.assign({}, query);
-                //@ts-ignore
-                let users = yield this.user.paginate({}, options);
+                let users;
+                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
+                    //@ts-ignore
+                    users = yield this.user.paginate({ $or: [{ role: search }, { subrole: search }, { branch: search }] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    users = yield this.user.paginate({}, options);
+                }
                 return users;
             }
             catch (e) {
@@ -188,8 +199,18 @@ class User extends module_1.default {
     branchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let { search } = query;
+                let options = Object.assign({}, query);
                 //@ts-ignore
-                let users = yield this.user.paginate({ branch: user.branch }, Object.assign({}, query));
+                let users;
+                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
+                    //@ts-ignore
+                    users = yield this.user.paginate({ branch: user.branch, $or: [{ role: search }, { subrole: search }, { branch: search }] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    users = yield this.user.paginate({ branch: user.branch }, options);
+                }
                 return users;
             }
             catch (e) {

@@ -167,6 +167,7 @@ class User extends Module {
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
+                    email:user.email,
                     link:`${Environment.FRONTEND_URL}`,
                     //@ts-ignore
                     branch:branch?.branch.name,
@@ -195,6 +196,7 @@ class User extends Module {
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,
+                    email:user.email,
                     link:`${Environment.FRONTEND_URL}`,
                     //@ts-ignore
                     branch:branch?.branch.name,
@@ -216,6 +218,7 @@ class User extends Module {
             const html = await getTemplate('invite', {
               team: user.role,
               role:user.subrole,
+              email:user.email,
               link:`${Environment.FRONTEND_URL}`,
               //@ts-ignore
               branch:branch?.branch.name,

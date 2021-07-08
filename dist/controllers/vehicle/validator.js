@@ -46,9 +46,7 @@ class VehicleValidator extends ctrl_1.default {
                 .withMessage('Acquisition date must be a date type'),
             express_validator_1.check('mileageDate'),
             express_validator_1.check('currMile'),
-            express_validator_1.check('assignedTo')
-                .exists()
-                .withMessage('Assigned to is required select one'),
+            express_validator_1.check('assignedTo'),
             express_validator_1.check('vehCategory')
                 .exists()
                 .withMessage('vehicle category is required'),
@@ -61,17 +59,9 @@ class VehicleValidator extends ctrl_1.default {
             express_validator_1.check('fuelType')
                 .exists()
                 .withMessage('Enter fuel type'),
-            express_validator_1.check('grossHeight')
-                .exists()
-                .withMessage('gross height is required'),
-            express_validator_1.check('netWeight')
-                .exists()
-                .withMessage('Net height is required'),
-            express_validator_1.check('disposal')
-                .exists()
-                .withMessage('Disposal object is required')
-                .isJSON()
-                .withMessage('this field has to be an object')
+            express_validator_1.check('grossWeight'),
+            express_validator_1.check('netWeight'),
+            express_validator_1.check('disposal'),
         ];
         return rules;
     }

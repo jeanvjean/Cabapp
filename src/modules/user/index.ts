@@ -153,6 +153,7 @@ class User extends Module {
 
   public async inviteUser(data:inviteUserInput, userInfo:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
     try {
+      // new Notify().fetchData()
       const branch = await this.user.findById(userInfo._id).populate({
         path:'branch', model:'branches'
       });
@@ -269,12 +270,12 @@ class User extends Module {
       let users;
       if(search?.length !== undefined){
         //@ts-ignore
-        users = await this.user.paginate({$or:[{role:search}, {subrole:search}, {branch:search}]},options);
+        users = await this.user.paginate({$or:[{role:search}, {subrole:search}]},options);
       }else {
         //@ts-ignore
         users = await this.user.paginate({},options);
       }
-      return users
+      return Promise.resolve(users)
     } catch (e) {
       this.handleException(e);
     }
@@ -282,7 +283,7 @@ class User extends Module {
 
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
-      let { search } = query;
+      const { search } = query;
       let options = {
         ...query
       }
@@ -290,12 +291,12 @@ class User extends Module {
       let users;
       if(search?.length !== undefined){
         //@ts-ignore
-        users = await this.user.paginate({branch:user.branch, $or:[{role:search}, {subrole:search}, {branch:search}]},options);
+        users = await this.user.paginate({branch:user.branch,$or:[{role:search}, {subrole:search}]},options);
       }else {
         //@ts-ignore
         users = await this.user.paginate({branch:user.branch},options);
       }
-      return users;
+      return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
     }
@@ -538,14 +539,24 @@ class User extends Module {
 
   public async suspendUser(data:SuspendUserInput, user:UserInterface):Promise<suspendUserResponse|undefined>{
     try{
-      const user = await this.user.findById(data.userId);
-      if(!user) {
+      const suspendUser = await this.user.findById(data.userId);
+      if(!suspendUser) {
         throw new BadInputFormatException('user not found');
       }
-      let updatedUser = await this.user.findByIdAndUpdate(user._id,{deactivated:data.suspend}, {new:true});
+      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:data.suspend}, {new:true});
       //@ts-ignore
-      let message = updatedUser.deactivated? 'suspended' : 're-activated';
-
+      let message = updatedUser.deactivated? `suspended` : 're-activated';
+      const html = await getTemplate('suspend', {
+        name: suspendUser.name,
+        officer:user.name,
+        action:message
+      });
+      let mailLoad = {
+        content:html,
+        subject:'Account suspension',
+        email:suspendUser.email,
+      }
+      new Notify().sendMail(mailLoad);
       return Promise.resolve({
         message,
         user

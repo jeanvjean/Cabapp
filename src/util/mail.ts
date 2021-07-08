@@ -208,6 +208,16 @@ class NotificationModule extends Module {
             }
 		}
 	}
+
+  public fetchData(){
+    const db = firebase.database();
+    const ref = db.ref('https://asnl-1f533-default-rtdb.firebaseio.com');
+    ref.on('value', (snapshot:any) => {
+      console.log(snapshot.val());
+    }, (errorObject:Error) => {
+      console.log('The read failed: ' + errorObject.name);
+    });
+  }
 }
 
 export default NotificationModule

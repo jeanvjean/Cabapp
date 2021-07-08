@@ -61,6 +61,7 @@ class User extends module_1.default {
     inviteUser(data, userInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                // new Notify().fetchData()
                 const branch = yield this.user.findById(userInfo._id).populate({
                     path: 'branch', model: 'branches'
                 });
@@ -183,13 +184,13 @@ class User extends module_1.default {
                 let users;
                 if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
                     //@ts-ignore
-                    users = yield this.user.paginate({ $or: [{ role: search }, { subrole: search }, { branch: search }] }, options);
+                    users = yield this.user.paginate({ $or: [{ role: search }, { subrole: search }] }, options);
                 }
                 else {
                     //@ts-ignore
                     users = yield this.user.paginate({}, options);
                 }
-                return users;
+                return Promise.resolve(users);
             }
             catch (e) {
                 this.handleException(e);
@@ -199,19 +200,19 @@ class User extends module_1.default {
     branchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let { search } = query;
+                const { search } = query;
                 let options = Object.assign({}, query);
                 //@ts-ignore
                 let users;
                 if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
                     //@ts-ignore
-                    users = yield this.user.paginate({ branch: user.branch, $or: [{ role: search }, { subrole: search }, { branch: search }] }, options);
+                    users = yield this.user.paginate({ branch: user.branch, $or: [{ role: search }, { subrole: search }] }, options);
                 }
                 else {
                     //@ts-ignore
                     users = yield this.user.paginate({ branch: user.branch }, options);
                 }
-                return users;
+                return Promise.resolve(users);
             }
             catch (e) {
                 this.handleException(e);
@@ -452,13 +453,24 @@ class User extends module_1.default {
     suspendUser(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const user = yield this.user.findById(data.userId);
-                if (!user) {
+                const suspendUser = yield this.user.findById(data.userId);
+                if (!suspendUser) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
-                let updatedUser = yield this.user.findByIdAndUpdate(user._id, { deactivated: data.suspend }, { new: true });
+                let updatedUser = yield this.user.findByIdAndUpdate(suspendUser._id, { deactivated: data.suspend }, { new: true });
                 //@ts-ignore
-                let message = updatedUser.deactivated ? 'suspended' : 're-activated';
+                let message = updatedUser.deactivated ? `suspended` : 're-activated';
+                const html = yield resolve_template_1.getTemplate('suspend', {
+                    name: suspendUser.name,
+                    officer: user.name,
+                    action: message
+                });
+                let mailLoad = {
+                    content: html,
+                    subject: 'Account suspension',
+                    email: suspendUser.email,
+                };
+                new mail_1.default().sendMail(mailLoad);
                 return Promise.resolve({
                     message,
                     user

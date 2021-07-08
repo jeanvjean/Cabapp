@@ -12,7 +12,6 @@
     <div class="email" style="display: flex; align-items: center; justify-content: center; text-align:center">
         <div class="main" style="width: 100%; background-color: white; display: flexbox; align-items: center;">
             <div style="align-items: center;">
-
                   <div class="head" style="
                   display: flexbox;
                   align-items: center;
@@ -32,7 +31,7 @@
                               text-transform: uppercase;
                               font-weight: 600;
                               font-size: 0.7rem;"
-                            >Registeration</span>
+                            > <b>{{action}}</b> </span>
                         </div>
 
                         <!-- <h1 style="font-size: 2.5rem;
@@ -48,11 +47,11 @@
                   line-height: 1.625;
                   color: #2f2d2d;"
                 >
-                    <p>Hi</p>
+                    <p>Hi {{name}}</p>
 
-                    <p> You have successfully registered your admin account and can now invite other users. </p>
+                    <p> Your account has been {{action}} by {{officer}} contact admin for more information</p>
                         <p>Regards... ASNL team</p>
-                    <div class="action" style="width: 100%;display: flex;align-items: center;justify-content: center;">
+                    <!-- <div class="action" style="width: 100%;display: flex;align-items: center;justify-content: center;">
                         <button style="
                           margin: 25px 0;
                           background-color: #5C53FF;color: white;
@@ -63,9 +62,9 @@
                           font-weight: 600;
                           font-size: 1rem;"
                         >
-                          <a href={{link}}>Complete registeration</a>
+                          <a href={{link}}>Reset Password</a>
                         </button>
-                    </div>
+                    </div> -->
 
                     <p class="footnote" style="
                       font-size: 0.6rem;
@@ -85,7 +84,6 @@
                     </p>
 
                 </div>
-
             </div>
         </div>
 
@@ -95,4 +93,5 @@
 </body>
 
 </html>
+
 

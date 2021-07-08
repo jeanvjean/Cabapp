@@ -76,6 +76,7 @@ exports.userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.userSchema.index({ role: 'text', subrole: 'text' });
 exports.userSchema.plugin(mongoosePaginator);
 exports.userSchema.methods.comparePWD = function (value) {
     return __awaiter(this, void 0, void 0, function* () {

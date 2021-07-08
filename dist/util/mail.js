@@ -173,6 +173,15 @@ class NotificationModule extends module_1.default {
             }
         });
     }
+    fetchData() {
+        const db = firebase.database();
+        const ref = db.ref('https://asnl-1f533-default-rtdb.firebaseio.com');
+        ref.on('value', (snapshot) => {
+            console.log(snapshot.val());
+        }, (errorObject) => {
+            console.log('The read failed: ' + errorObject.name);
+        });
+    }
 }
 exports.default = NotificationModule;
 //# sourceMappingURL=mail.js.map

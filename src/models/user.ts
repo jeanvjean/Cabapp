@@ -143,6 +143,8 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
    timestamps:true
  });
 
+ userSchema.index({role:'text', subrole:'text'});
+
  userSchema.plugin(mongoosePaginator);
 
  userSchema.methods.comparePWD = async function(

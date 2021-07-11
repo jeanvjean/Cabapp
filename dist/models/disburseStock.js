@@ -25,6 +25,7 @@ exports.disburseSchema = new mongoose_1.Schema({
     comments: [transferCylinder_1.commentSchema],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval) },
+    requestDepartment: { type: String },
     disburseStatus: { type: String, enum: Object.values(transferCylinder_1.TransferStatus) },
     requestStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval) },
     requestApproval: { type: String, enum: Object.values(transferCylinder_1.TransferStatus) },

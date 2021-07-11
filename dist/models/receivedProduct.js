@@ -36,7 +36,10 @@ exports.inventorySchema = new mongoose_1.Schema({
     direction: { type: String, enum: Object.values(productDirection) },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     grnNo: { type: String },
-    grInit: { type: Number }
+    grInit: { type: Number },
+    requestDepartment: { type: String }
+}, {
+    timestamps: true
 });
 exports.inventorySchema.plugin(mongoosePaginate);
 exports.inventorySchema.plugin(aggregatePaginate);

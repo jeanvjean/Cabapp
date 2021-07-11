@@ -470,16 +470,40 @@ class Product extends module_1.default {
     fetchInventories(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'inspectingOfficer', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                const aggregate = this.inventory.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { direction: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { LPOnumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { invoiceNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.productName': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const inventories = yield this.inventory.paginate({ branch: user.branch }, Object.assign({}, query));
-                //@ts-ignore
-                const issuedOut = yield this.inventory.paginate({ branch: user.branch, direction: receivedProduct_1.productDirection.OUT }, Object.assign({}, query));
-                //@ts-ignore
-                const recieved = yield this.inventory.paginate({ branch: user.branch, direction: receivedProduct_1.productDirection.IN }, Object.assign({}, query));
+                const inventories = yield this.inventory.aggregatePaginate(aggregate, options);
                 return Promise.resolve({
-                    inventory: inventories,
-                    issuedOut,
-                    recieved
+                    inventory: inventories
                 });
             }
             catch (e) {
@@ -506,7 +530,7 @@ class Product extends module_1.default {
                     subrole: 'head of department',
                     branch: user.branch
                 });
-                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch }));
+                const disbursement = new this.disburse(Object.assign(Object.assign({}, data), { nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod._id, initiator: user._id, branch: user.branch, requestDepartment: user.role }));
                 // let init = "GRN"
                 // let num = await generateToken(6);
                 //@ts-ignore
@@ -1061,6 +1085,8 @@ class Product extends module_1.default {
     fetchusersDisburseApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
@@ -1069,12 +1095,28 @@ class Product extends module_1.default {
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
                     ] });
+                const aggregate = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { disburseStatus: transferCylinder_1.TransferStatus.PENDING },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
+                                { fromBranch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({
-                    fromBranch: user.branch,
-                    nextApprovalOfficer: user._id,
-                    ApprovalStatus: transferCylinder_1.TransferStatus.PENDING
-                }, options);
+                const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -1132,6 +1174,8 @@ class Product extends module_1.default {
     fetchusersDisburseRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
@@ -1140,12 +1184,28 @@ class Product extends module_1.default {
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
                     ] });
+                const aggregate = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { requestApproval: transferCylinder_1.TransferStatus.PENDING },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const disbursement = yield this.disburse.paginate({
-                    branch: user.branch,
-                    nextApprovalOfficer: user._id,
-                    requestApproval: transferCylinder_1.TransferStatus.PENDING
-                }, options);
+                const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
                 //   console.log(disbursement)
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1222,8 +1282,62 @@ class Product extends module_1.default {
     fetchDisburseRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { disburseStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { fromBranch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { fromBranch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else {
+                    aggregate = aggregate2;
+                }
                 //@ts-ignore
-                const disbursements = yield this.disburse.paginate({ branch: user.branch }, Object.assign({}, query));
+                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
                 let totalApproved = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1243,8 +1357,62 @@ class Product extends module_1.default {
     fetchProductRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { disburseStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else {
+                    aggregate = aggregate2;
+                }
                 //@ts-ignore
-                const disbursements = yield this.disburse.paginate({ branch: user.branch }, Object.assign({}, query));
+                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
                 let totalApproved = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1264,8 +1432,78 @@ class Product extends module_1.default {
     disburseReport(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
+                const aggregate = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { disburseStatus: transferCylinder_1.TransferStatus.COMPLETED },
+                                { fromBranch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const disbursements = yield this.disburse.paginate({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
+                return Promise.resolve(disbursements);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    restockReport(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'nextApprovalOffice', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'releasedTo', model: 'User' },
+                        { path: 'releasedBy', model: 'User' }
+                    ] });
+                const aggregate = this.disburse.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { mrn: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { disburseStatus: transferCylinder_1.TransferStatus.COMPLETED },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                //@ts-ignore
+                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
                 return Promise.resolve(disbursements);
             }
             catch (e) {

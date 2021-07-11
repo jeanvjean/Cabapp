@@ -43,6 +43,7 @@ export interface DisburseProductInterface extends Document{
   requestApproval:TransferStatus
   requestStage:stagesOfApproval,
   initiator:Schema.Types.ObjectId
+  requestDepartment:string
   inspectingOfficer:Schema.Types.ObjectId
   jobTag:string
   customer:Schema.Types.ObjectId
@@ -72,6 +73,7 @@ export const disburseSchema = new Schema({
   comments:[commentSchema],
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval)},
+  requestDepartment:{type:String},
   disburseStatus:{type:String, enum:Object.values(TransferStatus)},
   requestStage:{type:String, enum:Object.values(stagesOfApproval)},
   requestApproval:{type:String, enum:Object.values(TransferStatus)},

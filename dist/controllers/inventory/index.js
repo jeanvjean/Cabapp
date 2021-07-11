@@ -156,6 +156,18 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    restockReport() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.restockReport(req.query, req.user);
+                this.ok(res, 'restock report fetched successfully', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchUserDisburseRequests() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

@@ -120,8 +120,6 @@ interface NewBranchInterface{
 
 interface InventoryPoolResponse {
   inventory:InventoryInterface[]
-  issuedOut:InventoryInterface[]
-  recieved:InventoryInterface[]
 }
 
 
@@ -559,17 +557,43 @@ class Product extends Module{
 
   public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'inspectingOfficer', model:'User'},
+          {path:'branch', model:'branches'}
+        ]
+      }
+      const aggregate = this.inventory.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                    {direction:{
+                      $regex: search?.toLowerCase() || ''
+                    }},{grnNo:{
+                      $regex: search?.toLowerCase() || ''
+                    }},{LPOnumber:{
+                      $regex: search?.toLowerCase() || ''
+                    }},{invoiceNumber:{
+                      $regex:search?.toLowerCase() || ''
+                    }},{'products.productName':{
+                      $regex:search?.toLowerCase() || ''
+                    }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
       //@ts-ignore
-      const inventories = await this.inventory.paginate({ branch:user.branch },{...query});
-      //@ts-ignore
-      const issuedOut = await this.inventory.paginate({ branch:user.branch, direction: productDirection.OUT},{...query});
-      //@ts-ignore
-      const recieved =  await this.inventory.paginate({ branch:user.branch, direction: productDirection.IN},{...query});
-
+      const inventories = await this.inventory.aggregatePaginate(aggregate, options);
       return Promise.resolve({
-          inventory:inventories,
-          issuedOut,
-          recieved
+          inventory:inventories
         });
     } catch (e) {
       this.handleException(e);
@@ -596,7 +620,8 @@ class Product extends Module{
         ...data,
         nextApprovalOfficer:hod?._id,
         initiator:user._id,
-        branch:user.branch
+        branch:user.branch,
+        requestDepartment:user.role
       });
       // let init = "GRN"
       // let num = await generateToken(6);
@@ -1147,6 +1172,8 @@ class Product extends Module{
 
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
       const options = {
         ...query,
         populate:[
@@ -1158,12 +1185,28 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
+      const aggregate = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {disburseStatus:TransferStatus.PENDING},
+              {nextApprovalOfficer:ObjectId(user._id.toString())},
+              {fromBranch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({
-        fromBranch:user.branch,
-        nextApprovalOfficer:user._id,
-        ApprovalStatus:TransferStatus.PENDING
-      },options);
+      const disbursement = await this.disburse.aggregatePaginate(aggregate,options);
 
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -1220,6 +1263,8 @@ class Product extends Module{
 
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
       const options = {
         ...query,
         populate:[
@@ -1231,12 +1276,28 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
+      const aggregate = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {requestApproval:TransferStatus.PENDING},
+              {nextApprovalOfficer:ObjectId(user._id.toString())},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
       //@ts-ignore
-      const disbursement = await this.disburse.paginate({
-         branch:user.branch,
-         nextApprovalOfficer:user._id,
-         requestApproval:TransferStatus.PENDING
-        },options);
+      const disbursement = await this.disburse.aggregatePaginate(aggregate, options);
       //   console.log(disbursement)
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1309,8 +1370,64 @@ class Product extends Module{
 
   public async fetchDisburseRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {disburseStatus: filter?.toLowerCase()},
+              {fromBranch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {fromBranch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else {
+        aggregate = aggregate2
+      }
       //@ts-ignore
-      const disbursements = await this.disburse.paginate({branch:user.branch},{...query});
+      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
 
       let totalApproved = await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.COMPLETED});
     let totalPending =  await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.PENDING});
@@ -1329,28 +1446,160 @@ class Product extends Module{
 
   public async fetchProductRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try{
-      //@ts-ignore
-      const disbursements = await this.disburse.paginate({branch:user.branch},{...query});
-      let totalApproved = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.COMPLETED});
-    let totalPending = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.PENDING});
-    return Promise.resolve({
-      disburse:disbursements,
-      count:{
-        totalApproved:totalApproved.length | 0,
-        totalPending:totalPending.length | 0,
-        totalDisbursements:disbursements.length|0
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
       }
-    });
+      let aggregate;
+      const aggregate1 = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {disburseStatus: filter?.toLowerCase()},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else {
+        aggregate = aggregate2
+      }
+      //@ts-ignore
+      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+
+      let totalApproved = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.COMPLETED});
+      let totalPending = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.PENDING});
+      return Promise.resolve({
+        disburse:disbursements,
+        count:{
+          totalApproved:totalApproved.length | 0,
+          totalPending:totalPending.length | 0,
+          totalDisbursements:disbursements.length|0
+        }
+      });
     }catch(e){
       this.handleException(e);
     }
   }
 
-
   public async disburseReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
+      }
+
+      const aggregate = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {disburseStatus:TransferStatus.COMPLETED},
+              {fromBranch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
       //@ts-ignore
-      const disbursements = await this.disburse.paginate({branch:user.branch, disburseStatus:TransferStatus.COMPLETED},{...query});
+      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+      return Promise.resolve(disbursements);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async restockReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
+    try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'nextApprovalOffice', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'customer', model:'customer'},
+          {path:'releasedTo', model:'User'},
+          {path:'releasedBy', model:'User'}
+        ]
+      }
+
+      const aggregate = this.disburse.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {grnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},{mrn:{
+                  $regex: search?.toLowerCase() || ''
+                }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {disburseStatus:TransferStatus.COMPLETED},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      //@ts-ignore
+      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
       return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);

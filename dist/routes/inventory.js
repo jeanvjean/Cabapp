@@ -21,6 +21,7 @@ router.get('/fetch-pending-disburse-requests', auth.verify(), controllers_1.prod
 router.get('/fetch-disburse-requests', auth.verify(), controllers_1.productCtrl.fetchDisbursements());
 router.get('/fetch-disbursement/:id', controllers_1.productCtrl.fetchDisbursement());
 router.get('/fetch-disbursement-report', auth.verify(), controllers_1.productCtrl.disburseReport());
+router.get('/fetch-restock-report', auth.verify(), controllers_1.productCtrl.restockReport());
 router.post('/create-branch', controllers_1.productCtrl.createBranch());
 router.get('/fetch-branches', controllers_1.productCtrl.fetchBranches());
 router.get('/fetch-suppliers', auth.verify(), controllers_1.productCtrl.fetchSuppliers());

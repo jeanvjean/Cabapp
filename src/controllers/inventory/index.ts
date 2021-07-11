@@ -151,6 +151,18 @@ class ProductCtrl extends Ctrl{
     }
   }
 
+  restockReport():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        //@ts-ignore
+        const data = await this.module.restockReport(req.query, req.user);
+        this.ok(res, 'restock report fetched successfully', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchUserDisburseRequests():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

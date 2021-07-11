@@ -96,6 +96,12 @@ router.get(
   productCtrl.disburseReport()
 );
 
+router.get(
+  '/fetch-restock-report',
+  auth.verify(),
+  productCtrl.restockReport()
+);
+
 router.post(
   '/create-branch',
   productCtrl.createBranch()

@@ -41,6 +41,7 @@ export interface ReceivedProduct {
   totalAvailable?:number,
   equipmentModel?:string,
   equipmentType?:string
+  requestDepartment:string
 }
 
 export const productRecievedSchema = new Schema({
@@ -71,7 +72,10 @@ export const inventorySchema = new Schema({
   direction:{type:String, enum:Object.values(productDirection)},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   grnNo:{type:String},
-  grInit:{type:Number}
+  grInit:{type:Number},
+  requestDepartment:{type:String}
+},{
+  timestamps:true
 });
 
 inventorySchema.plugin(mongoosePaginate);

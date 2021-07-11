@@ -4,6 +4,7 @@ exports.saleCylinderSchema = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.saleCylinderSchema = new mongoose_1.Schema({
     noOfCylinders: Number,
     volume: String,
@@ -28,6 +29,7 @@ const salesReqSchema = new mongoose_1.Schema({
     timestamps: true
 });
 salesReqSchema.plugin(mongoosePaginate);
+salesReqSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('sales-requisition', salesReqSchema);
 }

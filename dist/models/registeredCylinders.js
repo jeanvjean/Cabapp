@@ -4,6 +4,7 @@ exports.registerCylinderSchema = exports.cylinderHolder = exports.TypesOfCylinde
 const mongoose_1 = require("mongoose");
 const cylinder_1 = require("./cylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const walk_in_customers_1 = require("./walk-in-customers");
 var TypesOfCylinders;
 (function (TypesOfCylinders) {
@@ -51,6 +52,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     timestamps: true
 });
 exports.registerCylinderSchema.plugin(mongoosePaginate);
+exports.registerCylinderSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('registered-cylinders', exports.registerCylinderSchema);
 }

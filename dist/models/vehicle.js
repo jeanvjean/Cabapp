@@ -4,6 +4,7 @@ exports.vehicleSchema = exports.RoutePlanStatus = exports.RouteActivity = export
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var maintType;
 (function (maintType) {
     maintType["CORRECTIVE"] = "corrective";
@@ -86,6 +87,7 @@ exports.vehicleSchema = new mongoose_1.Schema({
     timestamps: true
 });
 exports.vehicleSchema.plugin(mongoosePaginate);
+exports.vehicleSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('vehicle', exports.vehicleSchema);
 }

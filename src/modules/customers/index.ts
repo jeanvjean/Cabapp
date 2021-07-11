@@ -6,7 +6,7 @@ import { OrderInterface, PickupStatus, pickupType, trackingOrder } from "../../m
 import { ApprovalStatus, stagesOfApproval, TransferStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { WalkinCustomerInterface, WalkinCustomerStatus } from "../../models/walk-in-customers";
-import { ApprovalInput } from "../cylinder";
+import { ApprovalInput, mongoose } from "../cylinder";
 import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
@@ -92,21 +92,11 @@ type newWalkinCustomer = {
 }
 
 type vehicleOrderResponse = {
-  supplier:OrderInterface[],
-  customer:OrderInterface[],
-  completed:{
-    customers:OrderInterface[],
-    suppliers:OrderInterface[],
-  }
+  orders:OrderInterface[],
 }
 
 type fetchPickupOrderRersponse = {
-  supplierOrders?:OrderInterface[],
-  customerOrders?:OrderInterface[],
-  completedOrders?:{
-    customers:OrderInterface[],
-    suppliers:OrderInterface[],
-  }
+  orders:OrderInterface[]
 }
 
 type OrderDoneInput = {
@@ -163,11 +153,60 @@ class Customer extends Module{
       const options = {
         ...query,
         populate:[
-          {path:'branch', model:'branches'}
+          {path:'branch', model:'branches'},
+          {path:'products', model:'products'}
         ]
       }
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      let aggregate;
+      const aggregate1 = this.customer.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {name:{
+                  $regex: search?.toLowerCase() || ''
+                }},{customerType:{
+                  $regex:search?.toLowerCase() || ''
+                }},{nickName:{
+                  $regex:search?.toLowerCase() || ''
+                }},{contactPerson:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.customer.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {name:{
+                  $regex: search?.toLowerCase() || ''
+                }},{customerType:{
+                  $regex:search?.toLowerCase() || ''
+                }},{nickName:{
+                  $regex:search?.toLowerCase() || ''
+                }},{contactPerson:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { branch:ObjectId(user.branch.toString()) }
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else {
+        aggregate = aggregate2
+      }
       //@ts-ignore
-      const customers = await this.customer.paginate({branch:user.branch}, options);
+      const customers = await this.customer.aggregatePaginate(aggregate, options);
       return Promise.resolve(customers);
     } catch (e) {
       this.handleException(e)
@@ -243,25 +282,47 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
-      //@ts-ignore
-      const orders = await this.order.paginate({vehicle:data.vehicle},options);
-      //@ts-ignore
-      let customerOrder = await this.order.paginate({vehicle:data.vehicle, status:PickupStatus.PENDING,pickupType:pickupType.CUSTOMER},options);
-      //@ts-ignore
-      let supplierOrder = await this.order.paginate({vehicle:data.vehicle, status:PickupStatus.PENDING,pickupType:pickupType.SUPPLIER},options);
-      //@ts-ignore
-      let completed = await this.order.paginate({vehicle:data.vehicle, status:PickupStatus.DONE},options);
-      //@ts-ignore
-      let completedCustomerOrders = await this.order.paginate({vehicle:data.vehicle, status:PickupStatus.DONE,pickupType:pickupType.CUSTOMER},options);
-      //@ts-ignore
-      let completedSupplierOrders = await this.order.paginate({vehicle:data.vehicle, status:PickupStatus.DONE,pickupType:pickupType.SUPPLIER},options);
-      return Promise.resolve({
-        supplier:supplierOrder,
-        customer:customerOrder,
-        completed:{
-          customers:completedCustomerOrders,
-          suppliers:completedSupplierOrders
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      let aggregate;
+      const aggregate1 = this.order.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {status:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { pickupType: filter?.toLowerCase() },
+              {vehicle: data.vehicle}
+            ]
+          }
         }
+      ]);
+      const aggregate2 = this.order.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {status:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { vehicle: data.vehicle }
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
+      //@ts-ignore
+      const orders = await this.order.aggregatePaginate(aggregate,options);
+      return Promise.resolve({
+        orders
       });
     } catch (e) {
       this.handleException(e);
@@ -299,36 +360,47 @@ class Customer extends Module{
           {path:'gasType', model:'cylinder'}
         ]
       }
-      console.log(options);
-      //@ts-ignore
-      const orders = await this.order.paginate({branch:user.branch}, options);
-      //@ts-ignore
-      let customerOrders = await this.order.paginate({branch:user.branch, pickupType:pickupType.CUSTOMER}, options);
-      console.log(customerOrders)
-      //@ts-ignore
-      let supplierOrders = await this.order.paginate({branch:user.branch, pickupType:pickupType.SUPPLIER}, options);
-      //@ts-ignore
-      let completedOrders = await this.order.paginate({branch:user.branch, status:PickupStatus.DONE}, options);
-      //@ts-ignore
-      let completedCustomerOrders = await this.order.paginate({
-        branch:user.branch,
-        pickupType:pickupType.CUSTOMER,
-        status:PickupStatus.DONE
-      }, options)
-      //@ts-ignore
-      let completedSupplierOrders = await this.order.paginate({
-        branch:user.branch,
-        pickupType:pickupType.SUPPLIER,
-        status:PickupStatus.DONE
-      }, options)
-
-      return Promise.resolve({
-        customerOrders,
-        supplierOrders,
-        completedOrders:{
-          customers:completedCustomerOrders,
-          suppliers:completedSupplierOrders
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      let aggregate;
+      const aggregate1 = this.order.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {status:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { pickupType: filter?.toLowerCase() },
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
         }
+      ]);
+      const aggregate2 = this.order.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {status:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { branch: ObjectId(user.branch.toString()) }
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
+      //@ts-ignore
+      const orders = await this.order.aggregatePaginate(aggregate, options);
+      return Promise.resolve({
+        orders
       });
     } catch (e) {
       this.handleException(e)
@@ -704,21 +776,61 @@ class Customer extends Module{
 
   public async fetchUserComplaintApproval(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
       const options = {
         ...query,
         populate:[
-          {path:'customer', model:'customer'},
+          {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'branch', model:'branches'}
+          {path:'customer', model:'customer'}
         ]
       }
+      let aggregate;
+      const aggregate1 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {customerName:{
+                  $regex: search?.toLowerCase() || ''
+                }},{issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {approvalStatus:TransferStatus.PENDING},
+              {nextApprovalOfficer: ObjectId(user._id.toString())},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {title:{
+                  $regex: search?.toLowerCase() || ''
+                }},{issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {approvalStatus:TransferStatus.PENDING},
+              {nextApprovalOfficer: ObjectId(user._id.toString())},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
       //@ts-ignore
-      const complaints = await this.complaint.paginate({
-        branch:user.branch,
-        approvalStatus:TransferStatus.PENDING,
-        nextApprovalOfficer:user._id
-      },options);
+      const complaints = await this.complaint.aggregatePaginate(aggregate,options);
 
       // let startStage = complaints.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -775,8 +887,60 @@ class Customer extends Module{
 
   public async fetchComplaints(query:QueryInterface, customerId:string):Promise<ComplaintInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'branch', model:'branches'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'customer', model:'customer'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {title:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {approvalStatus: filter?.toLowerCase()},
+              {customer: ObjectId(customerId)}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {title:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {customer: ObjectId(customerId)}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
       //@ts-ignore
-      const complains = await this.complaint.paginate({customer:customerId}, {...query});
+      const complains = await this.complaint.paginate(aggregate, options);
       return Promise.resolve(complains);
     } catch (e) {
       this.handleException(e);
@@ -785,8 +949,60 @@ class Customer extends Module{
 
   public async fetchApprovedComplaints(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'branch', model:'branches'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'customer', model:'customer'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {title:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {approvalStatus: filter?.toLowerCase()},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.complaint.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {title:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {issue:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
       //@ts-ignore
-      const complaints = await this.complaint.paginate({ branch:user.branch, ApprovalStatus:TransferStatus.COMPLETED }, {...query});
+      const complaints = await this.complaint.paginate(aggregate, options);
 
       return Promise.resolve(complaints);
     } catch (e) {
@@ -868,8 +1084,51 @@ class Customer extends Module{
 
   public async fetchWalkinCustomers(query:QueryInterface, user:UserInterface):Promise<WalkinCustomerInterface[]|undefined>{
     try{
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'branch', model:'branches'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.walkin.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {customerName:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {status: filter?.toLowerCase()},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.walkin.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {customerName:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
       //@ts-ignore
-      const customers = await this.walkin.paginate({ branch:user.branch }, {...query });
+      const customers = await this.walkin.paginate(aggregate, options);
       return Promise.resolve(customers);
     }catch(e){
       this.handleException(e);
@@ -927,8 +1186,51 @@ class Customer extends Module{
 
   public async fetchFilledCustomerCylinders(query:QueryInterface, user:UserInterface):Promise<WalkinCustomerInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'branch', model:'branches'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.walkin.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {customerName:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {status: filter?.toLowerCase()},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      const aggregate2 = this.walkin.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {customerName:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate2
+      }
       //@ts-ignore
-      const cylinders = await this.walkin.paginate({status:WalkinCustomerStatus.FILLED, branch:user.branch},{...query });
+      const cylinders = await this.walkin.aggregatePaginate(aggregate,options);
       return cylinders;
     } catch (e) {
       this.handleException(e);

@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface CustomerInterface extends Document{
   _id:Schema.Types.ObjectId
@@ -29,13 +30,13 @@ export interface CustomerInterface extends Document{
 }
 
 export const customerSchema = new Schema({
-  name:String,
-  customerType:String,
+  name:{type:String, lowercase:true},
+  customerType:{type:String, lowercase:true},
   modeOfeService:String,
-  nickName:String,
+  nickName:{type:String, lowercase:true},
   address:String,
-  contactPerson:String,
-  email:String,
+  contactPerson:{type:String, lowercase:true},
+  email:{type:String, lowercase:true},
   TIN:String,
   phoneNumber:Number,
   rcNumber:String,
@@ -45,12 +46,13 @@ export const customerSchema = new Schema({
   unitPrice:Number,
   CAC:String,
   validID:String,
-  branch:{type:Schema.Types.ObjectId, ref:'customer'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{
   timestamps:true
 });
 
 customerSchema.plugin(mongoosePaginate);
+customerSchema.plugin(aggregatePaginate)
 
 export default function factory(conn:Connection):Model<CustomerInterface> {
   return conn.model('customer', customerSchema);

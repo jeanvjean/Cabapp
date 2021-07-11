@@ -7,6 +7,7 @@ Model
 import { commentInterface, commentSchema, stagesOfApproval } from './transferCylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 
 export type Disposal = {
@@ -160,6 +161,7 @@ export const vehicleSchema = new Schema({
 });
 
 vehicleSchema.plugin(mongoosePaginate);
+vehicleSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection):Model<VehicleInterface> {
   return conn.model('vehicle', vehicleSchema);

@@ -6,6 +6,7 @@ Connection
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { productRecievedSchema, ReceivedProduct } from './receivedProduct';
 import { saleCylinder, saleCylinderSchema } from './sales-requisition';
 
@@ -63,6 +64,7 @@ const recieptSchema = new Schema({
 });
 
 recieptSchema.plugin(mongoosePaginate)
+recieptSchema.plugin(aggregatePaginate)
 
 
 export default function factory(conn:Connection):Model<RecieptInterface>{

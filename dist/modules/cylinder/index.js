@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.mongoose = void 0;
 const exceptions_1 = require("../../exceptions");
 const cylinder_1 = require("../../models/cylinder");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
@@ -19,6 +20,8 @@ const static_1 = require("../../configs/static");
 const logs_1 = require("../../util/logs");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
 const supplier_1 = require("../../models/supplier");
+const mongoose = require("mongoose");
+exports.mongoose = mongoose;
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -470,8 +473,24 @@ class Cylinder extends module_1.default {
     fetchChangeCylinderRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //@ts-ignore
-                const changes = yield this.change_gas.paginate({ branch: user.branch }, Object.assign({}, query));
+                const { search } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'gasType', model: 'cylinder' },
+                        { path: 'assignedTo', miodel: 'customer' }
+                    ] });
+                let changes;
+                if (search === null || search === void 0 ? void 0 : search.length) {
+                    //@ts-ignore
+                    changes = yield this.change_gas.paginate({ branch: user.branch, $or: [{ approvalStatus: search }] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    changes = yield this.change_gas.paginate({ branch: user.branch }, options);
+                }
                 // console.log(changes)
                 return changes;
             }
@@ -483,11 +502,21 @@ class Cylinder extends module_1.default {
     fetchPendingChangeRequest(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const change_requests = yield this.change_gas.find({
+                const { search } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'gasType', model: 'cylinder' },
+                        { path: 'assignedTo', miodel: 'customer' }
+                    ] });
+                //@ts-ignore
+                const change_requests = yield this.change_gas.paginate({
                     branch: user.branch,
                     approvaStatus: transferCylinder_1.TransferStatus.PENDING,
                     nextApprovalOfficer: user._id
-                }, Object.assign({}, query));
+                }, options);
                 return change_requests;
             }
             catch (e) {
@@ -517,27 +546,35 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { search } = query;
+                const ObjectId = mongoose.Types.ObjectId;
                 let options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'assignedTo', model: 'customer' },
                         { path: 'branch', model: 'branches' },
                         { path: 'gasType', model: 'cylinder' }
                     ] });
-                var registeredCylinders;
-                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
-                    //@ts-ignore
-                    registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch, $or: [
-                            { gasType: search },
-                            { gasVolumeContent: search },
-                            { cylinderType: search },
-                            { cylinderNumber: search },
-                            { assignedNumber: search },
-                            { dateManufactured: search }
-                        ] }, options);
-                }
-                else {
-                    //@ts-ignore
-                    registeredCylinders = yield this.registerCylinder.paginate({ branch: user.branch }, options);
-                }
+                // let aggregate;
+                const aggregate = this.registerCylinder.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { condition: {
+                                                $regex: search === null || search === void 0 ? void 0 : search.toLowerCase()
+                                            } }, { cylinderType: {
+                                                $regex: search === null || search === void 0 ? void 0 : search.toLowerCase()
+                                            } }, { cylinderNumber: {
+                                                $regex: search === null || search === void 0 ? void 0 : search.toLowerCase()
+                                            } }, { assignedNumber: {
+                                                $regex: search === null || search === void 0 ? void 0 : search.toLowerCase()
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                //@ts-ignore
+                var registeredCylinders = yield this.registerCylinder.aggregatePaginate(aggregate, options);
                 //@ts-ignore
                 const cylinders = yield this.registerCylinder.find({});
                 const bufferCylinders = cylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);
@@ -686,13 +723,28 @@ class Cylinder extends module_1.default {
     fetchFaultyCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 let options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'assignedTo', model: 'customer' },
                         { path: 'branch', model: 'branches' },
                         { path: 'gasType', model: 'cylinder' },
                     ] });
-                //@ts-ignore
-                const cylinders = yield this.registerCylinder.paginate({ branch: user.branch, condition: cylinder_1.CylinderCondition.FAULTY }, options);
+                let cylinders;
+                if (search === null || search === void 0 ? void 0 : search.length) {
+                    //@ts-ignore
+                    cylinders = yield this.registerCylinder.paginate({
+                        branch: user.branch,
+                        condition: cylinder_1.CylinderCondition.FAULTY,
+                        $or: [{ cylinderType: search }]
+                    }, options);
+                }
+                else {
+                    //@ts-ignore
+                    cylinders = yield this.registerCylinder.paginate({
+                        branch: user.branch,
+                        condition: cylinder_1.CylinderCondition.FAULTY
+                    }, options);
+                }
                 return Promise.resolve(cylinders);
             }
             catch (e) {
@@ -1058,8 +1110,22 @@ class Cylinder extends module_1.default {
     fetchCondemnCylinderRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //@ts-ignore
-                const requests = yield this.condemn.paginate({ branch: user.branch }, Object.assign({}, query));
+                const { search } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                let requests;
+                if (!(search === null || search === void 0 ? void 0 : search.length)) {
+                    //@ts-ignore
+                    requests = yield this.condemn.paginate({ branch: user.branch, $or: [{ approvalStatus: search }] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    requests = yield this.condemn.paginate({ branch: user.branch }, Object.assign({}, query));
+                }
                 return requests;
             }
             catch (e) {
@@ -1070,12 +1136,18 @@ class Cylinder extends module_1.default {
     fetchPendingCondemnRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
                 //@ts-ignore
                 const requests = yield this.condemn.paginate({
                     branch: user.branch,
                     approvaStatus: transferCylinder_1.TransferStatus.PENDING,
                     nextApprovalOfficer: user._id
-                }, Object.assign({}, query));
+                }, options);
                 return requests;
             }
             catch (e) {
@@ -1102,12 +1174,26 @@ class Cylinder extends module_1.default {
     fetchArchivedCylinder(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 let options = Object.assign(Object.assign({}, query), { options: [
                         { path: 'assignedTo', model: 'customer' },
                         { path: 'branch', model: 'branches' }
                     ] });
-                //@ts-ignore
-                const cylinders = yield this.archive.paginate({ branch: user.branch }, options);
+                let cylinders;
+                if (!(search === null || search === void 0 ? void 0 : search.length)) {
+                    //@ts-ignore
+                    cylinders = yield this.archive.paginate({
+                        branch: user.branch,
+                        $or: [{ assignedNumber: search === null || search === void 0 ? void 0 : search.toLowerCase() },
+                            { cylinderNumber: search === null || search === void 0 ? void 0 : search.toLowerCase() },
+                            { cylinderType: search === null || search === void 0 ? void 0 : search.toLowerCase() }
+                        ]
+                    }, options);
+                }
+                else {
+                    //@ts-ignore
+                    cylinders = yield this.archive.paginate({ branch: user.branch }, options);
+                }
                 return Promise.resolve(cylinders);
             }
             catch (e) {
@@ -1587,9 +1673,71 @@ class Cylinder extends module_1.default {
     fetchTransferRequets(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'gasType', model: 'cylinder' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'to', model: 'customer' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'toBranch', model: 'branches' },
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.transfer.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { transferStatus: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ] },
+                                { type: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.transfer.aggregate([
+                    {
+                        $match: {
+                            $or: [
+                                { transferStatus: {
+                                        $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                    } }
+                            ],
+                            $and: [
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate2;
+                }
                 //@ts-ignore
-                const transfers = yield this.transfer.paginate({ branch: user.branch }, Object.assign({}, query));
-                const transferReq = yield this.transfer.find({});
+                let transfers = yield this.transfer.aggregatePaginate(aggregate, options);
+                // if(search?.length) {
+                //   if(filter?.length) {
+                //     //@ts-ignore
+                //     transfers = await this.transfer.paginate({branch:user.branch,$or:[
+                //       {type:filter?.toLowerCase()}
+                //     ], $and:[{transferStatus:search?.toLowerCase()}]},options);
+                //   }else {
+                //     //@ts-ignore
+                //     transfers = await this.transfer.paginate({branch:user.branch,$or:[
+                //       {type:filter?.toLowerCase()}
+                //     ]},options);
+                //   }
+                // }else {
+                //    //@ts-ignore
+                //     transfers = await this.transfer.paginate({branch:user.branch},options);
+                // }
+                const transferReq = yield this.transfer.find({ branch: user.branch });
                 let totalApproved = transferReq.filter(
                 //@ts-ignore
                 transfer => transfer.transferStatus == transferCylinder_1.TransferStatus.COMPLETED);
@@ -1643,6 +1791,7 @@ class Cylinder extends module_1.default {
     fetchUserPendingApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
@@ -1651,12 +1800,25 @@ class Cylinder extends module_1.default {
                         { path: 'branch', model: 'branches' },
                         { path: 'to', model: 'customer' }
                     ] });
-                //@ts-ignore
-                const transfers = yield this.transfer.paginate({
-                    branch: user.branch,
-                    transferStatus: transferCylinder_1.TransferStatus.PENDING,
-                    nextApprovalOfficer: `${user._id}`
-                }, options);
+                let transfers;
+                if (!(search === null || search === void 0 ? void 0 : search.length)) {
+                    //@ts-ignore
+                    transfers = yield this.transfer.paginate({
+                        branch: user.branch,
+                        transferStatus: transferCylinder_1.TransferStatus.PENDING,
+                        nextApprovalOfficer: `${user._id}`,
+                        $or: [{ type: search === null || search === void 0 ? void 0 : search.toLowerCase() }
+                        ]
+                    }, options);
+                }
+                else {
+                    //@ts-ignore
+                    transfers = yield this.transfer.paginate({
+                        branch: user.branch,
+                        transferStatus: transferCylinder_1.TransferStatus.PENDING,
+                        nextApprovalOfficer: `${user._id}`
+                    }, options);
+                }
                 //@ts-ignore
                 // let startStage = transfers.docs.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -1743,12 +1905,24 @@ class Cylinder extends module_1.default {
     fetchCustomerCylinders(query, customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
                 let options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'gasType', model: 'cylinder' },
                         { path: 'assignedTo', model: 'customer' }
                     ] });
                 //@ts-ignore
-                const cylinders = yield this.registerCylinder.paginate({ assignedTo: customerId }, options);
+                let cylinders;
+                if (!(search === null || search === void 0 ? void 0 : search.length)) {
+                    //@ts-ignore
+                    cylinders = yield this.registerCylinder.paginate({ assignedTo: customerId, $or: [
+                            { cylinderNumber: search === null || search === void 0 ? void 0 : search.toLowerCase() },
+                            { assignedNumber: search === null || search === void 0 ? void 0 : search.toLowerCase() }
+                        ] }, options);
+                }
+                else {
+                    //@ts-ignore
+                    cylinders = yield this.registerCylinder.paginate({ assignedTo: customerId }, options);
+                }
                 return Promise.resolve(cylinders);
             }
             catch (e) {
@@ -1759,8 +1933,22 @@ class Cylinder extends module_1.default {
     fetchTransferReport(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'gasType', model: 'cylinder' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'to', model: 'customer' }
+                    ] });
                 //@ts-ignore
-                const transfers = yield this.transfer.paginate({ branch: user.branch, TransferStatus: `${transferCylinder_1.TransferStatus.COMPLETED}` }, Object.assign({}, query));
+                const transfers = yield this.transfer.paginate({
+                    branch: user.branch, TransferStatus: `${transferCylinder_1.TransferStatus.COMPLETED}`,
+                    $or: [
+                        { type: search === null || search === void 0 ? void 0 : search.toLowerCase() }
+                    ]
+                }, Object.assign({}, query));
                 //@ts-ignore
                 // const completed = transfers.docs.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
                 return Promise.resolve(transfers);

@@ -7,6 +7,7 @@ import {
 import { CylinderCondition } from './cylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { WalkinCustomerStatus } from './walk-in-customers';
 
 export enum TypesOfCylinders {
@@ -195,6 +196,7 @@ export const registerCylinderSchema = new Schema({
 });
 
 registerCylinderSchema.plugin(mongoosePaginate);
+registerCylinderSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection): Model<RegisteredCylinderInterface> {
   return conn.model('registered-cylinders', registerCylinderSchema);

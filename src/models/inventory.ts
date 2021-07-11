@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import ProductionSchedule from '../modules/production';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface ProductInterface extends Document{
   productName:string
@@ -46,12 +47,15 @@ export const productSchema = new Schema({
   division:{type:Schema.Types.ObjectId, ref:'branches'},
   supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  deleted:{type:Boolean, default:false}
+  deleted:{type:Boolean, default:false},
+  inStock:{type:Boolean},
+  outOfStock:{type:Boolean}
 },{
   collection:'products',
   timestamps:true
 });
 productSchema.plugin(mongoosePaginate)
+productSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection): Model<ProductInterface> {
   return conn.model('products',productSchema);

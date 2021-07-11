@@ -7,6 +7,7 @@ Document
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface saleCylinder{
   noOfCylinders:number
@@ -58,6 +59,7 @@ const salesReqSchema = new Schema({
 });
 
 salesReqSchema.plugin(mongoosePaginate);
+salesReqSchema.plugin(aggregatePaginate)
 
 export default function factory(conn:Connection):Model<SalesRequisitionInterface>{
   return conn.model('sales-requisition', salesReqSchema);

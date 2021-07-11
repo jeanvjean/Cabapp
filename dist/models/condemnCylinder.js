@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const condemSchema = new mongoose_1.Schema({
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
@@ -17,6 +18,7 @@ const condemSchema = new mongoose_1.Schema({
     timestamps: true
 });
 condemSchema.plugin(mongoosePaginate);
+condemSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('condemn', condemSchema);
 }

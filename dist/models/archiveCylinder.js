@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.archiveCylinderSchema = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePagination = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.archiveCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String },
     waterCapacity: { type: String },
@@ -22,6 +23,7 @@ exports.archiveCylinderSchema = new mongoose_1.Schema({
     purchaseCost: { type: Number },
 });
 exports.archiveCylinderSchema.plugin(mongoosePagination);
+exports.archiveCylinderSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('archive-cylinders', exports.archiveCylinderSchema);
 }

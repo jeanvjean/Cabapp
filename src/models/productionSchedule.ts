@@ -7,6 +7,7 @@ Model
 import { ApprovalOfficers, ApprovalOfficerSchema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 enum productionStatus {
   PENDING="pending",
@@ -69,6 +70,7 @@ const productionSchema = new Schema({
 });
 
 productionSchema.plugin(mongoosePaginate)
+productionSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection) :Model<ProductionScheduleInterface>{
   return conn.model('production-schedule', productionSchema);

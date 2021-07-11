@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var productionStatus;
 (function (productionStatus) {
     productionStatus["PENDING"] = "pending";
@@ -34,6 +35,7 @@ const productionSchema = new mongoose_1.Schema({
     produced: { type: Boolean, default: false }
 });
 productionSchema.plugin(mongoosePaginate);
+productionSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('production-schedule', productionSchema);
 }

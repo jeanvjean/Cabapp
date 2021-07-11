@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.orderType = exports.pickupType = exports.PickupStatus = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var PickupStatus;
 (function (PickupStatus) {
     PickupStatus["PENDING"] = "pending";
@@ -41,6 +42,7 @@ const OrderSchema = new mongoose_1.Schema({
     timestamps: true
 });
 OrderSchema.plugin(mongoosePaginate);
+OrderSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('orders', OrderSchema);
 }

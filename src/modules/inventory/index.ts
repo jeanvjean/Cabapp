@@ -14,6 +14,7 @@ import Environment from '../../configs/static';
 import Notify from '../../util/mail'
 import { DeleteResponse } from "../vehicle";
 import { createLog } from "../../util/logs";
+import { mongoose } from "../cylinder";
 
 interface ProductProp {
   product:Model<ProductInterface>
@@ -226,8 +227,39 @@ class Product extends Module{
 
   public async fetchProducts(query:QueryInterface, user:UserInterface): Promise<ProductInterface[]|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'supplier', model:'supplier'},
+          {path:'branch', model:'branches'},
+          {path:'division', model:'branches'}
+        ]
+      }
+      const aggregate = this.product.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {productName:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{inStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{outOfStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())},
+              {deleted: false}
+            ]
+          }
+        }
+      ]);
       //@ts-ignore
-      const products = await this.product.paginate({ branch:user.branch, deleted:false},{...query});
+      const products = await this.product.aggregatePaginate(aggregate,options);
       // console.log(products);
       return Promise.resolve(products);
     } catch (e) {

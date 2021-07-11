@@ -4,6 +4,7 @@ exports.complaintSchema = exports.complaintStatus = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var complaintStatus;
 (function (complaintStatus) {
     complaintStatus["RESOLVED"] = "resolved";
@@ -23,7 +24,7 @@ const cylinderReplaceSchema = new mongoose_1.Schema({
 });
 exports.complaintSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
-    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     title: { type: String },
     issue: { type: String },
     complaint: { type: String },
@@ -41,6 +42,7 @@ exports.complaintSchema = new mongoose_1.Schema({
     timestamps: true
 });
 exports.complaintSchema.plugin(mongoosePaginate);
+exports.complaintSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('complaint', exports.complaintSchema);
 }

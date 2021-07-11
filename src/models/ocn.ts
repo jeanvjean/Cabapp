@@ -6,6 +6,7 @@ Connection
 } from 'mongoose';
 import { ApprovalOfficers, stagesOfApproval, TransferStatus, approvalStageShema } from './transferCylinder';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 type ocnCylinders = {
     cylinderNo:string
@@ -53,7 +54,8 @@ const ocnSchema = new Schema({
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
     ocnNo:{type:String}
 });
-ocnSchema.plugin(mongoosePaginate)
+ocnSchema.plugin(mongoosePaginate);
+ocnSchema.plugin(aggregatePaginate)
 export default function factory(conn:Connection):Model<OutgoingCylinderInterface>{
     return conn.model('out-going-cylinders', ocnSchema);
 }

@@ -4,6 +4,7 @@ exports.disburseSchema = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const requesterSchema = new mongoose_1.Schema({
     requestingOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId }
@@ -39,6 +40,7 @@ exports.disburseSchema = new mongoose_1.Schema({
     grnNo: { type: String }
 });
 exports.disburseSchema.plugin(mongoosePaginate);
+exports.disburseSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('disburse-product', exports.disburseSchema);
 }

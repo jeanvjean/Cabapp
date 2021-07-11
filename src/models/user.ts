@@ -6,6 +6,7 @@ import {
 }
 from "mongoose";
 import * as mongoosePaginator from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 import { hash, compare, genSaltSync } from 'bcryptjs';
  export const salt = genSaltSync(10);
@@ -146,6 +147,7 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
  userSchema.index({role:'text', subrole:'text'});
 
  userSchema.plugin(mongoosePaginator);
+ userSchema.plugin(aggregatePaginate)
 
  userSchema.methods.comparePWD = async function(
    value: string

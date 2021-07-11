@@ -16,7 +16,8 @@ import { generateToken, padLeft } from "../../util/token";
 import { CondemnCylinderInterface } from "../../models/condemnCylinder";
 import { ChangeCylinderInterface } from "../../models/change-cylinder";
 import { SupplierTypes } from "../../models/supplier";
-
+import * as mongoose from 'mongoose';
+export { mongoose };
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
   registerCylinder: Model<RegisteredCylinderInterface>
@@ -634,8 +635,26 @@ class Cylinder extends Module {
 
   public async fetchChangeCylinderRequests(query:QueryInterface, user:UserInterface):Promise<ChangeCylinderInterface[]|undefined>{
     try {
-      //@ts-ignore
-      const changes = await this.change_gas.paginate({branch:user.branch}, {...query});
+      const { search } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'gasType', model:'cylinder'},
+          {path:'assignedTo', miodel:'customer'}
+        ]
+      }
+      let changes;
+      if(search?.length) {
+        //@ts-ignore
+        changes = await this.change_gas.paginate({branch:user.branch, $or:[{approvalStatus:search}]}, options);
+      } else {
+        //@ts-ignore
+        changes = await this.change_gas.paginate({branch:user.branch}, options);
+      }
       // console.log(changes)
       return changes
     } catch (e) {
@@ -645,11 +664,24 @@ class Cylinder extends Module {
 
   public async fetchPendingChangeRequest(query:QueryInterface, user:UserInterface):Promise<ChangeCylinderInterface[]|undefined>{
     try {
-      const change_requests = await this.change_gas.find({
+      const { search } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'gasType', model:'cylinder'},
+          {path:'assignedTo', miodel:'customer'}
+        ]
+      }
+      //@ts-ignore
+      const change_requests = await this.change_gas.paginate({
         branch:user.branch,
         approvaStatus:TransferStatus.PENDING,
         nextApprovalOfficer:user._id
-      }, {...query});
+      }, options);
       return change_requests;
     } catch (e) {
       this.handleException(e)
@@ -676,6 +708,7 @@ class Cylinder extends Module {
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
       const {search} = query;
+      const ObjectId = mongoose.Types.ObjectId
       let options = {
         ...query,
         populate:[
@@ -684,23 +717,29 @@ class Cylinder extends Module {
           {path:'gasType', model:'cylinder'}
         ]
       }
-      var registeredCylinders;
-      if(search?.length !== undefined) {
-        //@ts-ignore
-        registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch, $or:
-          [
-            {gasType:search},
-            {gasVolumeContent:search},
-            {cylinderType:search},
-            {cylinderNumber:search},
-            {assignedNumber:search},
-            {dateManufactured:search}
-          ] },options);
-      } else {
-        //@ts-ignore
-        registeredCylinders = await this.registerCylinder.paginate({ branch:user.branch },options);
-      }
-
+      // let aggregate;
+      const aggregate = this.registerCylinder.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {condition:{
+                  $regex:search?.toLowerCase()
+                }},{cylinderType:{
+                  $regex:search?.toLowerCase()
+                }},{cylinderNumber:{
+                  $regex:search?.toLowerCase()
+                }},{assignedNumber:{
+                  $regex:search?.toLowerCase()
+                }}
+              ]},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      //@ts-ignore
+      var registeredCylinders = await this.registerCylinder.aggregatePaginate(aggregate, options);
       //@ts-ignore
       const cylinders = await this.registerCylinder.find({});
       const bufferCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
@@ -877,6 +916,7 @@ class Cylinder extends Module {
 
   public async fetchFaultyCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
+      const { search } = query;
       let options = {
         ...query,
         populate:[
@@ -885,8 +925,21 @@ class Cylinder extends Module {
           {path:'gasType', model:'cylinder'},
         ]
       }
-      //@ts-ignore
-      const cylinders = await this.registerCylinder.paginate({branch:user.branch, condition:CylinderCondition.FAULTY}, options);
+      let cylinders
+      if(search?.length) {
+        //@ts-ignore
+        cylinders= await this.registerCylinder.paginate({
+          branch:user.branch,
+          condition:CylinderCondition.FAULTY,
+          $or:[{cylinderType:search}]
+        }, options);
+      }else {
+        //@ts-ignore
+        cylinders= await this.registerCylinder.paginate({
+          branch:user.branch,
+          condition:CylinderCondition.FAULTY
+        }, options);
+      }
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
@@ -1247,8 +1300,24 @@ class Cylinder extends Module {
 
   public async fetchCondemnCylinderRequests(query:QueryInterface, user:UserInterface):Promise<CondemnCylinderInterface[]|undefined>{
     try {
-      //@ts-ignore
-      const requests = await this.condemn.paginate({branch:user.branch}, {...query});
+      const { search } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'}
+        ]
+      }
+      let requests;
+      if(!search?.length) {
+        //@ts-ignore
+        requests = await this.condemn.paginate({branch:user.branch,$or:[{approvalStatus:search}]}, options);
+      }else {
+        //@ts-ignore
+        requests = await this.condemn.paginate({branch:user.branch}, {...query});
+      }
       return requests;
     } catch (e) {
       this.handleException(e)
@@ -1257,11 +1326,20 @@ class Cylinder extends Module {
 
   public async fetchPendingCondemnRequests(query:QueryInterface, user:UserInterface):Promise<CondemnCylinderInterface[]|undefined>{
     try {
+      const options = {
+        ...query,
+        populate:[
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'}
+        ]
+      }
       //@ts-ignore
       const requests = await this.condemn.paginate({
         branch:user.branch,
         approvaStatus:TransferStatus.PENDING,
-        nextApprovalOfficer:user._id}, {...query});
+        nextApprovalOfficer:user._id}, options);
       return requests;
     } catch (e) {
       this.handleException(e);
@@ -1284,6 +1362,7 @@ class Cylinder extends Module {
 
   public async fetchArchivedCylinder(query:QueryInterface, user:UserInterface):Promise<ArchivedCylinder[]|undefined>{
     try {
+      const { search } = query;
       let options = {
         ...query,
         options:[
@@ -1291,8 +1370,19 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
-      //@ts-ignore
-      const cylinders = await this.archive.paginate({branch:user.branch}, options);
+      let cylinders;
+      if(!search?.length) {
+        //@ts-ignore
+        cylinders = await this.archive.paginate({
+          branch:user.branch,
+          $or:[{assignedNumber:search?.toLowerCase()},
+            {cylinderNumber:search?.toLowerCase()},
+            {cylinderType:search?.toLowerCase()}
+          ]}, options);
+      }else {
+        //@ts-ignore
+        cylinders = await this.archive.paginate({branch:user.branch}, options);
+      }
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e);
@@ -1759,9 +1849,74 @@ class Cylinder extends Module {
 
   public async fetchTransferRequets(query:QueryInterface, user:UserInterface):Promise<TransferRequestPool|undefined>{
     try {
+      const ObjectId = mongoose.Types.ObjectId
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'gasType', model:'cylinder'},
+          {path:'initiator', model:'User'},
+          {path:'to', model:'customer'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'toBranch', model:'branches'},
+          {path:'branch', model:'branches'}
+        ]
+      }
+      let aggregate;
+      const aggregate1 = this.transfer.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {transferStatus:{
+                  $regex: search?.toLowerCase() || ""
+                }}
+              ]},
+              {type: filter?.toLowerCase()},
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+
+      const aggregate2 = this.transfer.aggregate([
+        {
+          $match:{
+              $or:[
+                {transferStatus:{
+                  $regex: search?.toLowerCase() || ""
+                }}
+              ],
+              $and:[
+                {branch: ObjectId(user.branch.toString())}
+              ]
+          }
+        }
+      ]);
+      if(search?.length && filter?.length) {
+        aggregate = aggregate1
+      }else if(search?.length && !filter?.length) {
+        aggregate = aggregate2
+      }
       //@ts-ignore
-      const transfers = await this.transfer.paginate({branch:user.branch},{...query});
-      const transferReq= await this.transfer.find({})
+       let transfers = await this.transfer.aggregatePaginate(aggregate,options);
+      // if(search?.length) {
+      //   if(filter?.length) {
+      //     //@ts-ignore
+      //     transfers = await this.transfer.paginate({branch:user.branch,$or:[
+      //       {type:filter?.toLowerCase()}
+      //     ], $and:[{transferStatus:search?.toLowerCase()}]},options);
+      //   }else {
+      //     //@ts-ignore
+      //     transfers = await this.transfer.paginate({branch:user.branch,$or:[
+      //       {type:filter?.toLowerCase()}
+      //     ]},options);
+      //   }
+      // }else {
+      //    //@ts-ignore
+      //     transfers = await this.transfer.paginate({branch:user.branch},options);
+      // }
+      const transferReq= await this.transfer.find({branch:user.branch})
       let totalApproved = transferReq.filter(
         //@ts-ignore
           transfer=>transfer.transferStatus == TransferStatus.COMPLETED
@@ -1811,7 +1966,7 @@ class Cylinder extends Module {
 
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
-
+      const { search } = query;
       const options = {
         ...query,
         populate:[
@@ -1823,12 +1978,24 @@ class Cylinder extends Module {
           {path:'to', model:'customer'}
         ]
       }
-      //@ts-ignore
-      const transfers = await this.transfer.paginate({
-        branch:user.branch,
-        transferStatus:TransferStatus.PENDING,
-        nextApprovalOfficer:`${user._id}`
-      },options);
+      let transfers;
+      if(!search?.length) {
+        //@ts-ignore
+        transfers = await this.transfer.paginate({
+          branch:user.branch,
+          transferStatus:TransferStatus.PENDING,
+          nextApprovalOfficer:`${user._id}`,
+          $or:[{type:search?.toLowerCase()}
+          ]
+        },options);
+      }else {
+        //@ts-ignore
+        transfers = await this.transfer.paginate({
+          branch:user.branch,
+          transferStatus:TransferStatus.PENDING,
+          nextApprovalOfficer:`${user._id}`
+        },options);
+      }
       //@ts-ignore
       // let startStage = transfers.docs.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -1911,6 +2078,7 @@ class Cylinder extends Module {
 
   public async fetchCustomerCylinders(query:QueryInterface, customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
+      const { search } = query;
       let options = {
         ...query,
         populate:[
@@ -1919,7 +2087,17 @@ class Cylinder extends Module {
         ]
       }
       //@ts-ignore
-      const cylinders = await this.registerCylinder.paginate({assignedTo:customerId}, options);
+      let cylinders;
+      if(!search?.length) {
+        //@ts-ignore
+        cylinders = await this.registerCylinder.paginate({assignedTo:customerId, $or:[
+          {cylinderNumber:search?.toLowerCase()},
+          {assignedNumber:search?.toLowerCase()}
+        ]}, options);
+      }else{
+        //@ts-ignore
+        cylinders = await this.registerCylinder.paginate({assignedTo:customerId}, options);
+      }
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
@@ -1928,8 +2106,27 @@ class Cylinder extends Module {
 
   public async fetchTransferReport(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
+      const { search, filter } = query;
+      const options = {
+        ...query,
+        populate:[
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'cylinders', model:'registered-cylinders'},
+          {path:'gasType', model:'cylinder'},
+          {path:'branch', model:'branches'},
+          {path:'to', model:'customer'}
+        ]
+      }
+
       //@ts-ignore
-      const transfers = await this.transfer.paginate({branch:user.branch, TransferStatus:`${TransferStatus.COMPLETED}`},{...query});
+      const transfers = await this.transfer.paginate(
+        {
+          branch:user.branch, TransferStatus:`${TransferStatus.COMPLETED}`,
+          $or:[
+            {type: search?.toLowerCase()}
+          ]
+      },{...query});
       //@ts-ignore
       // const completed = transfers.docs.filter(transfer=> transfer.transferStatus == `${TransferStatus.COMPLETED}`);
       return Promise.resolve(transfers);

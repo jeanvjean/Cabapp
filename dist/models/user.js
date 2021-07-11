@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userSchema = exports.UserRoles = exports.salt = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginator = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const bcryptjs_1 = require("bcryptjs");
 exports.salt = bcryptjs_1.genSaltSync(10);
 const permissions = require('../util/permissions.json');
@@ -78,6 +79,7 @@ exports.userSchema = new mongoose_1.Schema({
 });
 exports.userSchema.index({ role: 'text', subrole: 'text' });
 exports.userSchema.plugin(mongoosePaginator);
+exports.userSchema.plugin(aggregatePaginate);
 exports.userSchema.methods.comparePWD = function (value) {
     return __awaiter(this, void 0, void 0, function* () {
         let isMatch = yield bcryptjs_1.compare(value, this.password);

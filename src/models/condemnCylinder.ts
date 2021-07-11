@@ -6,6 +6,7 @@ Connection
 } from 'mongoose';
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface CondemnCylinderInterface extends Document{
   cylinders:Schema.Types.ObjectId[],
@@ -34,6 +35,7 @@ const condemSchema = new Schema({
 });
 
 condemSchema.plugin(mongoosePaginate);
+condemSchema.plugin(aggregatePaginate)
 
 export default function factory(conn:Connection) : Model<CondemnCylinderInterface>{
   return conn.model('condemn', condemSchema);

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const registeredCylinders_1 = require("./registeredCylinders");
 const transferCylinder_1 = require("./transferCylinder");
 const cylinderChangeSchem = new mongoose_1.Schema({
@@ -21,6 +22,7 @@ const cylinderChangeSchem = new mongoose_1.Schema({
     timestamps: true
 });
 cylinderChangeSchem.plugin(mongoosePaginate);
+cylinderChangeSchem.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('change-cylinder', cylinderChangeSchem);
 }

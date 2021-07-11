@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalkinCustomerStatus = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var WalkinCustomerStatus;
 (function (WalkinCustomerStatus) {
     WalkinCustomerStatus["FILLED"] = "filled";
@@ -29,6 +30,7 @@ const walkInCustomerSchema = new mongoose_1.Schema({
     timestamps: true
 });
 walkInCustomerSchema.plugin(mongoosePaginate);
+walkInCustomerSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('walk-in-customer', walkInCustomerSchema);
 }

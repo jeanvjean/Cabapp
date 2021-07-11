@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.inventorySchema = exports.productRecievedSchema = exports.productDirection = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 var productDirection;
 (function (productDirection) {
     productDirection["IN"] = "in-coming";
@@ -38,6 +39,7 @@ exports.inventorySchema = new mongoose_1.Schema({
     grInit: { type: Number }
 });
 exports.inventorySchema.plugin(mongoosePaginate);
+exports.inventorySchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('inventory', exports.inventorySchema);
 }

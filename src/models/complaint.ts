@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 import { ApprovalOfficers, ApprovalOfficerSchema, commentInterface, commentSchema, stagesOfApproval } from './transferCylinder';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 
 interface complaintCylinder {
@@ -67,7 +68,7 @@ const cylinderReplaceSchema = new Schema({
 
 export const complaintSchema = new Schema({
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
-  initiator:{type:Schema.Types.ObjectId, ref:'customer'},
+  initiator:{type:Schema.Types.ObjectId, ref:'User'},
   title:{type:String},
   issue:{type:String},
   complaint:{type:String},
@@ -86,6 +87,7 @@ export const complaintSchema = new Schema({
 });
 
 complaintSchema.plugin(mongoosePaginate);
+complaintSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection):Model<ComplaintInterface> {
   return conn.model('complaint', complaintSchema);

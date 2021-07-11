@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.paymentMode = exports.CustomerType = exports.receiptType = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const receivedProduct_1 = require("./receivedProduct");
 const sales_requisition_1 = require("./sales-requisition");
 var receiptType;
@@ -41,6 +42,7 @@ const recieptSchema = new mongoose_1.Schema({
     timestamps: true
 });
 recieptSchema.plugin(mongoosePaginate);
+recieptSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('reciept', recieptSchema);
 }

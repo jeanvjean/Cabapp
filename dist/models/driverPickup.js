@@ -4,6 +4,7 @@ const mongoose_1 = require("mongoose");
 const order_1 = require("./order");
 const vehicle_1 = require("./vehicle");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const routeCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     cylinderSize: String,
@@ -37,6 +38,7 @@ const routeSchema = new mongoose_1.Schema({
     timestamps: true
 });
 routeSchema.plugin(mongoosePaginate);
+routeSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('pickup-routes', routeSchema);
 }

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.productSchema = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.productSchema = new mongoose_1.Schema({
     productName: { type: String },
     itemDescription: { type: String },
@@ -21,12 +22,15 @@ exports.productSchema = new mongoose_1.Schema({
     division: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    deleted: { type: Boolean, default: false }
+    deleted: { type: Boolean, default: false },
+    inStock: { type: Boolean },
+    outOfStock: { type: Boolean }
 }, {
     collection: 'products',
     timestamps: true
 });
 exports.productSchema.plugin(mongoosePaginate);
+exports.productSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('products', exports.productSchema);
 }

@@ -18,6 +18,7 @@ const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
+const cylinder_1 = require("../cylinder");
 class Product extends module_1.default {
     constructor(props) {
         super();
@@ -117,8 +118,36 @@ class Product extends module_1.default {
     fetchProducts(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'division', model: 'branches' }
+                    ] });
+                const aggregate = this.product.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { productName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { inStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { outOfStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { deleted: false }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const products = yield this.product.paginate({ branch: user.branch, deleted: false }, Object.assign({}, query));
+                const products = yield this.product.aggregatePaginate(aggregate, options);
                 // console.log(products);
                 return Promise.resolve(products);
             }

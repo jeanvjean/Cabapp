@@ -7,6 +7,7 @@ import {
 import { orderType, pickupType } from './order';
 import { RouteActivity, RoutePlanStatus } from './vehicle';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 interface RouteCylinderInterface{
   cylinderNo:string
@@ -77,6 +78,7 @@ const routeSchema = new Schema({
 });
 
 routeSchema.plugin(mongoosePaginate);
+routeSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection):Model<PickupInterface> {
   return conn.model('pickup-routes', routeSchema);

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const cylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     volume: String
@@ -22,6 +23,7 @@ const purchaseOrderSchema = new mongoose_1.Schema({
     timestamps: true
 });
 purchaseOrderSchema.plugin(mongoosePaginate);
+purchaseOrderSchema.plugin(aggregatePaginate);
 function factory(conn) {
     return conn.model('purchase order', purchaseOrderSchema);
 }

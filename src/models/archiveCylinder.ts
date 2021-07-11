@@ -8,6 +8,8 @@ import { CylinderCondition } from './cylinder';
 
 import * as mongoosePagination from 'mongoose-paginate-v2';
 
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
+
 export interface ArchivedCylinder extends Document{
     /**
    * @param _id object id auto gen
@@ -136,6 +138,7 @@ export const archiveCylinderSchema = new Schema({
 });
 
 archiveCylinderSchema.plugin(mongoosePagination)
+archiveCylinderSchema.plugin(aggregatePaginate);
 
 export default function factory(conn:Connection):Model<ArchivedCylinder> {
   return conn.model('archive-cylinders', archiveCylinderSchema);

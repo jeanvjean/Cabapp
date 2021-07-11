@@ -5,6 +5,7 @@ import {
   Connection
 } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { TypesOfCylinders } from './registeredCylinders';
 import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageShema, commentInterface, commentSchema, stagesOfApproval, TransferStatus } from './transferCylinder';
 
@@ -42,6 +43,7 @@ const cylinderChangeSchem = new Schema({
 });
 
 cylinderChangeSchem.plugin(mongoosePaginate);
+cylinderChangeSchem.plugin(aggregatePaginate)
 
 export default function factory(conn:Connection):Model<ChangeCylinderInterface>{
   return conn.model('change-cylinder', cylinderChangeSchem);

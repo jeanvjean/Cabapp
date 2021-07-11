@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
+import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 export interface BranchInterface extends Document{
   name:string
   location:string
@@ -25,6 +26,7 @@ const branchSchema = new Schema({
   timestamps:true
 });
 branchSchema.plugin(mongoosePaginate)
+branchSchema.plugin(aggregatePaginate)
 export default function factory(conn:Connection):Model<BranchInterface>{
   return conn.model('branches', branchSchema);
 }

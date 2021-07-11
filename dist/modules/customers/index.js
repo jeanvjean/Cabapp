@@ -14,6 +14,7 @@ const complaint_1 = require("../../models/complaint");
 const order_1 = require("../../models/order");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const walk_in_customers_1 = require("../../models/walk-in-customers");
+const cylinder_1 = require("../cylinder");
 const module_1 = require("../module");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
@@ -54,10 +55,60 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const options = Object.assign(Object.assign({}, query), { populate: [
-                        { path: 'branch', model: 'branches' }
+                        { path: 'branch', model: 'branches' },
+                        { path: 'products', model: 'products' }
                     ] });
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                let aggregate;
+                const aggregate1 = this.customer.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { name: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { customerType: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { nickName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { contactPerson: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.customer.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { name: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { customerType: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { nickName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { contactPerson: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else {
+                    aggregate = aggregate2;
+                }
                 //@ts-ignore
-                const customers = yield this.customer.paginate({ branch: user.branch }, options);
+                const customers = yield this.customer.aggregatePaginate(aggregate, options);
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -140,25 +191,48 @@ class Customer extends module_1.default {
                         { path: 'supplier', model: 'supplier' },
                         { path: 'customer', model: 'customer' }
                     ] });
-                //@ts-ignore
-                const orders = yield this.order.paginate({ vehicle: data.vehicle }, options);
-                //@ts-ignore
-                let customerOrder = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.PENDING, pickupType: order_1.pickupType.CUSTOMER }, options);
-                //@ts-ignore
-                let supplierOrder = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.PENDING, pickupType: order_1.pickupType.SUPPLIER }, options);
-                //@ts-ignore
-                let completed = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE }, options);
-                //@ts-ignore
-                let completedCustomerOrders = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE, pickupType: order_1.pickupType.CUSTOMER }, options);
-                //@ts-ignore
-                let completedSupplierOrders = yield this.order.paginate({ vehicle: data.vehicle, status: order_1.PickupStatus.DONE, pickupType: order_1.pickupType.SUPPLIER }, options);
-                return Promise.resolve({
-                    supplier: supplierOrder,
-                    customer: customerOrder,
-                    completed: {
-                        customers: completedCustomerOrders,
-                        suppliers: completedSupplierOrders
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                let aggregate;
+                const aggregate1 = this.order.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { status: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { vehicle: data.vehicle }
+                            ]
+                        }
                     }
+                ]);
+                const aggregate2 = this.order.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { status: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { vehicle: data.vehicle }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
+                //@ts-ignore
+                const orders = yield this.order.aggregatePaginate(aggregate, options);
+                return Promise.resolve({
+                    orders
                 });
             }
             catch (e) {
@@ -193,35 +267,48 @@ class Customer extends module_1.default {
                         { path: 'customer', model: 'customer' },
                         { path: 'gasType', model: 'cylinder' }
                     ] });
-                console.log(options);
-                //@ts-ignore
-                const orders = yield this.order.paginate({ branch: user.branch }, options);
-                //@ts-ignore
-                let customerOrders = yield this.order.paginate({ branch: user.branch, pickupType: order_1.pickupType.CUSTOMER }, options);
-                console.log(customerOrders);
-                //@ts-ignore
-                let supplierOrders = yield this.order.paginate({ branch: user.branch, pickupType: order_1.pickupType.SUPPLIER }, options);
-                //@ts-ignore
-                let completedOrders = yield this.order.paginate({ branch: user.branch, status: order_1.PickupStatus.DONE }, options);
-                //@ts-ignore
-                let completedCustomerOrders = yield this.order.paginate({
-                    branch: user.branch,
-                    pickupType: order_1.pickupType.CUSTOMER,
-                    status: order_1.PickupStatus.DONE
-                }, options);
-                //@ts-ignore
-                let completedSupplierOrders = yield this.order.paginate({
-                    branch: user.branch,
-                    pickupType: order_1.pickupType.SUPPLIER,
-                    status: order_1.PickupStatus.DONE
-                }, options);
-                return Promise.resolve({
-                    customerOrders,
-                    supplierOrders,
-                    completedOrders: {
-                        customers: completedCustomerOrders,
-                        suppliers: completedSupplierOrders
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                let aggregate;
+                const aggregate1 = this.order.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { status: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
                     }
+                ]);
+                const aggregate2 = this.order.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { status: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
+                //@ts-ignore
+                const orders = yield this.order.aggregatePaginate(aggregate, options);
+                return Promise.resolve({
+                    orders
                 });
             }
             catch (e) {
@@ -609,18 +696,59 @@ class Customer extends module_1.default {
     fetchUserComplaintApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
-                        { path: 'customer', model: 'customer' },
+                        { path: 'branch', model: 'branches' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
-                        { path: 'branch', model: 'branches' }
+                        { path: 'customer', model: 'customer' }
                     ] });
+                let aggregate;
+                const aggregate1 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { customerName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { title: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
                 //@ts-ignore
-                const complaints = yield this.complaint.paginate({
-                    branch: user.branch,
-                    approvalStatus: transferCylinder_1.TransferStatus.PENDING,
-                    nextApprovalOfficer: user._id
-                }, options);
+                const complaints = yield this.complaint.aggregatePaginate(aggregate, options);
                 // let startStage = complaints.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -678,8 +806,58 @@ class Customer extends module_1.default {
     fetchComplaints(query, customerId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'branch', model: 'branches' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'customer', model: 'customer' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { title: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { approvalStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { customer: ObjectId(customerId) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { title: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { customer: ObjectId(customerId) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
                 //@ts-ignore
-                const complains = yield this.complaint.paginate({ customer: customerId }, Object.assign({}, query));
+                const complains = yield this.complaint.paginate(aggregate, options);
                 return Promise.resolve(complains);
             }
             catch (e) {
@@ -690,8 +868,58 @@ class Customer extends module_1.default {
     fetchApprovedComplaints(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'branch', model: 'branches' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'customer', model: 'customer' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { title: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { approvalStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.complaint.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { title: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { issue: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
                 //@ts-ignore
-                const complaints = yield this.complaint.paginate({ branch: user.branch, ApprovalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                const complaints = yield this.complaint.paginate(aggregate, options);
                 return Promise.resolve(complaints);
             }
             catch (e) {
@@ -779,8 +1007,49 @@ class Customer extends module_1.default {
     fetchWalkinCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.walkin.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { customerName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { status: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.walkin.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { customerName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
                 //@ts-ignore
-                const customers = yield this.walkin.paginate({ branch: user.branch }, Object.assign({}, query));
+                const customers = yield this.walkin.paginate(aggregate, options);
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -846,8 +1115,49 @@ class Customer extends module_1.default {
     fetchFilledCustomerCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search, filter } = query;
+                const options = Object.assign(Object.assign({}, query), { populate: [
+                        { path: 'branch', model: 'branches' }
+                    ] });
+                let aggregate;
+                const aggregate1 = this.walkin.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { customerName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { status: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate2 = this.walkin.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { customerName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate1;
+                }
+                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate2;
+                }
                 //@ts-ignore
-                const cylinders = yield this.walkin.paginate({ status: walk_in_customers_1.WalkinCustomerStatus.FILLED, branch: user.branch }, Object.assign({}, query));
+                const cylinders = yield this.walkin.aggregatePaginate(aggregate, options);
                 return cylinders;
             }
             catch (e) {

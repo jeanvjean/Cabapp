@@ -13,6 +13,7 @@ class DatabaseException extends exception_1.default {
      * @param {Error} err
      */
     constructor(message, err) {
+        console.log(err);
         super(message);
         Object.setPrototypeOf(this, new.target.prototype);
         this.name = DatabaseException.name;

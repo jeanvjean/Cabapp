@@ -7,6 +7,11 @@ export interface QueryInterface {
   limit?: number | 10;
   search?: 'string';
   filter?:'string',
+  holder?:string,
+  cylinderType?:string,
+  gasType?:string,
+  customer?:string,
+  supplier?:string,
   produced?:boolean;
   sort?: object;
   range?: string[];

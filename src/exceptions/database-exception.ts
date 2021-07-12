@@ -15,6 +15,7 @@ class DatabaseException extends Exception {
    * @param {Error} err
    */
   public constructor(message?: string, err?: MongoError) {
+    console.log(err)
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = DatabaseException.name;

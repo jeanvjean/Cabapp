@@ -2132,6 +2132,20 @@ class Cylinder extends Module {
       }
       //@ts-ignore
        let transfers = await this.transfer.aggregatePaginate(aggregate,options);
+       for(let trans of transfers.docs) {
+          let gasType = await this.cylinder.findById(trans.gasType);
+          trans.gasType = gasType;
+          let initiator = await this.user.findById(trans.initiator);
+          trans.initiator = initiator;
+          let to = await this.user.findById(trans.to);
+          trans.to = to;
+          let nextApprovalOfficer = await this.user.findById(trans.nextApprovalOfficer);
+          trans.nextApprovalOfficer = nextApprovalOfficer;
+          let toBranch = await this.branch.findById(trans.toBranch);
+          trans.toBranch = toBranch;
+          let branch = await this.branch.findById(trans.branch);
+          trans.branch = branch;
+       }
       // if(search?.length) {
       //   if(filter?.length) {
       //     //@ts-ignore

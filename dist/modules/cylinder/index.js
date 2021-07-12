@@ -1946,6 +1946,20 @@ class Cylinder extends module_1.default {
                 }
                 //@ts-ignore
                 let transfers = yield this.transfer.aggregatePaginate(aggregate, options);
+                for (let trans of transfers.docs) {
+                    let gasType = yield this.cylinder.findById(trans.gasType);
+                    trans.gasType = gasType;
+                    let initiator = yield this.user.findById(trans.initiator);
+                    trans.initiator = initiator;
+                    let to = yield this.user.findById(trans.to);
+                    trans.to = to;
+                    let nextApprovalOfficer = yield this.user.findById(trans.nextApprovalOfficer);
+                    trans.nextApprovalOfficer = nextApprovalOfficer;
+                    let toBranch = yield this.branch.findById(trans.toBranch);
+                    trans.toBranch = toBranch;
+                    let branch = yield this.branch.findById(trans.branch);
+                    trans.branch = branch;
+                }
                 // if(search?.length) {
                 //   if(filter?.length) {
                 //     //@ts-ignore

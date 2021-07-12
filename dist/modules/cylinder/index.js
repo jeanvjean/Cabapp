@@ -32,6 +32,9 @@ class Cylinder extends module_1.default {
         this.user = props.user;
         this.condemn = props.condemn;
         this.change_gas = props.change_gas;
+        this.customer = props.customer;
+        this.branch = props.branch;
+        this.supplier = props.supplier;
     }
     createCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -548,11 +551,11 @@ class Cylinder extends module_1.default {
                 const { search, holder, cylinderType, gasType, customer, supplier } = query;
                 const ObjectId = mongoose.Types.ObjectId;
                 let options = Object.assign(Object.assign({}, query), { populate: [
-                        { path: 'assignedTo', model: 'customer' },
-                        { path: 'branch', model: 'branches' },
-                        { path: 'gasType', model: 'cylinder' },
-                        { path: 'supplier', model: 'supplier' },
-                        { path: "fromBranch", model: 'branches' }
+                        'assignedTo',
+                        'branch',
+                        'gasType',
+                        'supplier',
+                        "fromBranch"
                     ] });
                 let aggregate;
                 const aggregate1 = this.registerCylinder.aggregate([
@@ -585,7 +588,7 @@ class Cylinder extends module_1.default {
                                 { branch: ObjectId(user.branch.toString()) }
                             ]
                         }
-                    }
+                    },
                 ]);
                 const aggregate2 = this.registerCylinder.aggregate([
                     {
@@ -779,8 +782,22 @@ class Cylinder extends module_1.default {
                 else {
                     aggregate = aggregate1;
                 }
+                // let gas = await this.cylinder.findById()
                 //@ts-ignore
                 var registeredCylinders = yield this.registerCylinder.aggregatePaginate(aggregate, options);
+                // await this.cylinder.populate(registeredCylinders, {path: "gasType"});
+                for (let cyl of registeredCylinders.docs) {
+                    let gas = yield this.cylinder.findOne({ _id: cyl.gasType });
+                    cyl.gasType = gas;
+                    let customer = yield this.customer.findById(cyl.assignedTo);
+                    cyl.assignedTo = customer;
+                    let supplier = yield this.supplier.findById(cyl.supplier);
+                    cyl.supplier = supplier;
+                    let branch = yield this.branch.findById(cyl.supplier);
+                    cyl.branch = branch;
+                    let fromBranch = yield this.branch.findById(cyl.supplier);
+                    cyl.fromBranch = fromBranch;
+                }
                 //@ts-ignore
                 const cylinders = yield this.registerCylinder.find({ branch: user.branch });
                 const bufferCylinders = cylinders.filter(cylinder => cylinder.cylinderType == cylinder_1.cylinderTypes.BUFFER);

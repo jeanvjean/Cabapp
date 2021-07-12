@@ -59,7 +59,10 @@ export const cylinder = new CylinderModule({
   archive:Archive,
   user:User,
   condemn:Condemn,
-  change_gas:ChangeCylinder
+  change_gas:ChangeCylinder,
+  customer:Customer,
+  branch:Branch,
+  supplier:Supplier
 });
 
 export const product = new ProductModule({

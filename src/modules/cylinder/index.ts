@@ -15,9 +15,12 @@ import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { generateToken, padLeft } from "../../util/token";
 import { CondemnCylinderInterface } from "../../models/condemnCylinder";
 import { ChangeCylinderInterface } from "../../models/change-cylinder";
-import { SupplierTypes } from "../../models/supplier";
+import { SupplierInterface, SupplierTypes } from "../../models/supplier";
 import * as mongoose from 'mongoose';
+import { CustomerInterface } from "../../models/customer";
+import { BranchInterface } from "../../models/branch";
 export { mongoose };
+
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
   registerCylinder: Model<RegisteredCylinderInterface>
@@ -26,6 +29,9 @@ type CylinderProps = {
   user:Model<UserInterface>
   condemn:Model<CondemnCylinderInterface>
   change_gas:Model<ChangeCylinderInterface>
+  customer:Model<CustomerInterface>
+  supplier:Model<SupplierInterface>
+  branch:Model<BranchInterface>
 }
 
 interface NewCylinderInterface{
@@ -187,6 +193,9 @@ class Cylinder extends Module {
   private user: Model<UserInterface>
   private condemn:Model<CondemnCylinderInterface>
   private change_gas:Model<ChangeCylinderInterface>
+  private customer:Model<CustomerInterface>
+  private branch:Model<BranchInterface>
+  private supplier:Model<SupplierInterface>
 
   constructor(props:CylinderProps) {
     super()
@@ -197,6 +206,9 @@ class Cylinder extends Module {
     this.user = props.user
     this.condemn = props.condemn
     this.change_gas = props.change_gas
+    this.customer = props.customer
+    this.branch = props.branch
+    this.supplier = props.supplier
   }
 
   public async createCylinder(data:NewCylinderInterface, user:UserInterface): Promise<CylinderInterface|undefined> {
@@ -712,11 +724,11 @@ class Cylinder extends Module {
       let options = {
         ...query,
         populate:[
-          {path:'assignedTo', model:'customer'},
-          {path:'branch', model:'branches'},
-          {path:'gasType', model:'cylinder'},
-          {path:'supplier', model:'supplier'},
-          {path:"fromBranch", model:'branches'}
+          'assignedTo',
+          'branch',
+          'gasType',
+          'supplier',
+          "fromBranch"
         ]
       }
       let aggregate;
@@ -750,7 +762,8 @@ class Cylinder extends Module {
               {branch: ObjectId(user.branch.toString())}
             ]
           }
-        }
+        },
+        // { $lookup: {from: 'cylinder', localField: 'gasType', foreignField: '_id', as: 'gas'} }
       ]);
       const aggregate2 = this.registerCylinder.aggregate([
         {
@@ -939,8 +952,22 @@ class Cylinder extends Module {
       } else {
         aggregate = aggregate1
       }
+      // let gas = await this.cylinder.findById()
       //@ts-ignore
       var registeredCylinders = await this.registerCylinder.aggregatePaginate(aggregate, options);
+      // await this.cylinder.populate(registeredCylinders, {path: "gasType"});
+      for(let cyl of registeredCylinders.docs){
+        let gas = await this.cylinder.findOne({_id: cyl.gasType});
+        cyl.gasType = gas;
+        let customer = await this.customer.findById(cyl.assignedTo);
+        cyl.assignedTo = customer;
+        let supplier = await this.supplier.findById(cyl.supplier);
+        cyl.supplier = supplier;
+        let branch = await this.branch.findById(cyl.supplier);
+        cyl.branch = branch;
+        let fromBranch = await this.branch.findById(cyl.supplier);
+        cyl.fromBranch = fromBranch;
+      }
       //@ts-ignore
       const cylinders = await this.registerCylinder.find({branch:user.branch});
       const bufferCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);

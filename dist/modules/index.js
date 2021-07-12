@@ -31,7 +31,10 @@ exports.cylinder = new cylinder_1.default({
     archive: index_1.Archive,
     user: index_1.User,
     condemn: index_1.Condemn,
-    change_gas: index_1.ChangeCylinder
+    change_gas: index_1.ChangeCylinder,
+    customer: index_1.Customer,
+    branch: index_1.Branch,
+    supplier: index_1.Supplier
 });
 exports.product = new inventory_1.default({
     product: index_1.Product,

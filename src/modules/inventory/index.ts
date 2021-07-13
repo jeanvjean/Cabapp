@@ -15,6 +15,7 @@ import Notify from '../../util/mail'
 import { DeleteResponse } from "../vehicle";
 import { createLog } from "../../util/logs";
 import { mongoose } from "../cylinder";
+import { CustomerInterface } from "../../models/customer";
 
 interface ProductProp {
   product:Model<ProductInterface>
@@ -23,6 +24,7 @@ interface ProductProp {
   disburse:Model<DisburseProductInterface>
   branch:Model<BranchInterface>
   user:Model<UserInterface>
+  customer:Model<CustomerInterface>
 }
 
 interface ApprovalInput{
@@ -130,6 +132,7 @@ class Product extends Module{
   private disburse:Model<DisburseProductInterface>
   private branch:Model<BranchInterface>
   private user:Model<UserInterface>
+  private customer:Model<CustomerInterface>
 
   constructor(props:ProductProp) {
     super()
@@ -139,6 +142,7 @@ class Product extends Module{
     this.disburse = props.disburse
     this.branch = props.branch
     this.user = props.user
+    this.customer = props.customer
   }
 
   public async createBranch(data:NewBranchInterface):Promise<BranchInterface|undefined>{
@@ -266,6 +270,15 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const products = await this.product.aggregatePaginate(aggregate,options);
+      //Populate reference fields
+      for(let product of products.docs) {
+        let supplier = await this.supplier.findById(product.supplier);
+        product.supplier = supplier;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let division = await this.branch.findById(product.division);
+        product.division = division;
+      }
       // console.log(products);
       return Promise.resolve(products);
     } catch (e) {
@@ -600,6 +613,13 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const inventories = await this.inventory.aggregatePaginate(aggregate, options);
+      //Populate reference fields
+      for(let product of inventories.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+      }
       return Promise.resolve({
           inventory:inventories
         });
@@ -1215,7 +1235,21 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const disbursement = await this.disburse.aggregatePaginate(aggregate,options);
-
+      //Populate reference fields
+      for(let product of disbursement.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
       //     for(let tofficer of transfer.approvalOfficers) {
@@ -1306,6 +1340,20 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const disbursement = await this.disburse.aggregatePaginate(aggregate, options);
+      for(let product of disbursement.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
       //   console.log(disbursement)
       // let startStage = disbursement.filter(transfer=> {
       //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1436,6 +1484,20 @@ class Product extends Module{
       }
       //@ts-ignore
       const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+      for(let product of disbursements.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
 
       let totalApproved = await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.COMPLETED});
     let totalPending =  await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.PENDING});
@@ -1512,6 +1574,20 @@ class Product extends Module{
       }
       //@ts-ignore
       const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+      for(let product of disbursements.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
 
       let totalApproved = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.COMPLETED});
       let totalPending = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.PENDING});
@@ -1565,6 +1641,20 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+      for(let product of disbursements.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
       return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);
@@ -1608,6 +1698,20 @@ class Product extends Module{
       ]);
       //@ts-ignore
       const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
+      for(let product of disbursements.docs) {
+        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
+        product.inspectingOfficer = inspectingOfficer;
+        let branch = await this.branch.findById(product.branch);
+        product.branch = branch;
+        let initiator = await this.user.findById(product.initiator);
+        product.initiator = initiator;
+        let customer = await this.customer.findById(product.customer);
+        product.customer = customer;
+        let releasedTo = await this.user.findById(product.releasedTo);
+        product.releasedTo = releasedTo;
+        let releasedBy = await this.user.findById(product.releasedBy);
+        product.releasedBy = releasedBy;
+      }
       return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);

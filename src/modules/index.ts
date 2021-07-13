@@ -71,7 +71,8 @@ export const product = new ProductModule({
   inventory:Inventory,
   disburse:DisburseProduct,
   branch:Branch,
-  user:User
+  user:User,
+  customer:Customer
 });
 
 export const vehicle = new VehicleModule({
@@ -119,7 +120,9 @@ export const purchase = new PurchaseOrderModule({
 
 export const ocn = new OcnModule({
   ocn:OCN,
-  user:User
+  user:User,
+  customer:Customer,
+  branch:Branch
 });
 
 export const account = new AccountModule({

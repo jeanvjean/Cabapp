@@ -8,10 +8,15 @@ import Environment from '../../configs/static';
 import { BadInputFormatException } from "../../exceptions";
 import { createLog } from "../../util/logs";
 import { generateToken } from "../../util/token";
+import { mongoose } from "../cylinder";
+import { CustomerInterface } from "../../models/customer";
+import { BranchInterface } from "../../models/branch";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
     user:Model<UserInterface>
+    customer:Model<CustomerInterface>
+    branch:Model<BranchInterface>
 }
 
 interface newOcnInterface {
@@ -34,11 +39,15 @@ type ocnApproval = {
 class OutGoingCylinder extends Module{
     private ocn:Model<OutgoingCylinderInterface>
     private user:Model<UserInterface>
+    private branch:Model<BranchInterface>
+    private customer:Model<CustomerInterface>
 
     constructor(props:ocnPropsInterface){
         super()
         this.ocn = props.ocn
         this.user = props.user;
+        this.branch = props.branch
+        this.customer = props.customer
     }
 
     public async createOCNRecord(data:newOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined>{
@@ -335,12 +344,36 @@ class OutGoingCylinder extends Module{
 
     public async fetchOcnApprovals(query:QueryInterface, user:UserInterface) :Promise<OutgoingCylinderInterface[]|undefined>{
         try {
+          const ObjectId = mongoose.Types.ObjectId;
+          const { search } = query;
+          const aggregate = this.ocn.aggregate([
+            {
+              $match:{
+                $and:[
+                  {
+                    $or:[
+                      {cylinderType:{
+                        $regex: search?.toLowerCase() || ""
+                      }}
+                    ]
+                  },
+                  {branch:ObjectId(user.branch.toString())},
+                  {nextApprovalOfficer:ObjectId(user._id.toString())},
+                  {approvalStatus:TransferStatus.PENDING}
+                ]
+              }
+            }
+          ]);
           //@ts-ignore
-            const outgoing = await this.ocn.paginate({
-              branch:user.branch,
-              nextApprovalOfficer:user._id,
-              ApprovalStatus:TransferStatus.PENDING
-            },{...query});
+            const outgoing = await this.ocn.aggregatePaginate(aggregate,{...query});
+            for(let o of outgoing.docs) {
+              let nextApprovalOfficer = await this.user.findById(o.nextApprovalOfficer);
+              o.nextApprovalOfficer = nextApprovalOfficer;
+              let customer = await this.customer.findById(o.customer);
+              o.customer = customer;
+              let branch = await this.branch.findById(o.branch);
+              o.branch = branch;
+            }
             // let startStage = outgoing.filter(outgoing=> {
             //     if(outgoing.approvalStage == stagesOfApproval.START) {
             //       for(let tofficer of outgoing.approvalOfficers) {
@@ -392,6 +425,44 @@ class OutGoingCylinder extends Module{
         } catch (e) {
             this.handleException(e);
         }
+    }
+
+    public async fetchOcns(query:QueryInterface, user:UserInterface):Promise<OutgoingCylinderInterface| undefined>{
+      try {
+        const ObjectId = mongoose.Types.ObjectId;
+          const { search } = query;
+          const aggregate = this.ocn.aggregate([
+            {
+              $match:{
+                $and:[
+                  {
+                    $or:[
+                      {cylinderType:{
+                        $regex: search?.toLowerCase() || ""
+                      }},{approvalStatus:{
+                        $regex: search?.toLowerCase() || ""
+                      }}
+                    ]
+                  },
+                  {branch:ObjectId(user.branch.toString())}
+                ]
+              }
+            }
+          ]);
+          //@ts-ignore
+          const outgoing = await this.ocn.aggregatePaginate(aggregate,{...query});
+          for(let o of outgoing.docs) {
+            let nextApprovalOfficer = await this.user.findById(o.nextApprovalOfficer);
+            o.nextApprovalOfficer = nextApprovalOfficer;
+            let customer = await this.customer.findById(o.customer);
+            o.customer = customer;
+            let branch = await this.branch.findById(o.branch);
+            o.branch = branch;
+          }
+          return Promise.resolve(outgoing)
+      } catch (e) {
+        this.handleException(e);
+      }
     }
 
     public async viewOcnDetails(ocnId:string):Promise<OutgoingCylinderInterface|undefined>{

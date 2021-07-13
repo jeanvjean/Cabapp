@@ -42,7 +42,8 @@ exports.product = new inventory_1.default({
     inventory: index_1.Inventory,
     disburse: index_1.DisburseProduct,
     branch: index_1.Branch,
-    user: index_1.User
+    user: index_1.User,
+    customer: index_1.Customer
 });
 exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle,
@@ -83,7 +84,9 @@ exports.purchase = new purchaseOrder_1.default({
 });
 exports.ocn = new ocn_1.default({
     ocn: index_1.OCN,
-    user: index_1.User
+    user: index_1.User,
+    customer: index_1.Customer,
+    branch: index_1.Branch
 });
 exports.account = new account_1.default({
     account: index_1.Reciept

@@ -28,6 +28,7 @@ class Product extends module_1.default {
         this.disburse = props.disburse;
         this.branch = props.branch;
         this.user = props.user;
+        this.customer = props.customer;
     }
     createBranch(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -156,6 +157,15 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const products = yield this.product.aggregatePaginate(aggregate, options);
+                //Populate reference fields
+                for (let product of products.docs) {
+                    let supplier = yield this.supplier.findById(product.supplier);
+                    product.supplier = supplier;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let division = yield this.branch.findById(product.division);
+                    product.division = division;
+                }
                 // console.log(products);
                 return Promise.resolve(products);
             }
@@ -510,6 +520,13 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const inventories = yield this.inventory.aggregatePaginate(aggregate, options);
+                //Populate reference fields
+                for (let product of inventories.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                }
                 return Promise.resolve({
                     inventory: inventories
                 });
@@ -1125,6 +1142,21 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
+                //Populate reference fields
+                for (let product of disbursement.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -1214,6 +1246,20 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
+                for (let product of disbursement.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 //   console.log(disbursement)
                 // let startStage = disbursement.filter(transfer=> {
                 //   if(transfer.requestStage == stagesOfApproval.START) {
@@ -1346,6 +1392,20 @@ class Product extends module_1.default {
                 }
                 //@ts-ignore
                 const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
+                for (let product of disbursements.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 let totalApproved = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1421,6 +1481,20 @@ class Product extends module_1.default {
                 }
                 //@ts-ignore
                 const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
+                for (let product of disbursements.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 let totalApproved = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1471,6 +1545,20 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
+                for (let product of disbursements.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 return Promise.resolve(disbursements);
             }
             catch (e) {
@@ -1512,6 +1600,20 @@ class Product extends module_1.default {
                 ]);
                 //@ts-ignore
                 const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
+                for (let product of disbursements.docs) {
+                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
+                    product.inspectingOfficer = inspectingOfficer;
+                    let branch = yield this.branch.findById(product.branch);
+                    product.branch = branch;
+                    let initiator = yield this.user.findById(product.initiator);
+                    product.initiator = initiator;
+                    let customer = yield this.customer.findById(product.customer);
+                    product.customer = customer;
+                    let releasedTo = yield this.user.findById(product.releasedTo);
+                    product.releasedTo = releasedTo;
+                    let releasedBy = yield this.user.findById(product.releasedBy);
+                    product.releasedBy = releasedBy;
+                }
                 return Promise.resolve(disbursements);
             }
             catch (e) {

@@ -36,5 +36,11 @@ router.get(
     ocnController.fetchOcnDetails()
 );
 
+router.get(
+  '/fetch-ocns',
+  auth.verify(),
+  ocnController.fetchOcns()
+);
+
 
 export default router;

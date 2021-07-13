@@ -2213,6 +2213,7 @@ class Cylinder extends Module {
   public async fetchUserPendingApproval(query:QueryInterface, user:UserInterface):Promise<TransferCylinder[]|undefined>{
     try {
       const { search } = query;
+      const ObjectId = mongoose.Types.ObjectId
       const options = {
         ...query,
         populate:[
@@ -2224,24 +2225,50 @@ class Cylinder extends Module {
           {path:'to', model:'customer'}
         ]
       }
-      let transfers;
-      if(!search?.length) {
+      const aggregate = this.transfer.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {transferStatus:{
+                    $regex: search?.toLowerCase() || ""
+                  }},{type:{
+                    $regex: search?.toLowerCase() || ""
+                  }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())},
+              {nextApprovalOfficer:ObjectId(user._id.toString())},
+              {transferStatus:TransferStatus.PENDING}
+            ]
+          }
+        }
+      ]);
         //@ts-ignore
-        transfers = await this.transfer.paginate({
-          branch:user.branch,
-          transferStatus:TransferStatus.PENDING,
-          nextApprovalOfficer:`${user._id}`,
-          $or:[{type:search?.toLowerCase()}
-          ]
-        },options);
-      }else {
-        //@ts-ignore
-        transfers = await this.transfer.paginate({
-          branch:user.branch,
-          transferStatus:TransferStatus.PENDING,
-          nextApprovalOfficer:`${user._id}`
-        },options);
-      }
+        let transfers = await this.transfer.aggregatePaginate(aggregate,options);
+        //populate reference fields
+        for(let trans of transfers.docs) {
+          let gasType = await this.cylinder.findById(trans.gasType);
+          trans.gasType = gasType;
+          let initiator = await this.user.findById(trans.initiator);
+          trans.initiator = initiator;
+          let to = await this.customer.findById(trans.to);
+          trans.to = to;
+          let nextApprovalOfficer = await this.user.findById(trans.nextApprovalOfficer);
+          trans.nextApprovalOfficer = nextApprovalOfficer;
+          let toBranch = await this.branch.findById(trans.toBranch);
+          trans.toBranch = toBranch;
+          let branch = await this.branch.findById(trans.branch);
+          trans.branch = branch;
+          let cylinders = [];
+          for(let cyl of trans.cylinders) {
+            let cy = await this.registerCylinder.findById(cyl);
+            cylinders.push(cy);
+          }
+          trans.cylinders = cylinders;
+       }
+
       //@ts-ignore
       // let startStage = transfers.docs.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {

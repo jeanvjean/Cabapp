@@ -2031,6 +2031,7 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { search } = query;
+                const ObjectId = mongoose.Types.ObjectId;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
@@ -2039,24 +2040,48 @@ class Cylinder extends module_1.default {
                         { path: 'branch', model: 'branches' },
                         { path: 'to', model: 'customer' }
                     ] });
-                let transfers;
-                if (!(search === null || search === void 0 ? void 0 : search.length)) {
-                    //@ts-ignore
-                    transfers = yield this.transfer.paginate({
-                        branch: user.branch,
-                        transferStatus: transferCylinder_1.TransferStatus.PENDING,
-                        nextApprovalOfficer: `${user._id}`,
-                        $or: [{ type: search === null || search === void 0 ? void 0 : search.toLowerCase() }
-                        ]
-                    }, options);
-                }
-                else {
-                    //@ts-ignore
-                    transfers = yield this.transfer.paginate({
-                        branch: user.branch,
-                        transferStatus: transferCylinder_1.TransferStatus.PENDING,
-                        nextApprovalOfficer: `${user._id}`
-                    }, options);
+                const aggregate = this.transfer.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { transferStatus: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { type: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
+                                { transferStatus: transferCylinder_1.TransferStatus.PENDING }
+                            ]
+                        }
+                    }
+                ]);
+                //@ts-ignore
+                let transfers = yield this.transfer.aggregatePaginate(aggregate, options);
+                //populate reference fields
+                for (let trans of transfers.docs) {
+                    let gasType = yield this.cylinder.findById(trans.gasType);
+                    trans.gasType = gasType;
+                    let initiator = yield this.user.findById(trans.initiator);
+                    trans.initiator = initiator;
+                    let to = yield this.customer.findById(trans.to);
+                    trans.to = to;
+                    let nextApprovalOfficer = yield this.user.findById(trans.nextApprovalOfficer);
+                    trans.nextApprovalOfficer = nextApprovalOfficer;
+                    let toBranch = yield this.branch.findById(trans.toBranch);
+                    trans.toBranch = toBranch;
+                    let branch = yield this.branch.findById(trans.branch);
+                    trans.branch = branch;
+                    let cylinders = [];
+                    for (let cyl of trans.cylinders) {
+                        let cy = yield this.registerCylinder.findById(cyl);
+                        cylinders.push(cy);
+                    }
+                    trans.cylinders = cylinders;
                 }
                 //@ts-ignore
                 // let startStage = transfers.docs.filter(transfer=> {

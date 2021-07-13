@@ -12,6 +12,11 @@ import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
 import { generateToken } from "../../util/token";
+import { BranchInterface } from "../../models/branch";
+import { ProductInterface } from "../../models/inventory";
+import { VehicleInterface } from "../../models/vehicle";
+import { SupplierInterface } from "../../models/supplier";
+import { CylinderInterface } from "../../models/cylinder";
 
 
 
@@ -21,6 +26,11 @@ export interface CustomerInterfaceProp{
   complaint:Model<ComplaintInterface>
   user:Model<UserInterface>
   walkin:Model<WalkinCustomerInterface>
+  branch:Model<BranchInterface>
+  product:Model<ProductInterface>
+  vehicle:Model<VehicleInterface>
+  supplier:Model<SupplierInterface>
+  cylinder:Model<CylinderInterface>
 }
 
 interface newCustomerInterface {
@@ -114,6 +124,11 @@ class Customer extends Module{
   private complaint:Model<ComplaintInterface>
   private user:Model<UserInterface>
   private walkin:Model<WalkinCustomerInterface>
+  private branch:Model<BranchInterface>
+  private product:Model<ProductInterface>
+  private supplier:Model<SupplierInterface>
+  private vehicle:Model<VehicleInterface>
+  private cylinder:Model<CylinderInterface>
 
   constructor(props:CustomerInterfaceProp){
     super()
@@ -122,6 +137,11 @@ class Customer extends Module{
     this.complaint = props.complaint
     this.user = props.user
     this.walkin = props.walkin
+    this.branch = props.branch
+    this.product = props.product
+    this.vehicle = props.vehicle
+    this.supplier = props.supplier
+    this.cylinder = props.cylinder
   }
 
   public async createCustomer(data:newCustomerInterface, user:UserInterface):Promise<CustomerInterface|undefined> {
@@ -207,6 +227,16 @@ class Customer extends Module{
       }
       //@ts-ignore
       const customers = await this.customer.aggregatePaginate(aggregate, options);
+      for(let cust of customers.docs) {
+        let branch = await this.branch.findById(cust.branch);
+        cust.branch = branch;
+        let products = []
+        for(let prod of cust.products) {
+          let product = await this.product.findById(prod);
+          products.push(product)
+        }
+        cust.products = products
+      }
       return Promise.resolve(customers);
     } catch (e) {
       this.handleException(e)
@@ -216,7 +246,8 @@ class Customer extends Module{
   public async fetchCustomerDetails(id:string):Promise<CustomerInterface|undefined>{
     try {
       const customer = await this.customer.findById(id).populate([
-        {path:'branch', model:'branches'}
+        {path:'branch', model:'branches'},
+        {path:'products', model:'products'}
       ]);
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
@@ -321,6 +352,15 @@ class Customer extends Module{
       }
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate,options);
+      //Populate the reference fields
+      for(let order of orders.docs) {
+        let vehicle = await this.vehicle.findById(order.vehicle).populate('assignedTo');
+        order.vehicle = vehicle
+        let supplier = await this.supplier.findById(order.supplier);
+        order.supplier = supplier;
+        let customer = await this.customer.findById(order.supplier);
+        order.customer = customer;
+      }
       return Promise.resolve({
         orders
       });
@@ -399,6 +439,17 @@ class Customer extends Module{
       }
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate, options);
+      //Populate reference fields
+        for(let order of orders.docs) {
+          let vehicle = await this.vehicle.findById(order.vehicle).populate('assignedTo');
+          order.vehicle = vehicle
+          let supplier = await this.supplier.findById(order.supplier);
+          order.supplier = supplier;
+          let customer = await this.customer.findById(order.supplier);
+          order.customer = customer;
+          let gasType = await this.cylinder.findById(order.gasType);
+          order.gasType = gasType;
+        }
       return Promise.resolve({
         orders
       });
@@ -831,6 +882,17 @@ class Customer extends Module{
       }
       //@ts-ignore
       const complaints = await this.complaint.aggregatePaginate(aggregate,options);
+      //populate id reference fields
+        for(let comp of complaints.docs) {
+          let branch = await this.branch.findById(comp.branch);
+          comp.branch = branch
+          let initiator = await this.user.findById(comp.initiator);
+          comp.initiator = initiator;
+          let nextApprovalOfficer = await this.user.findById(comp.nextApprovalOfficer);
+          comp.nextApprovalOfficer = nextApprovalOfficer;
+          let customer = await this.customer.findById(comp.customer);
+          comp.customer = customer;
+        }
 
       // let startStage = complaints.filter(transfer=> {
       //   if(transfer.approvalStage == stagesOfApproval.START) {
@@ -940,7 +1002,18 @@ class Customer extends Module{
         aggregate2
       }
       //@ts-ignore
-      const complains = await this.complaint.paginate(aggregate, options);
+      const complains = await this.complaint.aggregatePaginate(aggregate, options);
+      //populate id reference fields
+      for(let comp of complains.docs) {
+        let branch = await this.branch.findById(comp.branch);
+        comp.branch = branch
+        let initiator = await this.user.findById(comp.initiator);
+        comp.initiator = initiator;
+        let nextApprovalOfficer = await this.user.findById(comp.nextApprovalOfficer);
+        comp.nextApprovalOfficer = nextApprovalOfficer;
+        let customer = await this.customer.findById(comp.customer);
+        comp.customer = customer;
+      }
       return Promise.resolve(complains);
     } catch (e) {
       this.handleException(e);
@@ -1002,7 +1075,18 @@ class Customer extends Module{
         aggregate2
       }
       //@ts-ignore
-      const complaints = await this.complaint.paginate(aggregate, options);
+      const complaints = await this.complaint.aggregatePaginate(aggregate, options);
+      //populate id reference fields
+      for(let comp of complaints.docs) {
+        let branch = await this.branch.findById(comp.branch);
+        comp.branch = branch
+        let initiator = await this.user.findById(comp.initiator);
+        comp.initiator = initiator;
+        let nextApprovalOfficer = await this.user.findById(comp.nextApprovalOfficer);
+        comp.nextApprovalOfficer = nextApprovalOfficer;
+        let customer = await this.customer.findById(comp.customer);
+        comp.customer = customer;
+      }
 
       return Promise.resolve(complaints);
     } catch (e) {
@@ -1052,11 +1136,16 @@ class Customer extends Module{
   public async registerWalkinCustomers(data:newWalkinCustomer, user:UserInterface):Promise<WalkinCustomerInterface|undefined>{
     try{
       const customer = new this.walkin({...data, branch:user.branch});
-      const findCustomers = await this.walkin.find();
-      let docs = findCustomers.map(doc=>doc.serialNo);
-      let maxNumber = Math.max(...docs);
-      let sn = maxNumber + 1
-      customer.serialNo = sn | 1;
+      const findCustomers = await this.walkin.find().sort({serialNo:-1}).limit(1);
+      // let docs = findCustomers.map(doc=>doc.serialNo);
+      // let maxNumber = Math.max(...docs);
+      // let sn = maxNumber + 1
+      // customer.serialNo = sn | 1;
+      if(findCustomers.length > 0) {
+        customer.serialNo = findCustomers[0].serialNo+1
+      }else {
+        customer.serialNo = 1
+      }
       let init = "ECR"
       let num = await generateToken(6);
       //@ts-ignore
@@ -1128,7 +1217,12 @@ class Customer extends Module{
         aggregate2
       }
       //@ts-ignore
-      const customers = await this.walkin.paginate(aggregate, options);
+      const customers = await this.walkin.aggregatePaginate(aggregate, options);
+      //populate id reference fields
+      for(let cust of customers.docs) {
+        let branch = await this.branch.findById(cust.branch);
+        cust.branch = branch;
+      }
       return Promise.resolve(customers);
     }catch(e){
       this.handleException(e);
@@ -1231,6 +1325,10 @@ class Customer extends Module{
       }
       //@ts-ignore
       const cylinders = await this.walkin.aggregatePaginate(aggregate,options);
+      for(let cyl of cylinders.docs) {
+        let branch = await this.cylinder.findById(cyl.branch);
+        cyl.branch = branch;
+      }
       return cylinders;
     } catch (e) {
       this.handleException(e);

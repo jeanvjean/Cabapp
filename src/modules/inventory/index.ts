@@ -193,13 +193,14 @@ class Product extends Module{
       const {  partNumber } = data;
       let findProduct = await this.product.findOne({partNumber, branch:user.branch});
       if(findProduct) {
-        throw new BadInputFormatException('a product with this ASNL number already exists in your branch');
+        throw new BadInputFormatException('a product with this part number already exists in your branch');
       }
 
       let product = new this.product({...data, branch:user.branch});
-      let findP = await this.product.find({}).sort({serialNumber:-1}).limit(1)
+
+      let findP = await this.product.find({}).sort({serialNumber:-1}).limit(1);
       let sn;
-      if(findP) {
+      if(findP.length > 0) {
         //@ts-ignore
         sn = findP[0].serialNumber+1;
       }else{
@@ -207,6 +208,13 @@ class Product extends Module{
       }
       //@ts-ignore
       product.serialNumber = sn
+      if(product.quantity > 0) {
+        product.inStock = true;
+        product.outOfStock = false
+      } else {
+        product.inStock = false
+        product.outOfStock = true
+      }
       await product.save();
       await createLog({
         user:user._id,

@@ -28,6 +28,11 @@ class Customer extends module_1.default {
         this.complaint = props.complaint;
         this.user = props.user;
         this.walkin = props.walkin;
+        this.branch = props.branch;
+        this.product = props.product;
+        this.vehicle = props.vehicle;
+        this.supplier = props.supplier;
+        this.cylinder = props.cylinder;
     }
     createCustomer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -109,6 +114,16 @@ class Customer extends module_1.default {
                 }
                 //@ts-ignore
                 const customers = yield this.customer.aggregatePaginate(aggregate, options);
+                for (let cust of customers.docs) {
+                    let branch = yield this.branch.findById(cust.branch);
+                    cust.branch = branch;
+                    let products = [];
+                    for (let prod of cust.products) {
+                        let product = yield this.product.findById(prod);
+                        products.push(product);
+                    }
+                    cust.products = products;
+                }
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -120,7 +135,8 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const customer = yield this.customer.findById(id).populate([
-                    { path: 'branch', model: 'branches' }
+                    { path: 'branch', model: 'branches' },
+                    { path: 'products', model: 'products' }
                 ]);
                 return Promise.resolve(customer);
             }
@@ -231,6 +247,15 @@ class Customer extends module_1.default {
                 }
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);
+                //Populate the reference fields
+                for (let order of orders.docs) {
+                    let vehicle = yield this.vehicle.findById(order.vehicle).populate('assignedTo');
+                    order.vehicle = vehicle;
+                    let supplier = yield this.supplier.findById(order.supplier);
+                    order.supplier = supplier;
+                    let customer = yield this.customer.findById(order.supplier);
+                    order.customer = customer;
+                }
                 return Promise.resolve({
                     orders
                 });
@@ -307,6 +332,17 @@ class Customer extends module_1.default {
                 }
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);
+                //Populate reference fields
+                for (let order of orders.docs) {
+                    let vehicle = yield this.vehicle.findById(order.vehicle).populate('assignedTo');
+                    order.vehicle = vehicle;
+                    let supplier = yield this.supplier.findById(order.supplier);
+                    order.supplier = supplier;
+                    let customer = yield this.customer.findById(order.supplier);
+                    order.customer = customer;
+                    let gasType = yield this.cylinder.findById(order.gasType);
+                    order.gasType = gasType;
+                }
                 return Promise.resolve({
                     orders
                 });
@@ -749,6 +785,17 @@ class Customer extends module_1.default {
                 }
                 //@ts-ignore
                 const complaints = yield this.complaint.aggregatePaginate(aggregate, options);
+                //populate id reference fields
+                for (let comp of complaints.docs) {
+                    let branch = yield this.branch.findById(comp.branch);
+                    comp.branch = branch;
+                    let initiator = yield this.user.findById(comp.initiator);
+                    comp.initiator = initiator;
+                    let nextApprovalOfficer = yield this.user.findById(comp.nextApprovalOfficer);
+                    comp.nextApprovalOfficer = nextApprovalOfficer;
+                    let customer = yield this.customer.findById(comp.customer);
+                    comp.customer = customer;
+                }
                 // let startStage = complaints.filter(transfer=> {
                 //   if(transfer.approvalStage == stagesOfApproval.START) {
                 //     for(let tofficer of transfer.approvalOfficers) {
@@ -857,7 +904,18 @@ class Customer extends module_1.default {
                     aggregate2;
                 }
                 //@ts-ignore
-                const complains = yield this.complaint.paginate(aggregate, options);
+                const complains = yield this.complaint.aggregatePaginate(aggregate, options);
+                //populate id reference fields
+                for (let comp of complains.docs) {
+                    let branch = yield this.branch.findById(comp.branch);
+                    comp.branch = branch;
+                    let initiator = yield this.user.findById(comp.initiator);
+                    comp.initiator = initiator;
+                    let nextApprovalOfficer = yield this.user.findById(comp.nextApprovalOfficer);
+                    comp.nextApprovalOfficer = nextApprovalOfficer;
+                    let customer = yield this.customer.findById(comp.customer);
+                    comp.customer = customer;
+                }
                 return Promise.resolve(complains);
             }
             catch (e) {
@@ -919,7 +977,18 @@ class Customer extends module_1.default {
                     aggregate2;
                 }
                 //@ts-ignore
-                const complaints = yield this.complaint.paginate(aggregate, options);
+                const complaints = yield this.complaint.aggregatePaginate(aggregate, options);
+                //populate id reference fields
+                for (let comp of complaints.docs) {
+                    let branch = yield this.branch.findById(comp.branch);
+                    comp.branch = branch;
+                    let initiator = yield this.user.findById(comp.initiator);
+                    comp.initiator = initiator;
+                    let nextApprovalOfficer = yield this.user.findById(comp.nextApprovalOfficer);
+                    comp.nextApprovalOfficer = nextApprovalOfficer;
+                    let customer = yield this.customer.findById(comp.customer);
+                    comp.customer = customer;
+                }
                 return Promise.resolve(complaints);
             }
             catch (e) {
@@ -974,11 +1043,17 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const customer = new this.walkin(Object.assign(Object.assign({}, data), { branch: user.branch }));
-                const findCustomers = yield this.walkin.find();
-                let docs = findCustomers.map(doc => doc.serialNo);
-                let maxNumber = Math.max(...docs);
-                let sn = maxNumber + 1;
-                customer.serialNo = sn | 1;
+                const findCustomers = yield this.walkin.find().sort({ serialNo: -1 }).limit(1);
+                // let docs = findCustomers.map(doc=>doc.serialNo);
+                // let maxNumber = Math.max(...docs);
+                // let sn = maxNumber + 1
+                // customer.serialNo = sn | 1;
+                if (findCustomers.length > 0) {
+                    customer.serialNo = findCustomers[0].serialNo + 1;
+                }
+                else {
+                    customer.serialNo = 1;
+                }
                 let init = "ECR";
                 let num = yield token_1.generateToken(6);
                 //@ts-ignore
@@ -1049,7 +1124,12 @@ class Customer extends module_1.default {
                     aggregate2;
                 }
                 //@ts-ignore
-                const customers = yield this.walkin.paginate(aggregate, options);
+                const customers = yield this.walkin.aggregatePaginate(aggregate, options);
+                //populate id reference fields
+                for (let cust of customers.docs) {
+                    let branch = yield this.branch.findById(cust.branch);
+                    cust.branch = branch;
+                }
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -1158,6 +1238,10 @@ class Customer extends module_1.default {
                 }
                 //@ts-ignore
                 const cylinders = yield this.walkin.aggregatePaginate(aggregate, options);
+                for (let cyl of cylinders.docs) {
+                    let branch = yield this.cylinder.findById(cyl.branch);
+                    cyl.branch = branch;
+                }
                 return cylinders;
             }
             catch (e) {

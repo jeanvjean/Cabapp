@@ -92,7 +92,12 @@ export const customer = new CustomerModule({
   order:Order,
   complaint:Complain,
   user:User,
-  walkin:WalkInCustomer
+  walkin:WalkInCustomer,
+  branch:Branch,
+  product:Product,
+  vehicle:Vehicle,
+  supplier:Supplier,
+  cylinder:Cylinder
 });
 
 export const sales = new SalesModule({

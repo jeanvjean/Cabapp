@@ -27,6 +27,8 @@ export interface ProductInterface extends Document{
   supplier?:Schema.Types.ObjectId
   branch:Schema.Types.ObjectId
   deleted:boolean
+  inStock:boolean
+  outOfStock:boolean
 }
 
 export const productSchema = new Schema({

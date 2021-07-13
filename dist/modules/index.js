@@ -60,7 +60,12 @@ exports.customer = new customers_1.default({
     order: index_1.Order,
     complaint: index_1.Complain,
     user: index_1.User,
-    walkin: index_1.WalkInCustomer
+    walkin: index_1.WalkInCustomer,
+    branch: index_1.Branch,
+    product: index_1.Product,
+    vehicle: index_1.Vehicle,
+    supplier: index_1.Supplier,
+    cylinder: index_1.Cylinder
 });
 exports.sales = new sales_1.default({
     sales: index_1.SalesReq,

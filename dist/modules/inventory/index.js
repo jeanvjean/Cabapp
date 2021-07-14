@@ -52,6 +52,7 @@ class Product extends module_1.default {
                     role: newUser.subrole,
                     link: static_1.default.FRONTEND_URL,
                     branch: branch.name,
+                    email: newUser.email,
                     password
                 });
                 let mailLoad = {

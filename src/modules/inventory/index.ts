@@ -168,6 +168,7 @@ class Product extends Module{
           role:newUser.subrole,
           link:Environment.FRONTEND_URL,
           branch:branch.name,
+          email:newUser.email,
           password
         });
         let mailLoad = {

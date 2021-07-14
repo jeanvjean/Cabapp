@@ -38,7 +38,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderNumber: { type: String },
     condition: { type: String, enum: Object.values(cylinder_1.CylinderCondition), default: cylinder_1.CylinderCondition.GOOD },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    toBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    fromBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     holdingTime: { type: Date },
     department: { type: String },
     holder: { type: String, enum: Object.values(cylinderHolder), default: cylinderHolder.ASNL },

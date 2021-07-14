@@ -110,7 +110,7 @@ export interface RegisteredCylinderInterface extends Document{
 
   branch:Schema.Types.ObjectId
 
-  toBranch:Schema.Types.ObjectId
+  fromBranch:Schema.Types.ObjectId
 
   department:string
 
@@ -172,7 +172,7 @@ export const registerCylinderSchema = new Schema({
 
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
 
-  toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
+  fromBranch:{type:Schema.Types.ObjectId, ref:'branches'},
 
   holdingTime:{type:Date},
 

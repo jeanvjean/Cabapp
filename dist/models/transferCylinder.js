@@ -24,12 +24,11 @@ var ApprovalStatus;
 })(ApprovalStatus = exports.ApprovalStatus || (exports.ApprovalStatus = {}));
 var TransferType;
 (function (TransferType) {
-    TransferType["PERMANENT"] = "permanent";
+    TransferType["PERMANENT"] = "sale";
     TransferType["TEMPORARY"] = "temporary";
-    TransferType["DIVISION"] = "within-division";
+    TransferType["DIVISION"] = "division";
     TransferType["CONDEMN"] = "condemn";
     TransferType["REPAIR"] = "repair";
-    TransferType["BRANCH"] = "branch";
     TransferType["CHANGEGAS"] = "change-gas";
 })(TransferType = exports.TransferType || (exports.TransferType = {}));
 exports.commentSchema = new mongoose_1.Schema({

@@ -28,12 +28,11 @@ export enum ApprovalStatus {
 }
 
 export enum TransferType{
-  PERMANENT="permanent",
+  PERMANENT="sale",
   TEMPORARY="temporary",
-  DIVISION="within-division",
+  DIVISION="division",
   CONDEMN="condemn",
   REPAIR="repair",
-  BRANCH="branch",
   CHANGEGAS="change-gas"
 }
 
@@ -73,6 +72,7 @@ export interface TransferCylinder extends Document {
   purchaseDate:Date
   purchasePrice:number
   toBranch:Schema.Types.ObjectId
+  fromBranch:Schema.Types.ObjectId
   toDepartment:string
   branch:Schema.Types.ObjectId
   gasType:Schema.Types.ObjectId

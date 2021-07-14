@@ -584,6 +584,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) }
                             ]
@@ -616,6 +619,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) },
                                 { holder: holder === null || holder === void 0 ? void 0 : holder.toLowerCase() }
@@ -649,6 +655,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) },
                                 { holder: holder === null || holder === void 0 ? void 0 : holder.toLowerCase() },
@@ -683,6 +692,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) },
                                 { holder: holder === null || holder === void 0 ? void 0 : holder.toLowerCase() },
@@ -718,6 +730,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) },
                                 { holder: holder === null || holder === void 0 ? void 0 : holder.toLowerCase() },
@@ -754,6 +769,9 @@ class Cylinder extends module_1.default {
                                             } }, { cylinderStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // ,{fromBranch:{
+                                        //   $regex:ObjectId(search?.toLowerCase()) || ''
+                                        // }}
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) },
                                 { gasType: gasType === null || gasType === void 0 ? void 0 : gasType.toLowerCase() },
@@ -793,9 +811,9 @@ class Cylinder extends module_1.default {
                     cyl.assignedTo = customer;
                     let supplier = yield this.supplier.findById(cyl.supplier);
                     cyl.supplier = supplier;
-                    let branch = yield this.branch.findById(cyl.supplier);
+                    let branch = yield this.branch.findById(cyl.branch);
                     cyl.branch = branch;
-                    let fromBranch = yield this.branch.findById(cyl.supplier);
+                    let fromBranch = yield this.branch.findById(cyl.fromBranch);
                     cyl.fromBranch = fromBranch;
                 }
                 //@ts-ignore
@@ -826,7 +844,8 @@ class Cylinder extends module_1.default {
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'branch', model: 'branches' },
                     { path: 'gasType', model: 'cylinder' },
-                    { path: 'supplier', model: 'supplier' }
+                    { path: 'supplier', model: 'supplier' },
+                    { path: 'fromBranch', model: 'branches' }
                 ]);
                 return Promise.resolve(cylinders);
             }
@@ -1750,7 +1769,7 @@ class Cylinder extends module_1.default {
                             user: apUser
                         });
                         let cylinders = transfer.cylinders;
-                        if (transfer.type == transferCylinder_1.TransferType.TEMPORARY || transfer.type == transferCylinder_1.TransferType.PERMANENT) {
+                        if (transfer.type == transferCylinder_1.TransferType.TEMPORARY) {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
@@ -1759,41 +1778,65 @@ class Cylinder extends module_1.default {
                                 cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
                                 //@ts-ignore
                                 cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
-                                if (transfer.type == transferCylinder_1.TransferType.TEMPORARY) {
-                                    //@ts-ignore
-                                    cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
-                                }
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
+                            ;
+                        }
+                        else if (transfer.type == transferCylinder_1.TransferType.PERMANENT) {
+                            for (let cylinder of cylinders) {
+                                let cyl = yield this.registerCylinder.findById(cylinder);
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
+                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                            }
+                            ;
                         }
                         else if (transfer.type == transferCylinder_1.TransferType.DIVISION) {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
                                 //@ts-ignore
-                                // cyl?.cylinderType = TypesOfCylinders.BUFFER;
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
                                 //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.department = transfer.toDepartment;
+                                cyl === null || cyl === void 0 ? void 0 : cyl.fromBranch = transfer.branch;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.branch = transfer.toBranch;
+                                //@ts-ignore
+                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
                                 yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
                             }
                         }
-                        else if (transfer.type == transferCylinder_1.TransferType.CHANGEGAS) {
-                            for (let cylinder of cylinders) {
-                                let cyl = yield this.registerCylinder.findById(cylinder);
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.gasType = transfer.gasType;
-                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
-                            }
-                        }
-                        else if (transfer.type == transferCylinder_1.TransferType.BRANCH) {
-                            for (let cylinder of cylinders) {
-                                let cyl = yield this.registerCylinder.findById(cylinder);
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.toBranch = transfer.toBranch;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.BRANCH;
-                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
-                            }
-                        }
+                        // else if(transfer.type == TransferType.DIVISION){
+                        //   for(let cylinder of cylinders) {
+                        //     let cyl = await this.registerCylinder.findById(cylinder);
+                        //     //@ts-ignore
+                        //     // cyl?.cylinderType = TypesOfCylinders.BUFFER;
+                        //     //@ts-ignore
+                        //     cyl?.department = transfer.toDepartment;
+                        //     await cyl?.save();
+                        //   }
+                        // }else if(transfer.type == TransferType.CHANGEGAS){
+                        //   for(let cylinder of cylinders) {
+                        //     let cyl = await this.registerCylinder.findById(cylinder);
+                        //     //@ts-ignore
+                        //     cyl?.gasType = transfer.gasType;
+                        //     await cyl?.save();
+                        //   }
+                        // }else if(transfer.type == TransferType.BRANCH){
+                        //   for(let cylinder of cylinders) {
+                        //     let cyl = await this.registerCylinder.findById(cylinder);
+                        //     //@ts-ignore
+                        //     cyl?.toBranch = transfer.toBranch;
+                        //     //@ts-ignore
+                        //     cyl?.holder = cylinderHolder.BRANCH
+                        //     await cyl?.save();
+                        //   }
+                        // }
                         yield transfer.save();
                         return Promise.resolve({
                             message: "Approved",
@@ -1905,7 +1948,7 @@ class Cylinder extends module_1.default {
                         { path: 'initiator', model: 'User' },
                         { path: 'to', model: 'customer' },
                         { path: 'nextApprovalOfficer', model: 'User' },
-                        { path: 'toBranch', model: 'branches' },
+                        { path: 'fromBranch', model: 'branches' },
                         { path: 'branch', model: 'branches' }
                     ] });
                 let aggregate;
@@ -2018,7 +2061,8 @@ class Cylinder extends module_1.default {
                     { path: 'cylinders', model: 'registered-cylinders' },
                     { path: 'assignedTo', model: 'customer' },
                     { path: 'gasType', model: 'cylinder' },
-                    { path: 'branch', model: 'branches' }
+                    { path: 'branch', model: 'branches' },
+                    { path: 'toBranch', model: 'branches' }
                 ]);
                 return Promise.resolve(transfer);
             }
@@ -2038,6 +2082,7 @@ class Cylinder extends module_1.default {
                         { path: 'cylinders', model: 'registered-cylinders' },
                         { path: 'gasType', model: 'cylinder' },
                         { path: 'branch', model: 'branches' },
+                        { path: 'toBranch', model: 'branches' },
                         { path: 'to', model: 'customer' }
                     ] });
                 const aggregate = this.transfer.aggregate([

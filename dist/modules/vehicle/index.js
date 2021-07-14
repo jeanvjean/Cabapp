@@ -89,7 +89,7 @@ class Vehicle extends module_1.default {
                         new mail_1.default().sendMail(payload);
                     });
                 }.bind(null, vehicle._id));
-                schedule.scheduleJob(new Date(firstDate), function (id) {
+                schedule.scheduleJob(new Date(thirdDate), function (id) {
                     return __awaiter(this, void 0, void 0, function* () {
                         const html = yield resolve_template_1.getTemplate('licencenotice', {
                             date: vehicle.insuranceDate,
@@ -110,6 +110,91 @@ class Vehicle extends module_1.default {
                     });
                 }.bind(null, vehicle._id));
                 return Promise.resolve(vehicle);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    updateVehicle(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { vehicleId } = data;
+                let vehicle = yield this.vehicle.findById(vehicleId);
+                if (!vehicle) {
+                    throw new exceptions_1.BadInputFormatException('vehicle not found');
+                }
+                let branch = yield this.branch.findById(vehicle.branch).populate([
+                    { path: 'branchAdmin', model: "User" }
+                ]);
+                let updatedVehicle = yield this.vehicle.findByIdAndUpdate(vehicle._id, { $set: data }, { new: true });
+                if (data.insuranceDate) {
+                    let date = new Date(data.insuranceDate);
+                    let firstDate = date.setDate(date.getDate() - +14);
+                    let secondDate = date.setDate(date.getDate() - +7);
+                    let thirdDate = date.setDate(date.getDate() - +1);
+                    schedule.scheduleJob(new Date(firstDate), function (id) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            const html = yield resolve_template_1.getTemplate('licencenotice', {
+                                date: data.insuranceDate,
+                                remaining: 14,
+                                registration: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.regNo,
+                                vehicleType: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vehicleType,
+                                model: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vModel,
+                                //@ts-ignore
+                                name: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.name
+                            });
+                            let payload = {
+                                content: html,
+                                subject: 'Vehicle licence notification',
+                                //@ts-ignore
+                                email: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.email
+                            };
+                            new mail_1.default().sendMail(payload);
+                        });
+                    }.bind(null, updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle._id));
+                    schedule.scheduleJob(new Date(secondDate), function (id) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            const html = yield resolve_template_1.getTemplate('licencenotice', {
+                                date: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.insuranceDate,
+                                remaining: 7,
+                                registration: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.regNo,
+                                vehicleType: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vehicleType,
+                                model: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vModel,
+                                //@ts-ignore
+                                name: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.name
+                            });
+                            let payload = {
+                                content: html,
+                                subject: 'Vehicle licence notification',
+                                //@ts-ignore
+                                email: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.email
+                            };
+                            new mail_1.default().sendMail(payload);
+                        });
+                    }.bind(null, updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle._id));
+                    schedule.scheduleJob(new Date(thirdDate), function (id) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            const html = yield resolve_template_1.getTemplate('licencenotice', {
+                                date: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.insuranceDate,
+                                remaining: 1,
+                                registration: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.regNo,
+                                vehicleType: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vehicleType,
+                                model: updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle.vModel,
+                                //@ts-ignore
+                                name: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.name
+                            });
+                            let payload = {
+                                content: html,
+                                subject: 'Vehicle licence notification',
+                                //@ts-ignore
+                                email: branch === null || branch === void 0 ? void 0 : branch.branchAdmin.email
+                            };
+                            new mail_1.default().sendMail(payload);
+                        });
+                    }.bind(null, updatedVehicle === null || updatedVehicle === void 0 ? void 0 : updatedVehicle._id));
+                }
+                return Promise.resolve(updatedVehicle);
             }
             catch (e) {
                 this.handleException(e);

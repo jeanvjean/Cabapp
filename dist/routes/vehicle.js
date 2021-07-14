@@ -6,6 +6,7 @@ const controllers_1 = require("../controllers");
 const auth = new authentication_1.default();
 const router = express_1.Router();
 router.post('/register-vehicle', auth.verify(), controllers_1.vehicleCtrl.createVehicle());
+router.post('/update-vehicle/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.updateVehicle());
 router.get('/fetch-vehicles', auth.verify(), controllers_1.vehicleCtrl.fetchVehicles());
 router.get('/fetch-vehicle/:id', controllers_1.vehicleCtrl.fetchVehicle());
 router.post('/register-inspection/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.vehicleInspection());

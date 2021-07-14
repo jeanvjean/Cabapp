@@ -45,6 +45,28 @@ type NewVehicle = {
   lastMileage?:VehicleInterface['lastMileage']
 }
 
+interface UpdateVehicle {
+  vehicleType?:VehicleInterface['vehicleType']
+  manufacturer?:VehicleInterface['manufacturer']
+  vModel?:VehicleInterface['vModel']
+  regNo?:VehicleInterface['regNo']
+  acqisistionDate?:VehicleInterface['acqisistionDate']
+  mileageDate?:VehicleInterface['mileageDate']
+  currMile?:VehicleInterface['currMile']
+  assignedTo?:VehicleInterface['assignedTo']
+  vehCategory?:VehicleInterface['vehCategory']
+  tankCapacity?:VehicleInterface['tankCapacity']
+  batteryCapacity?:VehicleInterface['batteryCapacity']
+  fuelType?:VehicleInterface['fuelType']
+  grossWeight?:VehicleInterface['grossWeight']
+  netWeight?:VehicleInterface['netWeight']
+  disposal?:VehicleInterface['disposal'],
+  licence?:VehicleInterface['licence']
+  insuranceDate?:VehicleInterface['insuranceDate']
+  lastMileage?:VehicleInterface['lastMileage']
+  vehicleId:string
+}
+
 interface InspectionData {
   type:Maintainance['type']
   operation:Maintainance['operation']
@@ -178,7 +200,7 @@ class Vehicle extends Module{
         }.bind(null, vehicle._id)
       );
       schedule.scheduleJob(
-        new Date(firstDate),
+        new Date(thirdDate),
         async function(id:any){
           const html = await getTemplate('licencenotice', {
             date:vehicle.insuranceDate,
@@ -201,6 +223,94 @@ class Vehicle extends Module{
       return Promise.resolve(vehicle);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async updateVehicle(data:UpdateVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
+    try {
+      const { vehicleId } = data;
+      let vehicle = await this.vehicle.findById(vehicleId);
+      if(!vehicle) {
+        throw new BadInputFormatException('vehicle not found');
+      }
+
+      let branch = await this.branch.findById(vehicle.branch).populate([
+        {path:'branchAdmin', model:"User"}
+      ]);
+
+      let updatedVehicle = await this.vehicle.findByIdAndUpdate(vehicle._id, {$set:data}, {new:true});
+      if(data.insuranceDate) {
+        let date = new Date(data.insuranceDate);
+        let firstDate = date.setDate(date.getDate() - +14);
+        let secondDate = date.setDate(date.getDate() - +7);
+        let thirdDate = date.setDate(date.getDate() - +1);
+      schedule.scheduleJob(
+        new Date(firstDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:data.insuranceDate,
+            remaining:14,
+            registration:updatedVehicle?.regNo,
+            vehicleType:updatedVehicle?.vehicleType,
+            model:updatedVehicle?.vModel,
+            //@ts-ignore
+            name:branch?.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch?.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, updatedVehicle?._id)
+      );
+      schedule.scheduleJob(
+        new Date(secondDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:updatedVehicle?.insuranceDate,
+            remaining:7,
+            registration:updatedVehicle?.regNo,
+            vehicleType:updatedVehicle?.vehicleType,
+            model:updatedVehicle?.vModel,
+            //@ts-ignore
+            name:branch?.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch?.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, updatedVehicle?._id)
+      );
+      schedule.scheduleJob(
+        new Date(thirdDate),
+        async function(id:any){
+          const html = await getTemplate('licencenotice', {
+            date:updatedVehicle?.insuranceDate,
+            remaining:1,
+            registration:updatedVehicle?.regNo,
+            vehicleType:updatedVehicle?.vehicleType,
+            model:updatedVehicle?.vModel,
+            //@ts-ignore
+            name:branch?.branchAdmin.name
+          });
+          let payload = {
+            content:html,
+            subject:'Vehicle licence notification',
+            //@ts-ignore
+            email:branch?.branchAdmin.email
+          }
+          new Notify().sendMail(payload);
+        }.bind(null, updatedVehicle?._id)
+      )
+      }
+      return Promise.resolve(updatedVehicle as VehicleInterface);
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

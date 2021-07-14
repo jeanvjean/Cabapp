@@ -11,6 +11,12 @@ router.post(
   vehicleCtrl.createVehicle()
 );
 
+router.post(
+  '/update-vehicle/:vehicleId',
+  auth.verify(),
+  vehicleCtrl.updateVehicle()
+);
+
 router.get(
   '/fetch-vehicles',
   auth.verify(),

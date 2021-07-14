@@ -7,7 +7,7 @@ import Notify from '../../util/mail';
 import Environment from '../../configs/static';
 import { BadInputFormatException } from "../../exceptions";
 import { createLog } from "../../util/logs";
-import { generateToken } from "../../util/token";
+import { generateToken, padLeft } from "../../util/token";
 import { mongoose } from "../cylinder";
 import { CustomerInterface } from "../../models/customer";
 import { BranchInterface } from "../../models/branch";
@@ -63,11 +63,19 @@ class OutGoingCylinder extends Module{
                 department:user.role,
                 stageOfApproval:stagesOfApproval.STAGE1
             });
-            let init = 'OCN'
-            let num = await generateToken(6)
-            //@ts-ignore
-            let ocnNo = init + num.toString();
-            ocn.ocnNo = ocnNo;
+            let findOcn = await this.ocn.find({branch:user.branch}).sort({ocnInit:-1}).limit(1);
+            let initNum
+            if(findOcn[0] == undefined) {
+              initNum = 1;
+            }else {
+              initNum = findOcn[0].ocnInit+1
+            }
+            let init = "OCN";
+            const num = padLeft(initNum, 6, "");
+            let grnNo = init+num;
+            ocn.ocnNo = grnNo;
+            ocn.ocnInit = initNum;
+
             await ocn.save();
             await createLog({
               user:user._id,
@@ -482,3 +490,4 @@ class OutGoingCylinder extends Module{
 }
 
 export default OutGoingCylinder;
+

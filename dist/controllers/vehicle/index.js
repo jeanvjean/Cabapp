@@ -27,6 +27,18 @@ class VehicleController extends ctrl_1.default {
             }
         });
     }
+    updateVehicle() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.updateVehicle(Object.assign(Object.assign({}, req.body), { vehicleId: req.params.vehicleId }), req.user);
+                this.ok(res, 'updated vehicle', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchVehicles() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

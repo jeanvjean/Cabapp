@@ -23,7 +23,8 @@ const ocnSchema = new mongoose_1.Schema({
     approvalStatus: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), default: transferCylinder_1.TransferStatus.PENDING },
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    ocnNo: { type: String }
+    ocnNo: { type: String },
+    ocnInit: Number
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

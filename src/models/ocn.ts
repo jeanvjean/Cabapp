@@ -29,6 +29,7 @@ export interface OutgoingCylinderInterface extends Document {
     nextApprovalOfficer:Schema.Types.ObjectId
     branch:Schema.Types.ObjectId
     ocnNo:string
+    ocnInit:number
 }
 
 const ocnCylinderSchema = new Schema({
@@ -52,7 +53,8 @@ const ocnSchema = new Schema({
     approvalStatus:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
-    ocnNo:{type:String}
+    ocnNo:{type:String},
+    ocnInit:Number
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate)

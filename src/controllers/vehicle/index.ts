@@ -23,6 +23,18 @@ class VehicleController extends Ctrl{
     }
   }
 
+  updateVehicle():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.updateVehicle({...req.body, vehicleId:req.params.vehicleId}, req.user);
+        this.ok(res, 'updated vehicle', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchVehicles():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

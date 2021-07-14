@@ -39,11 +39,19 @@ class OutGoingCylinder extends module_1.default {
                     department: user.role,
                     stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
                 });
-                let init = 'OCN';
-                let num = yield token_1.generateToken(6);
-                //@ts-ignore
-                let ocnNo = init + num.toString();
-                ocn.ocnNo = ocnNo;
+                let findOcn = yield this.ocn.find({ branch: user.branch }).sort({ ocnInit: -1 }).limit(1);
+                let initNum;
+                if (findOcn[0] == undefined) {
+                    initNum = 1;
+                }
+                else {
+                    initNum = findOcn[0].ocnInit + 1;
+                }
+                let init = "OCN";
+                const num = token_1.padLeft(initNum, 6, "");
+                let grnNo = init + num;
+                ocn.ocnNo = grnNo;
+                ocn.ocnInit = initNum;
                 yield ocn.save();
                 yield logs_1.createLog({
                     user: user._id,

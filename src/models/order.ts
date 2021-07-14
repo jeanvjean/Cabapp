@@ -41,6 +41,8 @@ export interface OrderInterface extends Document{
   tracking:trackingOrder[],
   branch:Schema.Types.ObjectId
   orderType:orderType
+  orderNumber:string
+  initOn:number
 }
 
 const trackingSchema = new Schema({
@@ -61,7 +63,9 @@ const OrderSchema = new Schema({
   gasColor:{type:String},
   tracking:[trackingSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  orderType:{type:String, enum:Object.values(orderType)}
+  orderType:{type:String, enum:Object.values(orderType)},
+  initOn:{type:Number},
+  orderNumber:{type:String}
 },{
   timestamps:true
 });

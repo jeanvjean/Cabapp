@@ -37,7 +37,9 @@ const OrderSchema = new mongoose_1.Schema({
     gasColor: { type: String },
     tracking: [trackingSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    orderType: { type: String, enum: Object.values(orderType) }
+    orderType: { type: String, enum: Object.values(orderType) },
+    initOn: { type: Number },
+    orderNumber: { type: String }
 }, {
     timestamps: true
 });

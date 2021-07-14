@@ -11,7 +11,7 @@ import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
-import { generateToken } from "../../util/token";
+import { generateToken, padLeft } from "../../util/token";
 import { BranchInterface } from "../../models/branch";
 import { ProductInterface } from "../../models/inventory";
 import { VehicleInterface } from "../../models/vehicle";
@@ -262,6 +262,23 @@ class Customer extends Module{
         location:user.role,
         status:'pending'
       });
+      let findOrder = await this.order.find({}).sort({initOn:-1}).limit(1);
+
+      let initNum
+      if(findOrder[0] == undefined) {
+        initNum = 1
+      }else {
+        initNum = findOrder[0].initOn+1
+      }
+      let init = "GRN"
+      // let str = ""+initNum
+      // let pad = "000000"
+      // let ans = pad.substring(0, pad.length - str.length) + str;
+      const orderNumber = padLeft(initNum, 6, "");
+      let grnNo = init+orderNumber;
+      order.orderNumber = orderNumber;
+      order.initOn = initNum
+
       await order.save();
       await createLog({
         user:user._id,
@@ -323,6 +340,9 @@ class Customer extends Module{
               {$or:[
                 {status:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { pickupType: filter?.toLowerCase() },
@@ -338,6 +358,9 @@ class Customer extends Module{
               {$or:[
                 {status:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { vehicle: data.vehicle }
@@ -345,10 +368,10 @@ class Customer extends Module{
           }
         }
       ]);
-      if(search?.length && filter?.length) {
+      if(filter?.length) {
         aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate2
+      }else {
+        aggregate = aggregate2
       }
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate,options);
@@ -410,6 +433,9 @@ class Customer extends Module{
               {$or:[
                 {status:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { pickupType: filter?.toLowerCase() },
@@ -425,6 +451,9 @@ class Customer extends Module{
               {$or:[
                 {status:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { branch: ObjectId(user.branch.toString()) }
@@ -432,10 +461,10 @@ class Customer extends Module{
           }
         }
       ]);
-      if(search?.length && filter?.length) {
+      if(filter?.length) {
         aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate2
+      }else {
+        aggregate = aggregate2
       }
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate, options);

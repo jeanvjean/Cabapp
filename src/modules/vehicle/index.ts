@@ -646,6 +646,8 @@ class Vehicle extends Module{
         }
       }
       //@ts-ignore
+      pickup?.dateCompleted = new Date().toISOString()
+      //@ts-ignore
       pickup?.status = status;
       await pickup?.save();
       return Promise.resolve(pickup as PickupInterface);

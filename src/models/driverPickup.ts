@@ -40,6 +40,7 @@ export interface PickupInterface extends Document{
   security:Schema.Types.ObjectId
   deleted:boolean
   branch:Schema.Types.ObjectId
+  dateCompleted:Date
 }
 
 
@@ -72,7 +73,8 @@ const routeSchema = new Schema({
   recievedBy:{type:Schema.Types.ObjectId, ref:'User'},
   security:{type:Schema.Types.ObjectId, ref:'User'},
   deleted:{type:Boolean, default:false},
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  dateCompleted:{type:Date}
 },{
   timestamps:true
 });

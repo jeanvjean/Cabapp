@@ -153,6 +153,22 @@ class Customer extends module_1.default {
                     location: user.role,
                     status: 'pending'
                 });
+                let findOrder = yield this.order.find({}).sort({ initOn: -1 }).limit(1);
+                let initNum;
+                if (findOrder[0] == undefined) {
+                    initNum = 1;
+                }
+                else {
+                    initNum = findOrder[0].initOn + 1;
+                }
+                let init = "GRN";
+                // let str = ""+initNum
+                // let pad = "000000"
+                // let ans = pad.substring(0, pad.length - str.length) + str;
+                const orderNumber = token_1.padLeft(initNum, 6, "");
+                let grnNo = init + orderNumber;
+                order.orderNumber = orderNumber;
+                order.initOn = initNum;
                 yield order.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -217,6 +233,9 @@ class Customer extends module_1.default {
                                 { $or: [
                                         { status: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
@@ -232,6 +251,9 @@ class Customer extends module_1.default {
                                 { $or: [
                                         { status: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { vehicle: data.vehicle }
@@ -239,11 +261,11 @@ class Customer extends module_1.default {
                         }
                     }
                 ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                if (filter === null || filter === void 0 ? void 0 : filter.length) {
                     aggregate = aggregate1;
                 }
-                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate2;
+                else {
+                    aggregate = aggregate2;
                 }
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);
@@ -302,6 +324,9 @@ class Customer extends module_1.default {
                                 { $or: [
                                         { status: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
@@ -317,6 +342,9 @@ class Customer extends module_1.default {
                                 { $or: [
                                         { status: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { branch: ObjectId(user.branch.toString()) }
@@ -324,11 +352,11 @@ class Customer extends module_1.default {
                         }
                     }
                 ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                if (filter === null || filter === void 0 ? void 0 : filter.length) {
                     aggregate = aggregate1;
                 }
-                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate2;
+                else {
+                    aggregate = aggregate2;
                 }
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);

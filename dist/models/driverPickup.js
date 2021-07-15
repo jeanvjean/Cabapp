@@ -33,7 +33,8 @@ const routeSchema = new mongoose_1.Schema({
     recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     deleted: { type: Boolean, default: false },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    dateCompleted: { type: Date }
 }, {
     timestamps: true
 });

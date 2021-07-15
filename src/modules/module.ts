@@ -17,6 +17,8 @@ export interface QueryInterface {
   branch?:string,
   fromBranch?:string
   range?: string[];
+  out?:string
+  instock?:string
 }
 
 /**

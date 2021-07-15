@@ -239,7 +239,7 @@ class Product extends Module{
   public async fetchProducts(query:QueryInterface, user:UserInterface): Promise<ProductInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, instock, out } = query;
       const options = {
         ...query,
         populate:[
@@ -248,7 +248,8 @@ class Product extends Module{
           {path:'division', model:'branches'}
         ]
       }
-      const aggregate = this.product.aggregate([
+      let aggregate
+      const aggregate1 = this.product.aggregate([
         {
           $match:{
             $and:[
@@ -269,6 +270,57 @@ class Product extends Module{
           }
         }
       ]);
+      const aggregate2 = this.product.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {productName:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{inStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{outOfStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())},
+              {quantity: {$lt:1}},
+              {deleted: false}
+            ]
+          }
+        }
+      ]);
+      const aggregate3 = this.product.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {productName:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{inStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{outOfStock:{
+                    $regex: search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())},
+              {quantity: {$gt:0}},
+              {deleted: false}
+            ]
+          }
+        }
+      ]);
+      if(out?.length) {
+        aggregate = aggregate2
+      }else if(instock?.length) {
+        aggregate = aggregate3
+      }else {
+        aggregate = aggregate1
+      }
       //@ts-ignore
       const products = await this.product.aggregatePaginate(aggregate,options);
       //Populate reference fields

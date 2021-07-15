@@ -129,13 +129,14 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, instock, out } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'supplier', model: 'supplier' },
                         { path: 'branch', model: 'branches' },
                         { path: 'division', model: 'branches' }
                     ] });
-                const aggregate = this.product.aggregate([
+                let aggregate;
+                const aggregate1 = this.product.aggregate([
                     {
                         $match: {
                             $and: [
@@ -156,6 +157,59 @@ class Product extends module_1.default {
                         }
                     }
                 ]);
+                const aggregate2 = this.product.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { productName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { inStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { outOfStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { quantity: { $lt: 1 } },
+                                { deleted: false }
+                            ]
+                        }
+                    }
+                ]);
+                const aggregate3 = this.product.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { productName: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { inStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { outOfStock: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { quantity: { $gt: 0 } },
+                                { deleted: false }
+                            ]
+                        }
+                    }
+                ]);
+                if (out === null || out === void 0 ? void 0 : out.length) {
+                    aggregate = aggregate2;
+                }
+                else if (instock === null || instock === void 0 ? void 0 : instock.length) {
+                    aggregate = aggregate3;
+                }
+                else {
+                    aggregate = aggregate1;
+                }
                 //@ts-ignore
                 const products = yield this.product.aggregatePaginate(aggregate, options);
                 //Populate reference fields

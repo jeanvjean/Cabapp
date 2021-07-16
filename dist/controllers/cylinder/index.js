@@ -121,7 +121,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const transfer = yield this.module.transferCylinders(req.body, req.user);
-                this.ok(res, 'Transfer Initiated', transfer);
+                this.ok(res, transfer === null || transfer === void 0 ? void 0 : transfer.message, transfer === null || transfer === void 0 ? void 0 : transfer.transfer);
             }
             catch (e) {
                 this.handleError(e, req, res);
@@ -133,7 +133,7 @@ class CylinderController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const approval = yield this.module.approveTransfer(req.body, req.user);
-                this.ok(res, `${approval === null || approval === void 0 ? void 0 : approval.message}`, approval);
+                this.ok(res, `${approval === null || approval === void 0 ? void 0 : approval.message}`, approval === null || approval === void 0 ? void 0 : approval.transfer);
             }
             catch (e) {
                 this.handleError(e, req, res);

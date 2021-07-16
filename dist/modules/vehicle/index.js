@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.schedule = void 0;
 const exceptions_1 = require("../../exceptions");
 const vehicle_1 = require("../../models/vehicle");
 const module_1 = require("../module");
@@ -19,6 +20,7 @@ const order_1 = require("../../models/order");
 const registeredCylinders_1 = require("../../models/registeredCylinders");
 const token_1 = require("../../util/token");
 const schedule = require("node-schedule");
+exports.schedule = schedule;
 const resolve_template_1 = require("../../util/resolve-template");
 class Vehicle extends module_1.default {
     constructor(props) {

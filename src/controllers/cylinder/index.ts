@@ -120,7 +120,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const transfer = await this.module.transferCylinders(req.body, req.user);
-        this.ok(res, 'Transfer Initiated', transfer);
+        this.ok(res, transfer?.message, transfer?.transfer);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -132,7 +132,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const approval = await this.module.approveTransfer(req.body, req.user);
-        this.ok(res, `${approval?.message}`, approval);
+        this.ok(res, `${approval?.message}`, approval?.transfer);
       } catch (e) {
         this.handleError(e, req, res);
       }

@@ -22,6 +22,8 @@ const walk_in_customers_1 = require("../../models/walk-in-customers");
 const supplier_1 = require("../../models/supplier");
 const mongoose = require("mongoose");
 exports.mongoose = mongoose;
+const vehicle_1 = require("../vehicle");
+const models_1 = require("../../models");
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -1612,6 +1614,13 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    arrayRemove(arr, value) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return arr.filter(function (ele) {
+                return ele != value;
+            });
+        });
+    }
     transferCylinders(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -1620,6 +1629,36 @@ class Cylinder extends module_1.default {
                     date.setDate(date.getDate() + data.holdingTime);
                     //@ts-ignore
                     data === null || data === void 0 ? void 0 : data.holdingTime = date.toISOString();
+                }
+                let pulled = [];
+                let send = [];
+                for (let i = 0; i < data.cylinders.length; i++) {
+                    let cyl = data.cylinders[i];
+                    let fCyl = yield this.registerCylinder.findById(cyl);
+                    if (fCyl) {
+                        if (!fCyl.available) {
+                            pulled.push(cyl);
+                            send.push({
+                                cylinderNumber: fCyl.cylinderNumber,
+                                assignedNumber: fCyl.assignedNumber
+                            });
+                        }
+                        else {
+                            fCyl.available = false;
+                            yield fCyl.save();
+                        }
+                    }
+                }
+                let newArr = [];
+                for (let i = 0; i < data.cylinders.length; i++) {
+                    const element = data.cylinders[i];
+                    if (!pulled.includes(element)) {
+                        newArr.push(element);
+                    }
+                }
+                data.cylinders = newArr;
+                if (data.cylinders.length <= 0) {
+                    throw new exceptions_1.BadInputFormatException('please pass available cylinders to initiate transfer');
                 }
                 let transfer = new this.transfer(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 transfer.initiator = user._id;
@@ -1644,10 +1683,12 @@ class Cylinder extends module_1.default {
                 });
                 let com = {
                     comment: data.comment,
-                    commentBy: user._id
+                    commentBy: user._id,
+                    officer: user.name
                 };
                 //@ts-ignore
                 transfer.comments.push(com);
+                let message = pulled.length > 0 ? `some cylinders in the request may have been assigned to another customer cylinders:${send}` : `Transfer Initiated`;
                 yield transfer.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -1663,7 +1704,10 @@ class Cylinder extends module_1.default {
                     content: `A cylinder transfer has been initiated and requires your approval click to view ${static_1.default.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
                     user: hod
                 });
-                return Promise.resolve(transfer);
+                return Promise.resolve({
+                    transfer,
+                    message
+                });
             }
             catch (e) {
                 this.handleException(e);
@@ -1711,8 +1755,20 @@ class Cylinder extends module_1.default {
                         transfer.nextApprovalOfficer = AO[0].id;
                         transfer.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: user.name
                         });
+                        for (let i = 0; i < transfer.cylinders.length; i++) {
+                            let cyl = transfer.cylinders[i];
+                            let fCyl = yield this.registerCylinder.findById(cyl);
+                            if (fCyl) {
+                                if (!(fCyl === null || fCyl === void 0 ? void 0 : fCyl.available)) {
+                                    //@ts-ignore
+                                    fCyl === null || fCyl === void 0 ? void 0 : fCyl.available = true;
+                                    yield fCyl.save();
+                                }
+                            }
+                        }
                         yield transfer.save();
                         yield logs_1.createLog({
                             user: user._id,
@@ -1760,7 +1816,8 @@ class Cylinder extends module_1.default {
                         transfer.nextApprovalOfficer = AO[0].id;
                         transfer.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: user.name
                         });
                         yield transfer.save();
                         yield logs_1.createLog({
@@ -1815,8 +1872,44 @@ class Cylinder extends module_1.default {
                         transfer.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                         transfer.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: user.name
                         });
+                        let pulled = [];
+                        let send = [];
+                        for (let i = 0; i < transfer.cylinders.length; i++) {
+                            let cyl = transfer.cylinders[i];
+                            let fCyl = yield this.registerCylinder.findById(cyl);
+                            if (!(fCyl === null || fCyl === void 0 ? void 0 : fCyl.available)) {
+                                send.push({
+                                    cylinderNumber: fCyl === null || fCyl === void 0 ? void 0 : fCyl.cylinderNumber,
+                                    assignedNumber: fCyl === null || fCyl === void 0 ? void 0 : fCyl.assignedNumber
+                                });
+                                pulled.push(cyl);
+                            }
+                            else {
+                                fCyl.available = false;
+                                yield fCyl.save();
+                            }
+                        }
+                        let newArr = [];
+                        for (let i = 0; i < transfer.cylinders.length; i++) {
+                            const element = transfer.cylinders[i];
+                            if (!pulled.includes(element)) {
+                                newArr.push(element);
+                            }
+                        }
+                        transfer.cylinders = newArr;
+                        let message = pulled.length > 0 ? `some cylinders in the request may have been assigned to another customer cylinders:${send}` : `Approved`;
+                        if (transfer.cylinders.length === 0) {
+                            transfer.transferStatus = transferCylinder_1.TransferStatus.COMPLETED;
+                            transfer.comments.push({
+                                comment: "Transfer terminated, unavailable cylinders",
+                                commentBy: user._id,
+                                officer: user.name
+                            });
+                            throw new exceptions_1.BadInputFormatException('oops!!! seems all the cylinders in this request are taken... please initiate another request and pass available cylinders');
+                        }
                         yield transfer.save();
                         yield logs_1.createLog({
                             user: user._id,
@@ -1834,7 +1927,7 @@ class Cylinder extends module_1.default {
                             user: apUser
                         });
                         return Promise.resolve({
-                            message: "Approved",
+                            message,
                             transfer
                         });
                     }
@@ -1866,7 +1959,8 @@ class Cylinder extends module_1.default {
                         transfer.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
                         transfer.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: user.name
                         });
                         yield transfer.save();
                         // console.log(transfer)
@@ -1918,7 +2012,8 @@ class Cylinder extends module_1.default {
                         // transfer.nextApprovalOfficer = data.nextApprovalOfficer
                         transfer.comments.push({
                             comment: data.comment,
-                            commentBy: user._id
+                            commentBy: user._id,
+                            officer: user.name
                         });
                         yield logs_1.createLog({
                             user: user._id,
@@ -1939,15 +2034,33 @@ class Cylinder extends module_1.default {
                         if (transfer.type == transferCylinder_1.TransferType.TEMPORARY) {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
-                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                if (cyl) {
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.assignedTo = transfer.to;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.cylinderType = registeredCylinders_1.TypesOfCylinders.ASSIGNED;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
+                                    let date = new Date(cyl.holdingTime);
+                                    vehicle_1.schedule.scheduleJob(new Date(date), function (id) {
+                                        return __awaiter(this, void 0, void 0, function* () {
+                                            let holdingCylinder = yield models_1.RegisteredCylinder.findById(id);
+                                            if (holdingCylinder) {
+                                                if (!holdingCylinder.available) {
+                                                    holdingCylinder.available = true;
+                                                    yield new mail_1.default().push({
+                                                        subject: "Holding time ellapsed",
+                                                        content: `Cylinder holding time ellaped view cylinder Details: ${static_1.default.FRONTEND_URL}/cylinder/registered-cylinder-details/${holdingCylinder._id}`,
+                                                        user: apUser
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }.bind(null, cyl._id.toString()));
+                                    yield cyl.save();
+                                }
                             }
                             ;
                         }
@@ -1967,15 +2080,33 @@ class Cylinder extends module_1.default {
                         else if (transfer.type == transferCylinder_1.TransferType.DIVISION) {
                             for (let cylinder of cylinders) {
                                 let cyl = yield this.registerCylinder.findById(cylinder);
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.fromBranch = transfer.branch;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.branch = transfer.toBranch;
-                                //@ts-ignore
-                                cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
-                                yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                if (cyl) {
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.holdingTime = transfer.holdingTime;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.fromBranch = transfer.branch;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.branch = transfer.toBranch;
+                                    //@ts-ignore
+                                    cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                                    let date = new Date(cyl.holdingTime);
+                                    vehicle_1.schedule.scheduleJob(new Date(date), function (id) {
+                                        return __awaiter(this, void 0, void 0, function* () {
+                                            let holdingCylinder = yield models_1.RegisteredCylinder.findById(id);
+                                            if (holdingCylinder) {
+                                                if (!holdingCylinder.available) {
+                                                    holdingCylinder.available = true;
+                                                    yield new mail_1.default().push({
+                                                        subject: "Holding time ellapsed",
+                                                        content: `Cylinder holding time ellaped view cylinder Details: ${static_1.default.FRONTEND_URL}/cylinder/registered-cylinder-details/${holdingCylinder._id}`,
+                                                        user: apUser
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }.bind(null, cyl._id.toString()));
+                                    yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                }
                             }
                         }
                         // else if(transfer.type == TransferType.DIVISION){

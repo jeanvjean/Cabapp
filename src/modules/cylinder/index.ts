@@ -19,7 +19,9 @@ import { SupplierInterface, SupplierTypes } from "../../models/supplier";
 import * as mongoose from 'mongoose';
 import { CustomerInterface } from "../../models/customer";
 import { BranchInterface } from "../../models/branch";
+import { schedule } from "../vehicle";
 export { mongoose };
+import { RegisteredCylinder } from '../../models';
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -1806,7 +1808,13 @@ class Cylinder extends Module {
     }
   }
 
-  public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<TransferCylinder|undefined>{
+  private async arrayRemove(arr:Schema.Types.ObjectId[], value:Schema.Types.ObjectId) {
+    return arr.filter(function(ele){
+        return ele != value;
+    });
+  }
+
+  public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<ApprovalResponse|undefined>{
     try {
       const date = new Date();
       if(data.holdingTime) {
@@ -1814,6 +1822,39 @@ class Cylinder extends Module {
          //@ts-ignore
         data?.holdingTime = date.toISOString()
       }
+      let pulled = []
+      let send = []
+      for(let i = 0; i < data.cylinders.length; i++) {
+        let cyl = data.cylinders[i]
+        let fCyl = await this.registerCylinder.findById(cyl);
+        if(fCyl) {
+          if(!fCyl.available) {
+            pulled.push(cyl);
+            send.push({
+              cylinderNumber:fCyl.cylinderNumber,
+              assignedNumber:fCyl.assignedNumber
+            })
+          }else{
+            fCyl.available = false;
+            await fCyl.save();
+          }
+        }
+      }
+
+      let newArr = []
+      for (let i = 0; i < data.cylinders.length; i++) {
+        const element = data.cylinders[i];
+        if(!pulled.includes(element)){
+          newArr.push(element)
+        }
+      }
+
+      data.cylinders = newArr;
+
+      if(data.cylinders.length <= 0){
+        throw new BadInputFormatException('please pass available cylinders to initiate transfer');
+      }
+
       let transfer = new this.transfer({...data, branch:user.branch});
       transfer.initiator = user._id;
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
@@ -1837,10 +1878,12 @@ class Cylinder extends Module {
       });
       let com = {
         comment:data.comment,
-        commentBy:user._id
+        commentBy:user._id,
+        officer:user.name
       }
       //@ts-ignore
       transfer.comments.push(com);
+      let message = pulled.length > 0 ? `some cylinders in the request may have been assigned to another customer cylinders:${send}` : `Transfer Initiated`;
       await transfer.save();
       await createLog({
         user:user._id,
@@ -1856,7 +1899,10 @@ class Cylinder extends Module {
         content: `A cylinder transfer has been initiated and requires your approval click to view ${env.FRONTEND_URL}/fetch-transfer/${transfer._id}`,
         user: hod
       });
-      return Promise.resolve(transfer);
+      return Promise.resolve({
+        transfer,
+        message
+      });
     } catch (e) {
       this.handleException(e);
     }
@@ -1904,8 +1950,20 @@ class Cylinder extends Module {
           transfer.nextApprovalOfficer = AO[0].id
           transfer.comments.push({
             comment:data.comment,
-            commentBy:user._id
-          })
+            commentBy:user._id,
+            officer:user.name
+          });
+          for(let i = 0; i < transfer.cylinders.length; i++) {
+            let cyl = transfer.cylinders[i]
+            let fCyl = await this.registerCylinder.findById(cyl);
+            if(fCyl) {
+              if(!fCyl?.available) {
+                //@ts-ignore
+                fCyl?.available = true;
+                await fCyl.save();
+              }
+            }
+          }
           await transfer.save();
           await createLog({
             user:user._id,
@@ -1952,7 +2010,8 @@ class Cylinder extends Module {
           transfer.nextApprovalOfficer = AO[0].id
           transfer.comments.push({
             comment:data.comment,
-            commentBy:user._id
+            commentBy:user._id,
+            officer:user.name
           })
           await transfer.save();
           await createLog({
@@ -2006,8 +2065,45 @@ class Cylinder extends Module {
           transfer.nextApprovalOfficer = hod?._id;
           transfer.comments.push({
             comment:data.comment,
-            commentBy:user._id
-          })
+            commentBy:user._id,
+            officer:user.name
+          });
+          let pulled = []
+          let send = []
+          for(let i = 0; i < transfer.cylinders.length; i++) {
+            let cyl = transfer.cylinders[i]
+            let fCyl = await this.registerCylinder.findById(cyl);
+            if(!fCyl?.available) {
+              send.push({
+                cylinderNumber: fCyl?.cylinderNumber,
+                assignedNumber:fCyl?.assignedNumber
+              });
+              pulled.push(cyl);
+            }else{
+              fCyl.available = false;
+              await fCyl.save();
+            }
+          }
+          let newArr = []
+          for (let i = 0; i < transfer.cylinders.length; i++) {
+            const element = transfer.cylinders[i];
+            if(!pulled.includes(element)){
+              newArr.push(element)
+            }
+          }
+
+          transfer.cylinders = newArr;
+
+          let message = pulled.length > 0 ? `some cylinders in the request may have been assigned to another customer cylinders:${send}` : `Approved`;
+          if(transfer.cylinders.length === 0){
+            transfer.transferStatus = TransferStatus.COMPLETED;
+            transfer.comments.push({
+              comment:"Transfer terminated, unavailable cylinders",
+              commentBy:user._id,
+              officer:user.name
+            });
+            throw new BadInputFormatException('oops!!! seems all the cylinders in this request are taken... please initiate another request and pass available cylinders');
+          }
           await transfer.save();
           await createLog({
             user:user._id,
@@ -2025,7 +2121,7 @@ class Cylinder extends Module {
             user: apUser
           });
           return Promise.resolve({
-            message:"Approved",
+            message,
             transfer
           })
         }else if(transfer?.approvalStage == stagesOfApproval.STAGE1){
@@ -2056,7 +2152,8 @@ class Cylinder extends Module {
           transfer.nextApprovalOfficer = hod?.branch.branchAdmin;
           transfer.comments.push({
             comment:data.comment,
-            commentBy:user._id
+            commentBy:user._id,
+            officer:user.name
           })
           await transfer.save();
           // console.log(transfer)
@@ -2108,7 +2205,8 @@ class Cylinder extends Module {
           // transfer.nextApprovalOfficer = data.nextApprovalOfficer
           transfer.comments.push({
             comment:data.comment,
-            commentBy:user._id
+            commentBy:user._id,
+            officer:user.name
           });
           await createLog({
             user:user._id,
@@ -2129,15 +2227,35 @@ class Cylinder extends Module {
           if(transfer.type == TransferType.TEMPORARY){
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
-              //@ts-ignore
-              cyl?.assignedTo = transfer.to;
-              //@ts-ignore
-              cyl?.holder = cylinderHolder.CUSTOMER
-              //@ts-ignore
-              cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
-              //@ts-ignore
-              cyl?.holdingTime = transfer.holdingTime;
-              await cyl?.save()
+              if(cyl) {
+                //@ts-ignore
+                cyl?.assignedTo = transfer.to;
+                //@ts-ignore
+                cyl?.holder = cylinderHolder.CUSTOMER
+                //@ts-ignore
+                cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
+                //@ts-ignore
+                cyl?.holdingTime = transfer.holdingTime;
+
+                let date = new Date(cyl.holdingTime);
+                  schedule.scheduleJob(
+                    new Date(date),
+                    async function(id:string){
+                      let holdingCylinder = await RegisteredCylinder.findById(id);
+                      if(holdingCylinder) {
+                        if(!holdingCylinder.available) {
+                          holdingCylinder.available = true;
+                          await new Notify().push({
+                            subject: "Holding time ellapsed",
+                            content: `Cylinder holding time ellaped view cylinder Details: ${env.FRONTEND_URL}/cylinder/registered-cylinder-details/${holdingCylinder._id}`,
+                            user: apUser
+                          });
+                        }
+                      }
+                    }.bind(null, cyl._id.toString())
+                  );
+                await cyl.save()
+              }
             };
           }else if(transfer.type == TransferType.PERMANENT) {
             for(let cylinder of cylinders) {
@@ -2153,7 +2271,8 @@ class Cylinder extends Module {
           }else if(transfer.type == TransferType.DIVISION){
             for(let cylinder of cylinders) {
               let cyl = await this.registerCylinder.findById(cylinder);
-               //@ts-ignore
+              if(cyl) {
+                 //@ts-ignore
                cyl?.holdingTime = transfer.holdingTime;
                //@ts-ignore
                cyl?.fromBranch = transfer.branch
@@ -2161,7 +2280,26 @@ class Cylinder extends Module {
                cyl?.branch = transfer.toBranch
                //@ts-ignore
                cyl?.holder = cylinderHolder.ASNL
+
+               let date = new Date(cyl.holdingTime);
+                  schedule.scheduleJob(
+                    new Date(date),
+                    async function(id:string){
+                      let holdingCylinder = await RegisteredCylinder.findById(id);
+                      if(holdingCylinder) {
+                        if(!holdingCylinder.available) {
+                          holdingCylinder.available = true;
+                          await new Notify().push({
+                            subject: "Holding time ellapsed",
+                            content: `Cylinder holding time ellaped view cylinder Details: ${env.FRONTEND_URL}/cylinder/registered-cylinder-details/${holdingCylinder._id}`,
+                            user: apUser
+                          });
+                        }
+                      }
+                    }.bind(null, cyl._id.toString())
+                  );
               await cyl?.save();
+              }
             }
           }
           // else if(transfer.type == TransferType.DIVISION){

@@ -15,6 +15,8 @@ import { generateToken } from "../../util/token";
 import * as schedule from 'node-schedule'
 import { getTemplate } from '../../util/resolve-template';
 
+export { schedule };
+
 interface vehicleProps{
   vehicle:Model<VehicleInterface>
   pickup:Model<PickupInterface>

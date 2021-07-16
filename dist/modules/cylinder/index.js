@@ -1464,22 +1464,48 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { search } = query;
+                const ObjectId = mongoose.Types.ObjectId;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'cylinders', model: 'registered-cylinders' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' }
                     ] });
-                let requests;
-                if (!(search === null || search === void 0 ? void 0 : search.length)) {
-                    //@ts-ignore
-                    requests = yield this.condemn.paginate({ branch: user.branch, $or: [{ approvalStatus: search }] }, options);
+                let aggregate;
+                const aggregate1 = this.condemn.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { approvalStatus: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                aggregate = aggregate1;
+                //@ts-ignore
+                let requests = yield this.condemn.aggregatePaginate(aggregate, options);
+                for (let req of requests.docs) {
+                    let cylinders = [];
+                    for (let cyl of req.cylinders) {
+                        let cylinder = yield this.registerCylinder.findById(cyl);
+                        cylinders.push(cylinder);
+                    }
+                    req.cylinders = cylinders;
+                    let nextApprovalOfficer = yield this.user.findById(req.nextApprovalOfficer);
+                    req.nextApprovalOfficer = nextApprovalOfficer;
+                    let initiator = yield this.user.findById(req.initiator);
+                    req.initiator = initiator;
+                    let branch = yield this.branch.findById(req.branch);
+                    req.branch = branch;
                 }
-                else {
-                    //@ts-ignore
-                    requests = yield this.condemn.paginate({ branch: user.branch }, Object.assign({}, query));
-                }
-                return requests;
+                return Promise.resolve(requests);
             }
             catch (e) {
                 this.handleException(e);
@@ -1489,19 +1515,51 @@ class Cylinder extends module_1.default {
     fetchPendingCondemnRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
+                const ObjectId = mongoose.Types.ObjectId;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'cylinders', model: 'registered-cylinders' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' }
                     ] });
+                let aggregate;
+                const aggregate1 = this.condemn.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { approvalStatus: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING },
+                                { nextApprovalOfficer: ObjectId(user._id.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                aggregate = aggregate1;
                 //@ts-ignore
-                const requests = yield this.condemn.paginate({
-                    branch: user.branch,
-                    approvaStatus: transferCylinder_1.TransferStatus.PENDING,
-                    nextApprovalOfficer: user._id
-                }, options);
-                return requests;
+                const requests = yield this.condemn.aggregatePaginate(aggregate, options);
+                for (let req of requests.docs) {
+                    let cylinders = [];
+                    for (let cyl of req.cylinders) {
+                        let cylinder = yield this.registerCylinder.findById(cyl);
+                        cylinders.push(cylinder);
+                    }
+                    req.cylinders = cylinders;
+                    let nextApprovalOfficer = yield this.user.findById(req.nextApprovalOfficer);
+                    req.nextApprovalOfficer = nextApprovalOfficer;
+                    let initiator = yield this.user.findById(req.initiator);
+                    req.initiator = initiator;
+                    let branch = yield this.branch.findById(req.branch);
+                    req.branch = branch;
+                }
+                return Promise.resolve(requests);
             }
             catch (e) {
                 this.handleException(e);

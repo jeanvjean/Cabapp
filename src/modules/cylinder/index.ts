@@ -1658,6 +1658,7 @@ class Cylinder extends Module {
   public async fetchCondemnCylinderRequests(query:QueryInterface, user:UserInterface):Promise<CondemnCylinderInterface[]|undefined>{
     try {
       const { search } = query;
+      const ObjectId = mongoose.Types.ObjectId;
       const options = {
         ...query,
         populate:[
@@ -1667,15 +1668,41 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
-      let requests;
-      if(!search?.length) {
-        //@ts-ignore
-        requests = await this.condemn.paginate({branch:user.branch,$or:[{approvalStatus:search}]}, options);
-      }else {
-        //@ts-ignore
-        requests = await this.condemn.paginate({branch:user.branch}, {...query});
+      let aggregate;
+      const aggregate1 = this.condemn.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {approvalStatus:{
+                    $regex:search?.toLowerCase() || ""
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      aggregate = aggregate1;
+      //@ts-ignore
+      let requests = await this.condemn.aggregatePaginate(aggregate, options);
+      for(let req of requests.docs) {
+        let cylinders=[];
+        for(let cyl of req.cylinders) {
+          let cylinder = await this.registerCylinder.findById(cyl);
+          cylinders.push(cylinder)
+        }
+        req.cylinders = cylinders;
+        let nextApprovalOfficer = await this.user.findById(req.nextApprovalOfficer);
+        req.nextApprovalOfficer = nextApprovalOfficer;
+        let initiator = await this.user.findById(req.initiator);
+        req.initiator = initiator;
+        let branch = await this.branch.findById(req.branch);
+        req.branch = branch;
       }
-      return requests;
+      return Promise.resolve(requests);
     } catch (e) {
       this.handleException(e)
     }
@@ -1683,6 +1710,8 @@ class Cylinder extends Module {
 
   public async fetchPendingCondemnRequests(query:QueryInterface, user:UserInterface):Promise<CondemnCylinderInterface[]|undefined>{
     try {
+      const { search } = query;
+      const ObjectId = mongoose.Types.ObjectId;
       const options = {
         ...query,
         populate:[
@@ -1692,12 +1721,43 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
+      let aggregate;
+      const aggregate1 = this.condemn.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {approvalStatus:{
+                    $regex:search?.toLowerCase() || ""
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())},
+              {approvalStatus:TransferStatus.PENDING},
+              {nextApprovalOfficer:ObjectId(user._id.toString())}
+            ]
+          }
+        }
+      ]);
+      aggregate = aggregate1;
       //@ts-ignore
-      const requests = await this.condemn.paginate({
-        branch:user.branch,
-        approvaStatus:TransferStatus.PENDING,
-        nextApprovalOfficer:user._id}, options);
-      return requests;
+      const requests = await this.condemn.aggregatePaginate(aggregate, options);
+      for(let req of requests.docs) {
+        let cylinders=[];
+        for(let cyl of req.cylinders) {
+          let cylinder = await this.registerCylinder.findById(cyl);
+          cylinders.push(cylinder)
+        }
+        req.cylinders = cylinders;
+        let nextApprovalOfficer = await this.user.findById(req.nextApprovalOfficer);
+        req.nextApprovalOfficer = nextApprovalOfficer;
+        let initiator = await this.user.findById(req.initiator);
+        req.initiator = initiator;
+        let branch = await this.branch.findById(req.branch);
+        req.branch = branch;
+      }
+      return Promise.resolve(requests);
     } catch (e) {
       this.handleException(e);
     }

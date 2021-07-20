@@ -48,7 +48,8 @@ export interface DisburseProductInterface extends Document{
   jobTag:string
   customer:Schema.Types.ObjectId
   mrn:string
-  grnNo:string
+  grnNo:string,
+  grnInit:number;
 }
 
 const requesterSchema = new Schema({
@@ -86,7 +87,8 @@ export const disburseSchema = new Schema({
   jobTag:{type:String},
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
   mrn:{type:String},
-  grnNo:{type:String}
+  grnNo:{type:String},
+  grnInit:{type:Number}
 });
 
 disburseSchema.plugin(mongoosePaginate);

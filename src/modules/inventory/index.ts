@@ -704,10 +704,23 @@ class Product extends Module{
         branch:user.branch,
         requestDepartment:user.role
       });
-      // let init = "GRN"
-      // let num = await generateToken(6);
+      let finGrn = await this.disburse.find({}).sort({grnInit:-1}).limit(1);
+      let initGrn;
+      if(finGrn[0]) {
+        if(finGrn[0].grnInit) {
+          initGrn = finGrn[0].grnInit+1;
+        }else {
+          initGrn = 1
+        }
+      }else {
+        initGrn = 1
+      }
+      let mrn = "MRN"
+      let init = "GRN"
+      let num = await padLeft(initGrn, 6, "");
       //@ts-ignore
-      // disbursement.grnNo = init + num.toString();
+      disbursement.grnNo = init+num;
+      disbursement.mrn = mrn+num;
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,

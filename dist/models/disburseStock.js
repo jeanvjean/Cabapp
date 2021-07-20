@@ -38,7 +38,8 @@ exports.disburseSchema = new mongoose_1.Schema({
     jobTag: { type: String },
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     mrn: { type: String },
-    grnNo: { type: String }
+    grnNo: { type: String },
+    grnInit: { type: Number }
 });
 exports.disburseSchema.plugin(mongoosePaginate);
 exports.disburseSchema.plugin(aggregatePaginate);

@@ -4,6 +4,8 @@ import { Model } from "mongoose";
 import { UserInterface } from "../../models/user";
 import { BadInputFormatException } from "../../exceptions";
 import { createLog } from "../../util/logs";
+import { padLeft } from "../../util/token";
+import { mongoose } from "../cylinder";
 
 interface accountPropInterface {
     account:Model<RecieptInterface>
@@ -44,12 +46,16 @@ class Account extends Module{
         try {
             const reciept = new this.account({...data, branch:user.branch});
             reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
-            let exists = await this.account.find();
+            let exists = await this.account.find({}).sort({invInit:-1}).limit(1);
             let sn;
-            let nums = exists.map(doc=> doc.invoiceNo);
-            let maxNum = Math.max(...nums)
-            sn = maxNum + 1;
-            reciept.invoiceNo = sn | 1;
+            if(exists[0]) {
+              sn = exists[0].invInit++
+            }else {
+              sn = 1;
+            }
+            let init = 'INV';
+            let invoiceNumber = padLeft(sn, 6, "");
+            reciept.invoiceNo = init+invoiceNumber;
 
             await reciept.save();
             await createLog({
@@ -69,8 +75,29 @@ class Account extends Module{
 
     public async fetchInvoices(query:QueryInterface, user:UserInterface):Promise<RecieptInterface[]|undefined>{
         try {
+          const { search } = query;
+          const ObjectId = mongoose.Types.ObjectId;
+          const options = {
+            ...query
+          }
+          const aggregate = this.account.aggregate([
+            {
+              $match:{
+                $and:[
+                  {
+                    $or:[
+                      {invoiceNo:{
+                        $regex: search?.toLowerCase() || ""
+                      }}
+                    ]
+                  },
+                  {branch: ObjectId(user.branch.toString())}
+                ]
+              }
+            }
+          ]);
           //@ts-ignore
-            const invoices = await this.account.paginate({branch:user.branch},{...query});
+            const invoices = await this.account.aggregatePaginate(aggregate,options);
             return Promise.resolve(invoices);
         } catch (e) {
             this.handleException(e)

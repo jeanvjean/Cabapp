@@ -29,7 +29,8 @@ const recieptSchema = new mongoose_1.Schema({
     customerType: { type: String, enum: Object.values(CustomerType) },
     cylinders: { type: [sales_requisition_1.saleCylinderSchema] },
     products: { type: [receivedProduct_1.productRecievedSchema] },
-    invoiceNo: { type: Number },
+    invoiceNo: { type: String },
+    invInit: { type: Number },
     totalAmount: { type: Number },
     amountPaid: { type: Number },
     outstandingBalance: { type: Number },
@@ -37,7 +38,11 @@ const recieptSchema = new mongoose_1.Schema({
     date: { type: Date },
     preparedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     amountInWords: { type: String },
-    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    orderInfo: {
+        orderId: { type: String },
+        orderType: { type: String }
+    }
 }, {
     timestamps: true
 });

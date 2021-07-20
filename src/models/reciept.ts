@@ -32,7 +32,8 @@ export interface RecieptInterface extends Document{
     type:receiptType
     cylinders?:saleCylinder[],
     products?:ReceivedProduct[]
-    invoiceNo:number
+    invoiceNo:string
+    invInit:number
     totalAmount:number
     amountPaid:number
     outstandingBalance:number
@@ -50,7 +51,8 @@ const recieptSchema = new Schema({
     customerType:{type:String, enum:Object.values(CustomerType)},
     cylinders:{type:[saleCylinderSchema]},
     products:{type:[productRecievedSchema]},
-    invoiceNo:{type:Number},
+    invoiceNo:{type:String},
+    invInit:{type:Number},
     totalAmount:{type:Number},
     amountPaid:{type:Number},
     outstandingBalance:{type:Number},
@@ -58,7 +60,11 @@ const recieptSchema = new Schema({
     date:{type:Date},
     preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
     amountInWords:{type:String},
-    branch:{type:Schema.Types.ObjectId, ref:'branches'}
+    branch:{type:Schema.Types.ObjectId, ref:'branches'},
+    orderInfo:{
+      orderId:{type:String},
+      orderType:{type:String}
+    }
 },{
     timestamps:true
 });

@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
 const exceptions_1 = require("../../exceptions");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
+const cylinder_1 = require("../cylinder");
 class Account extends module_1.default {
     constructor(props) {
         super();
@@ -22,12 +24,17 @@ class Account extends module_1.default {
             try {
                 const reciept = new this.account(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
-                let exists = yield this.account.find();
+                let exists = yield this.account.find({}).sort({ invInit: -1 }).limit(1);
                 let sn;
-                let nums = exists.map(doc => doc.invoiceNo);
-                let maxNum = Math.max(...nums);
-                sn = maxNum + 1;
-                reciept.invoiceNo = sn | 1;
+                if (exists[0]) {
+                    sn = exists[0].invInit++;
+                }
+                else {
+                    sn = 1;
+                }
+                let init = 'INV';
+                let invoiceNumber = token_1.padLeft(sn, 6, "");
+                reciept.invoiceNo = init + invoiceNumber;
                 yield reciept.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -48,8 +55,27 @@ class Account extends module_1.default {
     fetchInvoices(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { search } = query;
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const options = Object.assign({}, query);
+                const aggregate = this.account.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { invoiceNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const invoices = yield this.account.paginate({ branch: user.branch }, Object.assign({}, query));
+                const invoices = yield this.account.aggregatePaginate(aggregate, options);
                 return Promise.resolve(invoices);
             }
             catch (e) {

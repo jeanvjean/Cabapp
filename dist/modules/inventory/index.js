@@ -630,12 +630,20 @@ class Product extends module_1.default {
                 //@ts-ignore
                 disbursement.grnNo = init + num;
                 disbursement.mrn = mrn + num;
+                console.log(initGrn);
+                disbursement.grnInit = initGrn;
+                console.log(disbursement);
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,
                     status: transferCylinder_1.ApprovalStatus.APPROVED,
                     approvalOfficer: user._id
                 };
+                // "quantityReleased": 15,  pass this when the approvalStage is "start"
+                // "comment": "i cannot give them ok"  pass this when the approvalStage is is on any level
+                // "nextApprovalOfficer": "60f023245cd89a8a231d46f1" pass this when the requestStage is "stage2",
+                // "releasedBy":"60a6d988ee959d2e8c9f02fb", pass this when the approvalStage is "start"
+                // "releasedTo":"60a7af1460653206389e9bcd",pass this when the approvalStage is "start"
                 disbursement.tracking.push(track);
                 disbursement.approvalOfficers.push({
                     name: user.name,
@@ -870,9 +878,12 @@ class Product extends module_1.default {
                     }
                 }
                 else {
+                    let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                     let hod = yield this.user.findOne({ branch: user.branch, subrole: 'head of department', role: user.role }).populate({
                         path: 'branch', model: 'branches'
                     });
+                    let newBranchApprovalOfficer = yield this.user.findOne({ branch: data.fromBranch, subrole: 'head of department', role: "sales" });
+                    // console.log(newBranchApprovalOfficer);
                     if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
                         let track = {
                             title: "Approval Prorcess",
@@ -1123,7 +1134,7 @@ class Product extends module_1.default {
                             status: transferCylinder_1.ApprovalStatus.APPROVED,
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
-                            nextApprovalOfficer: data.nextApprovalOfficer
+                            nextApprovalOfficer: newBranchApprovalOfficer === null || newBranchApprovalOfficer === void 0 ? void 0 : newBranchApprovalOfficer._id
                         };
                         let checkOfficer = disbursement.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
@@ -1142,11 +1153,12 @@ class Product extends module_1.default {
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.START;
                         disbursement.disburseStatus = transferCylinder_1.TransferStatus.PENDING;
                         //set next branch
-                        let nb = yield this.user.findById(data.nextApprovalOfficer);
+                        let nb = yield this.user.findById(newBranchApprovalOfficer === null || newBranchApprovalOfficer === void 0 ? void 0 : newBranchApprovalOfficer._id);
                         //@ts-ignore
-                        disbursement.nextApprovalOfficer = data.nextApprovalOfficer;
+                        disbursement.nextApprovalOfficer = newBranchApprovalOfficer._id;
+                        console.log(disbursement);
                         //@ts-ignore
-                        disbursement.fromBranch = nb === null || nb === void 0 ? void 0 : nb.branch;
+                        disbursement.fromBranch = data.fromBranch;
                         //@ts-ignore
                         disbursement.comments.push({
                             comment: data.comment,

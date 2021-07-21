@@ -31,7 +31,7 @@ interface ApprovalInput{
   comment:string,
   status:string,
   id:string,
-  nextApprovalOfficer?:string,
+  fromBranch?:DisburseProductInterface['fromBranch'],
   password:string,
   products?:DisburseProductInterface['products']
   releasedBy?:DisburseProductInterface['releasedBy']
@@ -721,13 +721,23 @@ class Product extends Module{
       //@ts-ignore
       disbursement.grnNo = init+num;
       disbursement.mrn = mrn+num;
+      console.log(initGrn)
       disbursement.grnInit = initGrn;
+      console.log(disbursement)
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,
         status:ApprovalStatus.APPROVED,
         approvalOfficer:user._id
       }
+
+    // "quantityReleased": 15,  pass this when the approvalStage is "start"
+    // "comment": "i cannot give them ok"  pass this when the approvalStage is is on any level
+
+    // "nextApprovalOfficer": "60f023245cd89a8a231d46f1" pass this when the requestStage is "stage2",
+    // "releasedBy":"60a6d988ee959d2e8c9f02fb", pass this when the approvalStage is "start"
+    // "releasedTo":"60a7af1460653206389e9bcd",pass this when the approvalStage is "start"
+
       disbursement.tracking.push(track);
       disbursement.approvalOfficers.push({
         name:user.name,
@@ -957,9 +967,12 @@ class Product extends Module{
           return Promise.resolve(disbursement)
         }
       }else {
+        let ObjectId = mongoose.Types.ObjectId;
         let hod = await this.user.findOne({branch:user.branch, subrole:'head of department', role:user.role}).populate({
           path:'branch', model:'branches'
         });
+        let newBranchApprovalOfficer = await this.user.findOne({branch:data.fromBranch, subrole:'sales executive', role:"sales"});
+        // console.log(newBranchApprovalOfficer);
         if(disbursement?.approvalStage == stagesOfApproval.START) {
           let track = {
             title:"Approval Prorcess",
@@ -1209,7 +1222,7 @@ class Product extends Module{
             status:ApprovalStatus.APPROVED,
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
-            nextApprovalOfficer:data.nextApprovalOfficer
+            nextApprovalOfficer:newBranchApprovalOfficer?._id
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
 
@@ -1230,11 +1243,12 @@ class Product extends Module{
           disbursement.disburseStatus = TransferStatus.PENDING
 
           //set next branch
-          let nb = await this.user.findById(data.nextApprovalOfficer);
+          let nb = await this.user.findById(newBranchApprovalOfficer?._id);
           //@ts-ignore
-          disbursement.nextApprovalOfficer = data.nextApprovalOfficer;
+          disbursement.nextApprovalOfficer = newBranchApprovalOfficer._id;
+          // console.log(disbursement)
           //@ts-ignore
-          disbursement.fromBranch = nb?.branch;
+          disbursement.fromBranch = data.fromBranch;
 
           //@ts-ignore
           disbursement.comments.push({

@@ -721,6 +721,7 @@ class Product extends Module{
       //@ts-ignore
       disbursement.grnNo = init+num;
       disbursement.mrn = mrn+num;
+      disbursement.grnInit = initGrn;
       let track = {
         title:"initiate disbursal process",
         stage:stagesOfApproval.STAGE1,

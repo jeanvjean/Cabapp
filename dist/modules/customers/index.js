@@ -1076,20 +1076,21 @@ class Customer extends module_1.default {
                 // let maxNumber = Math.max(...docs);
                 // let sn = maxNumber + 1
                 // customer.serialNo = sn | 1;
-                if (findCustomers.length > 0) {
+                if (findCustomers[0]) {
                     customer.serialNo = findCustomers[0].serialNo + 1;
                 }
                 else {
                     customer.serialNo = 1;
                 }
                 let init = "ECR";
-                let num = yield token_1.generateToken(6);
+                let num = token_1.padLeft(customer.serialNo, 6, "");
                 //@ts-ignore
-                customer.ecrNo = init + num.toString();
+                customer.ecrNo = init + num;
                 let icnInit = "ICN";
-                let icn = yield token_1.generateToken(6);
+                // let icn = await generateToken(6);
                 //@ts-ignore
-                customer.icnNo = icnInit + icn.toString();
+                customer.icnNo = icnInit + num;
+                customer.security = user._id;
                 yield customer.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -1157,6 +1158,10 @@ class Customer extends module_1.default {
                 for (let cust of customers.docs) {
                     let branch = yield this.branch.findById(cust.branch);
                     cust.branch = branch;
+                    let security = yield this.user.findById(cust.security);
+                    cust.security = security;
+                    let recievedBy = yield this.user.findById(cust.recievedBy);
+                    cust.recievedBy = recievedBy;
                 }
                 return Promise.resolve(customers);
             }
@@ -1165,13 +1170,34 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchWalkinCustomer(customerId) {
+    fetchWalkinCustomer(icnNo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const customer = yield this.walkin.findOne({ icnNo }).populate([
+                    { path: 'branch', model: 'branches' },
+                    { path: 'recievedBy', model: 'User' },
+                    { path: 'security', model: 'User' }
+                ]);
+                return Promise.resolve(customer);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    updateWalkinCustomer(customerId, data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const customer = yield this.walkin.findById(customerId).populate([
                     { path: 'branch', model: 'branches' },
+                    { path: 'recievedBy', model: 'User' },
+                    { path: 'security', model: 'User' }
                 ]);
-                return Promise.resolve(customer);
+                if (!customer) {
+                    throw new exceptions_1.BadInputFormatException('this customer was not registered.. contact security!!!');
+                }
+                let updatedCustomer = yield this.walkin.findByIdAndUpdate(customer._id, Object.assign(Object.assign({}, data), { recievedBy: user._id }), { new: true });
+                return Promise.resolve(updatedCustomer);
             }
             catch (e) {
                 this.handleException(e);

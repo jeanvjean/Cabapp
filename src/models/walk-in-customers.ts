@@ -29,6 +29,7 @@ export interface WalkinCustomerInterface extends Document{
   date:Date
   icnNo:string
   modeOfService:string
+  numberOfCylinders:number
   serialNo:number
   totalQuantity:string
   branch:Schema.Types.ObjectId
@@ -51,6 +52,7 @@ const walkInCustomerSchema = new Schema({
   date:Date,
   icnNo:String,
   totalQuantity:String,
+  numberOfCylinders:{type:Number},
   modeOfService:String,
   serialNo:Number,
   branch:{type:Schema.Types.ObjectId, ref:'branches'},

@@ -113,9 +113,13 @@ router.get(
 router.post(
   '/register-walkin-customer',
   auth.verify(),
-  Validator.validateValkinCustomer(),
-  val.validate(),
   customerCtrl.registerWalkinCustomer()
+);
+
+router.post(
+  '/update-walkin-customer/:customerId',
+  auth.verify(),
+  customerCtrl.updateWalkinCustomer()
 );
 
 router.get(
@@ -125,7 +129,7 @@ router.get(
 );
 
 router.get(
-  '/fetch-walkin-customer/:customerId',
+  '/fetch-walkin-customer/:icnNo',
   customerCtrl.fetchWalkinCustomer()
 );
 

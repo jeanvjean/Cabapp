@@ -22,10 +22,13 @@ const walkInCustomerSchema = new mongoose_1.Schema({
     date: Date,
     icnNo: String,
     totalQuantity: String,
+    numberOfCylinders: { type: Number },
     modeOfService: String,
     serialNo: Number,
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    status: { type: String, enum: Object.values(WalkinCustomerStatus), default: WalkinCustomerStatus.EMPTY }
+    status: { type: String, enum: Object.values(WalkinCustomerStatus), default: WalkinCustomerStatus.EMPTY },
+    recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
+    security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
 });

@@ -24,9 +24,10 @@ router.post('/approve-complaint/:complaintId', auth.verify(), controllers_1.cust
 router.get('/fetch-pending-comment-approval', auth.verify(), controllers_1.customerCtrl.fetchPendingComplaintApproval());
 router.get('/fetch-approved-complaints', auth.verify(), controllers_1.customerCtrl.fetchApprovedComplaints());
 router.get('/resolve-complaint/:complaintId', auth.verify(), controllers_1.customerCtrl.resolveComplaint());
-router.post('/register-walkin-customer', auth.verify(), customer_1.Validator.validateValkinCustomer(), val.validate(), controllers_1.customerCtrl.registerWalkinCustomer());
+router.post('/register-walkin-customer', auth.verify(), controllers_1.customerCtrl.registerWalkinCustomer());
+router.post('/update-walkin-customer/:customerId', auth.verify(), controllers_1.customerCtrl.updateWalkinCustomer());
 router.get('/fetch-walkin-customers', auth.verify(), controllers_1.customerCtrl.fetchWalkinCustomers());
-router.get('/fetch-walkin-customer/:customerId', controllers_1.customerCtrl.fetchWalkinCustomer());
+router.get('/fetch-walkin-customer/:icnNo', controllers_1.customerCtrl.fetchWalkinCustomer());
 router.delete('/delete-walkin-customer/:customerId', auth.verify(), controllers_1.customerCtrl.deleteWalkinCustomer());
 router.get('/mark-filled-cylinder/:customerId', auth.verify(), controllers_1.customerCtrl.markCustomerAsFilled());
 router.get('/fetch-filled-walkincylinders', auth.verify(), controllers_1.customerCtrl.fetchFilledCustomerCylinders());

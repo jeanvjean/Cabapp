@@ -1184,7 +1184,6 @@ class Customer extends Module{
       //@ts-ignore
       customer.icnNo = icnInit+num;
       customer.security = user._id;
-      customer.recievedBy = user._id;
 
       await customer.save();
       await createLog({
@@ -1264,14 +1263,33 @@ class Customer extends Module{
     }
   }
 
-  public async fetchWalkinCustomer(customerId:string):Promise<WalkinCustomerInterface|undefined>{
+  public async fetchWalkinCustomer(icnNo:string):Promise<WalkinCustomerInterface|undefined>{
     try {
-      const customer = await this.walkin.findById(customerId).populate([
+      const customer = await this.walkin.findOne({icnNo}).populate([
         {path:'branch', model:'branches'},
+        {path:'recievedBy', model:'User'},
+        {path:'security', model:'User'}
       ]);
       return Promise.resolve(customer as WalkinCustomerInterface);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async updateWalkinCustomer(customerId:string, data:newWalkinCustomer, user:UserInterface):Promise<WalkinCustomerInterface|undefined>{
+    try {
+      const customer = await this.walkin.findById(customerId).populate([
+        {path:'branch', model:'branches'},
+        {path:'recievedBy', model:'User'},
+        {path:'security', model:'User'}
+      ]);
+      if(!customer) {
+        throw new BadInputFormatException('this customer was not registered.. contact security!!!');
+      }
+      let updatedCustomer = await this.walkin.findByIdAndUpdate(customer._id, {...data, recievedBy:user._id}, {new:true});
+      return Promise.resolve(updatedCustomer as WalkinCustomerInterface);
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

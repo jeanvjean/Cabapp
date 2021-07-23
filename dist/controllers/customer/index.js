@@ -280,6 +280,18 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    updateWalkinCustomer() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.updateWalkinCustomer(req.params.customerId, req.body, req.user);
+                this.ok(res, 'completed registeration', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchWalkinCustomers() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
@@ -295,7 +307,7 @@ class customerCtrl extends ctrl_1.default {
     fetchWalkinCustomer() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.fetchWalkinCustomer(req.params.customerId);
+                const data = yield this.module.fetchWalkinCustomer(req.params.icnNo);
                 this.ok(res, 'customer fetched', data);
             }
             catch (e) {

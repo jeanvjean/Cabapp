@@ -882,7 +882,7 @@ class Product extends module_1.default {
                     let hod = yield this.user.findOne({ branch: user.branch, subrole: 'head of department', role: user.role }).populate({
                         path: 'branch', model: 'branches'
                     });
-                    let newBranchApprovalOfficer = yield this.user.findOne({ branch: data.fromBranch, subrole: 'head of department', role: "sales" });
+                    let newBranchApprovalOfficer = yield this.user.findOne({ branch: data.fromBranch, subrole: 'sales executive', role: "sales" });
                     // console.log(newBranchApprovalOfficer);
                     if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
                         let track = {
@@ -1156,7 +1156,7 @@ class Product extends module_1.default {
                         let nb = yield this.user.findById(newBranchApprovalOfficer === null || newBranchApprovalOfficer === void 0 ? void 0 : newBranchApprovalOfficer._id);
                         //@ts-ignore
                         disbursement.nextApprovalOfficer = newBranchApprovalOfficer._id;
-                        console.log(disbursement);
+                        // console.log(disbursement)
                         //@ts-ignore
                         disbursement.fromBranch = data.fromBranch;
                         //@ts-ignore

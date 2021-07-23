@@ -275,6 +275,18 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  updateWalkinCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.updateWalkinCustomer(req.params.customerId, req.body, req.user);
+        this.ok(res,'completed registeration', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchWalkinCustomers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try{
@@ -290,7 +302,7 @@ class customerCtrl extends Ctrl{
   fetchWalkinCustomer():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.fetchWalkinCustomer(req.params.customerId);
+        const data = await this.module.fetchWalkinCustomer(req.params.icnNo);
         this.ok(res, 'customer fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

@@ -87,6 +87,8 @@ type NewComplainInterface = {
   aprovalOfficers?:ComplaintInterface['nextApprovalOfficer']
   nextApprovalOfficer?:ComplaintInterface['nextApprovalOfficer']
   additionalAction?:ComplaintInterface['additionalAction']
+  icnNo?:ComplaintInterface['icnNo']
+  ecrNo?:ComplaintInterface['ecrNo']
 }
 
 type newWalkinCustomer = {
@@ -271,10 +273,14 @@ class Customer extends Module{
         initNum = findOrder[0].initOn+1
       }
       let init = "GRN"
+      let ecr = "ECR";
+      let icn = "ICN";
       // let str = ""+initNum
       // let pad = "000000"
       // let ans = pad.substring(0, pad.length - str.length) + str;
       const orderNumber = padLeft(initNum, 6, "");
+      order.ecrNo = ecr+orderNumber;
+      order.icnNo = icn+orderNumber;
       let grnNo = init+orderNumber;
       order.orderNumber = orderNumber;
       order.initOn = initNum
@@ -343,6 +349,12 @@ class Customer extends Module{
                 }},
                 {orderNumber:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {ecrNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {icnNo:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { pickupType: filter?.toLowerCase() },
@@ -360,6 +372,12 @@ class Customer extends Module{
                   $regex: search?.toLowerCase() || ''
                 }},
                 {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {ecrNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {icnNo:{
                   $regex: search?.toLowerCase() || ''
                 }}
               ]},
@@ -436,6 +454,12 @@ class Customer extends Module{
                 }},
                 {orderNumber:{
                   $regex: search?.toLowerCase() || ''
+                }},
+                {ecrNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {icnNo:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               { pickupType: filter?.toLowerCase() },
@@ -453,6 +477,12 @@ class Customer extends Module{
                   $regex: search?.toLowerCase() || ''
                 }},
                 {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {ecrNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {icnNo:{
                   $regex: search?.toLowerCase() || ''
                 }}
               ]},

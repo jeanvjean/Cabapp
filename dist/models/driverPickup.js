@@ -11,9 +11,27 @@ const routeCylinderSchema = new mongoose_1.Schema({
     totalVolume: String,
     totalQuantity: String
 });
+const routeSupplier = new mongoose_1.Schema({
+    name: String,
+    destination: String,
+    departure: String,
+    numberOfCylinders: Number,
+    cylinders: [routeCylinderSchema],
+    status: String
+});
+const routeCustomer = new mongoose_1.Schema({
+    name: String,
+    destination: String,
+    departure: String,
+    numberOfCylinders: Number,
+    cylinders: [routeCylinderSchema],
+    status: String
+});
 const routeSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
+    customers: [routeCustomer],
+    suppliers: [routeSupplier],
     startDate: { type: Date },
     endDate: { type: Date },
     activity: { type: String, enum: Object.values(vehicle_1.RouteActivity) },

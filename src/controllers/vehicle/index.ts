@@ -161,7 +161,7 @@ class VehicleController extends Ctrl{
       try {
         const { vehicleId, routeId } = req.params;
         const { status } = req.body;
-        const data = await this.module.markRouteAsComplete({vehicleId, routeId, status });
+        const data = await this.module.markRouteAsComplete({vehicleId, routeId, status, query:req.query });
         this.ok(res, 'Completed', data);
       } catch (e) {
         this.handleError(e, req, res);

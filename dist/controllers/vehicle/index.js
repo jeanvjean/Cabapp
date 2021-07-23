@@ -165,7 +165,7 @@ class VehicleController extends ctrl_1.default {
             try {
                 const { vehicleId, routeId } = req.params;
                 const { status } = req.body;
-                const data = yield this.module.markRouteAsComplete({ vehicleId, routeId, status });
+                const data = yield this.module.markRouteAsComplete({ vehicleId, routeId, status, query: req.query });
                 this.ok(res, 'Completed', data);
             }
             catch (e) {

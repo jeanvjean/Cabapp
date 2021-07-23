@@ -368,37 +368,41 @@ class Vehicle extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('selected vehicle was not found please pick an available vehicle');
                 }
                 let routePlan = new this.pickup(Object.assign(Object.assign({}, data), { branch: user.branch, vehicle: vehicle._id }));
-                let availableRoutes = yield this.pickup.find({});
-                routePlan.serialNo = availableRoutes.length + 1;
+                let availableRoutes = yield this.pickup.find({}).sort({ serialNo: -1 }).limit(1);
+                if (availableRoutes[0]) {
+                    routePlan.serialNo = availableRoutes[0].serialNo + 1;
+                }
+                else {
+                    routePlan.serialNo = 1;
+                }
+                const num = token_1.padLeft(routePlan.serialNo, 6, "");
+                const ecr = "ECR" + num;
+                routePlan.ecrNo = ecr;
+                routePlan.icnNo = "ICN" + num;
                 if (routePlan.orderType == order_1.pickupType.CUSTOMER) {
                     if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
                         let init = 'TECR';
-                        let num = yield token_1.generateToken(6);
                         //@ts-ignore
-                        let tecrNo = init + num.toString();
+                        let tecrNo = init + num;
                         routePlan.tecrNo = tecrNo;
                     }
                     else if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
                         let init = 'TFCR';
-                        let num = yield token_1.generateToken(6);
                         //@ts-ignore
-                        let tfcrNo = init + num.toString();
+                        let tfcrNo = init + num;
                         routePlan.tfcrNo = tfcrNo;
                     }
                 }
                 else if (routePlan.orderType == order_1.pickupType.SUPPLIER) {
                     if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
                         let init = 'TECR';
-                        let num = yield token_1.generateToken(6);
-                        //@ts-ignore
-                        let tecrNo = init + num.toString();
+                        let tecrNo = init + num;
                         routePlan.tecrNo = tecrNo;
                     }
                     else if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
                         let init = 'TFCR';
-                        let num = yield token_1.generateToken(6);
                         //@ts-ignore
-                        let tfcrNo = init + num.toString();
+                        let tfcrNo = init + num;
                         routePlan.tfcrNo = tfcrNo;
                     }
                 }
@@ -517,48 +521,114 @@ class Vehicle extends module_1.default {
     markRouteAsComplete(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const { query } = data;
+                //@ts-ignore
+                const { search } = query;
+                console.log(search);
                 const { status, routeId } = data;
                 const pickup = yield this.pickup.findById(routeId);
                 if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.SUPPLIER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
-                    for (var cylinder of pickup.cylinders) {
-                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
-                        //@ts-ignore
-                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
-                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
-                            location: pickup.destination,
-                            date: new Date().toISOString()
-                        });
-                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                    if (pickup.suppliers.length > 0) {
+                        for (let supplier of pickup.suppliers) {
+                            if (supplier.name == `${search}`) {
+                                if (supplier.cylinders.length > 0) {
+                                    for (let cylinder of supplier.cylinders) {
+                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        //@ts-ignore
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            location: supplier.destination,
+                                            date: new Date().toISOString()
+                                        });
+                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                    }
+                                }
+                                //@ts-ignore
+                                supplier.status = status;
+                            }
+                        }
                     }
                 }
                 else if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.CUSTOMER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
-                    for (var cylinder of pickup.cylinders) {
-                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
-                        //@ts-ignore
-                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
-                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
-                            location: pickup.destination,
-                            date: new Date().toISOString()
-                        });
-                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                    if (pickup.customers.length > 0) {
+                        for (let customer of pickup.customers) {
+                            if (customer.name == `${search}`) {
+                                if (customer.cylinders.length > 0) {
+                                    for (let cylinder of customer.cylinders) {
+                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        //@ts-ignore
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            location: customer.destination,
+                                            date: new Date().toISOString()
+                                        });
+                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                    }
+                                }
+                                //@ts-ignore
+                                customer.status = status;
+                            }
+                        }
                     }
                 }
-                else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP) {
-                    for (var cylinder of pickup.cylinders) {
-                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
-                        //@ts-ignore
-                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
-                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
-                            location: pickup.destination,
-                            date: new Date().toISOString()
-                        });
-                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP && (pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.CUSTOMER) {
+                    if (pickup.customers.length > 0) {
+                        for (let customer of pickup.customers) {
+                            if (customer.name == `${search}`) {
+                                if (customer.cylinders.length > 0) {
+                                    for (let cylinder of customer.cylinders) {
+                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        //@ts-ignore
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            location: customer.destination,
+                                            date: new Date().toISOString()
+                                        });
+                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                    }
+                                }
+                                //@ts-ignore
+                                customer.status = status;
+                            }
+                        }
+                    }
+                    // for(var cylinder of pickup.cylinders) {
+                    //   let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+                    //   //@ts-ignore
+                    //   cyl?.holder = cylinderHolder.ASNL;
+                    //   cyl?.tracking.push({
+                    //     location:pickup.destination,
+                    //     date:new Date().toISOString()
+                    //   });
+                    //   await cyl?.save();
+                    // }
+                }
+                else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP && (pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.SUPPLIER) {
+                    if (pickup.suppliers.length > 0) {
+                        for (let supplier of pickup.suppliers) {
+                            if (supplier.name == `${search}`) {
+                                if (supplier.cylinders.length > 0) {
+                                    for (let cylinder of supplier.cylinders) {
+                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        //@ts-ignore
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            location: supplier.destination,
+                                            date: new Date().toISOString()
+                                        });
+                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                    }
+                                }
+                                //@ts-ignore
+                                supplier.status = status;
+                            }
+                        }
                     }
                 }
                 //@ts-ignore
-                pickup === null || pickup === void 0 ? void 0 : pickup.dateCompleted = new Date().toISOString();
-                //@ts-ignore
-                pickup === null || pickup === void 0 ? void 0 : pickup.status = status;
+                // pickup?.dateCompleted = new Date().toISOString()
+                // //@ts-ignore
+                // pickup?.status = status;
                 yield (pickup === null || pickup === void 0 ? void 0 : pickup.save());
                 return Promise.resolve(pickup);
             }

@@ -81,7 +81,9 @@ export const complaintSchema = new Schema({
   comments:[commentSchema],
   approvalStatus:{type:String},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  complaintType:{type:String}
+  complaintType:{type:String},
+  icnNo:String,
+  ecrNo:String
 },{
   timestamps:true
 });

@@ -162,10 +162,14 @@ class Customer extends module_1.default {
                     initNum = findOrder[0].initOn + 1;
                 }
                 let init = "GRN";
+                let ecr = "ECR";
+                let icn = "ICN";
                 // let str = ""+initNum
                 // let pad = "000000"
                 // let ans = pad.substring(0, pad.length - str.length) + str;
                 const orderNumber = token_1.padLeft(initNum, 6, "");
+                order.ecrNo = ecr + orderNumber;
+                order.icnNo = icn + orderNumber;
                 let grnNo = init + orderNumber;
                 order.orderNumber = orderNumber;
                 order.initOn = initNum;
@@ -236,6 +240,12 @@ class Customer extends module_1.default {
                                             } },
                                         { orderNumber: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { ecrNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { icnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
@@ -253,6 +263,12 @@ class Customer extends module_1.default {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } },
                                         { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { ecrNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { icnNo: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
@@ -327,6 +343,12 @@ class Customer extends module_1.default {
                                             } },
                                         { orderNumber: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { ecrNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { icnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
@@ -344,6 +366,12 @@ class Customer extends module_1.default {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } },
                                         { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { ecrNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { icnNo: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },

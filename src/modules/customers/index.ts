@@ -1170,19 +1170,21 @@ class Customer extends Module{
       // let maxNumber = Math.max(...docs);
       // let sn = maxNumber + 1
       // customer.serialNo = sn | 1;
-      if(findCustomers.length > 0) {
+      if(findCustomers[0]) {
         customer.serialNo = findCustomers[0].serialNo+1
       }else {
         customer.serialNo = 1
       }
       let init = "ECR"
-      let num = await generateToken(6);
+      let num =  padLeft(customer.serialNo, 6, "");
       //@ts-ignore
-      customer.ecrNo = init + num.toString();
+      customer.ecrNo = init+num;
       let icnInit = "ICN"
-      let icn = await generateToken(6);
+      // let icn = await generateToken(6);
       //@ts-ignore
-      customer.icnNo = icnInit + icn.toString();
+      customer.icnNo = icnInit+num;
+      customer.security = user._id;
+      customer.recievedBy = user._id;
 
       await customer.save();
       await createLog({
@@ -1251,6 +1253,10 @@ class Customer extends Module{
       for(let cust of customers.docs) {
         let branch = await this.branch.findById(cust.branch);
         cust.branch = branch;
+        let security = await this.user.findById(cust.security);
+        cust.security = security;
+        let recievedBy = await this.user.findById(cust.recievedBy);
+        cust.recievedBy = recievedBy;
       }
       return Promise.resolve(customers);
     }catch(e){

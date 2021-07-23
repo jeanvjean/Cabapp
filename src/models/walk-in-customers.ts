@@ -33,6 +33,8 @@ export interface WalkinCustomerInterface extends Document{
   totalQuantity:string
   branch:Schema.Types.ObjectId
   status:WalkinCustomerStatus
+  recievedBy:Schema.Types.ObjectId
+  security:Schema.Types.ObjectId
 }
 
 const walkinCustomerCylinderSchema = new Schema({
@@ -52,7 +54,9 @@ const walkInCustomerSchema = new Schema({
   modeOfService:String,
   serialNo:Number,
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  status:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY}
+  status:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY},
+  recievedBy:{type:Schema.Types.ObjectId, ref:"User"},
+  security:{type:Schema.Types.ObjectId, ref:'User'}
 },{
   timestamps:true
 });

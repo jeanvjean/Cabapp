@@ -49,6 +49,7 @@ class PersonCtrl extends Ctrl {
     return async (req: Request, res: Response): Promise<void> => {
       // Todo: implement create handler
       const query = {}
+      //@ts-ignore
       const users = await this.module.get(query);
       this.ok(res, 'ok', users);
     };

@@ -517,6 +517,8 @@ class Customer extends Module{
       ]);
       if(filter?.length) {
         aggregate = aggregate1
+      }else if(orderType?.length){
+        aggregate = aggregate3
       }else {
         aggregate = aggregate2
       }

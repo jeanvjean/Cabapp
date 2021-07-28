@@ -190,6 +190,7 @@ class ProductCtrl extends Ctrl{
   fetchBranches():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
+        //@ts-ignore
         const data =  await this.module.fetchBranches(req.query);
         this.ok(res,'branches returned', data)
       } catch (e) {

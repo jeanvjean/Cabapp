@@ -45,6 +45,7 @@ class CylinderController extends Ctrl{
   fetchCylinders():RequestHandler{
     return async (req:Request, res:Response) =>{
       try {
+        //@ts-ignore
         const list = await this.module.fetchCylinders(req.query);
         this.ok(res, 'fetched cylinder types', list);
       } catch (e) {
@@ -214,7 +215,7 @@ class CylinderController extends Ctrl{
   fetchCustomerCylinders():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        //
+        //@ts-ignore
         const data = await this.module.fetchCustomerCylinders(req.query, req.params.customerId);
         this.ok(res, 'fetched cylinders', data);
       } catch (e) {

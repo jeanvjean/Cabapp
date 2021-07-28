@@ -74,6 +74,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { customerId } = req.params;
+        //@ts-ignore
         const data = await this.module.fetchCustomerOrder(req.query, customerId);
         this.ok(res, 'Fetched Orders', data)
       } catch (e) {
@@ -207,6 +208,7 @@ class customerCtrl extends Ctrl{
   fetchComplaints():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
+        //@ts-ignore
         const data = await this.module.fetchComplaints(req.query, req.params.customerId);
         this.ok(res, 'complaints fetched', data);
       } catch (e) {

@@ -510,6 +510,7 @@ class Customer extends Module{
                 }}
               ]},
               { branch: ObjectId(user.branch.toString()) },
+              { pickupType: filter?.toLowerCase() },
               { orderType: orderType?.toLowerCase() }
             ]
           }
@@ -517,7 +518,7 @@ class Customer extends Module{
       ]);
       if(filter?.length) {
         aggregate = aggregate1
-      }else if(orderType?.length){
+      }else if(orderType?.length && filter?.length){
         aggregate = aggregate3
       }else {
         aggregate = aggregate2

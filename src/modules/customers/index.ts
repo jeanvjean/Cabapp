@@ -442,7 +442,7 @@ class Customer extends Module{
         ]
       }
       const ObjectId = mongoose.Types.ObjectId;
-      const { search, filter } = query;
+      const { search, filter, orderType } = query;
       let aggregate;
       const aggregate1 = this.order.aggregate([
         {
@@ -487,6 +487,30 @@ class Customer extends Module{
                 }}
               ]},
               { branch: ObjectId(user.branch.toString()) }
+            ]
+          }
+        }
+      ]);
+      const aggregate3 = this.order.aggregate([
+        {
+          $match:{
+            $and:[
+              {$or:[
+                {status:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {orderNumber:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {ecrNo:{
+                  $regex: search?.toLowerCase() || ''
+                }},
+                {icnNo:{
+                  $regex: search?.toLowerCase() || ''
+                }}
+              ]},
+              { branch: ObjectId(user.branch.toString()) },
+              { orderType: orderType?.toLowerCase() }
             ]
           }
         }

@@ -65,7 +65,7 @@ const OrderSchema = new Schema({
   gasColor:{type:String},
   tracking:[trackingSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  orderType:{type:String, enum:Object.values(orderType)},
+  orderType:{type:String, enum:Object.values(orderType), lowecase:true},
   initOn:{type:Number},
   orderNumber:{type:String},
   ecrNo:{type:String},

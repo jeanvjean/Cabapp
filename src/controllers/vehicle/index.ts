@@ -73,6 +73,7 @@ class VehicleController extends Ctrl{
   fetchInspectionHistory():RequestHandler{
     return async(req:Request, res:Response) =>{
       try {
+        //@ts-ignore
         const data = await this.module.fetchInspectionHist(req.params.vehicleId, req.query);
         this.ok(res, 'History fetched', data);
       } catch (e) {
@@ -111,6 +112,7 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const {vehicleId} = req.params;
+        //@ts-ignore
         const data = await this.module.fetchRoutePlan({vehicleId, query:req.query});
         this.ok(res, 'fetched route plans', data)
       } catch (e) {
@@ -161,6 +163,7 @@ class VehicleController extends Ctrl{
       try {
         const { vehicleId, routeId } = req.params;
         const { status } = req.body;
+        //@ts-ignore
         const data = await this.module.markRouteAsComplete({vehicleId, routeId, status, query:req.query });
         this.ok(res, 'Completed', data);
       } catch (e) {

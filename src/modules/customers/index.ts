@@ -442,7 +442,7 @@ class Customer extends Module{
         ]
       }
       const ObjectId = mongoose.Types.ObjectId;
-      const { search, filter, orderType } = query;
+      const { search, filter, type } = query;
       let aggregate;
       const aggregate1 = this.order.aggregate([
         {
@@ -511,14 +511,14 @@ class Customer extends Module{
               ]},
               { branch: ObjectId(user.branch.toString()) },
               { pickupType: filter?.toLowerCase() },
-              { orderType: orderType?.toLowerCase() }
+              { orderType: type?.toLowerCase() }
             ]
           }
         }
       ]);
       if(filter?.length) {
         aggregate = aggregate1
-      }else if(orderType?.length && filter?.length){
+      }else if(type?.length && filter?.length){
         aggregate = aggregate3
       }else {
         aggregate = aggregate2

@@ -14,7 +14,7 @@ export interface QueryInterface {
   supplier?:string,
   produced?:boolean;
   sort?: object;
-  orderType:string
+  type:string
   branch?:string,
   fromBranch?:string
   range?: string[];

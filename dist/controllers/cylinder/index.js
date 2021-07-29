@@ -45,6 +45,7 @@ class CylinderController extends ctrl_1.default {
     fetchCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                //@ts-ignore
                 const list = yield this.module.fetchCylinders(req.query);
                 this.ok(res, 'fetched cylinder types', list);
             }
@@ -215,7 +216,7 @@ class CylinderController extends ctrl_1.default {
     fetchCustomerCylinders() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                //
+                //@ts-ignore
                 const data = yield this.module.fetchCustomerCylinders(req.query, req.params.customerId);
                 this.ok(res, 'fetched cylinders', data);
             }

@@ -79,6 +79,7 @@ class customerCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { customerId } = req.params;
+                //@ts-ignore
                 const data = yield this.module.fetchCustomerOrder(req.query, customerId);
                 this.ok(res, 'Fetched Orders', data);
             }
@@ -212,6 +213,7 @@ class customerCtrl extends ctrl_1.default {
     fetchComplaints() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                //@ts-ignore
                 const data = yield this.module.fetchComplaints(req.query, req.params.customerId);
                 this.ok(res, 'complaints fetched', data);
             }

@@ -15,6 +15,11 @@ type ocnCylinders = {
     price:number
 }
 
+export enum note {
+  IN="in-coming",
+  OUT="out-going"
+}
+
 export interface OutgoingCylinderInterface extends Document {
     customer:Schema.Types.ObjectId,
     cylinderType:string
@@ -30,6 +35,9 @@ export interface OutgoingCylinderInterface extends Document {
     branch:Schema.Types.ObjectId
     ocnNo:string
     ocnInit:number
+    noteType:note
+    totalAsnlCylinders:number
+    totalCustomerCylinders:number
 }
 
 const ocnCylinderSchema = new Schema({
@@ -54,10 +62,14 @@ const ocnSchema = new Schema({
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
     ocnNo:{type:String},
-    ocnInit:Number
+    noteType:{type:String, enum:Object.values(note)},
+    ocnInit:Number,
+    totalAsnlCylinders:Number,
+    totalCustomerCylinders:Number
 });
 ocnSchema.plugin(mongoosePaginate);
-ocnSchema.plugin(aggregatePaginate)
+ocnSchema.plugin(aggregatePaginate);
+
 export default function factory(conn:Connection):Model<OutgoingCylinderInterface>{
     return conn.model('out-going-cylinders', ocnSchema);
 }

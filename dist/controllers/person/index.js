@@ -44,6 +44,7 @@ class PersonCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             // Todo: implement create handler
             const query = {};
+            //@ts-ignore
             const users = yield this.module.get(query);
             this.ok(res, 'ok', users);
         });

@@ -1,9 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.note = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
+var note;
+(function (note) {
+    note["IN"] = "in-coming";
+    note["OUT"] = "out-going";
+})(note = exports.note || (exports.note = {}));
 const ocnCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     volume: String,
@@ -24,7 +30,10 @@ const ocnSchema = new mongoose_1.Schema({
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     ocnNo: { type: String },
-    ocnInit: Number
+    noteType: { type: String, enum: Object.values(note) },
+    ocnInit: Number,
+    totalAsnlCylinders: Number,
+    totalCustomerCylinders: Number
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

@@ -331,7 +331,8 @@ class Customer extends module_1.default {
                         { path: 'gasType', model: 'cylinder' }
                     ] });
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, type } = query;
+                console.log(type);
                 let aggregate;
                 const aggregate1 = this.order.aggregate([
                     {
@@ -380,8 +381,36 @@ class Customer extends module_1.default {
                         }
                     }
                 ]);
+                const aggregate3 = this.order.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                { $or: [
+                                        { status: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { orderNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { ecrNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { icnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ] },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
+                                { orderType: type }
+                            ]
+                        }
+                    }
+                ]);
                 if (filter === null || filter === void 0 ? void 0 : filter.length) {
                     aggregate = aggregate1;
+                }
+                else if ((type === null || type === void 0 ? void 0 : type.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
+                    aggregate = aggregate3;
                 }
                 else {
                     aggregate = aggregate2;

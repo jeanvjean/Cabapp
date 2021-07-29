@@ -195,6 +195,7 @@ class ProductCtrl extends ctrl_1.default {
     fetchBranches() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                //@ts-ignore
                 const data = yield this.module.fetchBranches(req.query);
                 this.ok(res, 'branches returned', data);
             }

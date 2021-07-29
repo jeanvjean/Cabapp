@@ -77,6 +77,7 @@ class VehicleController extends ctrl_1.default {
     fetchInspectionHistory() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                //@ts-ignore
                 const data = yield this.module.fetchInspectionHist(req.params.vehicleId, req.query);
                 this.ok(res, 'History fetched', data);
             }
@@ -115,6 +116,7 @@ class VehicleController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { vehicleId } = req.params;
+                //@ts-ignore
                 const data = yield this.module.fetchRoutePlan({ vehicleId, query: req.query });
                 this.ok(res, 'fetched route plans', data);
             }
@@ -165,6 +167,7 @@ class VehicleController extends ctrl_1.default {
             try {
                 const { vehicleId, routeId } = req.params;
                 const { status } = req.body;
+                //@ts-ignore
                 const data = yield this.module.markRouteAsComplete({ vehicleId, routeId, status, query: req.query });
                 this.ok(res, 'Completed', data);
             }

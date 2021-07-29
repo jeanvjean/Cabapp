@@ -27,6 +27,7 @@ interface newOcnInterface {
     totalQty:OutgoingCylinderInterface['totalQty']
     totalVol:OutgoingCylinderInterface['totalVol']
     totalAmount:OutgoingCylinderInterface['totalAmount']
+    noteType:OutgoingCylinderInterface['noteType']
 }
 
 type ocnApproval = {

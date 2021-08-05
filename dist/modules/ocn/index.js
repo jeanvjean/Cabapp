@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const module_1 = require("../module");
+const ocn_1 = require("../../models/ocn");
 const transferCylinder_1 = require("../../models/transferCylinder");
 const mail_1 = require("../../util/mail");
 const static_1 = require("../../configs/static");
@@ -48,9 +49,18 @@ class OutGoingCylinder extends module_1.default {
                     initNum = findOcn[0].ocnInit + 1;
                 }
                 let init = "OCN";
+                if (data.noteType == ocn_1.note.IN) {
+                    init = "ICN";
+                }
                 const num = token_1.padLeft(initNum, 6, "");
                 let grnNo = init + num;
-                ocn.ocnNo = grnNo;
+                if (init == "ICN") {
+                    ocn.icnNo = grnNo;
+                }
+                else if (init == "OCN") {
+                    ocn.ocnNo = grnNo;
+                }
+                // ocn.ocnNo = grnNo;
                 ocn.ocnInit = initNum;
                 yield ocn.save();
                 yield logs_1.createLog({
@@ -69,6 +79,21 @@ class OutGoingCylinder extends module_1.default {
                     user: apUser
                 });
                 return Promise.resolve(ocn);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    updateOcn(ocnId, data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let ocn = yield this.ocn.findById(ocnId);
+                if (!ocn) {
+                    throw new exceptions_1.BadInputFormatException('ocn not found');
+                }
+                let updatedOcn = yield this.ocn.findByIdAndUpdate(ocnId, Object.assign(Object.assign({}, data), { status: ocn_1.statuses.PASSED }), { new: true });
+                return Promise.resolve(updatedOcn);
             }
             catch (e) {
                 this.handleException(e);
@@ -424,8 +449,9 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search } = query;
-                const aggregate = this.ocn.aggregate([
+                const { search, filter } = query;
+                let aggregate;
+                let aggregate1 = this.ocn.aggregate([
                     {
                         $match: {
                             $and: [
@@ -435,6 +461,37 @@ class OutGoingCylinder extends module_1.default {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
                                             } }, { approvalStatus: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } },
+                                        ,
+                                        { icnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { ocnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { status: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate2 = this.ocn.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { cylinderType: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { approvalStatus: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } },
+                                        ,
+                                        { icnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { ocnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
                                             } }
                                     ]
                                 },
@@ -443,6 +500,12 @@ class OutGoingCylinder extends module_1.default {
                         }
                     }
                 ]);
+                if (filter === null || filter === void 0 ? void 0 : filter.length) {
+                    aggregate = aggregate1;
+                }
+                else {
+                    aggregate = aggregate2;
+                }
                 //@ts-ignore
                 const outgoing = yield this.ocn.aggregatePaginate(aggregate, Object.assign({}, query));
                 for (let o of outgoing.docs) {

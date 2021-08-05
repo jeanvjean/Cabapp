@@ -12,5 +12,6 @@ router.post('/approve-ocn/:ocnId', auth.verify(), ocn_1.Validator.validateApprov
 router.get('/fetch-ocn-approvals', auth.verify(), controllers_1.ocnController.fetchOcnApprovals());
 router.get('/fetch-ocn-details/:ocnId', auth.verify(), controllers_1.ocnController.fetchOcnDetails());
 router.get('/fetch-ocns', auth.verify(), controllers_1.ocnController.fetchOcns());
+router.post('/update-ocn/:ocnId', auth.verify(), controllers_1.ocnController.updateOcn());
 exports.default = router;
 //# sourceMappingURL=ocn.js.map

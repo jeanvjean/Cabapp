@@ -42,5 +42,11 @@ router.get(
   ocnController.fetchOcns()
 );
 
+router.post(
+    '/update-ocn/:ocnId',
+    auth.verify(),
+    ocnController.updateOcn()
+);
+
 
 export default router;

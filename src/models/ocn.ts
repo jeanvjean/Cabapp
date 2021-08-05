@@ -20,6 +20,11 @@ export enum note {
   OUT="out-going"
 }
 
+export enum statuses {
+    PASSED="passed",
+    PENDING="pending"
+}
+
 export interface OutgoingCylinderInterface extends Document {
     customer:Schema.Types.ObjectId,
     cylinderType:string
@@ -38,6 +43,8 @@ export interface OutgoingCylinderInterface extends Document {
     noteType:note
     totalAsnlCylinders:number
     totalCustomerCylinders:number
+    vehicle?:Schema.Types.ObjectId
+    icnNo:string
 }
 
 const ocnCylinderSchema = new Schema({
@@ -59,13 +66,16 @@ const ocnSchema = new Schema({
     approvalOfficers:{type:[approvalStageShema]},
     approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
+    status:{type:String, enum:Object.values(statuses)},
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
     ocnNo:{type:String},
+    icnNo:{type:String},
     noteType:{type:String, enum:Object.values(note)},
     ocnInit:Number,
     totalAsnlCylinders:Number,
-    totalCustomerCylinders:Number
+    totalCustomerCylinders:Number,
+    vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"}
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

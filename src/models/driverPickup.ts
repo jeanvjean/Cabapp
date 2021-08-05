@@ -61,6 +61,7 @@ export interface PickupInterface extends Document{
   deleted:boolean
   branch:Schema.Types.ObjectId
   dateCompleted:Date
+  ocnNo:string
 }
 
 const routeCylinderSchema = new Schema({
@@ -101,6 +102,7 @@ const routeSchema = new Schema({
   status:{type:String, enum:Object.values(RoutePlanStatus)},
   ecrNo:{type:String},
   icnNo:{type:String},
+  ocnNo:{type:String},
   tecrNo:{type:String},
   tfcrNo:{type:String},
   orderType:{type:String, enum:Object.values(pickupType)},

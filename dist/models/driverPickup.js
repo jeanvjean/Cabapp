@@ -40,6 +40,7 @@ const routeSchema = new mongoose_1.Schema({
     status: { type: String, enum: Object.values(vehicle_1.RoutePlanStatus) },
     ecrNo: { type: String },
     icnNo: { type: String },
+    ocnNo: { type: String },
     tecrNo: { type: String },
     tfcrNo: { type: String },
     orderType: { type: String, enum: Object.values(order_1.pickupType) },

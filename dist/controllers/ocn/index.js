@@ -65,6 +65,18 @@ class ocnController extends ctrl_1.default {
             }
         });
     }
+    updateOcn() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.updateOcn(req.params.ocnId, req.body, req.user);
+                this.ok(res, 'done', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchOcns() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

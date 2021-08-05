@@ -1,6 +1,6 @@
 import Module, { QueryInterface } from "../module";
 import { Model } from "mongoose";
-import { OutgoingCylinderInterface } from "../../models/ocn";
+import { note, OutgoingCylinderInterface, statuses } from "../../models/ocn";
 import { UserInterface } from "../../models/user";
 import { stagesOfApproval, ApprovalStatus, TransferStatus } from "../../models/transferCylinder";
 import Notify from '../../util/mail';
@@ -20,14 +20,17 @@ interface ocnPropsInterface {
 }
 
 interface newOcnInterface {
-    customer:OutgoingCylinderInterface['customer'],
-    cylinderType:OutgoingCylinderInterface['cylinderType']
-    date:OutgoingCylinderInterface['date']
-    cylinders:OutgoingCylinderInterface['cylinders']
-    totalQty:OutgoingCylinderInterface['totalQty']
-    totalVol:OutgoingCylinderInterface['totalVol']
-    totalAmount:OutgoingCylinderInterface['totalAmount']
-    noteType:OutgoingCylinderInterface['noteType']
+    customer?:OutgoingCylinderInterface['customer'],
+    cylinderType?:OutgoingCylinderInterface['cylinderType']
+    date?:OutgoingCylinderInterface['date']
+    cylinders?:OutgoingCylinderInterface['cylinders']
+    totalQty?:OutgoingCylinderInterface['totalQty']
+    totalVol?:OutgoingCylinderInterface['totalVol']
+    totalAmount?:OutgoingCylinderInterface['totalAmount']
+    noteType?:OutgoingCylinderInterface['noteType']
+    totalAsnlCylinders?:OutgoingCylinderInterface['totalAsnlCylinders']
+    totalCustomerCylinders?:OutgoingCylinderInterface['totalCustomerCylinders']
+    vehicle?:OutgoingCylinderInterface['vehicle']
 }
 
 type ocnApproval = {
@@ -72,9 +75,17 @@ class OutGoingCylinder extends Module{
               initNum = findOcn[0].ocnInit+1
             }
             let init = "OCN";
+            if(data.noteType == note.IN) {
+              init = "ICN"
+            }
             const num = padLeft(initNum, 6, "");
             let grnNo = init+num;
-            ocn.ocnNo = grnNo;
+            if(init == "ICN") {
+              ocn.icnNo = grnNo
+            }else if(init == "OCN") {
+              ocn.ocnNo = grnNo
+            }
+            // ocn.ocnNo = grnNo;
             ocn.ocnInit = initNum;
 
             await ocn.save();
@@ -97,6 +108,19 @@ class OutGoingCylinder extends Module{
         } catch (e) {
             this.handleException(e);
         }
+    }
+
+    public async updateOcn(ocnId:string, data:newOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined> {
+      try {
+        let ocn = await this.ocn.findById(ocnId);
+        if(!ocn) {
+          throw new BadInputFormatException('ocn not found');
+        }
+        let updatedOcn = await this.ocn.findByIdAndUpdate(ocnId, {...data, status:statuses.PASSED}, {new:true});
+        return Promise.resolve(updatedOcn as OutgoingCylinderInterface);
+      } catch (e) {
+        this.handleException(e);
+      }
     }
 
     public async approveOcn(data:ocnApproval, user:UserInterface):Promise<OutgoingCylinderInterface|undefined>{
@@ -439,8 +463,10 @@ class OutGoingCylinder extends Module{
     public async fetchOcns(query:QueryInterface, user:UserInterface):Promise<OutgoingCylinderInterface| undefined>{
       try {
         const ObjectId = mongoose.Types.ObjectId;
-          const { search } = query;
-          const aggregate = this.ocn.aggregate([
+          const { search, filter } = query;
+          let aggregate;
+
+          let aggregate1 = this.ocn.aggregate([
             {
               $match:{
                 $and:[
@@ -450,6 +476,36 @@ class OutGoingCylinder extends Module{
                         $regex: search?.toLowerCase() || ""
                       }},{approvalStatus:{
                         $regex: search?.toLowerCase() || ""
+                      }},
+                      ,{icnNo:{
+                        $regex: search?.toLowerCase() || ""
+                      }},{ocnNo:{
+                        $regex: search?.toLowerCase() || ""
+                      }}
+                    ]
+                  },
+                  {branch:ObjectId(user.branch.toString())},
+                  {status: filter?.toLowerCase()}
+                ]
+              }
+            }
+          ]);
+
+          let aggregate2 = this.ocn.aggregate([
+            {
+              $match:{
+                $and:[
+                  {
+                    $or:[
+                      {cylinderType:{
+                        $regex: search?.toLowerCase() || ""
+                      }},{approvalStatus:{
+                        $regex: search?.toLowerCase() || ""
+                      }},
+                      ,{icnNo:{
+                        $regex: search?.toLowerCase() || ""
+                      }},{ocnNo:{
+                        $regex: search?.toLowerCase() || ""
                       }}
                     ]
                   },
@@ -458,6 +514,11 @@ class OutGoingCylinder extends Module{
               }
             }
           ]);
+          if(filter?.length) {
+            aggregate = aggregate1;
+          } else {
+            aggregate = aggregate2
+          }
           //@ts-ignore
           const outgoing = await this.ocn.aggregatePaginate(aggregate,{...query});
           for(let o of outgoing.docs) {

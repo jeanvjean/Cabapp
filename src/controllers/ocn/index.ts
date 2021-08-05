@@ -59,6 +59,18 @@ class ocnController extends Ctrl {
         }
     }
 
+    updateOcn():RequestHandler{
+        return async(req:Request, res:Response)=>{
+            try {
+                //@ts-ignore
+                const data = await this.module.updateOcn(req.params.ocnId, req.body, req.user);
+                this.ok(res, 'done', data);
+            } catch (e) {
+                this.handleError(e, req, res);
+            }
+        }
+    }
+
     fetchOcns():RequestHandler{
       return async(req:Request, res:Response) =>{
         try {

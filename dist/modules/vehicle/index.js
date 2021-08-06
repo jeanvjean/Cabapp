@@ -378,7 +378,7 @@ class Vehicle extends module_1.default {
                 const num = token_1.padLeft(routePlan.serialNo, 6, "");
                 const ecr = "ECR" + num;
                 routePlan.ecrNo = ecr;
-                routePlan.icnNo = "ICN" + num;
+                // routePlan.icnNo = "ICN"+num;
                 if (routePlan.orderType == order_1.pickupType.CUSTOMER) {
                     if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
                         let init = 'TECR';

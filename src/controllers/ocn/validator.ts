@@ -32,11 +32,11 @@ class ocnValidator extends Ctrl{
             check('date')
                 .exists()
                 .withMessage('provide date please'),
-            check('cylinders')
-                .exists()
-                .withMessage('Please provide cylinders')
-                .isArray()
-                .withMessage('cylinders must be an array'),
+            check('cylinders'),
+                // .exists()
+                // .withMessage('Please provide cylinders')
+                // .isArray()
+                // .withMessage('cylinders must be an array'),
             check('totalQty')
                 .exists()
                 .withMessage('provide total quantity')

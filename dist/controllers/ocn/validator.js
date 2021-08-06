@@ -34,11 +34,11 @@ class ocnValidator extends ctrl_1.default {
             express_validator_1.check('date')
                 .exists()
                 .withMessage('provide date please'),
-            express_validator_1.check('cylinders')
-                .exists()
-                .withMessage('Please provide cylinders')
-                .isArray()
-                .withMessage('cylinders must be an array'),
+            express_validator_1.check('cylinders'),
+            // .exists()
+            // .withMessage('Please provide cylinders')
+            // .isArray()
+            // .withMessage('cylinders must be an array'),
             express_validator_1.check('totalQty')
                 .exists()
                 .withMessage('provide total quantity')

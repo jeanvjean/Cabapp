@@ -91,6 +91,7 @@ type RouteRecordInput = {
   status:PickupInterface['status'],
   ecrNo:PickupInterface['ecrNo'],
   icnNo:PickupInterface['icnNo'],
+  ocnNo:PickupInterface['ocnNo']
   orderType:PickupInterface['orderType'],
   modeOfService:PickupInterface['modeOfService'],
   date:PickupInterface['date'],
@@ -484,7 +485,7 @@ class Vehicle extends Module{
       const num = padLeft(routePlan.serialNo , 6, "");
       const ecr = "ECR"+num;
       routePlan.ecrNo = ecr;
-      routePlan.icnNo = "ICN"+num;
+      // routePlan.icnNo = "ICN"+num;
       if(routePlan.orderType == pickupType.CUSTOMER) {
         if(routePlan.activity == RouteActivity.PICKUP) {
           let init = 'TECR'

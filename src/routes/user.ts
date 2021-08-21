@@ -71,6 +71,12 @@ const router: expressRouter = expressRouter();
   );
 
   router.get(
+    '/fetch-deleted-users',
+    auth.verify(),
+    userCtrl.fetchDeletedUsers()
+  );
+
+  router.get(
     '/fetch-permissions',
     userCtrl.fetchPermissions()
   );
@@ -91,6 +97,12 @@ const router: expressRouter = expressRouter();
     '/fetch-all-users',
     auth.verify(),
     userCtrl.fetchallUsers()
+  );
+
+  router.get(
+    '/user-stats',
+    auth.verify(),
+    userCtrl.userStatistics()
   );
 
 export default router;

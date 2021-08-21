@@ -480,49 +480,73 @@ class Product extends module_1.default {
                 let grnNo = init + num;
                 inventory.grnNo = grnNo;
                 inventory.grInit = initNum;
-                let products = inventory.products;
-                if (inventory.direction == receivedProduct_1.productDirection.IN) {
-                    for (let product of products) {
-                        let prod = yield this.product.findOne({ partNumber: product.partNumber, branch: user.branch });
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.quantity += +product.passed;
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
-                        //@ts-ignore
-                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
-                    }
-                    yield logs_1.createLog({
-                        user: user._id,
-                        activities: {
-                            title: 'Inventory',
-                            //@ts-ignore
-                            activity: `You recorded new inventories coming in`,
-                            time: new Date().toISOString()
-                        }
-                    });
-                }
-                else if (inventory.direction == receivedProduct_1.productDirection.OUT) {
-                    for (let product of products) {
-                        let prod = yield this.product.findOne({ asnlNumber: product.partNumber, branch: user.branch });
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.quantity -= +product.quantity;
-                        //@ts-ignore
-                        prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
-                        //@ts-ignore
-                        yield (prod === null || prod === void 0 ? void 0 : prod.save());
-                    }
-                    yield logs_1.createLog({
-                        user: user._id,
-                        activities: {
-                            title: 'Inventory',
-                            //@ts-ignore
-                            activity: `You recorded new inventories going out`,
-                            time: new Date().toISOString()
-                        }
-                    });
-                }
+                let hod = yield this.user.find({ role: user.role, subrole: 'head of department' });
+                yield new mail_1.default().push({
+                    subject: "GRN approval",
+                    content: `You have a pending grn approval, click the link to view. ${static_1.default.FRONTEND_URL}/inventory/fetch-inventory/${inventory._id}`,
+                    user: hod
+                });
                 yield inventory.save();
                 return Promise.resolve(inventory);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    approveGrn(grnId, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let grn = yield this.inventory.findById(grnId);
+                if (grn) {
+                    let products = grn.products;
+                    if (grn.direction == receivedProduct_1.productDirection.IN) {
+                        for (let product of products) {
+                            let prod = yield this.product.findOne({ partNumber: product.partNumber, branch: user.branch });
+                            //@ts-ignore
+                            prod === null || prod === void 0 ? void 0 : prod.quantity += +product.passed;
+                            //@ts-ignore
+                            prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                            //@ts-ignore
+                            yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                        }
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Inventory',
+                                //@ts-ignore
+                                activity: `You recorded new inventories coming in`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                    }
+                    else if (grn.direction == receivedProduct_1.productDirection.OUT) {
+                        for (let product of products) {
+                            let prod = yield this.product.findOne({ asnlNumber: product.partNumber, branch: user.branch });
+                            //@ts-ignore
+                            prod === null || prod === void 0 ? void 0 : prod.quantity -= +product.quantity;
+                            //@ts-ignore
+                            prod === null || prod === void 0 ? void 0 : prod.totalCost = (prod === null || prod === void 0 ? void 0 : prod.unitCost) * (prod === null || prod === void 0 ? void 0 : prod.quantity);
+                            //@ts-ignore
+                            yield (prod === null || prod === void 0 ? void 0 : prod.save());
+                        }
+                        yield logs_1.createLog({
+                            user: user._id,
+                            activities: {
+                                title: 'Inventory',
+                                //@ts-ignore
+                                activity: `You recorded new inventories going out`,
+                                time: new Date().toISOString()
+                            }
+                        });
+                    }
+                }
+                else {
+                    throw new exceptions_1.BadInputFormatException('no grn found with this id');
+                }
+                grn.approved = true;
+                yield grn.save();
+                return Promise.resolve(grn);
             }
             catch (e) {
                 this.handleException(e);
@@ -630,9 +654,7 @@ class Product extends module_1.default {
                 //@ts-ignore
                 disbursement.grnNo = init + num;
                 disbursement.mrn = mrn + num;
-                console.log(initGrn);
                 disbursement.grnInit = initGrn;
-                console.log(disbursement);
                 let track = {
                     title: "initiate disbursal process",
                     stage: transferCylinder_1.stagesOfApproval.STAGE1,
@@ -742,7 +764,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -785,7 +807,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -828,7 +850,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -871,7 +893,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request you approved was rejected. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -925,7 +947,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -972,7 +994,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -1023,7 +1045,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.initiator);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `product disbursal request has been approved. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -1071,7 +1093,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -1122,7 +1144,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);
@@ -1177,7 +1199,7 @@ class Product extends module_1.default {
                         let apUser = yield this.user.findById(disbursement.nextApprovalOfficer);
                         yield new mail_1.default().push({
                             subject: "Product disbursal",
-                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/fetch-disbursement/${disbursement._id}`,
+                            content: `A disbursal request has been initiated and needs your approval. check and make appropriate corrections approval click to view ${static_1.default.FRONTEND_URL}/inventory/fetch-disbursement/${disbursement._id}`,
                             user: apUser
                         });
                         return Promise.resolve(disbursement);

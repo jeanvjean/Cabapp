@@ -142,7 +142,7 @@ class UserController extends Ctrl{
         const { userId } = req.params;
         let { suspend } = req.query;
         //@ts-ignore
-        const data = await this.module.suspendUser({userId, suspend}, req.user);
+        const data = await this.module.suspendUser({userId, suspend, reason}, req.user);
         this.ok(res, data?.message, data?.user);
       }catch(e){
         this.handleError(e, req, res);
@@ -187,8 +187,34 @@ class UserController extends Ctrl{
   deleteUser():RequestHandler{
     return async(req:Request, res:Response) =>{
       try {
-        const data = await this.module.deleteUser(req.params.userId);
+        const { reason } = req.query;
+        //@ts-ignore
+        const data = await this.module.deleteUser(req.params.userId, reason);
         this.ok(res,'Deleted',data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchDeletedUsers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchDeletedUsers(req.query, req.user);
+        this.ok(res, 'fetched deleted users', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  userStatistics():RequestHandler {
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.userStatistics(req.user);
+        this.ok(res, 'stats fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

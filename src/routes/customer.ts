@@ -163,4 +163,16 @@ router.get(
   customerCtrl.fetchComplaintDetails()
 );
 
+router.delete(
+  '/delete-customer/:customerId',
+  auth.verify(),
+  customerCtrl.deleteCustomer()
+);
+
+router.get(
+  '/fetch-deleted-customers',
+  auth.verify(),
+  customerCtrl.fetchDeletedCustomers()
+);
+
 export default router;

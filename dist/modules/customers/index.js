@@ -33,6 +33,7 @@ class Customer extends module_1.default {
         this.vehicle = props.vehicle;
         this.supplier = props.supplier;
         this.cylinder = props.cylinder;
+        this.deleteCustomer = props.deleteCustomer;
     }
     createCustomer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -139,6 +140,64 @@ class Customer extends module_1.default {
                     { path: 'products', model: 'products' }
                 ]);
                 return Promise.resolve(customer);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    deleteACustomer(customerId, user, reason) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let customer = yield this.customer.findById(customerId);
+                if (!customer) {
+                    throw new exceptions_1.BadInputFormatException('not found');
+                }
+                yield this.deleteCustomer.create({
+                    name: customer.name,
+                    email: customer.email,
+                    branch: user.branch,
+                    reason
+                });
+                yield customer.remove();
+                return Promise.resolve({
+                    message: 'customer deleted'
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchDeletedCustomers(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { search } = query;
+                let options = Object.assign({}, query);
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                let aggregate = this.deleteCustomer.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { name: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { reason: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }, { email: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                //@ts-ignore
+                const customers = yield this.deleteCustomer.aggregatePaginate(aggregate, options);
+                return Promise.resolve(customers);
             }
             catch (e) {
                 this.handleException(e);
@@ -553,7 +612,7 @@ class Customer extends module_1.default {
                 });
                 new mail_1.default().push({
                     subject: "Complaint",
-                    content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                    content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                     user: hod
                 });
                 return Promise.resolve(complaint);
@@ -621,7 +680,7 @@ class Customer extends module_1.default {
                             let approvalUser = yield this.user.findById(AO[0].id);
                             new mail_1.default().push({
                                 subject: "Complaint",
-                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                                 user: approvalUser
                             });
                             return Promise.resolve(complaint);
@@ -667,7 +726,7 @@ class Customer extends module_1.default {
                             let approvalUser = yield this.user.findById(AO[0].id);
                             new mail_1.default().push({
                                 subject: "Complaint",
-                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                                 user: approvalUser
                             });
                             return Promise.resolve(complaint);
@@ -708,7 +767,7 @@ class Customer extends module_1.default {
                             });
                             new mail_1.default().push({
                                 subject: "Complaint",
-                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                                 user: hod
                             });
                             return Promise.resolve(complaint);
@@ -754,7 +813,7 @@ class Customer extends module_1.default {
                             let approvalUser = yield this.user.findById(complaint.nextApprovalOfficer);
                             new mail_1.default().push({
                                 subject: "Complaint",
-                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                content: `A complaint requires your attention click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                                 user: approvalUser
                             });
                             return Promise.resolve(complaint);
@@ -801,7 +860,7 @@ class Customer extends module_1.default {
                             let approvalUser = yield this.user.findById(complaint.initiator);
                             new mail_1.default().push({
                                 subject: "Complaint",
-                                content: `Complaint approval complete. click to view ${static_1.default.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+                                content: `Complaint approval complete. click to view ${static_1.default.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
                                 user: approvalUser
                             });
                             return Promise.resolve(complaint);

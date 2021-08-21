@@ -17,7 +17,8 @@ const routeSupplier = new mongoose_1.Schema({
     departure: String,
     numberOfCylinders: Number,
     cylinders: [routeCylinderSchema],
-    status: String
+    status: String,
+    reportId: String
 });
 const routeCustomer = new mongoose_1.Schema({
     name: String,
@@ -25,7 +26,8 @@ const routeCustomer = new mongoose_1.Schema({
     departure: String,
     numberOfCylinders: Number,
     cylinders: [routeCylinderSchema],
-    status: String
+    status: String,
+    reportId: String
 });
 const routeSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
@@ -53,7 +55,14 @@ const routeSchema = new mongoose_1.Schema({
     security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     deleted: { type: Boolean, default: false },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    dateCompleted: { type: Date }
+    dateCompleted: { type: Date },
+    territory: { type: String },
+    mileageIn: { type: String },
+    mileageOut: { type: String },
+    fuelGiven: { type: String },
+    fuelsConsumed: { type: String },
+    timeOut: { type: String },
+    timeIn: { type: String }
 }, {
     timestamps: true
 });

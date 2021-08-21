@@ -58,6 +58,32 @@ class customerCtrl extends Ctrl{
     }
   }
 
+  deleteCustomer():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const { customerId } = req.params;
+        const { reason } = req.query;
+        //@ts-ignore
+        const data = await this.module.deleteACustomer(customerId, req.user, reason);
+        this.ok(res, data.message, data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchDeletedCustomers():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchDeletedCustomers(req.query, req.user);
+        this.ok(res, 'deleted customers', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   createOrder():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

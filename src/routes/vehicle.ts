@@ -57,6 +57,18 @@ router.post(
   vehicleCtrl.recordRoute()
 );
 
+router.post(
+  '/start-route/:routeId',
+  auth.verify(),
+  vehicleCtrl.startRoute()
+);
+
+router.get(
+  '/vehicle-performance/:vehicleId',
+  auth.verify(),
+  vehicleCtrl.fetchVehiclePerformance()
+);
+
 router.get(
   '/fetch-route-plan/:vehicleId',
   auth.verify(),

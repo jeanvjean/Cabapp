@@ -14,6 +14,9 @@ import { cylinderHolder, RegisteredCylinderInterface } from "../../models/regist
 import { generateToken, padLeft } from "../../util/token";
 import * as schedule from 'node-schedule'
 import { getTemplate } from '../../util/resolve-template';
+import { vehiclePerformance } from "../../models/pickupReport";
+import router from "../../routes/person";
+import { mongoose } from "../cylinder";
 
 export { schedule };
 
@@ -24,6 +27,7 @@ interface vehicleProps{
   activity:Model<ActivityLogInterface>,
   registerCylinder:Model<RegisteredCylinderInterface>
   branch:Model<BranchInterface>
+  routeReport:Model<vehiclePerformance>
 }
 
 type NewVehicle = {
@@ -81,6 +85,13 @@ interface InspectionData {
   approvalOfficer?:Maintainance['approvalOfficer']
 }
 
+interface startRouteInput {
+  departure?:string,
+  name?:string;
+  mileIn?:string,
+  mileOut?:string
+}
+
 type RouteRecordInput = {
   customer:PickupInterface['customer'],
   startDate:PickupInterface['startDate'],
@@ -111,7 +122,8 @@ type Parameters = {
   comment?:string
   driver?:string
   status?:string,
-  query?:QueryInterface
+  query?:QueryInterface,
+  mileageOut?:string
 }
 
 interface ApproveInspectionData {
@@ -132,6 +144,7 @@ class Vehicle extends Module{
   private activity:Model<ActivityLogInterface>
   private registerCylinder:Model<RegisteredCylinderInterface>
   private branch:Model<BranchInterface>
+  private routeReport:Model<vehiclePerformance>
 
   constructor(props:vehicleProps) {
     super()
@@ -141,6 +154,7 @@ class Vehicle extends Module{
     this.activity = props.activity
     this.registerCylinder = props.registerCylinder
     this.branch = props.branch
+    this.routeReport = props.routeReport
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -613,14 +627,82 @@ class Vehicle extends Module{
     }
   }
 
+  public async startRoute(routeId:string, data:startRouteInput):Promise<PickupInterface|undefined>{
+    try {
+      const plan = await this.pickup.findById(routeId).populate({
+        path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:'User'
+        }
+      });
+      if(!plan) {
+        throw new BadInputFormatException('No Routeplan found for this Id');
+      }
+      if(plan?.orderType == pickupType.SUPPLIER) {
+        if(plan.suppliers.length > 0){
+          for(let supplier of plan.suppliers) {
+            if(supplier.name == data.name) {
+              let payload = {
+                vehicle:plan.vehicle,
+                dateStarted:new Date().toISOString(),
+                departure:data.departure,
+                client:supplier.name,
+                destination:supplier.destination,
+                mileageIn:data.mileIn,
+                //@ts-ignore
+                driver:plan.vehicle.assignedTo.name,
+                routeInfo:plan._id
+              }
+              let routeReport = await this.routeReport.create(payload);
+              //@ts-ignore
+              supplier.status = RoutePlanStatus.PROGRESS;
+              supplier.reportId = routeReport._id;
+            }
+          }
+        }
+      }else if(plan.orderType == pickupType.CUSTOMER) {
+        if(plan.customers.length > 0) {
+          for(let customer of plan.customers) {
+            if(customer.name == data.name) {
+              let payload = {
+                vehicle:plan.vehicle,
+                dateStarted:new Date().toISOString(),
+                departure:data.departure,
+                destination:customer.destination,
+                client:customer.name,
+                //@ts-ignore
+                driver:plan.vehicle.assignedTo.name,
+                routeInfo:plan._id,
+                timeIn:new Date().getTime()
+              }
+              let routeReport = await this.routeReport.create(payload);
+              //@ts-ignore
+              customer.status = RoutePlanStatus.PROGRESS;
+              customer.reportId = routeReport._id
+            }
+          }
+        }
+      }
+      await plan.save();
+      return Promise.resolve(plan);
+    } catch(e){
+      this.handleException(e);
+    }
+  }
+
   public async markRouteAsComplete(data:Parameters):Promise<PickupInterface|undefined>{
     try {
       const { query } = data;
       //@ts-ignore
       const { search } = query;
-      console.log(search);
       const { status, routeId } = data;
       const pickup = await this.pickup.findById(routeId);
+      if(!pickup) {
+        throw new BadInputFormatException('Route Plan not found');
+      }
+      let routeReport = await this.routeReport.findOne({ routeInfo: pickup?._id });
+      if(!routeReport) {
+        throw new BadInputFormatException('this route has not been started and thus cannot be marked as complete');
+      }
       if(pickup?.orderType == pickupType.SUPPLIER && pickup.activity == RouteActivity.DELIVERY) {
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
@@ -638,7 +720,14 @@ class Vehicle extends Module{
                 }
               }
               //@ts-ignore
-              supplier.status = status
+              supplier.status = RoutePlanStatus.DONE;
+              let routeReport = await this.routeReport.findById(supplier.reportId);
+              //@ts-ignore
+              routeReport?.dateCompleted = new Date().toISOString();
+              //@ts-ignore
+              routeReport?.timeOut = new Date().getTime();
+              //@ts-ignore
+              routeReport?.mileageOut = data.mileageOut;
             }
           }
         }
@@ -659,7 +748,14 @@ class Vehicle extends Module{
                 }
               }
               //@ts-ignore
-              customer.status = status
+              customer.status = RoutePlanStatus.DONE;              
+              let routeReport = await this.routeReport.findById(customer.reportId);
+              //@ts-ignore
+              routeReport?.dateCompleted = new Date().toISOString();
+              //@ts-ignore
+              routeReport?.mileageOut = data.mileageOut;
+              //@ts-ignore
+              routeReport?.timeOut = new Date().getTime();
             }
           }
         }
@@ -680,20 +776,17 @@ class Vehicle extends Module{
                 }
               }
               //@ts-ignore
-              customer.status = status
+              customer.status = RoutePlanStatus.DONE              
+              let routeReport = await this.routeReport.findById(customer.reportId);
+              //@ts-ignore
+              routeReport?.dateCompleted = new Date().toISOString();
+              //@ts-ignore
+              routeReport?.mileageOut = data.mileageOut;
+              //@ts-ignore
+              routeReport?.timeOut = new Date().getTime();
             }
           }
         }
-        // for(var cylinder of pickup.cylinders) {
-        //   let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
-        //   //@ts-ignore
-        //   cyl?.holder = cylinderHolder.ASNL;
-        //   cyl?.tracking.push({
-        //     location:pickup.destination,
-        //     date:new Date().toISOString()
-        //   });
-        //   await cyl?.save();
-        // }
       }else if(pickup?.activity == RouteActivity.PICKUP && pickup?.orderType == pickupType.SUPPLIER){
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
@@ -711,16 +804,25 @@ class Vehicle extends Module{
                 }
               }
               //@ts-ignore
-              supplier.status = status
+              supplier.status = RoutePlanStatus.DONE
+              let routeReport = await this.routeReport.findById(supplier.reportId);
+              //@ts-ignore
+              routeReport?.dateCompleted = new Date().toISOString();
+              //@ts-ignore
+              routeReport?.mileageOut = data.mileageOut;
+              //@ts-ignore
+              routeReport?.timeOut = new Date().getTime();
             }
           }
         }
       }
       //@ts-ignore
-      // pickup?.dateCompleted = new Date().toISOString()
+      // pickup?.dateCompleted = new Date().toISOString();
+      // routeReport.dateCompleted = pickup.dateCompleted;
       // //@ts-ignore
       // pickup?.status = status;
       await pickup?.save();
+      await routeReport.save();
       return Promise.resolve(pickup as PickupInterface);
     } catch (e) {
       this.handleException(e);
@@ -732,6 +834,98 @@ class Vehicle extends Module{
       let user = await this.user.findById(userId);
       const logs = await this.activity.findOne({user:user?._id});
       return Promise.resolve(logs as ActivityLogInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchVehiclePerformance(query:QueryInterface, vehicleId:string):Promise<vehiclePerformance[]|undefined>{
+    try {
+      const ObjectId = mongoose.Types.ObjectId
+      const options = {
+        ...query
+      }
+      let { search, filter, fromDate, toDate } = query;
+      let aggregate;
+      let aggregate1 = this.routeReport.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {client:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {vehicle: ObjectId(vehicleId)}
+            ]
+          }
+        }
+      ]);
+      let aggregate2 = this.routeReport.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {client:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {vehicle: ObjectId(vehicleId)},
+              {dateCompleted: {'$gte':fromDate}}
+            ]
+          }
+        }
+      ]);
+      let aggregate3 = this.routeReport.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {client:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {vehicle: ObjectId(vehicleId)},
+              {dateCompleted: {"$gte":new Date().toISOString(),'$lte':toDate}}
+            ]
+          }
+        }
+      ]);
+      let aggregate4 = this.routeReport.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {client:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {vehicle: ObjectId(vehicleId)},
+              {dateCompleted: {"$gte":fromDate,'$lte':toDate}}
+            ]
+          }
+        }
+      ]);
+      if(fromDate.length && toDate.length) {
+        aggregate = aggregate4;
+      }else if(fromDate.length && !toDate.length) {
+        aggregate = aggregate2;
+      }else if(!fromDate.length && toDate.length){
+        aggregate= aggregate3
+      }else{
+        aggregate=aggregate1
+      }
+      //@ts-ignore
+      const performance = await this.routeReport.aggregatePaginate(aggregate, options);
+      return Promise.resolve(performance);
     } catch (e) {
       this.handleException(e);
     }

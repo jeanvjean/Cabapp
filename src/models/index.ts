@@ -30,6 +30,9 @@ import recieptFactory, { RecieptInterface } from './reciept';
 import activityLog, { ActivityLogInterface } from './logs';
 import condemnFactory, {CondemnCylinderInterface} from './condemnCylinder';
 import cylinderChangeFactory, {ChangeCylinderInterface} from './change-cylinder';
+import deletedUserFactory, { DeletedUser } from './removedUser';
+import pickUpReportFactory, { vehiclePerformance } from './pickupReport';
+import deleteCustomerFactory, { DeletedCustomer } from './deletedCustomers';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -84,5 +87,11 @@ export const Activity:Model<ActivityLogInterface> = activityLog(conn);
 export const Condemn:Model<CondemnCylinderInterface> = condemnFactory(conn);
 
 export const ChangeCylinder:Model<ChangeCylinderInterface> = cylinderChangeFactory(conn);
+
+export const DeletedUsers:Model<DeletedUser> = deletedUserFactory(conn);
+
+export const VehicleReport:Model<vehiclePerformance> = pickUpReportFactory(conn);
+
+export const DeletedCustomers:Model<DeletedCustomer> = deleteCustomerFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

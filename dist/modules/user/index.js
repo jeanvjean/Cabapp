@@ -20,11 +20,13 @@ const static_1 = require("../../configs/static");
 const bcryptjs_1 = require("bcryptjs");
 const resolve_template_1 = require("../../util/resolve-template");
 const logs_1 = require("../../util/logs");
+const cylinder_1 = require("../cylinder");
 exports.signTokenKey = "loremipsumdolorsitemet";
 class User extends module_1.default {
     constructor(props) {
         super();
         this.user = props.user;
+        this.deleted = props.deleted;
     }
     register(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -200,18 +202,80 @@ class User extends module_1.default {
     branchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                let { search, filter, verified, active } = query;
+                console.log(verified, active);
                 let options = Object.assign({}, query);
-                //@ts-ignore
-                let users;
-                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
-                    //@ts-ignore
-                    users = yield this.user.paginate({ branch: user.branch, $or: [{ role: search }, { subrole: search }] }, options);
+                let aggregate;
+                let aggregate1 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate2 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { isVerified: !!verified }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate3 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) },
+                                { deactivated: !!active }
+                            ]
+                        }
+                    }
+                ]);
+                if (verified && !active) {
+                    aggregate = aggregate2;
+                }
+                else if (active && !verified) {
+                    aggregate = aggregate3;
                 }
                 else {
-                    //@ts-ignore
-                    users = yield this.user.paginate({ branch: user.branch }, options);
+                    aggregate = aggregate1;
                 }
+                //@ts-ignore
+                let users;
+                //@ts-ignore
+                users = yield this.user.aggregatePaginate(aggregate, options);
                 return Promise.resolve(users);
             }
             catch (e) {
@@ -457,7 +521,7 @@ class User extends module_1.default {
                 if (!suspendUser) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
-                let updatedUser = yield this.user.findByIdAndUpdate(suspendUser._id, { deactivated: data.suspend }, { new: true });
+                let updatedUser = yield this.user.findByIdAndUpdate(suspendUser._id, { deactivated: data.suspend, suspensionReason: data.reason }, { new: true });
                 //@ts-ignore
                 let message = updatedUser.deactivated ? `suspended` : 're-activated';
                 const html = yield resolve_template_1.getTemplate('suspend', {
@@ -492,16 +556,83 @@ class User extends module_1.default {
             }
         });
     }
-    deleteUser(id) {
+    deleteUser(id, reason) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.user.findById(id);
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
+                yield this.deleted.create({
+                    name: user.name,
+                    email: user.email,
+                    role: user.subrole,
+                    department: user.role,
+                    branch: user.branch,
+                    reason
+                });
                 yield this.user.findByIdAndDelete(id);
                 return Promise.resolve({
                     message: 'User deleted'
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchDeletedUsers(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search } = query;
+                let options = Object.assign({}, query);
+                let aggregate = this.deleted.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { email: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
+                                            } },
+                                        { name: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
+                                            } },
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
+                                            } },
+                                        { department: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
+                                            } }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                //@ts-ignore
+                const users = yield this.deleted.aggregatePaginate(aggregate, options);
+                return Promise.resolve(users);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    userStatistics(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const deletedUsers = yield this.deleted.find({ branch: user.branch });
+                const users = yield this.user.find({ branch: user.branch });
+                const activeUsers = users.filter(user => user.isVerified);
+                const inactiveUsers = users.filter(user => !user.isVerified);
+                return Promise.resolve({
+                    deletedUsers: deletedUsers.length || 0,
+                    activeUsers: activeUsers.length || 0,
+                    inactiveUsers: inactiveUsers.length || 0,
+                    totalUsers: users.length || 0
                 });
             }
             catch (e) {

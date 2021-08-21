@@ -73,7 +73,8 @@ exports.userSchema = new mongoose_1.Schema({
             name: String,
             sub_permissions: [String]
         }],
-    image: { type: String }
+    image: { type: String },
+    suspensionReason: String
 }, {
     timestamps: true
 });

@@ -10,10 +10,14 @@ import Environment from '../../configs/static';
 import { compareSync, genSaltSync, hash } from 'bcryptjs';
 import { getTemplate } from '../../util/resolve-template';
 import { createLog } from '../../util/logs';
+import { DeletedUser } from '../../models/removedUser';
+import { mongoose } from '../cylinder';
+import { user } from '..';
 export const signTokenKey = "loremipsumdolorsitemet";
 
 interface UserConstructorInterface {
   user: Model<UserInterface>
+  deleted:Model<DeletedUser>
 }
 
 interface NewUserInterface {
@@ -26,7 +30,8 @@ interface NewUserInterface {
 
 type SuspendUserInput = {
   userId:string,
-  suspend:boolean
+  suspend:boolean,
+  reason?:string
 }
 
 type suspendUserResponse = {
@@ -110,10 +115,12 @@ export interface InviteUserInterfaceRespone{
 
 class User extends Module {
   private user: Model<UserInterface>
+  private deleted:Model<DeletedUser>
 
   constructor(props: UserConstructorInterface){
     super();
     this.user = props.user;
+    this.deleted = props.deleted
   }
 
   public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
@@ -283,19 +290,83 @@ class User extends Module {
 
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
-      const { search } = query;
+      const ObjectId = mongoose.Types.ObjectId;
+      let { search, filter, verified, active } = query;      
+      console.log(verified, active)
       let options = {
         ...query
       }
+      let aggregate;
+      let aggregate1 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+
+      let aggregate2 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())},
+              {isVerified: !!verified}
+            ]
+          }
+        }
+      ]);
+
+      let aggregate3 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())},
+              {deactivated: !!active}
+            ]
+          }
+        }
+      ]);
+
+      if(verified && !active) {
+        aggregate = aggregate2;
+      }else if(active && !verified){
+        aggregate = aggregate3;
+      }else {
+        aggregate = aggregate1;
+      }
       //@ts-ignore
       let users;
-      if(search?.length !== undefined){
-        //@ts-ignore
-        users = await this.user.paginate({branch:user.branch,$or:[{role:search}, {subrole:search}]},options);
-      }else {
-        //@ts-ignore
-        users = await this.user.paginate({branch:user.branch},options);
-      }
+      //@ts-ignore
+      users = await this.user.aggregatePaginate(aggregate, options);
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
@@ -341,7 +412,6 @@ class User extends Module {
     } catch (error) {
       this.handleException(error);
     }
-
   }
 
   public async fetchUser(data: TokenPayloadInterface): Promise<UserInterface>{
@@ -543,7 +613,7 @@ class User extends Module {
       if(!suspendUser) {
         throw new BadInputFormatException('user not found');
       }
-      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:data.suspend}, {new:true});
+      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:data.suspend, suspensionReason:data.reason}, {new:true});
       //@ts-ignore
       let message = updatedUser.deactivated? `suspended` : 're-activated';
       const html = await getTemplate('suspend', {
@@ -575,17 +645,82 @@ class User extends Module {
     }
   }
 
-  public async deleteUser(id:string):Promise<any>{
+  public async deleteUser(id:string, reason:string):Promise<any>{
     try{
       const user = await this.user.findById(id);
       if(!user) {
         throw new BadInputFormatException('user not found');
       }
+      await this.deleted.create({
+        name:user.name,
+        email:user.email,
+        role:user.subrole,
+        department:user.role,
+        branch:user.branch,
+        reason
+      });
       await this.user.findByIdAndDelete(id);
       return Promise.resolve({
         message:'User deleted'
-      })
+      });
     }catch(e){
+      this.handleException(e);
+    }
+  }
+
+  public async fetchDeletedUsers(query:QueryInterface, user:UserInterface):Promise<DeletedUser[]|undefined>{
+    try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search } = query;
+      let options = {
+        ...query
+      }
+      let aggregate = this.deleted.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {email:{
+                    $regex: search?.toLowerCase || ""
+                  }},
+                  {name:{
+                    $regex: search?.toLowerCase || ""
+                  }},
+                  {role:{
+                    $regex: search?.toLowerCase || ""
+                  }},
+                  {department:{
+                    $regex: search?.toLowerCase || ""
+                  }}
+                ]
+              },
+              {branch: ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      //@ts-ignore
+      const users = await this.deleted.aggregatePaginate(aggregate, options);
+      return Promise.resolve(users);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async userStatistics(user:UserInterface):Promise<any>{
+    try {
+      const deletedUsers = await this.deleted.find({branch:user.branch});
+      const users = await this.user.find({branch:user.branch});
+      const activeUsers = users.filter(user=> user.isVerified);
+      const inactiveUsers = users.filter(user=> !user.isVerified)
+      return Promise.resolve({
+        deletedUsers:deletedUsers.length || 0,
+        activeUsers:activeUsers.length || 0,
+        inactiveUsers:inactiveUsers.length || 0,
+        totalUsers: users.length || 0
+      });
+    } catch (e) {
       this.handleException(e);
     }
   }

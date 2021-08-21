@@ -22,7 +22,8 @@ export interface customerPickupInterface{
   departure:string
   numberOfCylinders:number,
   cylinders:RouteCylinderInterface[]
-  status:RoutePlanStatus
+  status:RoutePlanStatus,
+  reportId:string
 }
 
 export interface supplierPickupInterface{
@@ -31,7 +32,8 @@ export interface supplierPickupInterface{
   departure:string
   numberOfCylinders:number,
   cylinders:RouteCylinderInterface[]
-  status:RoutePlanStatus
+  status:RoutePlanStatus,  
+  reportId:string
 }
 
 
@@ -62,6 +64,13 @@ export interface PickupInterface extends Document{
   branch:Schema.Types.ObjectId
   dateCompleted:Date
   ocnNo:string
+  territory:string
+  mileageIn:string
+  mileageOut:string
+  fuelGiven:string
+  fuelsConsumed:string
+  timeOut:string
+  timeIn:string
 }
 
 const routeCylinderSchema = new Schema({
@@ -77,7 +86,8 @@ const routeSupplier = new Schema({
   departure:String,
   numberOfCylinders:Number,
   cylinders:[routeCylinderSchema],
-  status:String
+  status:String,  
+  reportId:String
 });
 
 const routeCustomer = new Schema({
@@ -86,7 +96,8 @@ const routeCustomer = new Schema({
   departure:String,
   numberOfCylinders:Number,
   cylinders:[routeCylinderSchema],
-  status:String
+  status:String,
+  reportId:String
 });
 
 const routeSchema = new Schema({
@@ -115,7 +126,14 @@ const routeSchema = new Schema({
   security:{type:Schema.Types.ObjectId, ref:'User'},
   deleted:{type:Boolean, default:false},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  dateCompleted:{type:Date}
+  dateCompleted:{type:Date},
+  territory:{type:String},
+  mileageIn:{type:String},
+  mileageOut:{type:String},
+  fuelGiven:{type:String},
+  fuelsConsumed:{type:String},
+  timeOut:{type:String},
+  timeIn:{type:String}
 },{
   timestamps:true
 });

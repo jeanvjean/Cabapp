@@ -19,7 +19,11 @@ export interface QueryInterface {
   fromBranch?:string
   range?: string[];
   out?:string
-  instock?:string
+  instock?:string,
+  fromDate:string,
+  toDate:string,
+  verified:boolean
+  active:boolean
 }
 
 /**

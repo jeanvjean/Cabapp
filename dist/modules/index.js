@@ -22,7 +22,8 @@ exports.person = new person_1.default({
     model: index_1.Person
 });
 exports.user = new user_1.default({
-    user: index_1.User
+    user: index_1.User,
+    deleted: index_1.DeletedUsers
 });
 exports.cylinder = new cylinder_1.default({
     cylinder: index_1.Cylinder,
@@ -51,7 +52,8 @@ exports.vehicle = new vehicle_1.default({
     user: index_1.User,
     activity: index_1.Activity,
     registerCylinder: index_1.RegisteredCylinder,
-    branch: index_1.Branch
+    branch: index_1.Branch,
+    routeReport: index_1.VehicleReport
 });
 exports.driver = new driver_1.default({
     driver: index_1.User
@@ -66,7 +68,8 @@ exports.customer = new customers_1.default({
     product: index_1.Product,
     vehicle: index_1.Vehicle,
     supplier: index_1.Supplier,
-    cylinder: index_1.Cylinder
+    cylinder: index_1.Cylinder,
+    deleteCustomer: index_1.DeletedCustomers
 });
 exports.sales = new sales_1.default({
     sales: index_1.SalesReq,

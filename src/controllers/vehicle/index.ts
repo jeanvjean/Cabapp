@@ -108,6 +108,29 @@ class VehicleController extends Ctrl{
     }
   }
 
+  startRoute():RequestHandler {
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.startRoute(req.params.routeId, req.body);
+        this.ok(res, 'route plan started', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchVehiclePerformance():RequestHandler {
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchVehiclePerformance(req.query, req.params.vehicleId);
+        this.ok(res, 'vehicle history', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchRoutePlan():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

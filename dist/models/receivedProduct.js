@@ -37,7 +37,8 @@ exports.inventorySchema = new mongoose_1.Schema({
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     grnNo: { type: String },
     grInit: { type: Number },
-    requestDepartment: { type: String }
+    requestDepartment: { type: String },
+    approved: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

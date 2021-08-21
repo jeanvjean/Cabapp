@@ -83,8 +83,13 @@ class ProductCtrl extends Ctrl{
   disburseProducts():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
+        let mrnDocument
+        if(req.files) {
+          //@ts-ignore
+          mrnDocument = await uploadFile(req.files.mrnDocument, 'inventory/mrn-docs');
+        }
         //@ts-ignore
-        const disbursement = await this.module.disburseProduct(req.body, req.user);
+        const disbursement = await this.module.disburseProduct({...req.body, mrnDocument}, req.user);
         this.ok(res, 'done', disbursement);
       } catch (e) {
         this.handleError(e, req, res);

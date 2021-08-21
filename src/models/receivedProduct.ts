@@ -26,7 +26,8 @@ export interface InventoryInterface extends Document{
   direction:productDirection,
   branch:Schema.Types.ObjectId
   grnNo:string
-  grInit:number
+  grInit:number,
+  approved:boolean
 }
 
 export interface ReceivedProduct {
@@ -73,7 +74,8 @@ export const inventorySchema = new Schema({
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   grnNo:{type:String},
   grInit:{type:Number},
-  requestDepartment:{type:String}
+  requestDepartment:{type:String},
+  approved:{type:Boolean, default:false}
 },{
   timestamps:true
 });

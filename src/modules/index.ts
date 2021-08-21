@@ -24,7 +24,10 @@ import {
   Reciept,
   Activity,
   Condemn,
-  ChangeCylinder
+  ChangeCylinder,
+  VehicleReport,
+  DeletedUsers,
+  DeletedCustomers
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -49,7 +52,8 @@ export const person = new PersonModule({
 });
 
 export const user = new UserModule({
-  user: User
+  user: User,
+  deleted:DeletedUsers
 });
 
 export const cylinder = new CylinderModule({
@@ -81,7 +85,8 @@ export const vehicle = new VehicleModule({
   user:User,
   activity:Activity,
   registerCylinder:RegisteredCylinder,
-  branch:Branch
+  branch:Branch,
+  routeReport:VehicleReport
 });
 
 export const driver = new DriverModule({
@@ -98,7 +103,8 @@ export const customer = new CustomerModule({
   product:Product,
   vehicle:Vehicle,
   supplier:Supplier,
-  cylinder:Cylinder
+  cylinder:Cylinder,
+  deleteCustomer:DeletedCustomers
 });
 
 export const sales = new SalesModule({

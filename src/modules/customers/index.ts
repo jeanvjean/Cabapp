@@ -17,6 +17,7 @@ import { ProductInterface } from "../../models/inventory";
 import { VehicleInterface } from "../../models/vehicle";
 import { SupplierInterface } from "../../models/supplier";
 import { CylinderInterface } from "../../models/cylinder";
+import { DeletedCustomer } from "../../models/deletedCustomers";
 
 
 
@@ -31,6 +32,7 @@ export interface CustomerInterfaceProp{
   vehicle:Model<VehicleInterface>
   supplier:Model<SupplierInterface>
   cylinder:Model<CylinderInterface>
+  deleteCustomer:Model<DeletedCustomer>
 }
 
 interface newCustomerInterface {
@@ -131,6 +133,7 @@ class Customer extends Module{
   private supplier:Model<SupplierInterface>
   private vehicle:Model<VehicleInterface>
   private cylinder:Model<CylinderInterface>
+  private deleteCustomer:Model<DeletedCustomer>
 
   constructor(props:CustomerInterfaceProp){
     super()
@@ -144,6 +147,7 @@ class Customer extends Module{
     this.vehicle = props.vehicle
     this.supplier = props.supplier
     this.cylinder = props.cylinder
+    this.deleteCustomer = props.deleteCustomer
   }
 
   public async createCustomer(data:newCustomerInterface, user:UserInterface):Promise<CustomerInterface|undefined> {
@@ -254,6 +258,62 @@ class Customer extends Module{
       return Promise.resolve(customer as CustomerInterface);
     } catch (e) {
       this.handleException(e)
+    }
+  }
+
+  public async deleteACustomer(customerId:string, user:UserInterface, reason:string):Promise<any>{
+    try {
+      let customer = await this.customer.findById(customerId)
+      if(!customer) {
+        throw new BadInputFormatException('not found');
+      }
+      await this.deleteCustomer.create({
+        name:customer.name,
+        email:customer.email,
+        branch:user.branch,
+        reason
+      });
+      await customer.remove();
+      return Promise.resolve({
+        message:'customer deleted'
+      });
+    } catch (e) {
+      this.handleException(e)
+    }
+  }
+
+  public async fetchDeletedCustomers(query:QueryInterface, user:UserInterface):Promise<DeletedCustomer[]|undefined>{
+    try {
+      const { search } = query;
+      let options = {
+        ...query
+      }
+      const ObjectId = mongoose.Types.ObjectId
+      let aggregate = this.deleteCustomer.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {name:{
+                    $regex: search?.toLowerCase() || ""
+                  }},{reason:{
+                    $regex: search?.toLowerCase() || ""
+                  }},{email:{
+                    $regex: search?.toLowerCase() || ""
+                  }}
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+      //@ts-ignore
+      const customers = await this.deleteCustomer.aggregatePaginate(aggregate, options);
+      return Promise.resolve(customers)
+    } catch (e) {
+      this.handleException(e);
     }
   }
 
@@ -656,7 +716,7 @@ class Customer extends Module{
       });
       new Notify().push({
         subject: "Complaint",
-        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+        content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
         user: hod
       });
       return Promise.resolve(complaint);
@@ -722,7 +782,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -767,7 +827,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(AO[0].id);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);
@@ -807,7 +867,7 @@ class Customer extends Module{
             });
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
               user: hod
             });
             return Promise.resolve(complaint);
@@ -853,7 +913,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(complaint.nextApprovalOfficer);
             new Notify().push({
               subject: "Complaint",
-              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `A complaint requires your attention click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint)
@@ -899,7 +959,7 @@ class Customer extends Module{
             let approvalUser = await this.user.findById(complaint.initiator);
             new Notify().push({
               subject: "Complaint",
-              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/fetch-complaints/${complaint._id}`,
+              content: `Complaint approval complete. click to view ${env.FRONTEND_URL}/customer/fetch-complaints/${complaint._id}`,
               user: approvalUser
             });
             return Promise.resolve(complaint);

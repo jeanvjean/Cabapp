@@ -88,8 +88,13 @@ class ProductCtrl extends ctrl_1.default {
     disburseProducts() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
+                let mrnDocument;
+                if (req.files) {
+                    //@ts-ignore
+                    mrnDocument = yield driver_1.uploadFile(req.files.mrnDocument, 'inventory/mrn-docs');
+                }
                 //@ts-ignore
-                const disbursement = yield this.module.disburseProduct(req.body, req.user);
+                const disbursement = yield this.module.disburseProduct(Object.assign(Object.assign({}, req.body), { mrnDocument }), req.user);
                 this.ok(res, 'done', disbursement);
             }
             catch (e) {

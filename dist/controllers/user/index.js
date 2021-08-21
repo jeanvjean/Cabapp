@@ -142,7 +142,7 @@ class UserController extends ctrl_1.default {
                 const { userId } = req.params;
                 let { suspend } = req.query;
                 //@ts-ignore
-                const data = yield this.module.suspendUser({ userId, suspend }, req.user);
+                const data = yield this.module.suspendUser({ userId, suspend, reason }, req.user);
                 this.ok(res, data === null || data === void 0 ? void 0 : data.message, data === null || data === void 0 ? void 0 : data.user);
             }
             catch (e) {
@@ -187,8 +187,34 @@ class UserController extends ctrl_1.default {
     deleteUser() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.deleteUser(req.params.userId);
+                const { reason } = req.query;
+                //@ts-ignore
+                const data = yield this.module.deleteUser(req.params.userId, reason);
                 this.ok(res, 'Deleted', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchDeletedUsers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchDeletedUsers(req.query, req.user);
+                this.ok(res, 'fetched deleted users', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    userStatistics() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.userStatistics(req.user);
+                this.ok(res, 'stats fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

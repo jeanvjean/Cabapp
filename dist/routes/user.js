@@ -20,9 +20,11 @@ router.post('/request-password-reset', controllers_1.userCtrl.requestPasswordRes
 router.post('/reset-password', user_1.Validator.validatePassword(), val.validate(), controllers_1.userCtrl.resetPassword());
 router.post('/change-password', user_1.Validator.validatePasswordChange(), val.validate(), auth.verify(), controllers_1.userCtrl.changePassword());
 router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());
+router.get('/fetch-deleted-users', auth.verify(), controllers_1.userCtrl.fetchDeletedUsers());
 router.get('/fetch-permissions', controllers_1.userCtrl.fetchPermissions());
 router.get('/register-token/:token', auth.verify(), controllers_1.userCtrl.updateToken());
 router.get('/suspend/:userId', auth.verify(), controllers_1.userCtrl.suspendUser());
 router.get('/fetch-all-users', auth.verify(), controllers_1.userCtrl.fetchallUsers());
+router.get('/user-stats', auth.verify(), controllers_1.userCtrl.userStatistics());
 exports.default = router;
 //# sourceMappingURL=user.js.map

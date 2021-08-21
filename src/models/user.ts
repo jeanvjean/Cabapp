@@ -77,6 +77,8 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
 
     image:string
 
+    suspensionReason:string
+
     /**
      * @param isVerified account verified Boolean
      */
@@ -139,7 +141,8 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
       name:String,
       sub_permissions:[String]
     }],
-    image:{type:String}
+    image:{type:String},
+    suspensionReason:String
  },{
    timestamps:true
  });

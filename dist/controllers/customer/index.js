@@ -63,6 +63,32 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    deleteCustomer() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { customerId } = req.params;
+                const { reason } = req.query;
+                //@ts-ignore
+                const data = yield this.module.deleteACustomer(customerId, req.user, reason);
+                this.ok(res, data.message, data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchDeletedCustomers() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchDeletedCustomers(req.query, req.user);
+                this.ok(res, 'deleted customers', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     createOrder() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

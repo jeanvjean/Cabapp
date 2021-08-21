@@ -112,6 +112,29 @@ class VehicleController extends ctrl_1.default {
             }
         });
     }
+    startRoute() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.startRoute(req.params.routeId, req.body);
+                this.ok(res, 'route plan started', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchVehiclePerformance() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchVehiclePerformance(req.query, req.params.vehicleId);
+                this.ok(res, 'vehicle history', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     fetchRoutePlan() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

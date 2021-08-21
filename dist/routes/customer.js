@@ -33,5 +33,7 @@ router.get('/mark-filled-cylinder/:customerId', auth.verify(), controllers_1.cus
 router.get('/fetch-filled-walkincylinders', auth.verify(), controllers_1.customerCtrl.fetchFilledCustomerCylinders());
 router.get('/fetch-all-customers', auth.verify(), controllers_1.customerCtrl.fetchallCustomers());
 router.get('/fetch-complaint-details/:complaintId', auth.verify(), controllers_1.customerCtrl.fetchComplaintDetails());
+router.delete('/delete-customer/:customerId', auth.verify(), controllers_1.customerCtrl.deleteCustomer());
+router.get('/fetch-deleted-customers', auth.verify(), controllers_1.customerCtrl.fetchDeletedCustomers());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

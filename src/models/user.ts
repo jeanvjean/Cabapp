@@ -77,7 +77,9 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
 
     image:string
 
-    suspensionReason:string
+    suspensionReason?:string
+
+    deactivated:boolean
 
     /**
      * @param isVerified account verified Boolean

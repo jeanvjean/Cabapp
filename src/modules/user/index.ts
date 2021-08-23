@@ -613,7 +613,16 @@ class User extends Module {
       if(!suspendUser) {
         throw new BadInputFormatException('user not found');
       }
-      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:data.suspend, suspensionReason:data.reason}, {new:true});
+      let suspend;
+      if(suspendUser.deactivated) {
+        suspend = false;
+      }else{
+        suspend = true
+      }
+      // suspendUser.deactivated = data.suspend;
+      // suspendUser.suspensionReason = data.reason;
+      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:suspend, suspensionReason:data?.reason}, {new:true});
+      console.log(updatedUser)
       //@ts-ignore
       let message = updatedUser.deactivated? `suspended` : 're-activated';
       const html = await getTemplate('suspend', {
@@ -629,7 +638,7 @@ class User extends Module {
       new Notify().sendMail(mailLoad);
       return Promise.resolve({
         message,
-        user
+        user:updatedUser as UserInterface
       });
     }catch(e){
       this.handleException(e);

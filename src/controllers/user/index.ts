@@ -140,7 +140,7 @@ class UserController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try{
         const { userId } = req.params;
-        let { suspend } = req.query;
+        let { suspend, reason } = req.query;
         //@ts-ignore
         const data = await this.module.suspendUser({userId, suspend, reason}, req.user);
         this.ok(res, data?.message, data?.user);

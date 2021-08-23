@@ -521,7 +521,17 @@ class User extends module_1.default {
                 if (!suspendUser) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
-                let updatedUser = yield this.user.findByIdAndUpdate(suspendUser._id, { deactivated: data.suspend, suspensionReason: data.reason }, { new: true });
+                let suspend;
+                if (suspendUser.deactivated) {
+                    suspend = false;
+                }
+                else {
+                    suspend = true;
+                }
+                // suspendUser.deactivated = data.suspend;
+                // suspendUser.suspensionReason = data.reason;
+                let updatedUser = yield this.user.findByIdAndUpdate(suspendUser._id, { deactivated: suspend, suspensionReason: data === null || data === void 0 ? void 0 : data.reason }, { new: true });
+                console.log(updatedUser);
                 //@ts-ignore
                 let message = updatedUser.deactivated ? `suspended` : 're-activated';
                 const html = yield resolve_template_1.getTemplate('suspend', {
@@ -537,7 +547,7 @@ class User extends module_1.default {
                 new mail_1.default().sendMail(mailLoad);
                 return Promise.resolve({
                     message,
-                    user
+                    user: updatedUser
                 });
             }
             catch (e) {

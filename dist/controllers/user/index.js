@@ -140,7 +140,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { userId } = req.params;
-                let { suspend } = req.query;
+                let { suspend, reason } = req.query;
                 //@ts-ignore
                 const data = yield this.module.suspendUser({ userId, suspend, reason }, req.user);
                 this.ok(res, data === null || data === void 0 ? void 0 : data.message, data === null || data === void 0 ? void 0 : data.user);

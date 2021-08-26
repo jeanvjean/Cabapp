@@ -189,7 +189,7 @@ class UserController extends Ctrl{
       try {
         const { reason } = req.query;
         //@ts-ignore
-        const data = await this.module.deleteUser(req.params.userId, reason);
+        const data = await this.module.deleteUser(req.params.userId, reason, req.user);
         this.ok(res,'Deleted',data);
       } catch (e) {
         this.handleError(e, req, res);

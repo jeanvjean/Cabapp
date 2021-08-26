@@ -635,6 +635,22 @@ class User extends Module {
         subject:'Account suspension',
         email:suspendUser.email,
       }
+      await createLog({
+        user:user._id,
+        activities:{
+          title:'Suspended User',
+          activity:`You ${message} ${updatedUser?.name}`,
+          time: new Date().toISOString()
+        }
+      });
+      await createLog({
+        user:updatedUser?._id,
+        activities:{
+          title:'Suspended User',
+          activity:`You were ${message} by ${user?.name}`,
+          time: new Date().toISOString()
+        }
+      });
       new Notify().sendMail(mailLoad);
       return Promise.resolve({
         message,
@@ -654,7 +670,7 @@ class User extends Module {
     }
   }
 
-  public async deleteUser(id:string, reason:string):Promise<any>{
+  public async deleteUser(id:string, reason:string, userInfo:UserInterface):Promise<any>{
     try{
       const user = await this.user.findById(id);
       if(!user) {
@@ -667,6 +683,14 @@ class User extends Module {
         department:user.role,
         branch:user.branch,
         reason
+      });
+      await createLog({
+        user:userInfo?._id,
+        activities:{
+          title:'Deleted User',
+          activity:`You deleted ${user?.name}`,
+          time: new Date().toISOString()
+        }
       });
       await this.user.findByIdAndDelete(id);
       return Promise.resolve({
@@ -741,6 +765,14 @@ class User extends Module {
       if(!user){
         throw new BadInputFormatException('user not found');
       }
+      await createLog({
+        user:user?._id,
+        activities:{
+          title:'Suspended User',
+          activity:`You have subscribed to notifications`,
+          time: new Date().toISOString()
+        }
+      });
       return Promise.resolve(user)
     } catch (e) {
       this.handleException(e);

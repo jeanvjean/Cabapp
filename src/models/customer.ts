@@ -8,10 +8,15 @@ import {
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
+export enum CustomerType {
+  WALKIN="walk-in",
+  REGULAR="regular"
+}
+
 export interface CustomerInterface extends Document{
   _id:Schema.Types.ObjectId
   name:string
-  customerType:string
+  customerType:CustomerType
   modeOfService:string
   nickName:string
   address:string
@@ -31,7 +36,7 @@ export interface CustomerInterface extends Document{
 
 export const customerSchema = new Schema({
   name:{type:String, lowercase:true},
-  customerType:{type:String, lowercase:true},
+  customerType:{type:String, enum:Object.values(CustomerType), default:CustomerType.REGULAR, lowercase:true},
   modeOfeService:String,
   nickName:{type:String, lowercase:true},
   address:String,

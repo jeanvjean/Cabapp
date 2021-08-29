@@ -8,6 +8,7 @@ import { ApprovalOfficers, ApprovalOfficerSchema, commentInterface, commentSchem
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import { Priority } from './emptyCylinder';
 
 enum productionStatus {
   PENDING="pending",
@@ -40,6 +41,7 @@ export interface ProductionScheduleInterface extends Document{
   approvalStage:stagesOfApproval
   branch:Schema.Types.ObjectId
   produced?:boolean
+  priority?:Priority
 }
 
 const productionCylinderSchema = new Schema({
@@ -55,7 +57,7 @@ const productionSchema = new Schema({
   ecrNo:{type:String},
   shift:{type:String},
   date:{type:Date},
-  cylinders:{type:[productionCylinderSchema]},
+  cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
   quantityToFill:{type:Number},
   volumeToFill:{type:String},
   totalQuantity:{type:Number},
@@ -66,7 +68,8 @@ const productionSchema = new Schema({
   status:{type:String, enum:Object.values(TransferStatus), derfault:TransferStatus.PENDING},
   approvalStage:{type:String},
   comments:{type:[commentSchema]},
-  produced:{type:Boolean, default:false}
+  produced:{type:Boolean, default:false},
+  priority:{type:String, enum:Object.values(Priority), default:Priority.REGULAR}
 });
 
 productionSchema.plugin(mongoosePaginate)

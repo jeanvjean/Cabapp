@@ -27,7 +27,8 @@ import {
   ChangeCylinder,
   VehicleReport,
   DeletedUsers,
-  DeletedCustomers
+  DeletedCustomers,
+  EmptyCylinder
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -42,6 +43,7 @@ import ProductionModule from './production';
 import PurchaseOrderModule from './purchaseOrder';
 import OcnModule from './ocn';
 import AccountModule from './account';
+import EmptyCylinderModule from "./ecr";
 
 /**
  * @category Modules
@@ -133,4 +135,13 @@ export const ocn = new OcnModule({
 
 export const account = new AccountModule({
   account:Reciept
+});
+
+export const emptyCylinder = new EmptyCylinderModule({
+  emptyCylinder:EmptyCylinder,
+  user:User,
+  cylinder:RegisteredCylinder,
+  customer:Customer,
+  ocn:OCN,
+  branch:Branch
 });

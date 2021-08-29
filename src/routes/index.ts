@@ -13,6 +13,7 @@ import productionRouter from './production';
 import purchaseRouter from './purchase';
 import accountRouter from './account';
 import ocnRouter from './ocn';
+import ecrRouter from './ecr';
 const uploader = new Uploader();
 
 const router: expressRouter = expressRouter();
@@ -33,6 +34,7 @@ router.use('/production', productionRouter);
 router.use('/purchase', purchaseRouter);
 router.use('/account', accountRouter);
 router.use('/ocn', ocnRouter);
+router.use('/ecr', ecrRouter);
 
 router.post('/upload', uploader.fileUpload());
 

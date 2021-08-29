@@ -29,7 +29,7 @@ export interface OutgoingCylinderInterface extends Document {
     customer:Schema.Types.ObjectId,
     cylinderType:string
     date:Date
-    cylinders:ocnCylinders[]
+    cylinders:Schema.Types.ObjectId[]
     totalQty:number
     totalVol:string
     totalAmount:number
@@ -59,7 +59,7 @@ const ocnSchema = new Schema({
     customer:{type:Schema.Types.ObjectId, ref:'customer'},
     cylinderType:{type:String},
     date:{type:Date},
-    cylinders:{type:[ocnCylinderSchema]},
+    cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
     totalQty:{type:Number},
     totalVol:{type:String},
     totalAmount:{type:Number},

@@ -25,7 +25,7 @@ const ocnSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     cylinderType: { type: String },
     date: { type: Date },
-    cylinders: { type: [ocnCylinderSchema] },
+    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
     totalQty: { type: Number },
     totalVol: { type: String },
     totalAmount: { type: Number },

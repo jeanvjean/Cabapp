@@ -21,7 +21,7 @@ export interface SalesRequisitionInterface extends Document{
   customerName:string
   ecrNo:string
   date:Date
-  cylinders:saleCylinder[]
+  cylinders:Schema.Types.ObjectId[]
   initiator:Schema.Types.ObjectId
   approvalStage:stagesOfApproval
   tracking:ApprovalStage[]
@@ -44,7 +44,7 @@ const salesReqSchema = new Schema({
   customerName:{type:String},
   ecrNo:{type:String},
   date:{type:Date},
-  cylinders:[saleCylinderSchema],
+  cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   tracking:[approvalStageShema],
   initiator:{type:Schema.Types.ObjectId, ref:'users'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.START},

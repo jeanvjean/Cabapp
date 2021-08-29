@@ -30,7 +30,7 @@ export interface RecieptInterface extends Document{
     customer:string
     cylinderType:string
     type:receiptType
-    cylinders?:saleCylinder[],
+    cylinders?:Schema.Types.ObjectId[],
     products?:ReceivedProduct[]
     invoiceNo:string
     invInit:number
@@ -49,7 +49,7 @@ const recieptSchema = new Schema({
     cylinderType:{type:String},
     recieptType:{type:String, enum:Object.values(receiptType)},
     customerType:{type:String, enum:Object.values(CustomerType)},
-    cylinders:{type:[saleCylinderSchema]},
+    cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
     products:{type:[productRecievedSchema]},
     invoiceNo:{type:String},
     invInit:{type:Number},

@@ -4,6 +4,7 @@ const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
+const emptyCylinder_1 = require("./emptyCylinder");
 var productionStatus;
 (function (productionStatus) {
     productionStatus["PENDING"] = "pending";
@@ -21,7 +22,7 @@ const productionSchema = new mongoose_1.Schema({
     ecrNo: { type: String },
     shift: { type: String },
     date: { type: Date },
-    cylinders: { type: [productionCylinderSchema] },
+    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
     quantityToFill: { type: Number },
     volumeToFill: { type: String },
     totalQuantity: { type: Number },
@@ -32,7 +33,8 @@ const productionSchema = new mongoose_1.Schema({
     status: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), derfault: transferCylinder_1.TransferStatus.PENDING },
     approvalStage: { type: String },
     comments: { type: [transferCylinder_1.commentSchema] },
-    produced: { type: Boolean, default: false }
+    produced: { type: Boolean, default: false },
+    priority: { type: String, enum: Object.values(emptyCylinder_1.Priority), default: emptyCylinder_1.Priority.REGULAR }
 });
 productionSchema.plugin(mongoosePaginate);
 productionSchema.plugin(aggregatePaginate);

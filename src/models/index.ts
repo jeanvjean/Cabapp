@@ -33,6 +33,7 @@ import cylinderChangeFactory, {ChangeCylinderInterface} from './change-cylinder'
 import deletedUserFactory, { DeletedUser } from './removedUser';
 import pickUpReportFactory, { vehiclePerformance } from './pickupReport';
 import deleteCustomerFactory, { DeletedCustomer } from './deletedCustomers';
+import ecrFactory, { EmptyCylinderInterface } from "./emptyCylinder";
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -93,5 +94,7 @@ export const DeletedUsers:Model<DeletedUser> = deletedUserFactory(conn);
 export const VehicleReport:Model<vehiclePerformance> = pickUpReportFactory(conn);
 
 export const DeletedCustomers:Model<DeletedCustomer> = deleteCustomerFactory(conn);
+
+export const EmptyCylinder:Model<EmptyCylinderInterface> = ecrFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

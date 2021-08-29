@@ -189,7 +189,7 @@ class UserController extends ctrl_1.default {
             try {
                 const { reason } = req.query;
                 //@ts-ignore
-                const data = yield this.module.deleteUser(req.params.userId, reason);
+                const data = yield this.module.deleteUser(req.params.userId, reason, req.user);
                 this.ok(res, 'Deleted', data);
             }
             catch (e) {

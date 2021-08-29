@@ -544,6 +544,22 @@ class User extends module_1.default {
                     subject: 'Account suspension',
                     email: suspendUser.email,
                 };
+                yield logs_1.createLog({
+                    user: user._id,
+                    activities: {
+                        title: 'Suspended User',
+                        activity: `You ${message} ${updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.name}`,
+                        time: new Date().toISOString()
+                    }
+                });
+                yield logs_1.createLog({
+                    user: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser._id,
+                    activities: {
+                        title: 'Suspended User',
+                        activity: `You were ${message} by ${user === null || user === void 0 ? void 0 : user.name}`,
+                        time: new Date().toISOString()
+                    }
+                });
                 new mail_1.default().sendMail(mailLoad);
                 return Promise.resolve({
                     message,
@@ -566,7 +582,7 @@ class User extends module_1.default {
             }
         });
     }
-    deleteUser(id, reason) {
+    deleteUser(id, reason, userInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const user = yield this.user.findById(id);
@@ -580,6 +596,14 @@ class User extends module_1.default {
                     department: user.role,
                     branch: user.branch,
                     reason
+                });
+                yield logs_1.createLog({
+                    user: userInfo === null || userInfo === void 0 ? void 0 : userInfo._id,
+                    activities: {
+                        title: 'Deleted User',
+                        activity: `You deleted ${user === null || user === void 0 ? void 0 : user.name}`,
+                        time: new Date().toISOString()
+                    }
                 });
                 yield this.user.findByIdAndDelete(id);
                 return Promise.resolve({
@@ -658,6 +682,14 @@ class User extends module_1.default {
                 if (!user) {
                     throw new exceptions_1.BadInputFormatException('user not found');
                 }
+                yield logs_1.createLog({
+                    user: user === null || user === void 0 ? void 0 : user._id,
+                    activities: {
+                        title: 'Suspended User',
+                        activity: `You have subscribed to notifications`,
+                        time: new Date().toISOString()
+                    }
+                });
                 return Promise.resolve(user);
             }
             catch (e) {

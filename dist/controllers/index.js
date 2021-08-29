@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ctrl = exports.accountCtrl = exports.ocnController = exports.purchaseCtrl = exports.productionCtrl = exports.salesCtrl = exports.customerCtrl = exports.driverCtrl = exports.vehicleCtrl = exports.productCtrl = exports.cylinderCtrl = exports.userCtrl = exports.personCtrl = void 0;
+exports.ctrl = exports.ecrCtrl = exports.accountCtrl = exports.ocnController = exports.purchaseCtrl = exports.productionCtrl = exports.salesCtrl = exports.customerCtrl = exports.driverCtrl = exports.vehicleCtrl = exports.productCtrl = exports.cylinderCtrl = exports.userCtrl = exports.personCtrl = void 0;
 const modules_1 = require("../modules");
 const cylinder_1 = require("./cylinder");
 const ctrl_1 = require("./ctrl");
@@ -15,6 +15,7 @@ const production_1 = require("./production");
 const purchaseOrder_1 = require("./purchaseOrder");
 const ocn_1 = require("./ocn");
 const account_1 = require("./account");
+const ecr_1 = require("./ecr");
 exports.personCtrl = new person_1.default(modules_1.person);
 exports.userCtrl = new user_1.default(modules_1.user);
 exports.cylinderCtrl = new cylinder_1.default(modules_1.cylinder);
@@ -27,5 +28,6 @@ exports.productionCtrl = new production_1.default(modules_1.production);
 exports.purchaseCtrl = new purchaseOrder_1.default(modules_1.purchase);
 exports.ocnController = new ocn_1.default(modules_1.ocn);
 exports.accountCtrl = new account_1.default(modules_1.account);
+exports.ecrCtrl = new ecr_1.default(modules_1.emptyCylinder);
 exports.ctrl = new ctrl_1.default();
 //# sourceMappingURL=index.js.map

@@ -5,7 +5,6 @@ const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const receivedProduct_1 = require("./receivedProduct");
-const sales_requisition_1 = require("./sales-requisition");
 var receiptType;
 (function (receiptType) {
     receiptType["PRODUCT"] = "product";
@@ -27,7 +26,7 @@ const recieptSchema = new mongoose_1.Schema({
     cylinderType: { type: String },
     recieptType: { type: String, enum: Object.values(receiptType) },
     customerType: { type: String, enum: Object.values(CustomerType) },
-    cylinders: { type: [sales_requisition_1.saleCylinderSchema] },
+    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
     products: { type: [receivedProduct_1.productRecievedSchema] },
     invoiceNo: { type: String },
     invInit: { type: Number },

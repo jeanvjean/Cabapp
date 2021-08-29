@@ -407,53 +407,6 @@ class OutGoingCylinder extends Module{
               let branch = await this.branch.findById(o.branch);
               o.branch = branch;
             }
-            // let startStage = outgoing.filter(outgoing=> {
-            //     if(outgoing.approvalStage == stagesOfApproval.START) {
-            //       for(let tofficer of outgoing.approvalOfficers) {
-            //         if(`${tofficer.id}` == `${user._id}`){
-            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-            //             return outgoing
-            //           }
-            //         }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
-            //           return outgoing
-            //         }
-            //       }
-            //     }
-            //   });
-            //   let stage1 = outgoing.filter(outgoing=>{
-            //     if(outgoing.approvalStage == stagesOfApproval.STAGE1) {
-            //       for(let tofficer of outgoing.approvalOfficers) {
-            //         if(`${tofficer.id}` == `${user._id}`){
-            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-            //             return outgoing
-            //           }
-            //         }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
-            //           return outgoing
-            //         }
-            //       }
-            //     }
-            //   });
-              // let stage2 = outgoing.filter(outgoing=>{
-              //   if(outgoing.approvalStage == stagesOfApproval.STAGE2) {
-              //     for(let tofficer of outgoing.approvalOfficers) {
-              //       if(`${tofficer.id}` == `${user._id}`){
-              //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-              //           return outgoing
-              //         }
-              //       }else if(`${outgoing.nextApprovalOfficer}` == `${user._id}`){
-              //         return outgoing
-              //       }
-              //     }
-              //   }
-              // });
-              // let pendingApprovals;
-              // if(user.subrole == 'superadmin'){
-              //   pendingApprovals = stage2;
-              // }else if(user.subrole == 'head of department'){
-              //   pendingApprovals = stage1
-              // }else {
-              //   pendingApprovals = startStage;
-              // }
               return Promise.resolve(outgoing)
         } catch (e) {
             this.handleException(e);
@@ -541,7 +494,8 @@ class OutGoingCylinder extends Module{
                 {path:'customer', model:'customer' },
                 {path:'approvalOfficers', model:'User'},
                 {path:'nextApprovalOfficer', model:'User'},
-                {path:'branch', model:'branches'}
+                {path:'branch', model:'branches'},
+                {path:"cylinders", model:"registered-cylinders"}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

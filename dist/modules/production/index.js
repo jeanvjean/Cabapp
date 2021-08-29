@@ -337,54 +337,7 @@ class ProductionSchedule extends module_1.default {
                     branch: user.branch,
                     nextApprovalOfficer: user._id,
                     status: transferCylinder_1.TransferStatus.PENDING
-                }, Object.assign({}, query));
-                // let startStage = productions.filter(production=> {
-                //   if(production.approvalStage == stagesOfApproval.START) {
-                //     for(let tofficer of production.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //           return production
-                //         }
-                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-                //         return production
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage1 = productions.filter(production=>{
-                //   if(production.approvalStage == stagesOfApproval.STAGE1) {
-                //     for(let tofficer of production.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //           return production
-                //         }
-                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-                //         return production
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage2 = productions.filter(production=>{
-                //   if(production.approvalStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of production.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return production
-                //         }
-                //       }else if(`${production.nextApprovalOfficer}` == `${user._id}`){
-                //         return production
-                //       }
-                //     }
-                //   }
-                // });
-                // let pendingApprovals;
-                // if(user.subrole == 'superadmin'){
-                //   pendingApprovals = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   pendingApprovals = stage1
-                // }else {
-                //   pendingApprovals = startStage;
-                // }
+                }, Object.assign(Object.assign({}, query), { sort: { priority: 1 } }));
                 return Promise.resolve(productions);
             }
             catch (e) {
@@ -398,7 +351,8 @@ class ProductionSchedule extends module_1.default {
                 const production = yield this.production.findById(productionId).populate([
                     { path: 'customer', model: 'customer' },
                     { path: 'initiator', model: 'User' },
-                    { path: 'nextApprovalOfficer', model: 'User' }
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: "cylinders", model: "registered-cylinders" }
                 ]);
                 if (!production) {
                     throw new exceptions_1.BadInputFormatException('Production schedule not found');

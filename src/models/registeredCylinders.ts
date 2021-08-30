@@ -26,6 +26,8 @@ export enum cylinderHolder {
 
 export interface CylinderTracking{
   location:string,
+  name:string
+  heldBy:string
   date:string
 }
 
@@ -144,6 +146,8 @@ export interface RegisteredCylinderInterface extends Document{
 
 const trackingSchema = new Schema({
   location:String,
+  heldBy:String,
+  name:String,
   date:Date
 });
 

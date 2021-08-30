@@ -16,5 +16,8 @@ router.get('/returned-cylinder/:cylinderId', auth.verify(), controllers_1.salesC
 router.get('/sales-cylinder-transactions', auth.verify(), controllers_1.salesCtrl.salesReportCylinders());
 router.get('/sales-purchase-order', auth.verify(), controllers_1.salesCtrl.purchaseOrderReport());
 router.get('/sales-order-report', auth.verify(), controllers_1.salesCtrl.salesOrderReport());
+router.get('/download-purchase-report', auth.verify(), controllers_1.salesCtrl.purchaseReportDowndload());
+router.get('/download-salesOrderReport', auth.verify(), controllers_1.salesCtrl.salesOrderDownload());
+router.get('/download-cylinderTransactions', auth.verify(), controllers_1.salesCtrl.salesReportCylindersDownload());
 exports.default = router;
 //# sourceMappingURL=sales.js.map

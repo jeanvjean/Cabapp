@@ -104,7 +104,7 @@ class SalesCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.salesOrderTransaction(req.user);
+                const data = yield this.module.salesOrderTransaction(req.query, req.user);
                 this.ok(res, 'sales order report', data);
             }
             catch (e) {
@@ -116,8 +116,44 @@ class SalesCtrl extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.purchaseOrderReport(req.user);
+                const data = yield this.module.purchaseOrderReport(req.query, req.user);
                 this.ok(res, 'purchase order report', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    purchaseReportDowndload() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.purchaseReportDowndload(req.user);
+                this.ok(res, 'download data', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    salesOrderDownload() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.salesOrderDownload(req.user);
+                this.ok(res, 'sales order report', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    salesReportCylindersDownload() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.cylinderTransactionsDownload(req.user);
+                this.ok(res, 'cylinder report fetched', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

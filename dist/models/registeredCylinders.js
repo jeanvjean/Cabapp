@@ -22,6 +22,8 @@ var cylinderHolder;
 })(cylinderHolder = exports.cylinderHolder || (exports.cylinderHolder = {}));
 const trackingSchema = new mongoose_1.Schema({
     location: String,
+    heldBy: String,
+    name: String,
     date: Date
 });
 exports.registerCylinderSchema = new mongoose_1.Schema({

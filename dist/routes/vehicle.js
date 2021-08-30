@@ -23,5 +23,6 @@ router.get('/remove-driver/:vehicleId/:driver', auth.verify(), controllers_1.veh
 router.post('/mark-route-as-complete/:vehicleId/:routeId', auth.verify(), controllers_1.vehicleCtrl.markRouteAsComplete());
 router.get('/fetch-activityLogs/:userId', auth.verify(), controllers_1.vehicleCtrl.fetchActivityLogs());
 router.get('/fetch-all-vehicle', auth.verify(), controllers_1.vehicleCtrl.fetchallVehicles());
+router.get('/download-routePlan/:vehicleId', controllers_1.vehicleCtrl.vehicleRoutePlan());
 exports.default = router;
 //# sourceMappingURL=vehicle.js.map

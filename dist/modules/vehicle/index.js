@@ -520,6 +520,20 @@ class Vehicle extends module_1.default {
             }
         });
     }
+    vehicleRoutePlan(vehicleId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                //@ts-ignore
+                const vr = yield this.pickup.find({ vehicle: vehicleId });
+                ;
+                return Promise.resolve(vr);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     startRoute(routeId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -610,6 +624,8 @@ class Vehicle extends module_1.default {
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            heldBy: "supplier",
+                                            name: supplier.name,
                                             location: supplier.destination,
                                             date: new Date().toISOString()
                                         });
@@ -639,6 +655,8 @@ class Vehicle extends module_1.default {
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            heldBy: "customer",
+                                            name: customer.name,
                                             location: customer.destination,
                                             date: new Date().toISOString()
                                         });
@@ -668,6 +686,8 @@ class Vehicle extends module_1.default {
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            heldBy: "asnl",
+                                            name: "ASNL",
                                             location: customer.destination,
                                             date: new Date().toISOString()
                                         });
@@ -697,6 +717,8 @@ class Vehicle extends module_1.default {
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                            heldBy: "supplier",
+                                            name: supplier.name,
                                             location: supplier.destination,
                                             date: new Date().toISOString()
                                         });

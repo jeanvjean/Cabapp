@@ -345,53 +345,6 @@ class Sale extends module_1.default {
                     branch: user.branch,
                     nextApprovalOfficer: user._id
                 }, Object.assign({}, query));
-                // let startStage = sales.filter(transfer=> {
-                //   if(transfer.approvalStage == stagesOfApproval.START) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage1 = sales.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage2 = sales.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let pendingApprovals;
-                // if(user.subrole == 'superadmin'){
-                //   pendingApprovals = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   pendingApprovals = stage1
-                // }else {
-                //   pendingApprovals = startStage;
-                // }
                 return Promise.resolve(sales);
             }
             catch (e) {
@@ -430,15 +383,53 @@ class Sale extends module_1.default {
             }
         });
     }
+    cylinderTransactionsDownload(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // const options = {
+                //   ...query,
+                //   populate:[
+                //     {path:'assignedTo', model:'customer'}
+                //   ]
+                // }
+                //@ts-ignore
+                const cylinders = yield this.cylinder.find({ branch: user.branch, cylinderType: registeredCylinders_1.TypesOfCylinders.ASSIGNED });
+                return Promise.resolve(cylinders);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
     salesOrderTransaction(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const salesOrders = yield this.sales.paginate({ branch: user.branch }, Object.assign({}, query));
+                const salesOrders = yield this.sales.find({ branch: user.branch }, Object.assign({}, query));
                 //@ts-ignore
-                const completed = yield this.sales.paginate({ branch: user.branch, status: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                const completed = yield this.sales.find({ branch: user.branch, status: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
                 //@ts-ignore
-                const in_progress = yield this.sales.paginate({ branch: user.branch, status: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
+                const in_progress = yield this.sales.find({ branch: user.branch, status: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
+                return Promise.resolve({
+                    orders: salesOrders,
+                    completed,
+                    pending: in_progress
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    salesOrderDownload(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const salesOrders = yield this.sales.find({ branch: user.branch });
+                //@ts-ignore
+                const completed = yield this.sales.find({ branch: user.branch, status: transferCylinder_1.TransferStatus.COMPLETED });
+                //@ts-ignore
+                const in_progress = yield this.sales.find({ branch: user.branch, status: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
                     orders: salesOrders,
                     completed,
@@ -459,6 +450,26 @@ class Sale extends module_1.default {
                 const completed = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
                 //@ts-ignore
                 const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
+                return Promise.resolve({
+                    orders: purchaseOrder,
+                    completed,
+                    pending
+                });
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    purchaseReportDowndload(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const purchaseOrder = yield this.purchase.find({ branch: user.branch });
+                //@ts-ignore
+                const completed = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED });
+                //@ts-ignore
+                const pending = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
                     orders: purchaseOrder,
                     completed,

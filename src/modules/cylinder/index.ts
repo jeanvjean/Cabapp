@@ -2302,34 +2302,6 @@ class Cylinder extends Module {
               }
             }
           }
-          // else if(transfer.type == TransferType.DIVISION){
-          //   for(let cylinder of cylinders) {
-          //     let cyl = await this.registerCylinder.findById(cylinder);
-          //     //@ts-ignore
-          //     // cyl?.cylinderType = TypesOfCylinders.BUFFER;
-          //     //@ts-ignore
-          //     cyl?.department = transfer.toDepartment;
-
-          //     await cyl?.save();
-          //   }
-          // }else if(transfer.type == TransferType.CHANGEGAS){
-          //   for(let cylinder of cylinders) {
-          //     let cyl = await this.registerCylinder.findById(cylinder);
-          //     //@ts-ignore
-          //     cyl?.gasType = transfer.gasType;
-
-          //     await cyl?.save();
-          //   }
-          // }else if(transfer.type == TransferType.BRANCH){
-          //   for(let cylinder of cylinders) {
-          //     let cyl = await this.registerCylinder.findById(cylinder);
-          //     //@ts-ignore
-          //     cyl?.toBranch = transfer.toBranch;
-          //     //@ts-ignore
-          //     cyl?.holder = cylinderHolder.BRANCH
-          //     await cyl?.save();
-          //   }
-          // }
           await transfer.save();
           return Promise.resolve({
             message:"Approved",
@@ -2616,57 +2588,6 @@ class Cylinder extends Module {
           }
           trans.cylinders = cylinders;
        }
-
-      //@ts-ignore
-      // let startStage = transfers.docs.filter(transfer=> {
-      //   if(transfer.approvalStage == stagesOfApproval.START) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      //@ts-ignore
-      // let stage1 = transfers.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      //@ts-ignore
-      // let stage2 = transfers.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let pendingApprovals;
-      // if(user.subrole == 'superadmin'){
-      //   pendingApprovals = stage2;
-      // }else if(user.subrole == 'head of department'){
-      //   pendingApprovals = stage1
-      // }else {
-      //   pendingApprovals = startStage;
-      // }
       return Promise.resolve(transfers)
     } catch (e) {
       this.handleException(e);

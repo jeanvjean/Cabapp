@@ -634,6 +634,17 @@ class Vehicle extends Module{
     }
   }
 
+  public async vehicleRoutePlan(vehicleId:string):Promise<PickupInterface[]|undefined>{
+    try {
+      const ObjectId = mongoose.Types.ObjectId;
+      //@ts-ignore
+      const vr = await this.pickup.find({vehicle:vehicleId});;
+      return Promise.resolve(vr);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
   public async startRoute(routeId:string, data:startRouteInput):Promise<PickupInterface|undefined>{
     try {
       const plan = await this.pickup.findById(routeId).populate({
@@ -720,6 +731,8 @@ class Vehicle extends Module{
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.SUPPLIER;
                     cyl?.tracking.push({
+                      heldBy:"supplier",
+                      name:supplier.name,
                       location:supplier.destination,
                       date:new Date().toISOString()
                     });
@@ -748,6 +761,8 @@ class Vehicle extends Module{
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.CUSTOMER;
                     cyl?.tracking.push({
+                      heldBy:"customer",
+                      name:customer.name,
                       location:customer.destination,
                       date:new Date().toISOString()
                     });
@@ -776,6 +791,8 @@ class Vehicle extends Module{
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.ASNL;
                     cyl?.tracking.push({
+                      heldBy:"asnl",
+                      name:"ASNL",
                       location:customer.destination,
                       date:new Date().toISOString()
                     });
@@ -804,6 +821,8 @@ class Vehicle extends Module{
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.SUPPLIER;
                     cyl?.tracking.push({
+                      heldBy:"supplier",
+                      name:supplier.name,
                       location:supplier.destination,
                       date:new Date().toISOString()
                     });

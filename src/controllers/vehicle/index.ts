@@ -230,6 +230,17 @@ class VehicleController extends Ctrl{
     }
   }
 
+  vehicleRoutePlan():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.vehicleRoutePlan(req.params.vehicleId);
+        this.ok(res, 'download', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export default VehicleController;

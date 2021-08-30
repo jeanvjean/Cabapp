@@ -111,4 +111,9 @@ router.get(
   vehicleCtrl.fetchallVehicles()
 );
 
+router.get(
+  '/download-routePlan/:vehicleId',
+  vehicleCtrl.vehicleRoutePlan()
+);
+
 export default router;

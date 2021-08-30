@@ -65,4 +65,22 @@ router.get(
   salesCtrl.salesOrderReport()
 );
 
+router.get(
+  '/download-purchase-report',
+  auth.verify(),
+  salesCtrl.purchaseReportDowndload()
+);
+
+router.get(
+  '/download-salesOrderReport',
+  auth.verify(),
+  salesCtrl.salesOrderDownload()
+);
+
+router.get(
+  '/download-cylinderTransactions',
+  auth.verify(),
+  salesCtrl.salesReportCylindersDownload()
+);
+
 export default router;

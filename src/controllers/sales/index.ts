@@ -98,7 +98,7 @@ class SalesCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.salesOrderTransaction(req.user);
+        const data = await this.module.salesOrderTransaction(req.query, req.user);
         this.ok(res, 'sales order report', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -110,8 +110,44 @@ class SalesCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.purchaseOrderReport(req.user);
+        const data = await this.module.purchaseOrderReport(req.query, req.user);
         this.ok(res, 'purchase order report', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  purchaseReportDowndload():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.purchaseReportDowndload(req.user);
+        this.ok(res, 'download data', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  salesOrderDownload():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.salesOrderDownload(req.user);
+        this.ok(res, 'sales order report', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  salesReportCylindersDownload():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.cylinderTransactionsDownload(req.user);
+        this.ok(res, 'cylinder report fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

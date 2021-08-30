@@ -111,6 +111,13 @@ type RouteRecordInput = {
   vehicle:PickupInterface['vehicle'],
   recievedBy:PickupInterface['recievedBy'],
   security:PickupInterface['security'],
+  territory:PickupInterface['territory']
+  mileageIn:PickupInterface['mileageIn']
+  mileageOut:PickupInterface['mileageOut']
+  fuelGiven:PickupInterface['fuelGiven']
+  fuelsConsumed:PickupInterface['fuelsConsumed']
+  timeOut:PickupInterface['timeOut']
+  timeIn:PickupInterface['timeIn']
 }
 
 

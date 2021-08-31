@@ -93,24 +93,22 @@ interface startRouteInput {
 }
 
 type RouteRecordInput = {
-  customer:PickupInterface['customer'],
-  startDate:PickupInterface['startDate'],
-  endDate?:PickupInterface['endDate'],
-  activity:PickupInterface['activity'],
-  destination:PickupInterface['destination'],
-  departure:PickupInterface['departure'],
-  status:PickupInterface['status'],
-  ecrNo:PickupInterface['ecrNo'],
-  icnNo:PickupInterface['icnNo'],
+  customers:PickupInterface['customers']
+  suppliers:PickupInterface['suppliers']
+  startDate:PickupInterface['startDate']
+  endDate?:PickupInterface['endDate']
+  activity:PickupInterface['activity']
+  status:PickupInterface['customer']
+  orderType:PickupInterface['orderType']
+  modeOfService:PickupInterface['modeOfService']
+  date:PickupInterface['date']
+  vehicle:PickupInterface['vehicle']
+  recievedBy:PickupInterface['recievedBy']
+  security:PickupInterface['security']
+  deleted:PickupInterface['deleted']
+  branch:PickupInterface['branch']
+  dateCompleted:PickupInterface['dateCompleted']
   ocnNo:PickupInterface['ocnNo']
-  orderType:PickupInterface['orderType'],
-  modeOfService:PickupInterface['modeOfService'],
-  date:PickupInterface['date'],
-  serialNo:number
-  cylinders:PickupInterface['cylinders'],
-  vehicle:PickupInterface['vehicle'],
-  recievedBy:PickupInterface['recievedBy'],
-  security:PickupInterface['security'],
   territory:PickupInterface['territory']
   mileageIn:PickupInterface['mileageIn']
   mileageOut:PickupInterface['mileageOut']
@@ -727,7 +725,7 @@ class Vehicle extends Module{
             if(supplier.name == `${search}`) {
               if(supplier.cylinders.length > 0) {
                 for(let cylinder of supplier.cylinders) {
-                    let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+                    let cyl = await this.registerCylinder.findById(cylinder);
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.SUPPLIER;
                     cyl?.tracking.push({
@@ -757,7 +755,7 @@ class Vehicle extends Module{
             if(customer.name == `${search}`) {
               if(customer.cylinders.length > 0) {
                 for(let cylinder of customer.cylinders) {
-                    let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+                    let cyl = await this.registerCylinder.findById(cylinder);
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.CUSTOMER;
                     cyl?.tracking.push({
@@ -787,7 +785,7 @@ class Vehicle extends Module{
             if(customer.name == `${search}`) {
               if(customer.cylinders.length > 0) {
                 for(let cylinder of customer.cylinders) {
-                    let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+                    let cyl = await this.registerCylinder.findById(cylinder);
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.ASNL;
                     cyl?.tracking.push({
@@ -817,7 +815,7 @@ class Vehicle extends Module{
             if(supplier.name == `${search}`) {
               if(supplier.cylinders.length > 0) {
                 for(let cylinder of supplier.cylinders) {
-                    let cyl = await this.registerCylinder.findOne({cylinderNumber:cylinder.cylinderNo});
+                    let cyl = await this.registerCylinder.findById(cylinder);
                     //@ts-ignore
                     cyl?.holder = cylinderHolder.SUPPLIER;
                     cyl?.tracking.push({

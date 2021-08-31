@@ -494,11 +494,20 @@ class Product extends module_1.default {
             }
         });
     }
-    approveGrn(grnId, user) {
+    approveGrn(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let grn = yield this.inventory.findById(grnId);
+                let grn = yield this.inventory.findById(data.grnId);
                 if (grn) {
+                    if (data.status == 'rejected') {
+                        let initiator = yield this.user.findById(grn.inspectingOfficer);
+                        yield new mail_1.default().push({
+                            subject: "GRN approval",
+                            content: `Your Grn approval request was rejected, click the link to view. ${static_1.default.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+                            user: initiator
+                        });
+                        throw new exceptions_1.BadInputFormatException('Not approved');
+                    }
                     let products = grn.products;
                     if (grn.direction == receivedProduct_1.productDirection.IN) {
                         for (let product of products) {
@@ -545,6 +554,12 @@ class Product extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('no grn found with this id');
                 }
                 grn.approved = true;
+                let initiator = yield this.user.findById(grn.inspectingOfficer);
+                yield new mail_1.default().push({
+                    subject: "GRN approval",
+                    content: `Your Grn approval request was rejected, click the link to view. ${static_1.default.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+                    user: initiator
+                });
                 yield grn.save();
                 return Promise.resolve(grn);
             }
@@ -661,11 +676,6 @@ class Product extends module_1.default {
                     status: transferCylinder_1.ApprovalStatus.APPROVED,
                     approvalOfficer: user._id
                 };
-                // "quantityReleased": 15,  pass this when the approvalStage is "start"
-                // "comment": "i cannot give them ok"  pass this when the approvalStage is is on any level
-                // "nextApprovalOfficer": "60f023245cd89a8a231d46f1" pass this when the requestStage is "stage2",
-                // "releasedBy":"60a6d988ee959d2e8c9f02fb", pass this when the approvalStage is "start"
-                // "releasedTo":"60a7af1460653206389e9bcd",pass this when the approvalStage is "start"
                 disbursement.tracking.push(track);
                 disbursement.approvalOfficers.push({
                     name: user.name,

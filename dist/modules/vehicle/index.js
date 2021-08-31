@@ -620,7 +620,7 @@ class Vehicle extends module_1.default {
                             if (supplier.name == `${search}`) {
                                 if (supplier.cylinders.length > 0) {
                                     for (let cylinder of supplier.cylinders) {
-                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
@@ -651,7 +651,7 @@ class Vehicle extends module_1.default {
                             if (customer.name == `${search}`) {
                                 if (customer.cylinders.length > 0) {
                                     for (let cylinder of customer.cylinders) {
-                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
@@ -682,7 +682,7 @@ class Vehicle extends module_1.default {
                             if (customer.name == `${search}`) {
                                 if (customer.cylinders.length > 0) {
                                     for (let cylinder of customer.cylinders) {
-                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
@@ -713,7 +713,7 @@ class Vehicle extends module_1.default {
                             if (supplier.name == `${search}`) {
                                 if (supplier.cylinders.length > 0) {
                                     for (let cylinder of supplier.cylinders) {
-                                        let cyl = yield this.registerCylinder.findOne({ cylinderNumber: cylinder.cylinderNo });
+                                        let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({

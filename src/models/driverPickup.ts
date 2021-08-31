@@ -21,7 +21,7 @@ export interface customerPickupInterface{
   destination:string
   departure:string
   numberOfCylinders:number,
-  cylinders:RouteCylinderInterface[]
+  cylinders:Schema.Types.ObjectId[]
   status:RoutePlanStatus,
   reportId:string
 }
@@ -31,7 +31,7 @@ export interface supplierPickupInterface{
   destination:string
   departure:string
   numberOfCylinders:number,
-  cylinders:RouteCylinderInterface[]
+  cylinders:Schema.Types.ObjectId[]
   status:RoutePlanStatus,  
   reportId:string
 }
@@ -85,7 +85,7 @@ const routeSupplier = new Schema({
   destination:String,
   departure:String,
   numberOfCylinders:Number,
-  cylinders:[routeCylinderSchema],
+  cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   status:String,  
   reportId:String
 });
@@ -95,7 +95,7 @@ const routeCustomer = new Schema({
   destination:String,
   departure:String,
   numberOfCylinders:Number,
-  cylinders:[routeCylinderSchema],
+  cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   status:String,
   reportId:String
 });

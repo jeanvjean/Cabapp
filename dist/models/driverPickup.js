@@ -16,7 +16,7 @@ const routeSupplier = new mongoose_1.Schema({
     destination: String,
     departure: String,
     numberOfCylinders: Number,
-    cylinders: [routeCylinderSchema],
+    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
     status: String,
     reportId: String
 });
@@ -25,7 +25,7 @@ const routeCustomer = new mongoose_1.Schema({
     destination: String,
     departure: String,
     numberOfCylinders: Number,
-    cylinders: [routeCylinderSchema],
+    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
     status: String,
     reportId: String
 });

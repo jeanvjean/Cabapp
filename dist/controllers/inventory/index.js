@@ -85,6 +85,18 @@ class ProductCtrl extends ctrl_1.default {
             }
         });
     }
+    approveGrn() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.approveGrn(req.body, reg.user);
+                this.ok(res, 'done', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
     disburseProducts() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

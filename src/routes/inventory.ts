@@ -183,4 +183,10 @@ router.get(
   productCtrl.grnStats()
 );
 
+router.post(
+  '/approve-grn',
+  auth.verify(),
+  productCtrl.approveGrn()
+);
+
 export default router;

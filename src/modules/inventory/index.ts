@@ -66,6 +66,11 @@ interface updateProduct {
   supplier?:ProductInterface['supplier']
 }
 
+interface ApproveGrnInput {
+  grnId:string
+  status:string
+}
+
 type NewSupplierInterface = {
   name:SupplierInterface['name']
   location:SupplierInterface['location']
@@ -586,10 +591,20 @@ class Product extends Module{
     }
   }
 
-  public async approveGrn(grnId:string, user:UserInterface):Promise<InventoryInterface|undefined>{
+  public async approveGrn(data:ApproveGrnInput, user:UserInterface):Promise<InventoryInterface|undefined>{
     try {
-      let grn = await this.inventory.findById(grnId);
+      let grn = await this.inventory.findById(data.grnId);
+      
       if(grn) {
+        if(data.status == 'rejected'){
+          let initiator = await this.user.findById(grn.inspectingOfficer);
+          await new Notify().push({
+            subject: "GRN approval",
+            content: `Your Grn approval request was rejected, click the link to view. ${Environment.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+            user: initiator
+          });
+          throw new BadInputFormatException('Not approved');
+        }
         let products = grn.products;
       if(grn.direction == productDirection.IN){
         for(let product of products) {
@@ -634,6 +649,12 @@ class Product extends Module{
         throw new BadInputFormatException('no grn found with this id');
       }
       grn.approved = true;
+      let initiator = await this.user.findById(grn.inspectingOfficer);
+        await new Notify().push({
+          subject: "GRN approval",
+          content: `Your Grn approval request was rejected, click the link to view. ${Environment.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+          user: initiator
+        });
     await grn.save();
       return Promise.resolve(grn);
     } catch (e) {
@@ -749,14 +770,6 @@ class Product extends Module{
         status:ApprovalStatus.APPROVED,
         approvalOfficer:user._id
       }
-
-    // "quantityReleased": 15,  pass this when the approvalStage is "start"
-    // "comment": "i cannot give them ok"  pass this when the approvalStage is is on any level
-
-    // "nextApprovalOfficer": "60f023245cd89a8a231d46f1" pass this when the requestStage is "stage2",
-    // "releasedBy":"60a6d988ee959d2e8c9f02fb", pass this when the approvalStage is "start"
-    // "releasedTo":"60a7af1460653206389e9bcd",pass this when the approvalStage is "start"
-
       disbursement.tracking.push(track);
       disbursement.approvalOfficers.push({
         name:user.name,

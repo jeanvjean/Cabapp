@@ -270,18 +270,80 @@ class User extends Module {
 
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
-      const { search } = query;
+      const ObjectId = mongoose.Types.ObjectId;
+      let { search, filter, verified, active } = query;
       let options = {
         ...query
       }
-      let users;
-      if(search?.length !== undefined){
-        //@ts-ignore
-        users = await this.user.paginate({$or:[{role:search}, {subrole:search}]},options);
+      let aggregate;
+      let aggregate1 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              }
+            ]
+          }
+        }
+      ]);
+
+      let aggregate2 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {isVerified: !!verified}
+            ]
+          }
+        }
+      ]);
+
+      let aggregate3 = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {deactivated: !!active}
+            ]
+          }
+        }
+      ]);
+
+      if(verified && !active) {
+        aggregate = aggregate2;
+      }else if(active && !verified){
+        aggregate = aggregate3;
       }else {
-        //@ts-ignore
-        users = await this.user.paginate({},options);
+        aggregate = aggregate1;
       }
+
+      //@ts-ignore
+      let users;
+      //@ts-ignore
+      users = await this.user.aggregatePaginate(aggregate, options);
       return Promise.resolve(users)
     } catch (e) {
       this.handleException(e);
@@ -291,8 +353,7 @@ class User extends Module {
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active } = query;      
-      console.log(verified, active)
+      let { search, filter, verified, active } = query;
       let options = {
         ...query
       }

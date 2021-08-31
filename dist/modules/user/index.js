@@ -181,17 +181,77 @@ class User extends module_1.default {
     fetchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                let { search, filter, verified, active } = query;
+                console.log(verified, active);
                 let options = Object.assign({}, query);
-                let users;
-                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
-                    //@ts-ignore
-                    users = yield this.user.paginate({ $or: [{ role: search }, { subrole: search }] }, options);
+                let aggregate;
+                let aggregate1 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate2 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { isVerified: !!verified }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate3 = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { deactivated: !!active }
+                            ]
+                        }
+                    }
+                ]);
+                if (verified && !active) {
+                    aggregate = aggregate2;
+                }
+                else if (active && !verified) {
+                    aggregate = aggregate3;
                 }
                 else {
-                    //@ts-ignore
-                    users = yield this.user.paginate({}, options);
+                    aggregate = aggregate1;
                 }
+                //@ts-ignore
+                let users;
+                //@ts-ignore
+                users = yield this.user.aggregatePaginate(aggregate, options);
                 return Promise.resolve(users);
             }
             catch (e) {

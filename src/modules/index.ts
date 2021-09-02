@@ -88,7 +88,9 @@ export const vehicle = new VehicleModule({
   activity:Activity,
   registerCylinder:RegisteredCylinder,
   branch:Branch,
-  routeReport:VehicleReport
+  routeReport:VehicleReport,
+  customer:Customer,
+  supplier:Supplier
 });
 
 export const driver = new DriverModule({

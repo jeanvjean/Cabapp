@@ -262,9 +262,9 @@ class Product extends Module{
                 $or:[
                   {productName:{
                     $regex: search?.toLowerCase() || ''
-                  }},{inStock:{
+                  }},{equipmentType:{
                     $regex: search?.toLowerCase() || ''
-                  }},{outOfStock:{
+                  }},{location:{
                     $regex: search?.toLowerCase() || ''
                   }}
                 ]
@@ -283,9 +283,9 @@ class Product extends Module{
                 $or:[
                   {productName:{
                     $regex: search?.toLowerCase() || ''
-                  }},{inStock:{
+                  }},{equipmentType:{
                     $regex: search?.toLowerCase() || ''
-                  }},{outOfStock:{
+                  }},{location:{
                     $regex: search?.toLowerCase() || ''
                   }}
                 ]
@@ -305,9 +305,9 @@ class Product extends Module{
                 $or:[
                   {productName:{
                     $regex: search?.toLowerCase() || ''
-                  }},{inStock:{
+                  }},{equipmentType:{
                     $regex: search?.toLowerCase() || ''
-                  }},{outOfStock:{
+                  }},{location:{
                     $regex: search?.toLowerCase() || ''
                   }}
                 ]
@@ -670,11 +670,11 @@ class Product extends Module{
       this.handleException(e)
     }
   }
-
+//GRN
   public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, fromDate, toDate } = query;
       const options = {
         ...query,
         populate:[
@@ -682,7 +682,8 @@ class Product extends Module{
           {path:'branch', model:'branches'}
         ]
       }
-      const aggregate = this.inventory.aggregate([
+      let aggregate;
+      const aggregate1 = this.inventory.aggregate([
         {
           $match:{
             $and:[
@@ -698,7 +699,16 @@ class Product extends Module{
                       $regex:search?.toLowerCase() || ''
                     }},{'products.productName':{
                       $regex:search?.toLowerCase() || ''
+                    }},{'products.equipmentModel':{
+                      $regex:search?.toLowerCase() || ''
+                    }},{'products.equipmentType':{
+                      $regex:search?.toLowerCase() || ''
                     }}
+                    // {
+                    //   createdAt:{
+                    //     "$gte": fromDate || "", "$lte":toDate || ""
+                    //   }
+                    // }
                 ]
               },
               {branch:ObjectId(user.branch.toString())}
@@ -706,6 +716,39 @@ class Product extends Module{
           }
         }
       ]);
+      let aggregate2 = this.inventory.aggregate([
+        {
+          $match:{
+            createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)},
+            $and:[
+              {
+                $or:[
+                  {direction:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{grnNo:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{LPOnumber:{
+                    $regex: search?.toLowerCase() || ''
+                  }},{invoiceNumber:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{'products.productName':{
+                    $regex:search?.toLowerCase() || ''
+                  }},{'products.equipmentModel':{
+                    $regex:search?.toLowerCase() || ''
+                  }},{'products.equipmentType':{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              }
+            ]
+          }
+        }
+      ]);
+      if(fromDate.length) {
+        aggregate = aggregate2
+      }else {
+        aggregate = aggregate1;
+      }
       //@ts-ignore
       const inventories = await this.inventory.aggregatePaginate(aggregate, options);
       //Populate reference fields
@@ -1363,53 +1406,6 @@ class Product extends Module{
         let releasedBy = await this.user.findById(product.releasedBy);
         product.releasedBy = releasedBy;
       }
-      // let startStage = disbursement.filter(transfer=> {
-      //   if(transfer.approvalStage == stagesOfApproval.START) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage1 = disbursement.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage2 = disbursement.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let disb;
-      // if(user.subrole == 'superadmin'){
-      //   disb = stage2;
-      // }else if(user.subrole == 'head of department'){
-      //   disb = stage1
-      // }else {
-      //   disb = startStage;
-      // }
       return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
@@ -1467,54 +1463,6 @@ class Product extends Module{
         let releasedBy = await this.user.findById(product.releasedBy);
         product.releasedBy = releasedBy;
       }
-      //   console.log(disbursement)
-      // let startStage = disbursement.filter(transfer=> {
-      //   if(transfer.requestStage == stagesOfApproval.START) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage1 = disbursement.filter(transfer=>{
-      //   if(transfer.requestStage == stagesOfApproval.STAGE1) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage2 = disbursement.filter(transfer=>{
-      //   if(transfer.requestStage == stagesOfApproval.STAGE2) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let disb;
-      // if(user.subrole == 'superadmin'){
-      //   disb = stage2;
-      // }else if(user.subrole == 'head of department'){
-      //   disb = stage1
-      // }else {
-      //   disb = startStage;
-      // }
       return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
@@ -1564,6 +1512,10 @@ class Product extends Module{
                   $regex: search?.toLowerCase() || ''
                 }},{jobTag:{
                   $regex: search?.toLowerCase() || ''
+                }},{customer:{
+                  $regex: ObjectId(search) || ''
+                }},{requestDepartment:{
+                  $regex: search?.toLowerCase() || ''
                 }}
               ]},
               {disburseStatus: filter?.toLowerCase()},
@@ -1582,6 +1534,10 @@ class Product extends Module{
                 }},{mrn:{
                   $regex: search?.toLowerCase() || ''
                 }},{jobTag:{
+                  $regex: search?.toLowerCase() || ''
+                }},{customer:{
+                  $regex: ObjectId(search) || ''
+                }},{requestDepartment:{
                   $regex: search?.toLowerCase() || ''
                 }}
               ]},

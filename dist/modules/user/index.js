@@ -183,7 +183,6 @@ class User extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { search, filter, verified, active } = query;
-                console.log(verified, active);
                 let options = Object.assign({}, query);
                 let aggregate;
                 let aggregate1 = this.user.aggregate([
@@ -264,7 +263,6 @@ class User extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { search, filter, verified, active } = query;
-                console.log(verified, active);
                 let options = Object.assign({}, query);
                 let aggregate;
                 let aggregate1 = this.user.aggregate([

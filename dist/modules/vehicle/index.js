@@ -33,6 +33,8 @@ class Vehicle extends module_1.default {
         this.registerCylinder = props.registerCylinder;
         this.branch = props.branch;
         this.routeReport = props.routeReport;
+        this.customer = props.customer;
+        this.supplier = props.supplier;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -208,8 +210,29 @@ class Vehicle extends module_1.default {
     fetchVehicles(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const { search } = query;
+                const options = Object.assign({}, query);
+                let aggregate = this.vehicle.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        {
+                                            vehCategory: {
+                                                $regex: search || ""
+                                            }
+                                        }
+                                    ]
+                                },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
                 //@ts-ignore
-                const vehicles = yield this.vehicle.paginate({ branch: user.branch }, Object.assign({}, query));
+                const vehicles = yield this.vehicle.aggregatePaginate(aggregate, options);
                 return Promise.resolve(vehicles);
             }
             catch (e) {
@@ -365,7 +388,7 @@ class Vehicle extends module_1.default {
     recordRoute(data, params, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const vehicle = yield this.vehicle.findById(params.vehicleId);
+                const vehicle = yield this.vehicle.findById(params.vehicleId).populate('assignedTo');
                 if (!vehicle) {
                     throw new exceptions_1.BadInputFormatException('selected vehicle was not found please pick an available vehicle');
                 }
@@ -503,7 +526,17 @@ class Vehicle extends module_1.default {
     fetchRoutePlan(data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { vehicleId, query } = data;
+                let ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                let { vehicleId, query } = data;
+                const search = query === null || query === void 0 ? void 0 : query.search;
+                if (search === null || search === void 0 ? void 0 : search.length) {
+                    let u = yield this.user.findOne({ name: search, role: "sales", subrole: "driver" });
+                    let vi = yield this.vehicle.findOne({ assignedTo: u === null || u === void 0 ? void 0 : u._id });
+                    if (!vi) {
+                        throw new exceptions_1.BadInputFormatException('Driver\'s vehicle information not found');
+                    }
+                    vehicleId = vi === null || vi === void 0 ? void 0 : vi._id;
+                }
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'customer', model: 'customer' },
                         { path: 'supplier', model: 'supplier' },
@@ -511,8 +544,61 @@ class Vehicle extends module_1.default {
                         { path: 'security', model: 'User' },
                         { path: 'recievedBy', model: 'User' }
                     ] });
+                let aggregate;
+                let aggregate1 = this.pickup.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        {
+                                            modeOfService: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            }
+                                        }
+                                    ]
+                                },
+                                { vehicle: ObjectId(`${vehicleId}`) },
+                                { deleted: false }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate2 = this.pickup.aggregate([
+                    {
+                        $match: {
+                            //@ts-ignore
+                            createdAt: { $gte: new Date(query === null || query === void 0 ? void 0 : query.fromDate), $lte: new Date(query === null || query === void 0 ? void 0 : query.toDate) },
+                            $and: [
+                                {
+                                    $or: [
+                                        {
+                                            modeOfService: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]);
+                if (query === null || query === void 0 ? void 0 : query.fromDate) {
+                    aggregate = aggregate2;
+                }
+                else {
+                    aggregate = aggregate1;
+                }
                 //@ts-ignore
-                const routePlan = yield this.pickup.paginate({ vehicle: `${vehicleId}`, deleted: false }, options);
+                const routePlan = yield this.pickup.aggregatePaginate(aggregate, options);
+                console.log(routePlan);
+                for (let route of routePlan.docs) {
+                    route.customer = yield this.customer.findById(route.customer);
+                    route.supplier = yield this.supplier.findById(route.supplier);
+                    route.vehicle = yield this.vehicle.findById(route.vehicle).populate('assignedTo');
+                    route.security = yield this.user.findById(route.security);
+                    route.recievedBy = yield this.user.findById(route.recievedBy);
+                }
                 return Promise.resolve(routePlan);
             }
             catch (e) {

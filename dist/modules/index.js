@@ -54,7 +54,9 @@ exports.vehicle = new vehicle_1.default({
     activity: index_1.Activity,
     registerCylinder: index_1.RegisteredCylinder,
     branch: index_1.Branch,
-    routeReport: index_1.VehicleReport
+    routeReport: index_1.VehicleReport,
+    customer: index_1.Customer,
+    supplier: index_1.Supplier
 });
 exports.driver = new driver_1.default({
     driver: index_1.User

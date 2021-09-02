@@ -17,6 +17,8 @@ import { getTemplate } from '../../util/resolve-template';
 import { vehiclePerformance } from "../../models/pickupReport";
 import router from "../../routes/person";
 import { mongoose } from "../cylinder";
+import { CustomerInterface } from "../../models/customer";
+import { SupplierInterface } from "../../models/supplier";
 
 export { schedule };
 
@@ -28,6 +30,8 @@ interface vehicleProps{
   registerCylinder:Model<RegisteredCylinderInterface>
   branch:Model<BranchInterface>
   routeReport:Model<vehiclePerformance>
+  customer:Model<CustomerInterface>
+  supplier:Model<SupplierInterface>
 }
 
 type NewVehicle = {
@@ -150,6 +154,8 @@ class Vehicle extends Module{
   private registerCylinder:Model<RegisteredCylinderInterface>
   private branch:Model<BranchInterface>
   private routeReport:Model<vehiclePerformance>
+  private customer:Model<CustomerInterface>
+  private supplier:Model<SupplierInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -160,6 +166,8 @@ class Vehicle extends Module{
     this.registerCylinder = props.registerCylinder
     this.branch = props.branch
     this.routeReport = props.routeReport
+    this.customer = props.customer
+    this.supplier = props.supplier
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -338,9 +346,32 @@ class Vehicle extends Module{
 
   public async fetchVehicles(query:QueryInterface, user:UserInterface):Promise<VehicleInterface[]|undefined> {
     try {
+      const ObjectId = mongoose.Types.ObjectId;
+      const { search } = query;
+      const options = {
+        ...query
+      }
+      let aggregate = this.vehicle.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {
+                    vehCategory:{
+                      $regex: search || ""
+                    }
+                  }
+                ]
+              },
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ])
       //@ts-ignore
-      const vehicles = await this.vehicle.paginate({ branch:user.branch }, {...query});
-      return Promise.resolve(vehicles)
+      const vehicles = await this.vehicle.aggregatePaginate(aggregate, options);
+      return Promise.resolve(vehicles);
     } catch (e) {
       this.handleException(e);
     }
@@ -486,7 +517,7 @@ class Vehicle extends Module{
     user:UserInterface
     ):Promise<PickupInterface|undefined>{
     try {
-      const vehicle = await this.vehicle.findById(params.vehicleId);
+      const vehicle = await this.vehicle.findById(params.vehicleId).populate('assignedTo');
       if(!vehicle) {
         throw new BadInputFormatException('selected vehicle was not found please pick an available vehicle')
       }
@@ -613,7 +644,17 @@ class Vehicle extends Module{
 
   public async fetchRoutePlan(data:Parameters):Promise<PickupInterface[]|undefined>{
     try {
-      const { vehicleId, query } = data;
+      let ObjectId = mongoose.Types.ObjectId;
+      let { vehicleId, query } = data;
+      const search = query?.search;
+      if(search?.length) {
+        let u = await this.user.findOne({name:search, role:"sales", subrole:"driver"});
+        let vi = await this.vehicle.findOne({assignedTo:u?._id});
+        if(!vi) {
+          throw new BadInputFormatException('Driver\'s vehicle information not found');
+        }
+        vehicleId = vi?._id;
+      }
       const options = {
         ...query,
         populate:[
@@ -624,8 +665,59 @@ class Vehicle extends Module{
           {path:'recievedBy', model:'User'}
         ]
       }
+      let aggregate;
+      let aggregate1 = this.pickup.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {
+                    modeOfService:{
+                      $regex: search?.toLowerCase() || ""
+                    }
+                  }
+              ]
+              },
+              {vehicle:ObjectId(`${vehicleId}`)},
+              {deleted:false}
+            ]
+          }
+        }
+      ]);
+      let aggregate2 = this.pickup.aggregate([
+        {
+          $match:{
+            //@ts-ignore
+            createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)},
+            $and:[
+              {
+                $or:[
+                  {
+                    modeOfService:{
+                      $regex: search?.toLowerCase() || ""
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]);
+      if(query?.fromDate) {
+        aggregate = aggregate2;
+      }else {
+        aggregate = aggregate1;
+      }
       //@ts-ignore
-      const routePlan = await this.pickup.paginate({vehicle:`${vehicleId}`, deleted:false}, options);
+      const routePlan = await this.pickup.aggregatePaginate(aggregate, options);
+      for(let route of routePlan.docs) {
+        route.customer = await this.customer.findById(route.customer);
+        route.supplier = await this.supplier.findById(route.supplier);
+        route.vehicle = await this.vehicle.findById(route.vehicle).populate('assignedTo');
+        route.security = await this.user.findById(route.security);
+        route.recievedBy = await this.user.findById(route.recievedBy);
+      }
       return Promise.resolve(routePlan);
     } catch (e) {
       this.handleException(e);

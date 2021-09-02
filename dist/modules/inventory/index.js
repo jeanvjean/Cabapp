@@ -144,9 +144,9 @@ class Product extends module_1.default {
                                     $or: [
                                         { productName: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { inStock: {
+                                            } }, { equipmentType: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { outOfStock: {
+                                            } }, { location: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ]
@@ -165,9 +165,9 @@ class Product extends module_1.default {
                                     $or: [
                                         { productName: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { inStock: {
+                                            } }, { equipmentType: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { outOfStock: {
+                                            } }, { location: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ]
@@ -187,9 +187,9 @@ class Product extends module_1.default {
                                     $or: [
                                         { productName: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { inStock: {
+                                            } }, { equipmentType: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { outOfStock: {
+                                            } }, { location: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ]
@@ -579,16 +579,18 @@ class Product extends module_1.default {
             }
         });
     }
+    //GRN
     fetchInventories(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, fromDate, toDate } = query;
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'inspectingOfficer', model: 'User' },
                         { path: 'branch', model: 'branches' }
                     ] });
-                const aggregate = this.inventory.aggregate([
+                let aggregate;
+                const aggregate1 = this.inventory.aggregate([
                     {
                         $match: {
                             $and: [
@@ -604,7 +606,16 @@ class Product extends module_1.default {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }, { 'products.productName': {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.equipmentModel': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.equipmentType': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
+                                        // {
+                                        //   createdAt:{
+                                        //     "$gte": fromDate || "", "$lte":toDate || ""
+                                        //   }
+                                        // }
                                     ]
                                 },
                                 { branch: ObjectId(user.branch.toString()) }
@@ -612,6 +623,40 @@ class Product extends module_1.default {
                         }
                     }
                 ]);
+                let aggregate2 = this.inventory.aggregate([
+                    {
+                        $match: {
+                            createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) },
+                            $and: [
+                                {
+                                    $or: [
+                                        { direction: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { grnNo: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { LPOnumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { invoiceNumber: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.productName': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.equipmentModel': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { 'products.equipmentType': {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]);
+                if (fromDate.length) {
+                    aggregate = aggregate2;
+                }
+                else {
+                    aggregate = aggregate1;
+                }
                 //@ts-ignore
                 const inventories = yield this.inventory.aggregatePaginate(aggregate, options);
                 //Populate reference fields
@@ -1271,53 +1316,6 @@ class Product extends module_1.default {
                     let releasedBy = yield this.user.findById(product.releasedBy);
                     product.releasedBy = releasedBy;
                 }
-                // let startStage = disbursement.filter(transfer=> {
-                //   if(transfer.approvalStage == stagesOfApproval.START) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage1 = disbursement.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage2 = disbursement.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let disb;
-                // if(user.subrole == 'superadmin'){
-                //   disb = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   disb = stage1
-                // }else {
-                //   disb = startStage;
-                // }
                 return Promise.resolve(disbursement);
             }
             catch (e) {
@@ -1374,54 +1372,6 @@ class Product extends module_1.default {
                     let releasedBy = yield this.user.findById(product.releasedBy);
                     product.releasedBy = releasedBy;
                 }
-                //   console.log(disbursement)
-                // let startStage = disbursement.filter(transfer=> {
-                //   if(transfer.requestStage == stagesOfApproval.START) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage1 = disbursement.filter(transfer=>{
-                //   if(transfer.requestStage == stagesOfApproval.STAGE1) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage2 = disbursement.filter(transfer=>{
-                //   if(transfer.requestStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let disb;
-                // if(user.subrole == 'superadmin'){
-                //   disb = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   disb = stage1
-                // }else {
-                //   disb = startStage;
-                // }
                 return Promise.resolve(disbursement);
             }
             catch (e) {
@@ -1472,6 +1422,12 @@ class Product extends module_1.default {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }, { jobTag: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { customer: {
+                                                $regex: ObjectId(search) || ''
+                                            } },
+                                        { requestDepartment: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },
                                 { disburseStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
@@ -1490,6 +1446,12 @@ class Product extends module_1.default {
                                             } }, { mrn: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }, { jobTag: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } },
+                                        { customer: {
+                                                $regex: ObjectId(search) || ''
+                                            } },
+                                        { requestDepartment: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
                                     ] },

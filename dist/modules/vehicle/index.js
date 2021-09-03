@@ -267,7 +267,9 @@ class Vehicle extends module_1.default {
                     prevMileage: data.prevMileage,
                     itemsReplaced: data.itemsReplaced,
                     approvalOfficer: data.approvalOfficer,
-                    approvalStatus: vehicle_1.InspectApproval.PENDING
+                    approvalStatus: vehicle_1.InspectApproval.PENDING,
+                    recomendedMech: data.recomendedMech,
+                    referer: data.referer
                 };
                 let com = {
                     comment: data.comment,

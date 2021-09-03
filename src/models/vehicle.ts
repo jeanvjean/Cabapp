@@ -44,7 +44,9 @@ export type Maintainance = {
   itemsReplaced?:ReplacedItems[]
   comments?:commentInterface[]
   approvalStatus?:InspectApproval
-  approvalOfficer?:Schema.Types.ObjectId
+  approvalOfficer?:Schema.Types.ObjectId  
+  recomendedMech?:string,
+  referer?:string
 }
  export enum RouteActivity {
   PICKUP='pick-up',
@@ -91,12 +93,18 @@ export interface VehicleInterface extends Document{
   branch:Schema.Types.ObjectId
 }
 
-export type ReplacedItems ={
+export type ReplacedItems = {
   name:string
+  qty:number,
+  unitCost:number
+  totalCost:number
 }
 
 const replacedItemSchema = new Schema({
-  name:String
+  name:String,
+  qty:Number,
+  unitCost:Number,
+  totalCost:Number
 });
 
 const routeSchema = new Schema({
@@ -120,7 +128,9 @@ const maintainaceSchema = new Schema({
   comments:[commentSchema],
   approvalStatus:{type:String},
   approvalStage:{type:String},
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'}
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
+  recomendedMech:String,
+  referer:String,
 },{
   timestamps:true
 });

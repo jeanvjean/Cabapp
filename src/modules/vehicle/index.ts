@@ -86,7 +86,9 @@ interface InspectionData {
   prevMileage:Maintainance['prevMileage'],
   itemsReplaced?:Maintainance['itemsReplaced']
   comment?:string
-  approvalOfficer?:Maintainance['approvalOfficer']
+  approvalOfficer?:Maintainance['approvalOfficer']  
+  recomendedMech?:string,
+  referer?:string
 }
 
 interface startRouteInput {
@@ -401,7 +403,9 @@ class Vehicle extends Module{
         prevMileage:data.prevMileage,
         itemsReplaced:data.itemsReplaced,
         approvalOfficer:data.approvalOfficer,
-        approvalStatus:InspectApproval.PENDING
+        approvalStatus:InspectApproval.PENDING,        
+        recomendedMech:data.recomendedMech,
+        referer:data.referer
       }
       let com = {
         comment:data.comment,

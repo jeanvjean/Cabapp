@@ -27,7 +27,10 @@ var RoutePlanStatus;
     RoutePlanStatus["DONE"] = "done";
 })(RoutePlanStatus = exports.RoutePlanStatus || (exports.RoutePlanStatus = {}));
 const replacedItemSchema = new mongoose_1.Schema({
-    name: String
+    name: String,
+    qty: Number,
+    unitCost: Number,
+    totalCost: Number
 });
 const routeSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
@@ -49,7 +52,9 @@ const maintainaceSchema = new mongoose_1.Schema({
     comments: [transferCylinder_1.commentSchema],
     approvalStatus: { type: String },
     approvalStage: { type: String },
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    recomendedMech: String,
+    referer: String,
 }, {
     timestamps: true
 });

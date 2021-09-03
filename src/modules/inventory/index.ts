@@ -774,7 +774,7 @@ class Product extends Module{
       this.handleException(e);
     }
   }
-
+  //MRN
   public async disburseProduct(data:NewDisburseInterface, user:UserInterface):Promise<DisburseProductInterface|undefined>{
     try {
       let hod = await this.user.findOne({

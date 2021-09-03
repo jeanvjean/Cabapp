@@ -686,6 +686,7 @@ class Product extends module_1.default {
             }
         });
     }
+    //MRN
     disburseProduct(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

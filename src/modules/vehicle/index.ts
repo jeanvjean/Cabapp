@@ -949,6 +949,8 @@ class Vehicle extends Module{
     try {
       let user = await this.user.findById(userId);
       const logs = await this.activity.findOne({user:user?._id});
+      //@ts-ignore
+      logs?.activities.sort((a,b)=> b.createdAt - a.createdAt);
       return Promise.resolve(logs as ActivityLogInterface);
     } catch (e) {
       this.handleException(e);

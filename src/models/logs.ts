@@ -9,6 +9,8 @@ export interface activities {
   title:string
   activity:string
   time:Date
+  createdAt:Date
+  updatedAt:Date
 }
 
 export interface ActivityLogInterface extends Document {

@@ -591,7 +591,6 @@ class Vehicle extends module_1.default {
                 }
                 //@ts-ignore
                 const routePlan = yield this.pickup.aggregatePaginate(aggregate, options);
-                console.log(routePlan);
                 for (let route of routePlan.docs) {
                     route.customer = yield this.customer.findById(route.customer);
                     route.supplier = yield this.supplier.findById(route.supplier);
@@ -843,6 +842,8 @@ class Vehicle extends module_1.default {
             try {
                 let user = yield this.user.findById(userId);
                 const logs = yield this.activity.findOne({ user: user === null || user === void 0 ? void 0 : user._id });
+                //@ts-ignore
+                logs === null || logs === void 0 ? void 0 : logs.activities.sort((a, b) => b.createdAt - a.createdAt);
                 return Promise.resolve(logs);
             }
             catch (e) {

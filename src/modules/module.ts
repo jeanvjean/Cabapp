@@ -7,6 +7,7 @@ export interface QueryInterface {
   limit?: number | 10;
   search?: 'string';
   filter?:'string',
+  skip?:number | 0
   holder?:string,
   cylinderType?:string,
   gasType?:string,
@@ -24,6 +25,8 @@ export interface QueryInterface {
   toDate:string,
   verified:boolean
   active:boolean
+  suspended?:boolean
+  unverified?:boolean
 }
 
 /**

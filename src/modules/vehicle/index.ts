@@ -89,6 +89,7 @@ interface InspectionData {
   approvalOfficer?:Maintainance['approvalOfficer']  
   recomendedMech?:string,
   referer?:string
+  analytics?:Maintainance['analytics']
 }
 
 interface startRouteInput {
@@ -403,7 +404,8 @@ class Vehicle extends Module{
         prevMileage:data.prevMileage,
         itemsReplaced:data.itemsReplaced,
         approvalOfficer:data.approvalOfficer,
-        approvalStatus:InspectApproval.PENDING,        
+        approvalStatus:InspectApproval.PENDING,
+        analytics:data.analytics,
         recomendedMech:data.recomendedMech,
         referer:data.referer
       }

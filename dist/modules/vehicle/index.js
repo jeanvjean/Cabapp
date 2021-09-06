@@ -268,6 +268,7 @@ class Vehicle extends module_1.default {
                     itemsReplaced: data.itemsReplaced,
                     approvalOfficer: data.approvalOfficer,
                     approvalStatus: vehicle_1.InspectApproval.PENDING,
+                    analytics: data.analytics,
                     recomendedMech: data.recomendedMech,
                     referer: data.referer
                 };

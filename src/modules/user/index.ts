@@ -271,7 +271,7 @@ class User extends Module {
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active } = query;
+      let { search, filter, verified, active, unverified, suspended } = query;
       let options = {
         ...query
       }
@@ -287,7 +287,7 @@ class User extends Module {
                   }},{subrole:{
                     $regex:search?.toLowerCase() || ''
                   }}
-                ]
+                ],
               }
             ]
           }
@@ -313,6 +313,25 @@ class User extends Module {
         }
       ]);
 
+      let aggregate2V = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {isVerified: !unverified}
+            ]
+          }
+        }
+      ]);
+
       let aggregate3 = this.user.aggregate([
         {
           $match:{
@@ -326,25 +345,50 @@ class User extends Module {
                   }}
                 ]
               },
-              {deactivated: !!active}
+              {deactivated: !active}
             ]
           }
         }
       ]);
 
-      if(verified && !active) {
+      let aggregate3A = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {deactivated: !!suspended}
+            ]
+          }
+        }
+      ]);
+
+      if(verified) {
         aggregate = aggregate2;
-      }else if(active && !verified){
+      }else if(active){
         aggregate = aggregate3;
+      }else if(suspended){
+        aggregate = aggregate3A;
+      }else if(unverified) {
+        aggregate = aggregate2V;
       }else {
         aggregate = aggregate1;
       }
-
       //@ts-ignore
       let users;
       //@ts-ignore
       users = await this.user.aggregatePaginate(aggregate, options);
-      return Promise.resolve(users)
+      //@ts-ignore
+      // users = await this.user.searchPartial(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
+      // users = await this.user.searchFull(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
+      return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
     }
@@ -353,7 +397,7 @@ class User extends Module {
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active } = query;
+      let { search, filter, verified, active, unverified, suspended } = query;
       let options = {
         ...query
       }
@@ -369,7 +413,7 @@ class User extends Module {
                   }},{subrole:{
                     $regex:search?.toLowerCase() || ''
                   }}
-                ]
+                ],
               },
               {branch:ObjectId(user.branch.toString())}
             ]
@@ -390,8 +434,28 @@ class User extends Module {
                   }}
                 ]
               },
-              {branch:ObjectId(user.branch.toString())},
-              {isVerified: !!verified}
+              {isVerified: !!verified},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+
+      let aggregate2V = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {isVerified: !unverified},
+              {branch:ObjectId(user.branch.toString())}
             ]
           }
         }
@@ -410,17 +474,41 @@ class User extends Module {
                   }}
                 ]
               },
-              {branch:ObjectId(user.branch.toString())},
-              {deactivated: !!active}
+              {deactivated: !active},
+              {branch:ObjectId(user.branch.toString())}
             ]
           }
         }
       ]);
 
-      if(verified && !active) {
+      let aggregate3A = this.user.aggregate([
+        {
+          $match:{
+            $and:[
+              {
+                $or:[
+                  {role:{
+                    $regex:search?.toLowerCase() || ''
+                  }},{subrole:{
+                    $regex:search?.toLowerCase() || ''
+                  }}
+                ]
+              },
+              {deactivated: !!suspended},
+              {branch:ObjectId(user.branch.toString())}
+            ]
+          }
+        }
+      ]);
+
+      if(verified) {
         aggregate = aggregate2;
-      }else if(active && !verified){
+      }else if(active){
         aggregate = aggregate3;
+      }else if(suspended){
+        aggregate = aggregate3A;
+      }else if(unverified) {
+        aggregate = aggregate2V;
       }else {
         aggregate = aggregate1;
       }

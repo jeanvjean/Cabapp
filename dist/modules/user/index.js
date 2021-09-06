@@ -182,7 +182,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active } = query;
+                let { search, filter, verified, active, unverified, suspended } = query;
                 let options = Object.assign({}, query);
                 let aggregate;
                 let aggregate1 = this.user.aggregate([
@@ -196,7 +196,7 @@ class User extends module_1.default {
                                             } }, { subrole: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
-                                    ]
+                                    ],
                                 }
                             ]
                         }
@@ -220,6 +220,24 @@ class User extends module_1.default {
                         }
                     }
                 ]);
+                let aggregate2V = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { isVerified: !unverified }
+                            ]
+                        }
+                    }
+                ]);
                 let aggregate3 = this.user.aggregate([
                     {
                         $match: {
@@ -233,16 +251,40 @@ class User extends module_1.default {
                                             } }
                                     ]
                                 },
-                                { deactivated: !!active }
+                                { deactivated: !active }
                             ]
                         }
                     }
                 ]);
-                if (verified && !active) {
+                let aggregate3A = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { deactivated: !!suspended }
+                            ]
+                        }
+                    }
+                ]);
+                if (verified) {
                     aggregate = aggregate2;
                 }
-                else if (active && !verified) {
+                else if (active) {
                     aggregate = aggregate3;
+                }
+                else if (suspended) {
+                    aggregate = aggregate3A;
+                }
+                else if (unverified) {
+                    aggregate = aggregate2V;
                 }
                 else {
                     aggregate = aggregate1;
@@ -251,6 +293,9 @@ class User extends module_1.default {
                 let users;
                 //@ts-ignore
                 users = yield this.user.aggregatePaginate(aggregate, options);
+                //@ts-ignore
+                // users = await this.user.searchPartial(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
+                // users = await this.user.searchFull(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
                 return Promise.resolve(users);
             }
             catch (e) {
@@ -262,7 +307,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active } = query;
+                let { search, filter, verified, active, unverified, suspended } = query;
                 let options = Object.assign({}, query);
                 let aggregate;
                 let aggregate1 = this.user.aggregate([
@@ -276,7 +321,7 @@ class User extends module_1.default {
                                             } }, { subrole: {
                                                 $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
                                             } }
-                                    ]
+                                    ],
                                 },
                                 { branch: ObjectId(user.branch.toString()) }
                             ]
@@ -296,8 +341,27 @@ class User extends module_1.default {
                                             } }
                                     ]
                                 },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { isVerified: !!verified }
+                                { isVerified: !!verified },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                let aggregate2V = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { isVerified: !unverified },
+                                { branch: ObjectId(user.branch.toString()) }
                             ]
                         }
                     }
@@ -315,17 +379,42 @@ class User extends module_1.default {
                                             } }
                                     ]
                                 },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { deactivated: !!active }
+                                { deactivated: !active },
+                                { branch: ObjectId(user.branch.toString()) }
                             ]
                         }
                     }
                 ]);
-                if (verified && !active) {
+                let aggregate3A = this.user.aggregate([
+                    {
+                        $match: {
+                            $and: [
+                                {
+                                    $or: [
+                                        { role: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }, { subrole: {
+                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
+                                            } }
+                                    ]
+                                },
+                                { deactivated: !!suspended },
+                                { branch: ObjectId(user.branch.toString()) }
+                            ]
+                        }
+                    }
+                ]);
+                if (verified) {
                     aggregate = aggregate2;
                 }
-                else if (active && !verified) {
+                else if (active) {
                     aggregate = aggregate3;
+                }
+                else if (suspended) {
+                    aggregate = aggregate3A;
+                }
+                else if (unverified) {
+                    aggregate = aggregate2V;
                 }
                 else {
                     aggregate = aggregate1;

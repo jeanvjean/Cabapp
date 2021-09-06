@@ -14,8 +14,10 @@ const mongoose_1 = require("mongoose");
 const mongoosePaginator = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const bcryptjs_1 = require("bcryptjs");
+const cylinder_1 = require("../modules/cylinder");
 exports.salt = bcryptjs_1.genSaltSync(10);
 const permissions = require('../util/permissions.json');
+const ObjectId = cylinder_1.mongoose.Types.ObjectId;
 /**
  * Attributes of a user
  * @meta Model Model
@@ -78,6 +80,73 @@ exports.userSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
+exports.userSchema.statics = {
+    searchPartial: function (q, query, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.aggregate([
+                {
+                    $match: Object.assign({ $and: [
+                            {
+                                $or: [
+                                    { name: new RegExp(q, "i") },
+                                    { email: new RegExp(q, 'i') },
+                                    { role: new RegExp(q, 'i') },
+                                    { subrole: new RegExp(q, 'i') }
+                                ],
+                            }, {
+                                branch: ObjectId(options.branch)
+                            }
+                        ] }, query)
+                },
+                {
+                    $sort: options.sort || { createdAt: 1 }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        // get a count of every result that matches until now
+                        totalCount: { $sum: 1 },
+                        // keep our results for the next operation
+                        results: { $push: '$$ROOT' }
+                    }
+                },
+                {
+                    $project: {
+                        totalCount: 1,
+                        rows: {
+                            $slice: ['$results', options.skip || 0, options.limit || '$totalCount']
+                        }
+                    }
+                }
+            ]);
+        });
+    },
+    searchFull: function (q, query, options) {
+        return this.aggregate([
+            {
+                $match: Object.assign({ $text: { $search: q, $caseSensitive: false } }, query)
+            },
+            { $sort: options.sort },
+            {
+                $group: {
+                    _id: null,
+                    // get a count of every result that matches until now
+                    totalCount: { $sum: 1 },
+                    // keep our results for the next operation
+                    results: { $push: '$$ROOT' }
+                }
+            },
+            {
+                $project: {
+                    totalCount: 1,
+                    rows: {
+                        $slice: ['$results', options.skip || 0, options.limit || '$totalCount']
+                    }
+                }
+            }
+        ]);
+    }
+};
 exports.userSchema.index({ role: 'text', subrole: 'text' });
 exports.userSchema.plugin(mongoosePaginator);
 exports.userSchema.plugin(aggregatePaginate);

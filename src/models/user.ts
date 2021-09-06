@@ -9,8 +9,11 @@ import * as mongoosePaginator from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 import { hash, compare, genSaltSync } from 'bcryptjs';
+import { mongoose } from "../modules/cylinder";
  export const salt = genSaltSync(10);
  const permissions = require('../util/permissions.json');
+
+ const ObjectId = mongoose.Types.ObjectId;
 
 /**
  * Attributes of a user
@@ -148,6 +151,78 @@ import { hash, compare, genSaltSync } from 'bcryptjs';
  },{
    timestamps:true
  });
+
+ userSchema.statics = {
+   searchPartial:async function(q:any, query:any, options:any) {
+    return this.aggregate([
+      {
+        $match:{
+          $and:[
+            {
+              $or:[
+                {name: new RegExp(q, "i")},
+                {email:new RegExp(q, 'i')},
+                {role:new RegExp(q, 'i')},
+                {subrole:new RegExp(q, 'i')}
+              ],
+            },{
+              branch: ObjectId(options.branch)
+            }
+          ],
+          ...query
+        }
+      },
+      {
+        $sort:options.sort || {createdAt:1}
+      },
+      {
+        $group: {
+          _id: null,
+          // get a count of every result that matches until now
+          totalCount: { $sum: 1 },
+          // keep our results for the next operation
+          results: { $push: '$$ROOT' }
+        }
+      },
+      {
+        $project: {
+          totalCount: 1,
+          rows: {
+            $slice: ['$results', options.skip || 0, options.limit || '$totalCount']
+          }
+        }
+      }
+    ]);
+   },
+   searchFull: function (q:any, query:any, options:any) {
+    return this.aggregate([
+      {
+        $match: {
+          $text: { $search: q, $caseSensitive: false },
+          ...query
+        }
+      },
+      { $sort: options.sort },
+      {
+        $group: {
+          _id: null,
+          // get a count of every result that matches until now
+          totalCount: { $sum: 1 },
+          // keep our results for the next operation
+          results: { $push: '$$ROOT' }
+        }
+      },
+      {
+        $project: {
+          totalCount: 1,
+          rows: {
+            $slice: ['$results', options.skip || 0, options.limit || '$totalCount']
+          }
+        }
+      }
+    ]);
+  }
+ }
 
  userSchema.index({role:'text', subrole:'text'});
 

@@ -21,6 +21,13 @@ export enum maintType {
   PREINSPECTION = 'pre-inspection'
 }
 
+export type MaintainanceAnalytics ={
+  requestAuthenticity:string,
+  estimateObtained:string,
+  itemPrice:number,
+  recomendation:string
+}
+
 export enum InspectApproval {
   APPROVED='approved',
   REJECTED='rejected',
@@ -44,7 +51,8 @@ export type Maintainance = {
   itemsReplaced?:ReplacedItems[]
   comments?:commentInterface[]
   approvalStatus?:InspectApproval
-  approvalOfficer?:Schema.Types.ObjectId  
+  approvalOfficer?:Schema.Types.ObjectId
+  analytics?:MaintainanceAnalytics
   recomendedMech?:string,
   referer?:string
 }

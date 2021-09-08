@@ -271,7 +271,8 @@ class Vehicle extends Module{
         {path:'branchAdmin', model:"User"}
       ]);
 
-      let updatedVehicle = await this.vehicle.findByIdAndUpdate(vehicle._id, {$set:data}, {new:true});
+      let updatedVehicle = await this.vehicle.findByIdAndUpdate(vehicle._id, {...data}, {new:true});
+      // console.log(updatedVehicle);
       if(data.insuranceDate) {
         let date = new Date(data.insuranceDate);
         let firstDate = date.setDate(date.getDate() - +14);

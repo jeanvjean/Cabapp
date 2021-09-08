@@ -85,7 +85,7 @@ exports.vehicleSchema = new mongoose_1.Schema({
     routes: [routeSchema],
     licence: { type: String },
     insuranceDate: { type: String },
-    latestMileage: { type: String },
+    lastMileage: { type: String },
     comments: [transferCylinder_1.commentSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 }, {

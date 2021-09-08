@@ -171,7 +171,7 @@ export const vehicleSchema = new Schema({
   routes:[routeSchema],
   licence:{type:String},
   insuranceDate:{type:String},
-  latestMileage:{type:String},
+  lastMileage:{type:String},
   comments:[commentSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{

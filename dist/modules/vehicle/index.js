@@ -133,7 +133,8 @@ class Vehicle extends module_1.default {
                 let branch = yield this.branch.findById(vehicle.branch).populate([
                     { path: 'branchAdmin', model: "User" }
                 ]);
-                let updatedVehicle = yield this.vehicle.findByIdAndUpdate(vehicle._id, { $set: data }, { new: true });
+                let updatedVehicle = yield this.vehicle.findByIdAndUpdate(vehicle._id, Object.assign({}, data), { new: true });
+                console.log(updatedVehicle);
                 if (data.insuranceDate) {
                     let date = new Date(data.insuranceDate);
                     let firstDate = date.setDate(date.getDate() - +14);

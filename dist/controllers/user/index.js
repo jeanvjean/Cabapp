@@ -61,7 +61,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.fetchUsers(req.query, req.user);
+                const data = yield this.module.fetchUsers(Object.assign(Object.assign({}, req.body), req.query), req.user);
                 this.ok(res, 'Fetched Users', data);
             }
             catch (e) {
@@ -73,7 +73,7 @@ class UserController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.branchUsers(req.query, req.user);
+                const data = yield this.module.branchUsers(Object.assign(Object.assign({}, req.body), req.query), req.user);
                 this.ok(res, 'branch users', data);
             }
             catch (e) {

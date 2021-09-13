@@ -19,6 +19,7 @@ export interface QueryInterface {
   branch?:string,
   fromBranch?:string
   range?: string[];
+  departments:string[];
   out?:string
   instock?:string,
   fromDate:string,

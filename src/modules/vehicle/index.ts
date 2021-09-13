@@ -653,6 +653,7 @@ class Vehicle extends Module{
     try {
       let ObjectId = mongoose.Types.ObjectId;
       let { vehicleId, query } = data;
+      console.log(query?.fromDate, query?.toDate)
       const search = query?.search;
       if(search?.length) {
         let u = await this.user.findOne({name:search, role:"sales", subrole:"driver"});
@@ -662,6 +663,31 @@ class Vehicle extends Module{
         }
         vehicleId = vi?._id;
       }
+      let or = [];
+      if(search) {
+        or.push({modeOfService: new RegExp(search, "gi")})
+      }else {
+        or.push({modeOfService: new RegExp("", "gi")})
+      }
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },            
+            {vehicle:ObjectId(`${vehicleId}`)},
+            {deleted:false}
+          ]
+        }
+      }
+
+      if(query?.fromDate && query.toDate) {
+        // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+        let { $match } = q;
+        //@ts-ignore
+        q.$match = {...$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}}
+      }
+      // console.log(q)
       const options = {
         ...query,
         populate:[
@@ -672,50 +698,7 @@ class Vehicle extends Module{
           {path:'recievedBy', model:'User'}
         ]
       }
-      let aggregate;
-      let aggregate1 = this.pickup.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {
-                    modeOfService:{
-                      $regex: search?.toLowerCase() || ""
-                    }
-                  }
-              ]
-              },
-              {vehicle:ObjectId(`${vehicleId}`)},
-              {deleted:false}
-            ]
-          }
-        }
-      ]);
-      let aggregate2 = this.pickup.aggregate([
-        {
-          $match:{
-            //@ts-ignore
-            createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)},
-            $and:[
-              {
-                $or:[
-                  {
-                    modeOfService:{
-                      $regex: search?.toLowerCase() || ""
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      ]);
-      if(query?.fromDate) {
-        aggregate = aggregate2;
-      }else {
-        aggregate = aggregate1;
-      }
+      let aggregate = this.pickup.aggregate([q]);
       //@ts-ignore
       const routePlan = await this.pickup.aggregatePaginate(aggregate, options);
       for(let route of routePlan.docs) {

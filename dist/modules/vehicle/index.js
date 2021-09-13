@@ -134,7 +134,7 @@ class Vehicle extends module_1.default {
                     { path: 'branchAdmin', model: "User" }
                 ]);
                 let updatedVehicle = yield this.vehicle.findByIdAndUpdate(vehicle._id, Object.assign({}, data), { new: true });
-                console.log(updatedVehicle);
+                // console.log(updatedVehicle);
                 if (data.insuranceDate) {
                     let date = new Date(data.insuranceDate);
                     let firstDate = date.setDate(date.getDate() - +14);
@@ -532,6 +532,7 @@ class Vehicle extends module_1.default {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { vehicleId, query } = data;
+                console.log(query === null || query === void 0 ? void 0 : query.fromDate, query === null || query === void 0 ? void 0 : query.toDate);
                 const search = query === null || query === void 0 ? void 0 : query.search;
                 if (search === null || search === void 0 ? void 0 : search.length) {
                     let u = yield this.user.findOne({ name: search, role: "sales", subrole: "driver" });
@@ -541,6 +542,31 @@ class Vehicle extends module_1.default {
                     }
                     vehicleId = vi === null || vi === void 0 ? void 0 : vi._id;
                 }
+                let or = [];
+                if (search) {
+                    or.push({ modeOfService: new RegExp(search, "gi") });
+                }
+                else {
+                    or.push({ modeOfService: new RegExp("", "gi") });
+                }
+                let q = {
+                    $match: {
+                        $and: [
+                            {
+                                $or: or
+                            },
+                            { vehicle: ObjectId(`${vehicleId}`) },
+                            { deleted: false }
+                        ]
+                    }
+                };
+                if ((query === null || query === void 0 ? void 0 : query.fromDate) && query.toDate) {
+                    // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+                    let { $match } = q;
+                    //@ts-ignore
+                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(query === null || query === void 0 ? void 0 : query.fromDate), $lte: new Date(query === null || query === void 0 ? void 0 : query.toDate) } });
+                }
+                console.log(q);
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'customer', model: 'customer' },
                         { path: 'supplier', model: 'supplier' },
@@ -548,51 +574,7 @@ class Vehicle extends module_1.default {
                         { path: 'security', model: 'User' },
                         { path: 'recievedBy', model: 'User' }
                     ] });
-                let aggregate;
-                let aggregate1 = this.pickup.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        {
-                                            modeOfService: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            }
-                                        }
-                                    ]
-                                },
-                                { vehicle: ObjectId(`${vehicleId}`) },
-                                { deleted: false }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate2 = this.pickup.aggregate([
-                    {
-                        $match: {
-                            //@ts-ignore
-                            createdAt: { $gte: new Date(query === null || query === void 0 ? void 0 : query.fromDate), $lte: new Date(query === null || query === void 0 ? void 0 : query.toDate) },
-                            $and: [
-                                {
-                                    $or: [
-                                        {
-                                            modeOfService: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            }
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                ]);
-                if (query === null || query === void 0 ? void 0 : query.fromDate) {
-                    aggregate = aggregate2;
-                }
-                else {
-                    aggregate = aggregate1;
-                }
+                let aggregate = this.pickup.aggregate([q]);
                 //@ts-ignore
                 const routePlan = yield this.pickup.aggregatePaginate(aggregate, options);
                 for (let route of routePlan.docs) {

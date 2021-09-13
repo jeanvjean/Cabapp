@@ -13,6 +13,7 @@ import { createLog } from '../../util/logs';
 import { DeletedUser } from '../../models/removedUser';
 import { mongoose } from '../cylinder';
 import { user } from '..';
+import paginate from '../../util/paginate';
 export const signTokenKey = "loremipsumdolorsitemet";
 
 interface UserConstructorInterface {
@@ -271,248 +272,103 @@ class User extends Module {
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended } = query;
+      let { search, filter, verified, active, unverified, suspended, departments } = query;
+      let or = [];
+      if(departments && departments.length > 0) {
+        for(let filter of departments) {
+          or.push({role: new RegExp(filter, "gi")})
+        }
+      }else {
+        or.push({name: new RegExp(search || "", "gi")});
+      }
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            }
+          ]
+        }
+      }
+      if(verified) {
+        //@ts-ignore
+        q.$match.$and.push({isVerified: !!verified})
+      }
+      if(active) {
+        //@ts-ignore
+        q.$match.$and.push({deactivated: !!active})
+      }
+
+      if(unverified) {
+        //@ts-ignore
+        q.$match.$and.push({isVerified: !unverified})
+      }
+      if(suspended) {
+        //@ts-ignore
+        q.$match.$and.push({deactivated: !suspended})
+      }
       let options = {
         ...query
       }
-      let aggregate;
-      let aggregate1 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ],
-              }
-            ]
-          }
-        }
-      ]);
-
-      let aggregate2 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {isVerified: !!verified}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate2V = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {isVerified: !unverified}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate3 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {deactivated: !active}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate3A = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {deactivated: !!suspended}
-            ]
-          }
-        }
-      ]);
-
-      if(verified) {
-        aggregate = aggregate2;
-      }else if(active){
-        aggregate = aggregate3;
-      }else if(suspended){
-        aggregate = aggregate3A;
-      }else if(unverified) {
-        aggregate = aggregate2V;
-      }else {
-        aggregate = aggregate1;
-      }
-      //@ts-ignore
+      // let aggregate;
+      let aggregate = this.user.aggregate([q]);
       let users;
       //@ts-ignore
       users = await this.user.aggregatePaginate(aggregate, options);
+      return Promise.resolve(users);
+
       //@ts-ignore
       // users = await this.user.searchPartial(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
       // users = await this.user.searchFull(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
-      return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
     }
   }
-
+//@ts-ignore
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
-    try {
+    try {     
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended } = query;
+      let { search, filter, verified, active, unverified, suspended, departments } = query;
+      let or = [];
+      if(departments && departments.length > 0) {
+        for(let filter of departments) {
+          or.push({role: new RegExp(filter, "gi")})
+        }
+      }else {
+        or.push({name: new RegExp(search || "", "gi")})
+      }
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },
+            {branch:ObjectId(user.branch.toString())}
+          ]
+        }
+      }
+      if(verified) {
+        //@ts-ignore
+        q.$match.$and.push({isVerified: !!verified})
+      }
+      if(active) {
+        //@ts-ignore
+        q.$match.$and.push({deactivated: !!active})
+      }
+
+      if(unverified) {
+        //@ts-ignore
+        q.$match.$and.push({isVerified: !unverified})
+      }
+      if(suspended) {
+        //@ts-ignore
+        q.$match.$and.push({deactivated: !suspended})
+      }
       let options = {
         ...query
       }
-      let aggregate;
-      let aggregate1 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ],
-              },
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate2 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {isVerified: !!verified},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate2V = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {isVerified: !unverified},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate3 = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {deactivated: !active},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      let aggregate3A = this.user.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {role:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{subrole:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {deactivated: !!suspended},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      if(verified) {
-        aggregate = aggregate2;
-      }else if(active){
-        aggregate = aggregate3;
-      }else if(suspended){
-        aggregate = aggregate3A;
-      }else if(unverified) {
-        aggregate = aggregate2V;
-      }else {
-        aggregate = aggregate1;
-      }
-      //@ts-ignore
+      // let aggregate;
+      let aggregate = this.user.aggregate([q]);
       let users;
       //@ts-ignore
       users = await this.user.aggregatePaginate(aggregate, options);

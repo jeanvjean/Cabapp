@@ -585,78 +585,34 @@ class Product extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter, fromDate, toDate } = query;
+                let or = [];
+                if (search) {
+                    or.push({ modeOfService: new RegExp(search, "gi") }, { direction: new RegExp(search, "gi") }, { grnNo: new RegExp(search, "gi") }, { "products.productName": new RegExp(search, "gi") }, { "products.equipmentModel": new RegExp(search, "gi") }, { "products.equipmentType": new RegExp(search, "gi") });
+                }
+                else {
+                    or.push({ "products.productName": new RegExp("", "gi") });
+                }
+                let q = {
+                    $match: {
+                        $and: [
+                            {
+                                $or: or
+                            },
+                            { branch: ObjectId(user.branch.toString()) },
+                        ]
+                    }
+                };
+                if (fromDate && toDate) {
+                    // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+                    let { $match } = q;
+                    //@ts-ignore
+                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                }
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'inspectingOfficer', model: 'User' },
                         { path: 'branch', model: 'branches' }
                     ] });
-                let aggregate;
-                const aggregate1 = this.inventory.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { direction: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { LPOnumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { invoiceNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.productName': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.equipmentModel': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.equipmentType': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                        // {
-                                        //   createdAt:{
-                                        //     "$gte": fromDate || "", "$lte":toDate || ""
-                                        //   }
-                                        // }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate2 = this.inventory.aggregate([
-                    {
-                        $match: {
-                            createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) },
-                            $and: [
-                                {
-                                    $or: [
-                                        { direction: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { LPOnumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { invoiceNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.productName': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.equipmentModel': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { 'products.equipmentType': {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                ]);
-                if (fromDate.length) {
-                    aggregate = aggregate2;
-                }
-                else {
-                    aggregate = aggregate1;
-                }
+                const aggregate = this.inventory.aggregate([q]);
                 //@ts-ignore
                 const inventories = yield this.inventory.aggregatePaginate(aggregate, options);
                 //Populate reference fields

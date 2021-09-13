@@ -61,7 +61,7 @@ class UserController extends Ctrl{
     return async (req:Request, res:Response) =>{
       try {
         //@ts-ignore
-        const data = await this.module.fetchUsers(req.query, req.user);
+        const data = await this.module.fetchUsers({...req.body, ...req.query}, req.user);
         this.ok(res, 'Fetched Users', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -73,7 +73,7 @@ class UserController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.branchUsers(req.query, req.user);
+        const data = await this.module.branchUsers({...req.body, ...req.query}, req.user);
         this.ok(res, 'branch users', data);
       } catch (e) {
         this.handleError(e, req, res);

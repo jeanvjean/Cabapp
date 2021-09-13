@@ -675,6 +675,35 @@ class Product extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId
       const { search, filter, fromDate, toDate } = query;
+
+      let or = [];
+      if(search) {
+        or.push(
+          {modeOfService: new RegExp(search, "gi")},
+          {direction: new RegExp(search, "gi")},
+          {grnNo: new RegExp(search, "gi")},
+          {"products.productName": new RegExp(search, "gi")},
+          {"products.equipmentModel": new RegExp(search, "gi")},
+          {"products.equipmentType": new RegExp(search, "gi")})
+      }else {
+        or.push({"products.productName": new RegExp("", "gi")})
+      }
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },            
+            {branch:ObjectId(user.branch.toString())},
+          ]
+        }
+      }
+      if(fromDate && toDate) {
+        // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+        let { $match } = q;
+        //@ts-ignore
+        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+      }
       const options = {
         ...query,
         populate:[
@@ -682,73 +711,7 @@ class Product extends Module{
           {path:'branch', model:'branches'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.inventory.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                    {direction:{
-                      $regex: search?.toLowerCase() || ''
-                    }},{grnNo:{
-                      $regex: search?.toLowerCase() || ''
-                    }},{LPOnumber:{
-                      $regex: search?.toLowerCase() || ''
-                    }},{invoiceNumber:{
-                      $regex:search?.toLowerCase() || ''
-                    }},{'products.productName':{
-                      $regex:search?.toLowerCase() || ''
-                    }},{'products.equipmentModel':{
-                      $regex:search?.toLowerCase() || ''
-                    }},{'products.equipmentType':{
-                      $regex:search?.toLowerCase() || ''
-                    }}
-                    // {
-                    //   createdAt:{
-                    //     "$gte": fromDate || "", "$lte":toDate || ""
-                    //   }
-                    // }
-                ]
-              },
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      let aggregate2 = this.inventory.aggregate([
-        {
-          $match:{
-            createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)},
-            $and:[
-              {
-                $or:[
-                  {direction:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{grnNo:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{LPOnumber:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{invoiceNumber:{
-                    $regex:search?.toLowerCase() || ''
-                  }},{'products.productName':{
-                    $regex:search?.toLowerCase() || ''
-                  }},{'products.equipmentModel':{
-                    $regex:search?.toLowerCase() || ''
-                  }},{'products.equipmentType':{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              }
-            ]
-          }
-        }
-      ]);
-      if(fromDate.length) {
-        aggregate = aggregate2
-      }else {
-        aggregate = aggregate1;
-      }
+      const aggregate = this.inventory.aggregate([q]);
       //@ts-ignore
       const inventories = await this.inventory.aggregatePaginate(aggregate, options);
       //Populate reference fields

@@ -566,7 +566,7 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(query === null || query === void 0 ? void 0 : query.fromDate), $lte: new Date(query === null || query === void 0 ? void 0 : query.toDate) } });
                 }
-                console.log(q);
+                // console.log(q)
                 const options = Object.assign(Object.assign({}, query), { populate: [
                         { path: 'customer', model: 'customer' },
                         { path: 'supplier', model: 'supplier' },

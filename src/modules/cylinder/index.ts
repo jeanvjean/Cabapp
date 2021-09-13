@@ -725,359 +725,377 @@ class Cylinder extends Module {
       const ObjectId = mongoose.Types.ObjectId
       let options = {
         ...query,
-        populate:[
-          'assignedTo',
-          'branch',
-          'gasType',
-          'supplier',
-          "fromBranch"
-        ]
+        populate:[]
       }
-      let aggregate;
-      const aggregate1 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        },
-        // { $lookup: {from: 'cylinder', localField: 'gasType', foreignField: '_id', as: 'gas'} }
-      ]);
-      const aggregate2 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())},
-              {holder: holder?.toLowerCase()}
-            ]
-          }
-        }
-      ]);
-      const aggregate3 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())},
-              {holder: holder?.toLowerCase()},
-              {gasType: gasType?.toLowerCase()}
-            ]
-          }
-        }
-      ]);
-      const aggregate4 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())},
-              {holder: holder?.toLowerCase()},
-              {gasType: gasType?.toLowerCase()},
-              {cylinderType: cylinderType?.toLowerCase()}
-            ]
-          }
-        }
-      ]);
-      const aggregate5 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())},
-              {holder: holder?.toLowerCase()},
-              {gasType: gasType?.toLowerCase()},
-              {cylinderType: cylinderType?.toLowerCase()},
-              {'assignedTo.name': customer?.toLowerCase()}
-            ]
-          }
-        }
-      ]);
-      const aggregate6 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {branch: ObjectId(user.branch.toString())},
-              {gasType: gasType?.toLowerCase()},
-              {cylinderType: cylinderType?.toLowerCase()},
-              {'assignedTo.name': customer?.toLowerCase()},
-              {'supplier.supplierType': supplier?.toLowerCase()}
-            ]
-          }
-        }
-      ]);
-      const aggregate7 = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-                // ,{fromBranch:{
-                //   $regex:ObjectId(search?.toLowerCase()) || ''
-                // }}
-              ]},
-              {fromBranch: ObjectId(fromBranch)},
-              {branch: ObjectId(branch)}
-            ]
-          }
-        }
-      ]);
-      const branchCylinders = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-              ]},
-              {branch: ObjectId(branch)}
-            ]
-          }
-        }
-      ]);
-      const fromBranchCylinders = this.registerCylinder.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {condition:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{holder:{
-                  $regex:search?.toLowerCase() || ''
-                }},{assignedNumber:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'gasType.gasName':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{'supplier.supplierType':{
-                  $regex:search?.toLowerCase() || ''
-                }},{cylinderStatus:{
-                  $regex:search?.toLowerCase() || ''
-                }}
-              ]},
-              {fromBranch: ObjectId(fromBranch)}
-            ]
-          }
-        }
-      ]);
-      if(holder?.length && cylinderType?.length && gasType?.length && customer?.length && supplier?.length ) {
-        aggregate = aggregate6
-      }else if(holder?.length && cylinderType?.length && gasType?.length && customer?.length){
-        aggregate = aggregate5
-      }else if(holder?.length && cylinderType?.length && gasType?.length) {
-        aggregate = aggregate4
-      } else if(holder?.length && gasType?.length){
-        aggregate = aggregate3
+      let or = [];
+      if(supplier?.length ) {
+          or.push(
+            {'supplier.supplierType': new RegExp(supplier,'gi')}
+        )
+      }else if(customer?.length){
+        or.push(
+          {'assignedTo': new RegExp(customer, 'gi')}
+        )
+      }else if(cylinderType?.length) {
+        // aggregate = aggregate4
+        or.push(
+          {cylinderType: new RegExp(cylinderType, 'gi')}
+        )
+      } else if(gasType?.length){
+        // aggregate = aggregate3
+        or.push(
+          {'gasType': new RegExp(gasType, 'gi')}
+        )
       } else if(holder?.length){
-        aggregate = aggregate2
-      } else if(branch?.length && fromBranch?.length){
-        aggregate = aggregate7
-      } else if(branch?.length){
-        aggregate = branchCylinders
-      } else if(fromBranch?.length){
-        aggregate = fromBranchCylinders
+        // aggregate = aggregate2
+        or.push(          
+          {holder: new RegExp(holder, 'gi')}
+        )
       } else {
-        aggregate = aggregate1
+        or.push({cylinderStatus: new RegExp(search || "", 'gi')})
       }
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },
+            {branch: ObjectId(user.branch.toString())},
+          ]
+        }
+      }
+      let lu = {
+        $lookup:{
+            from: 'cylinder',
+            localField: "gasType",
+            foreignField: "_id",
+            as: "gasType"
+          }
+     }
+      if(fromBranch?.length){
+        // aggregate = aggregate7
+        q.$match.$and.push(
+          //@ts-ignore
+          {fromBranch: ObjectId(fromBranch)}
+        )
+      } else if(branch?.length){
+        // aggregate = branchCylinders
+        q.$match.$and.push(          
+          {branch: ObjectId(branch)}
+        )
+      }
+      let aggregate = this.registerCylinder.aggregate([q]);
+      // const aggregate1 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+      //         {branch: ObjectId(user.branch.toString())}
+      //       ]
+      //     }
+      //   },
+      //   // { $lookup: {from: 'cylinder', localField: 'gasType', foreignField: '_id', as: 'gas'} }
+      // ]);
+      // const aggregate2 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+      //         {branch: ObjectId(user.branch.toString())},
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const aggregate3 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+      //         {branch: ObjectId(user.branch.toString())},
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const aggregate4 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+              
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const aggregate5 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+      //         {branch: ObjectId(user.branch.toString())},
+              
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const aggregate6 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},
+      //         {branch: ObjectId(user.branch.toString())},
+      //         ,
+      //         ,
+              
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const aggregate7 = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //           // ,{fromBranch:{
+      //           //   $regex:ObjectId(search?.toLowerCase()) || ''
+      //           // }}
+      //         ]},,
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const branchCylinders = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //         ]},
+      //       ]
+      //     }
+      //   }
+      // ]);
+      // const fromBranchCylinders = this.registerCylinder.aggregate([
+      //   {
+      //     $match:{
+      //       $and:[
+      //         {$or:[
+      //           {condition:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{holder:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{assignedNumber:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'gasType.gasName':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderType:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{'supplier.supplierType':{
+      //             $regex:search?.toLowerCase() || ''
+      //           }},{cylinderStatus:{
+      //             $regex:search?.toLowerCase() || ''
+      //           }}
+      //         ]},
+      //       ]
+      //     }
+      //   }
+      // ]);
       // let gas = await this.cylinder.findById()
       //@ts-ignore
       var registeredCylinders = await this.registerCylinder.aggregatePaginate(aggregate, options);

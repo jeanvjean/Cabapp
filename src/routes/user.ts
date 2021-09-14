@@ -28,9 +28,9 @@ const router: expressRouter = expressRouter();
 
   router.get('/get-roles', auth.verify(), userCtrl.getConstantRoles());
 
-  router.post('/get-users', auth.verify(), userCtrl.fetchUsers());
+  router.get('/get-users', auth.verify(), userCtrl.fetchUsers());
 
-  router.post('/get-branch-users', auth.verify(), userCtrl.branchUsers());
+  router.get('/get-branch-users', auth.verify(), userCtrl.branchUsers());
 
   router.get('/user-details/:id/:email', auth.verify(), userCtrl.fetchUser());
 

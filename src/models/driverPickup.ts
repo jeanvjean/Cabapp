@@ -71,6 +71,7 @@ export interface PickupInterface extends Document{
   fuelsConsumed:string
   timeOut:string
   timeIn:string
+  pprNo:string
 }
 
 const routeCylinderSchema = new Schema({
@@ -133,7 +134,8 @@ const routeSchema = new Schema({
   fuelGiven:{type:String},
   fuelsConsumed:{type:String},
   timeOut:{type:String},
-  timeIn:{type:String}
+  timeIn:{type:String},
+  pprNo:String
 },{
   timestamps:true
 });

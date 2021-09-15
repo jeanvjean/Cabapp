@@ -62,7 +62,8 @@ const routeSchema = new mongoose_1.Schema({
     fuelGiven: { type: String },
     fuelsConsumed: { type: String },
     timeOut: { type: String },
-    timeIn: { type: String }
+    timeIn: { type: String },
+    pprNo: String
 }, {
     timestamps: true
 });

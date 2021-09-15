@@ -272,7 +272,7 @@ class User extends Module {
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended, departments } = query;
+      let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
       let or = [];
       if(departments && departments.length > 0) {
         for(let filter of departments) {
@@ -307,6 +307,11 @@ class User extends Module {
         //@ts-ignore
         q.$match.$and.push({deactivated: !suspended})
       }
+      if(fromDate && toDate) {
+        let { $match } = q;
+        //@ts-ignore
+        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+      }
       let options = {
         ...query
       }
@@ -328,7 +333,7 @@ class User extends Module {
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {     
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended, departments } = query;
+      let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
       let or = [];
       if(departments && departments.length > 0) {
         for(let filter of departments) {
@@ -366,6 +371,11 @@ class User extends Module {
       }
       let options = {
         ...query
+      }
+      if(fromDate && toDate) {
+        let { $match } = q;
+        //@ts-ignore
+        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
       }
       // let aggregate;
       let aggregate = this.user.aggregate([q]);

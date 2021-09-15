@@ -182,7 +182,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active, unverified, suspended, departments } = query;
+                let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
                 let or = [];
                 if (departments && departments.length > 0) {
                     for (let filter of departments) {
@@ -217,6 +217,11 @@ class User extends module_1.default {
                     //@ts-ignore
                     q.$match.$and.push({ deactivated: !suspended });
                 }
+                if (fromDate && toDate) {
+                    let { $match } = q;
+                    //@ts-ignore
+                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                }
                 let options = Object.assign({}, query);
                 // let aggregate;
                 let aggregate = this.user.aggregate([q]);
@@ -238,7 +243,7 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active, unverified, suspended, departments } = query;
+                let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
                 let or = [];
                 if (departments && departments.length > 0) {
                     for (let filter of departments) {
@@ -275,6 +280,11 @@ class User extends module_1.default {
                     q.$match.$and.push({ deactivated: !suspended });
                 }
                 let options = Object.assign({}, query);
+                if (fromDate && toDate) {
+                    let { $match } = q;
+                    //@ts-ignore
+                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                }
                 // let aggregate;
                 let aggregate = this.user.aggregate([q]);
                 let users;

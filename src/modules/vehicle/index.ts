@@ -541,6 +541,8 @@ class Vehicle extends Module{
       }
       const num = padLeft(routePlan.serialNo , 6, "");
       const ecr = "ECR"+num;
+
+      routePlan.pprNo = "PPR"+num;
       routePlan.ecrNo = ecr;
       // routePlan.icnNo = "ICN"+num;
       if(routePlan.orderType == pickupType.CUSTOMER) {

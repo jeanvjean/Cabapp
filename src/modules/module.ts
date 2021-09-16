@@ -9,6 +9,8 @@ export interface QueryInterface {
   filter?:'string',
   skip?:number | 0
   holder?:string,
+  condition?:string
+  owner:string
   cylinderType?:string,
   gasType?:string,
   customer?:string,

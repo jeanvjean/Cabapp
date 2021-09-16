@@ -6,6 +6,7 @@ const cylinder_1 = require("./cylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 const walk_in_customers_1 = require("./walk-in-customers");
+const supplier_1 = require("./supplier");
 var TypesOfCylinders;
 (function (TypesOfCylinders) {
     TypesOfCylinders["BUFFER"] = "buffer";
@@ -32,6 +33,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     dateManufactured: { type: Date },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     gasType: { type: mongoose_1.Schema.Types.ObjectId, ref: 'cylinder' },
+    gasName: { type: String },
     standardColor: { type: String },
     assignedNumber: { type: String },
     testingPresure: { type: String },
@@ -50,6 +52,8 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     purchaseCost: { type: Number },
     purchaseDate: { type: Date },
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
+    supplierType: { type: String, enum: Object.values(supplier_1.SupplierTypes) },
+    owner: { type: String, enum: Object.values(cylinderHolder) },
     tracking: [trackingSchema]
 }, {
     timestamps: true

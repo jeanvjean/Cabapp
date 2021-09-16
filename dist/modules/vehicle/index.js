@@ -695,6 +695,8 @@ class Vehicle extends module_1.default {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                                        //@ts-ignore
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.supplierType = supplier.supplierType;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
                                             heldBy: "supplier",
                                             name: supplier.name,
@@ -787,7 +789,7 @@ class Vehicle extends module_1.default {
                                     for (let cylinder of supplier.cylinders) {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
                                         //@ts-ignore
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
                                             heldBy: "supplier",
                                             name: supplier.name,

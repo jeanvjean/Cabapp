@@ -8,6 +8,7 @@ import { orderType, pickupType } from './order';
 import { RouteActivity, RoutePlanStatus } from './vehicle';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import { SupplierTypes } from './supplier';
 
 interface RouteCylinderInterface{
   cylinderNo:string
@@ -27,6 +28,7 @@ export interface customerPickupInterface{
 }
 
 export interface supplierPickupInterface{
+  supplierType: SupplierTypes;
   name?:string
   destination:string
   departure:string

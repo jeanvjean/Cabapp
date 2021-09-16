@@ -9,6 +9,7 @@ import { CylinderCondition } from './cylinder';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { WalkinCustomerStatus } from './walk-in-customers';
+import { SupplierTypes } from './supplier';
 
 export enum TypesOfCylinders {
   BUFFER="buffer",
@@ -63,6 +64,8 @@ export interface RegisteredCylinderInterface extends Document{
    */
 
   gasType:Schema.Types.ObjectId
+
+  gasName:string
 
   /**
    * @param standardColor standard gas color for cylinder
@@ -130,6 +133,10 @@ export interface RegisteredCylinderInterface extends Document{
 
   supplier:Schema.Types.ObjectId
 
+  supplierType:SupplierTypes
+
+  owner: cylinderHolder
+
   /**
    * @param createdAt
    */
@@ -161,6 +168,8 @@ export const registerCylinderSchema = new Schema({
   assignedTo:{type:Schema.Types.ObjectId, ref:'customer'},
 
   gasType:{type:Schema.Types.ObjectId, ref:'cylinder'},
+
+  gasName:{type:String},
 
   standardColor:{type:String},
 
@@ -197,6 +206,10 @@ export const registerCylinderSchema = new Schema({
   purchaseDate:{type:Date},
 
   supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
+
+  supplierType:{type:String, enum:Object.values(SupplierTypes)},
+
+  owner:{type:String, enum:Object.values(cylinderHolder) },
 
   tracking:[trackingSchema]
 },{

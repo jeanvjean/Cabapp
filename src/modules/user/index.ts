@@ -278,9 +278,8 @@ class User extends Module {
         for(let filter of departments) {
           or.push({role: new RegExp(filter, "gi")})
         }
-      }else {
-        or.push({name: new RegExp(search || "", "gi")});
       }
+      or.push({name: new RegExp(search || "", "gi")});
       let q = {
         $match:{
           $and:[
@@ -339,9 +338,8 @@ class User extends Module {
         for(let filter of departments) {
           or.push({role: new RegExp(filter, "gi")})
         }
-      }else {
-        or.push({name: new RegExp(search || "", "gi")})
       }
+      or.push({name: new RegExp(search || "", "gi")});
       let q = {
         $match:{
           $and:[

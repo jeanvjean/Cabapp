@@ -189,9 +189,7 @@ class User extends module_1.default {
                         or.push({ role: new RegExp(filter, "gi") });
                     }
                 }
-                else {
-                    or.push({ name: new RegExp(search || "", "gi") });
-                }
+                or.push({ name: new RegExp(search || "", "gi") });
                 let q = {
                     $match: {
                         $and: [
@@ -250,9 +248,7 @@ class User extends module_1.default {
                         or.push({ role: new RegExp(filter, "gi") });
                     }
                 }
-                else {
-                    or.push({ name: new RegExp(search || "", "gi") });
-                }
+                or.push({ name: new RegExp(search || "", "gi") });
                 let q = {
                     $match: {
                         $and: [

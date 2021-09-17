@@ -398,59 +398,29 @@ class Customer extends Module{
       }
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
-      let aggregate;
-      const aggregate1 = this.order.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {status:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {orderNumber:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {ecrNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {icnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { pickupType: filter?.toLowerCase() },
-              {vehicle: data.vehicle}
-            ]
-          }
+      let or = [];
+      or.push(
+        {status: new RegExp(search || '', 'gi')},
+        {orderNumber: new RegExp(search || '', 'gi')},
+        {ecrNo: new RegExp(search || '', 'gi')}
+        );
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },
+            {vehicle: data.vehicle}
+          ]
         }
-      ]);
-      const aggregate2 = this.order.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {status:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {orderNumber:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {ecrNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {icnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { vehicle: data.vehicle }
-            ]
-          }
-        }
-      ]);
-      if(filter?.length) {
-        aggregate = aggregate1
-      }else {
-        aggregate = aggregate2
       }
+      if(filter?.length) {
+        q.$match.$and.push(
+          //@ts-ignore
+          {pickupType: new RegExp(filter || '', 'gi')},
+        );
+      }
+      let aggregate = this.order.aggregate([q]);
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate,options);
       //Populate the reference fields
@@ -503,87 +473,35 @@ class Customer extends Module{
       }
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter, type } = query;
-      console.log(type)
-      let aggregate;
-      const aggregate1 = this.order.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {status:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {orderNumber:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {ecrNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {icnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { pickupType: filter?.toLowerCase() },
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
+      let or = [];
+      or.push(
+        {status: new RegExp(search || '', 'gi')},
+        {orderNumber: new RegExp(search || '', 'gi')},
+        {ecrNo: new RegExp(search || '', 'gi')}
+        );
+      let q = {
+        $match:{
+          $and:[
+            {
+              $or:or
+            },
+            {branch: ObjectId(user.branch.toString())}
+          ]
         }
-      ]);
-      const aggregate2 = this.order.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {status:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {orderNumber:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {ecrNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {icnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { branch: ObjectId(user.branch.toString()) }
-            ]
-          }
-        }
-      ]);
-      const aggregate3 = this.order.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {status:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {orderNumber:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {ecrNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {icnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { branch: ObjectId(user.branch.toString()) },
-              { pickupType: filter?.toLowerCase() },
-              { orderType: type }
-            ]
-          }
-        }
-      ]);
-      if(filter?.length) {
-        aggregate = aggregate1
-      }else if(type?.length && filter?.length){
-        aggregate = aggregate3
-      }else {
-        aggregate = aggregate2
       }
+      if(filter?.length) {
+        q.$match.$and.push(
+          //@ts-ignore
+          {pickupType: new RegExp(filter || '', 'gi')},
+        );
+      }
+      if(type?.length) {
+        q.$match.$and.push(
+          //@ts-ignore
+          {orderType: new RegExp(type || '', 'gi')},
+        );
+      }
+      let aggregate = this.order.aggregate([q]);
       //@ts-ignore
       const orders = await this.order.aggregatePaginate(aggregate, options);
       //Populate reference fields
@@ -1040,54 +958,6 @@ class Customer extends Module{
           let customer = await this.customer.findById(comp.customer);
           comp.customer = customer;
         }
-
-      // let startStage = complaints.filter(transfer=> {
-      //   if(transfer.approvalStage == stagesOfApproval.START) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage1 = complaints.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let stage2 = complaints.filter(transfer=>{
-      //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-      //     for(let tofficer of transfer.approvalOfficers) {
-      //       if(`${tofficer.id}` == `${user._id}`){
-      //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-      //           return transfer
-      //         }
-      //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-      //         return transfer
-      //       }
-      //     }
-      //   }
-      // });
-      // let pendingApprovals;
-      // if(user.subrole == 'superadmin'){
-      //   pendingApprovals = stage2;
-      // }else if(user.subrole == 'head of department'){
-      //   pendingApprovals = stage1
-      // }else {
-      //   pendingApprovals = startStage;
-      // }
       return Promise.resolve(complaints)
     } catch (e) {
       this.handleException(e);

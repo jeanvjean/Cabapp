@@ -288,60 +288,24 @@ class Customer extends module_1.default {
                     ] });
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter } = query;
-                let aggregate;
-                const aggregate1 = this.order.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { status: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { orderNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { vehicle: data.vehicle }
-                            ]
-                        }
+                let or = [];
+                or.push({ status: new RegExp(search || '', 'gi') }, { orderNumber: new RegExp(search || '', 'gi') }, { ecrNo: new RegExp(search || '', 'gi') });
+                let q = {
+                    $match: {
+                        $and: [
+                            {
+                                $or: or
+                            },
+                            { vehicle: data.vehicle }
+                        ]
                     }
-                ]);
-                const aggregate2 = this.order.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { status: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { orderNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { vehicle: data.vehicle }
-                            ]
-                        }
-                    }
-                ]);
+                };
                 if (filter === null || filter === void 0 ? void 0 : filter.length) {
-                    aggregate = aggregate1;
+                    q.$match.$and.push(
+                    //@ts-ignore
+                    { pickupType: new RegExp(filter || '', 'gi') });
                 }
-                else {
-                    aggregate = aggregate2;
-                }
+                let aggregate = this.order.aggregate([q]);
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);
                 //Populate the reference fields
@@ -391,89 +355,29 @@ class Customer extends module_1.default {
                     ] });
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter, type } = query;
-                console.log(type);
-                let aggregate;
-                const aggregate1 = this.order.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { status: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { orderNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
+                let or = [];
+                or.push({ status: new RegExp(search || '', 'gi') }, { orderNumber: new RegExp(search || '', 'gi') }, { ecrNo: new RegExp(search || '', 'gi') });
+                let q = {
+                    $match: {
+                        $and: [
+                            {
+                                $or: or
+                            },
+                            { branch: ObjectId(user.branch.toString()) }
+                        ]
                     }
-                ]);
-                const aggregate2 = this.order.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { status: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { orderNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate3 = this.order.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { status: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { orderNumber: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { pickupType: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { orderType: type }
-                            ]
-                        }
-                    }
-                ]);
+                };
                 if (filter === null || filter === void 0 ? void 0 : filter.length) {
-                    aggregate = aggregate1;
+                    q.$match.$and.push(
+                    //@ts-ignore
+                    { pickupType: new RegExp(filter || '', 'gi') });
                 }
-                else if ((type === null || type === void 0 ? void 0 : type.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate3;
+                if (type === null || type === void 0 ? void 0 : type.length) {
+                    q.$match.$and.push(
+                    //@ts-ignore
+                    { orderType: new RegExp(type || '', 'gi') });
                 }
-                else {
-                    aggregate = aggregate2;
-                }
+                let aggregate = this.order.aggregate([q]);
                 //@ts-ignore
                 const orders = yield this.order.aggregatePaginate(aggregate, options);
                 //Populate reference fields
@@ -940,53 +844,6 @@ class Customer extends module_1.default {
                     let customer = yield this.customer.findById(comp.customer);
                     comp.customer = customer;
                 }
-                // let startStage = complaints.filter(transfer=> {
-                //   if(transfer.approvalStage == stagesOfApproval.START) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage1 = complaints.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE1) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let stage2 = complaints.filter(transfer=>{
-                //   if(transfer.approvalStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of transfer.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return transfer
-                //         }
-                //       }else if(`${transfer.nextApprovalOfficer}` == `${user._id}`){
-                //         return transfer
-                //       }
-                //     }
-                //   }
-                // });
-                // let pendingApprovals;
-                // if(user.subrole == 'superadmin'){
-                //   pendingApprovals = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   pendingApprovals = stage1
-                // }else {
-                //   pendingApprovals = startStage;
-                // }
                 return Promise.resolve(complaints);
             }
             catch (e) {

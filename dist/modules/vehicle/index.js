@@ -533,7 +533,6 @@ class Vehicle extends module_1.default {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { vehicleId, query } = data;
-                console.log(query === null || query === void 0 ? void 0 : query.fromDate, query === null || query === void 0 ? void 0 : query.toDate);
                 const search = query === null || query === void 0 ? void 0 : query.search;
                 if (search === null || search === void 0 ? void 0 : search.length) {
                     let u = yield this.user.findOne({ name: search, role: "sales", subrole: "driver" });

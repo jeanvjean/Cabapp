@@ -655,7 +655,6 @@ class Vehicle extends Module{
     try {
       let ObjectId = mongoose.Types.ObjectId;
       let { vehicleId, query } = data;
-      console.log(query?.fromDate, query?.toDate)
       const search = query?.search;
       if(search?.length) {
         let u = await this.user.findOne({name:search, role:"sales", subrole:"driver"});
@@ -665,11 +664,10 @@ class Vehicle extends Module{
         }
         vehicleId = vi?._id;
       }
-      let or = [];
+      let or = [];      
+      or.push({modeOfService: new RegExp("", "gi")})
       if(search) {
         or.push({modeOfService: new RegExp(search, "gi")})
-      }else {
-        or.push({modeOfService: new RegExp("", "gi")})
       }
       let q = {
         $match:{

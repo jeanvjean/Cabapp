@@ -667,7 +667,11 @@ class Vehicle extends Module{
       let or = [];      
       or.push({modeOfService: new RegExp("", "gi")})
       if(search) {
-        or.push({modeOfService: new RegExp(search, "gi")})
+        or.push(
+          {modeOfService: new RegExp(search, "gi")},
+          {tecrNo: new RegExp(search, "gi")},
+          {'suppliers.name': new RegExp(search, "gi")},
+        )
       }
       let q = {
         $match:{

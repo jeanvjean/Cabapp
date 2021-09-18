@@ -671,6 +671,7 @@ class Vehicle extends Module{
           {modeOfService: new RegExp(search, "gi")},
           {tecrNo: new RegExp(search, "gi")},
           {'suppliers.name': new RegExp(search, "gi")},
+          {'customers.name': new RegExp(search, "gi")}
         )
       }
       let q = {

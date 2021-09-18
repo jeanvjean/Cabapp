@@ -14,6 +14,9 @@ export interface QueryInterface {
   cylinderType?:string,
   gasType?:string,
   customer?:string,
+  driver?:string
+  tecr?:string
+  tfcr?:string
   supplier?:string,
   produced?:boolean;
   sort?: object;

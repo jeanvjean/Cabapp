@@ -655,25 +655,28 @@ class Vehicle extends Module{
     try {
       let ObjectId = mongoose.Types.ObjectId;
       let { vehicleId, query } = data;
-      const search = query?.search;
-      if(search?.length) {
-        let u = await this.user.findOne({name:search, role:"sales", subrole:"driver"});
-        let vi = await this.vehicle.findOne({assignedTo:u?._id});
-        if(!vi) {
-          throw new BadInputFormatException('Driver\'s vehicle information not found');
-        }
-        vehicleId = vi?._id;
-      }
-      let or = [];      
-      or.push({modeOfService: new RegExp("", "gi")})
+      //@ts-ignore
+      let { driver, tecr, tfcr, supplier, customer, search, fromDate, toDate } = query;
+      // console.log(driver, tecr, tfcr, supplier, customer, search);
+      // const search = query?.search;
+      // if(driver?.length) {
+      //   // console.log(driver)
+      //   let u = await this.user.findOne({name:driver, role:"sales", subrole:"driver"});
+      //   //@ts-ignore
+      //   let vi = await this.vehicle.findOne({assignedTo:`${u?._id}`});
+      //   console.log(vi);
+      //   if(!vi) {
+      //     throw new BadInputFormatException('Driver\'s vehicle information not found');
+      //   }
+      //   vehicleId = vi?._id;
+      // }
+      
+      let or = [];
       if(search) {
-        or.push(
-          {modeOfService: new RegExp(search, "gi")},
-          {tecrNo: new RegExp(search, "gi")},
-          {'suppliers.name': new RegExp(search, "gi")},
-          {'customers.name': new RegExp(search, "gi")}
-        )
+        or.push({modeOfService: new RegExp(search || "", "gi")})
       }
+      or.push({"customers.name": new RegExp(search || "", "gi")})
+      // console.log(or)
       let q = {
         $match:{
           $and:[
@@ -686,22 +689,32 @@ class Vehicle extends Module{
         }
       }
 
-      if(query?.fromDate && query.toDate) {
-        // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+      if(tecr?.length) {
+        //@ts-ignore
+        q.$match.$and.push({tecrNo: new RegExp(tecr, "gi")})
+      }
+      if(tfcr?.length) {
+        //@ts-ignore
+        q.$match.$and.push({tfcrNo: new RegExp(tfcr, "gi")})
+      }
+      if(supplier?.length) {
+        //@ts-ignore
+        q.$match.$and.push({'suppliers.name': new RegExp(supplier, "gi")})
+      }
+      if(customer?.length) {
+        //@ts-ignore
+        q.$match.$and.push({'customers.name': new RegExp(customer, "gi")})
+      }
+      // console.log(or)
+      if(fromDate && toDate) {
+        // {...q.$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}} 
         let { $match } = q;
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}}
+        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
       }
       // console.log(q)
       const options = {
-        ...query,
-        populate:[
-          {path:'customer', model:'customer'},
-          {path:'supplier', model:'supplier'},
-          {path:'vehicle', model:'vehicle'},
-          {path:'security', model:'User'},
-          {path:'recievedBy', model:'User'}
-        ]
+        ...query
       }
       let aggregate = this.pickup.aggregate([q]);
       //@ts-ignore

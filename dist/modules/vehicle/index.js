@@ -533,22 +533,27 @@ class Vehicle extends module_1.default {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { vehicleId, query } = data;
-                const search = query === null || query === void 0 ? void 0 : query.search;
-                if (search === null || search === void 0 ? void 0 : search.length) {
-                    let u = yield this.user.findOne({ name: search, role: "sales", subrole: "driver" });
-                    let vi = yield this.vehicle.findOne({ assignedTo: u === null || u === void 0 ? void 0 : u._id });
-                    if (!vi) {
-                        throw new exceptions_1.BadInputFormatException('Driver\'s vehicle information not found');
-                    }
-                    vehicleId = vi === null || vi === void 0 ? void 0 : vi._id;
-                }
+                //@ts-ignore
+                let { driver, tecr, tfcr, supplier, customer, search, fromDate, toDate } = query;
+                // console.log(driver, tecr, tfcr, supplier, customer, search);
+                // const search = query?.search;
+                // if(driver?.length) {
+                //   // console.log(driver)
+                //   let u = await this.user.findOne({name:driver, role:"sales", subrole:"driver"});
+                //   //@ts-ignore
+                //   let vi = await this.vehicle.findOne({assignedTo:`${u?._id}`});
+                //   console.log(vi);
+                //   if(!vi) {
+                //     throw new BadInputFormatException('Driver\'s vehicle information not found');
+                //   }
+                //   vehicleId = vi?._id;
+                // }
                 let or = [];
                 if (search) {
-                    or.push({ modeOfService: new RegExp(search, "gi") });
+                    or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                else {
-                    or.push({ modeOfService: new RegExp("", "gi") });
-                }
+                or.push({ "customers.name": new RegExp(search || "", "gi") });
+                // console.log(or)
                 let q = {
                     $match: {
                         $and: [
@@ -560,20 +565,31 @@ class Vehicle extends module_1.default {
                         ]
                     }
                 };
-                if ((query === null || query === void 0 ? void 0 : query.fromDate) && query.toDate) {
-                    // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
+                if (tecr === null || tecr === void 0 ? void 0 : tecr.length) {
+                    //@ts-ignore
+                    q.$match.$and.push({ tecrNo: new RegExp(tecr, "gi") });
+                }
+                if (tfcr === null || tfcr === void 0 ? void 0 : tfcr.length) {
+                    //@ts-ignore
+                    q.$match.$and.push({ tfcrNo: new RegExp(tfcr, "gi") });
+                }
+                if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
+                    //@ts-ignore
+                    q.$match.$and.push({ 'suppliers.name': new RegExp(supplier, "gi") });
+                }
+                if (customer === null || customer === void 0 ? void 0 : customer.length) {
+                    //@ts-ignore
+                    q.$match.$and.push({ 'customers.name': new RegExp(customer, "gi") });
+                }
+                // console.log(or)
+                if (fromDate && toDate) {
+                    // {...q.$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}} 
                     let { $match } = q;
                     //@ts-ignore
-                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(query === null || query === void 0 ? void 0 : query.fromDate), $lte: new Date(query === null || query === void 0 ? void 0 : query.toDate) } });
+                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
                 }
                 // console.log(q)
-                const options = Object.assign(Object.assign({}, query), { populate: [
-                        { path: 'customer', model: 'customer' },
-                        { path: 'supplier', model: 'supplier' },
-                        { path: 'vehicle', model: 'vehicle' },
-                        { path: 'security', model: 'User' },
-                        { path: 'recievedBy', model: 'User' }
-                    ] });
+                const options = Object.assign({}, query);
                 let aggregate = this.pickup.aggregate([q]);
                 //@ts-ignore
                 const routePlan = yield this.pickup.aggregatePaginate(aggregate, options);

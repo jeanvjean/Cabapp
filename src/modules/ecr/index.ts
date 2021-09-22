@@ -2,7 +2,7 @@ import { Model } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { BranchInterface } from "../../models/branch";
 import { CustomerInterface } from "../../models/customer";
-import { EcrApproval, EmptyCylinderInterface, Priority, ProductionSchedule } from "../../models/emptyCylinder";
+import { EcrApproval, EcrType, EmptyCylinderInterface, Priority, ProductionSchedule } from "../../models/emptyCylinder";
 import { OutgoingCylinderInterface } from "../../models/ocn";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { ApprovalStatus } from "../../models/transferCylinder";
@@ -20,6 +20,11 @@ export interface EmptyCylinderProps{
     customer:Model<CustomerInterface>
     ocn:Model<OutgoingCylinderInterface>
     branch:Model<BranchInterface>
+}
+
+interface tecrApprovalInput {
+    tecrId:string,
+    otp:string
 }
 
 interface ApproveEcrInput {
@@ -61,7 +66,11 @@ class EmptyCylinderModule extends Module {
 
     public async createECR(data:newEcrInterface, user:UserInterface):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const ecr = new this.emptyCylinder({...data,branch:user.branch});
+            const ecr = new this.emptyCylinder({
+                ...data,
+                branch:user.branch,
+                type:EcrType.SALES
+            });
             if(ecr.priority == Priority.URGENT) {
                 let aprvO = await this.user.findOne({role:user.role, subrole:"head of department", branch:user.branch});
                 if(!aprvO) {
@@ -80,6 +89,7 @@ class EmptyCylinderModule extends Module {
             if(!avEcr[0]) {
                 num = 1
             }else {
+                //@ts-ignore
                 num = avEcr[0].initNum +1;
             }
             let inNum =  padLeft(num, 6, "");
@@ -102,42 +112,29 @@ class EmptyCylinderModule extends Module {
 
     public async emptyCylinderPool(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
         try {
-            const { search } = query;
+            const { search, type } = query;
             const ObjectId = mongoose.Types.ObjectId;
             const options = {
-                ...query
+                page:query.page,
+                limit:query.limit
             }
-            const aggregate = this.emptyCylinder.aggregate([
-                {
-                    $match:{
-                        $and:[
-                            {
-                                $or:[
-                                    {ecrNo:{
-                                        $regex: search?.toLowerCase || ""
-                                    }},
-                                    {priority:{
-                                        $regex: search?.toLowerCase || ""
-                                    }},
-                                    {ecrNo:{
-                                        $regex: search?.toLowerCase || ""
-                                    }},
-                                    {position:{
-                                        $regex: search?.toLowerCase || ""
-                                    }}
-                                ]
-                            },
-                            {branch:ObjectId(user.branch.toString())},
-                            {scheduled:false}
-                        ]
-                    }
-                },
-                {
-                    $sort:{priority:1}
-                }
-            ]);
+            let q = {
+                branch:user.branch
+            }
+            let or =[]
+            if(search) {
+                or.push({status:new RegExp(search, 'gi')});
+            }
+            if(type) {
+                //@ts-ignore
+                q = {...q, type:new RegExp(type, 'gi')}
+            }
+            if(or.length > 0) {
+                //@ts-ignore
+                q = {...q, $or:or}
+            }
             //@ts-ignore
-            const ecr = await this.emptyCylinder.aggregatePaginate(aggregate, options);
+            const ecr = await this.emptyCylinder.paginate(q, options);
             return Promise.resolve(ecr);
         } catch (e) {
             this.handleException(e)
@@ -148,6 +145,87 @@ class EmptyCylinderModule extends Module {
         try {
             const ecr = await this.emptyCylinder.findById(ecrId);
             return Promise.resolve(ecr as EmptyCylinderInterface);
+        } catch (e) {
+            this.handleException(e)
+        }
+    }
+
+    public async fetchTECR(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
+        try {
+            let { tecr, customer, type, driverStatus, salesStatus } = query;
+            console.log(tecr)
+            let q = {
+                branch:user.branch
+            }
+            let options = {
+                page:query.page || 1,
+                limit:query.limit || 10,
+                populate:[
+                    {path:'customer', model:'customer'},
+                    {path:'cylinders', model:'registered-cylinders'},
+                    {path:'nextApprovalOfficer', model:'User'},
+                    {path:'branch', model:'branches'},
+                    {path:'initiator', model:'User'}
+                ]
+            }
+            let or = []
+
+            if(tecr) {
+                // or.push({tecrNo: new RegExp(tecr, 'gi')})
+                //@ts-ignore
+                q = {...q, tecrNo: new RegExp(tecr, 'gi')}
+            }
+            if(customer) {
+                // or.push({"customer.name": new RegExp(customer, 'gi')})
+                //@ts-ignore
+                q = {...q, "customer.name": new RegExp(customer, 'gi')}
+            }
+
+            if(type) {
+                //@ts-ignore
+                q = {...q, type:new RegExp(type, 'gi')}
+            }
+            if(driverStatus) {
+                //@ts-ignore
+                q = {...q, driverStatus:new RegExp(driverStatus, 'gi')}
+            }
+            if(salesStatus) {
+                //@ts-ignore
+                q = {...q, status:new RegExp(salesStatus, 'gi')}
+            }
+            //@ts-ignore
+            const ecr = await this.emptyCylinder.paginate(q, options);
+            return Promise.resolve(ecr);
+        } catch (e) {
+            this.handleException(e)
+        }
+    }
+
+    public async fetchTEcrDetails(tecrNo:string):Promise<EmptyCylinderInterface|undefined>{
+        try {
+            const data = await this.emptyCylinder.findOne({tecrNo:tecrNo});
+            return Promise.resolve(data as EmptyCylinderInterface);
+        } catch (e) {
+            this.handleException(e)
+        }
+    }
+    //@ts-ignore
+    public async completeTecr(input:tecrApprovalInput):Promise<EmptyCylinderInterface|undefined>{
+        try {
+            let { tecrId, otp } = input;
+            let data = await this.emptyCylinder.findById(tecrId);
+            if(!data) {
+                throw new BadInputFormatException('sorry this request was not found');
+            }
+            if(data.otp !== otp) {
+                throw new BadInputFormatException('invalid otp provided');
+            }
+
+            data.driverStatus = EcrApproval.APPROVED;
+
+            await data.save();
+
+            return Promise.resolve(data);
         } catch (e) {
             this.handleException(e)
         }

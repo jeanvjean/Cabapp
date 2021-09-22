@@ -40,6 +40,11 @@ class Customer extends module_1.default {
             try {
                 const date = new Date();
                 date.setDate(date.getDate() + data.cylinderHoldingTime);
+                let exist = yield this.customer.findOne({ email: data.email, branch: user.branch });
+                console.log(exist);
+                if (exist) {
+                    throw new exceptions_1.BadInputFormatException('a customer with this email exists');
+                }
                 const customer = yield this.customer.create(Object.assign(Object.assign({}, data), { cylinderHoldingTime: date.toISOString(), branch: user.branch }));
                 yield logs_1.createLog({
                     user: user._id,

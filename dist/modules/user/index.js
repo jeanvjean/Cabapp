@@ -182,50 +182,75 @@ class User extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
-                let or = [];
-                if (departments && departments.length > 0) {
-                    for (let filter of departments) {
-                        or.push({ role: new RegExp(filter, "gi") });
-                    }
-                }
-                or.push({ name: new RegExp(search || "", "gi") });
-                let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            }
-                        ]
-                    }
+                let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10
                 };
+                let q = {};
+                //@ts-ignore
+                let or = [];
+                // console.log(q)
                 if (verified) {
                     //@ts-ignore
-                    q.$match.$and.push({ isVerified: !!verified });
+                    q = Object.assign(Object.assign({}, q), { isVerified: !!verified });
+                    // q.$or.push({isVerified: !!verified});
                 }
                 if (active) {
                     //@ts-ignore
-                    q.$match.$and.push({ deactivated: !!active });
-                }
-                if (unverified) {
-                    //@ts-ignore
-                    q.$match.$and.push({ isVerified: !unverified });
+                    // q.$or.push({deactivated: !!active});
+                    q = Object.assign(Object.assign({}, q), { deactivated: !active });
                 }
                 if (suspended) {
                     //@ts-ignore
-                    q.$match.$and.push({ deactivated: !suspended });
+                    // q.$or.push({deactivated: !suspended});
+                    q = Object.assign(Object.assign({}, q), { deactivated: !!suspended });
                 }
-                if (fromDate && toDate) {
-                    let { $match } = q;
+                if (unverified) {
                     //@ts-ignore
-                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                    // q.$or.push({deactivated: !unverified});
+                    q = Object.assign(Object.assign({}, q), { isVerified: !unverified });
                 }
-                let options = Object.assign({}, query);
+                if (email) {
+                    //@ts-ignore
+                    // q.$or.push({email: new RegExp(email, "gi")});
+                    q = Object.assign(Object.assign({}, q), { email: new RegExp(email, 'gi') });
+                }
+                if (subrole) {
+                    //@ts-ignore
+                    // q.$or.push({subrole: new RegExp(subrole, "gi")});
+                    q = Object.assign(Object.assign({}, q), { subrole: new RegExp(subrole, "gi") });
+                }
+                if (departments) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { role: { $in: departments } });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
+                }
+                if (name) {
+                    // q.$or.push({"name": new RegExp(name || "", "gi")})
+                    //@ts-ignore
+                    // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { name: new RegExp(name, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 // let aggregate;
-                let aggregate = this.user.aggregate([q]);
-                let users;
+                // let aggregate = this.user.aggregate([q]);
                 //@ts-ignore
-                users = yield this.user.aggregatePaginate(aggregate, options);
+                let users = yield this.user.paginate(q, options);
                 return Promise.resolve(users);
                 //@ts-ignore
                 // users = await this.user.searchPartial(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
@@ -236,56 +261,79 @@ class User extends module_1.default {
             }
         });
     }
-    //@ts-ignore
     branchUsers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
-                let or = [];
-                if (departments && departments.length > 0) {
-                    for (let filter of departments) {
-                        or.push({ role: new RegExp(filter, "gi") });
-                    }
-                }
-                or.push({ name: new RegExp(search || "", "gi") });
-                let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            },
-                            { branch: ObjectId(user.branch.toString()) }
-                        ]
-                    }
+                let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10
                 };
+                let q = {
+                    branch: user.branch
+                };
+                //@ts-ignore
+                let or = [];
+                // console.log(q)
                 if (verified) {
                     //@ts-ignore
-                    q.$match.$and.push({ isVerified: !!verified });
+                    q = Object.assign(Object.assign({}, q), { isVerified: !!verified });
+                    // q.$or.push({isVerified: !!verified});
                 }
                 if (active) {
                     //@ts-ignore
-                    q.$match.$and.push({ deactivated: !!active });
-                }
-                if (unverified) {
-                    //@ts-ignore
-                    q.$match.$and.push({ isVerified: !unverified });
+                    // q.$or.push({deactivated: !!active});
+                    q = Object.assign(Object.assign({}, q), { deactivated: !active });
                 }
                 if (suspended) {
                     //@ts-ignore
-                    q.$match.$and.push({ deactivated: !suspended });
+                    // q.$or.push({deactivated: !suspended});
+                    q = Object.assign(Object.assign({}, q), { deactivated: !!suspended });
                 }
-                let options = Object.assign({}, query);
-                if (fromDate && toDate) {
-                    let { $match } = q;
+                if (unverified) {
                     //@ts-ignore
-                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                    // q.$or.push({deactivated: !unverified});
+                    q = Object.assign(Object.assign({}, q), { isVerified: !unverified });
                 }
-                // let aggregate;
-                let aggregate = this.user.aggregate([q]);
-                let users;
+                if (email) {
+                    //@ts-ignore
+                    // q.$or.push({email: new RegExp(email, "gi")});
+                    q = Object.assign(Object.assign({}, q), { email: new RegExp(email, 'gi') });
+                }
+                if (subrole) {
+                    //@ts-ignore
+                    // q.$or.push({subrole: new RegExp(subrole, "gi")});
+                    q = Object.assign(Object.assign({}, q), { subrole: new RegExp(subrole, "gi") });
+                }
+                if (departments) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { role: { $in: departments } });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
+                }
+                if (name) {
+                    // q.$or.push({"name": new RegExp(name || "", "gi")})
+                    //@ts-ignore
+                    // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { name: new RegExp(name, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                users = yield this.user.aggregatePaginate(aggregate, options);
+                let users = yield this.user.paginate(q, options);
                 return Promise.resolve(users);
             }
             catch (e) {

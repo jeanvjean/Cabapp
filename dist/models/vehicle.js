@@ -66,6 +66,7 @@ const disposalSchema = new mongoose_1.Schema({
     timestamps: true
 });
 exports.vehicleSchema = new mongoose_1.Schema({
+    vehicleName: { type: String },
     vehicleType: { type: String },
     manufacturer: { type: String },
     vModel: { type: String },

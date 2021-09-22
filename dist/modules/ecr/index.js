@@ -29,7 +29,7 @@ class EmptyCylinderModule extends module_1.default {
     createECR(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const ecr = new this.emptyCylinder(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                const ecr = new this.emptyCylinder(Object.assign(Object.assign({}, data), { branch: user.branch, type: emptyCylinder_1.EcrType.SALES }));
                 if (ecr.priority == emptyCylinder_1.Priority.URGENT) {
                     let aprvO = yield this.user.findOne({ role: user.role, subrole: "head of department", branch: user.branch });
                     if (!aprvO) {
@@ -49,6 +49,7 @@ class EmptyCylinderModule extends module_1.default {
                     num = 1;
                 }
                 else {
+                    //@ts-ignore
                     num = avEcr[0].initNum + 1;
                 }
                 let inNum = token_1.padLeft(num, 6, "");
@@ -73,40 +74,29 @@ class EmptyCylinderModule extends module_1.default {
     emptyCylinderPool(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
+                const { search, type } = query;
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const options = Object.assign({}, query);
-                const aggregate = this.emptyCylinder.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } },
-                                        { priority: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } },
-                                        { position: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { scheduled: false }
-                            ]
-                        }
-                    },
-                    {
-                        $sort: { priority: 1 }
-                    }
-                ]);
+                const options = {
+                    page: query.page,
+                    limit: query.limit
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ status: new RegExp(search, 'gi') });
+                }
+                if (type) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { type: new RegExp(type, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const ecr = yield this.emptyCylinder.aggregatePaginate(aggregate, options);
+                const ecr = yield this.emptyCylinder.paginate(q, options);
                 return Promise.resolve(ecr);
             }
             catch (e) {
@@ -119,6 +109,90 @@ class EmptyCylinderModule extends module_1.default {
             try {
                 const ecr = yield this.emptyCylinder.findById(ecrId);
                 return Promise.resolve(ecr);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchTECR(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { tecr, customer, type, driverStatus, salesStatus } = query;
+                console.log(tecr);
+                let q = {
+                    branch: user.branch
+                };
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'initiator', model: 'User' }
+                    ]
+                };
+                let or = [];
+                if (tecr) {
+                    // or.push({tecrNo: new RegExp(tecr, 'gi')})
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { tecrNo: new RegExp(tecr, 'gi') });
+                }
+                if (customer) {
+                    // or.push({"customer.name": new RegExp(customer, 'gi')})
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { "customer.name": new RegExp(customer, 'gi') });
+                }
+                if (type) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { type: new RegExp(type, 'gi') });
+                }
+                if (driverStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { driverStatus: new RegExp(driverStatus, 'gi') });
+                }
+                if (salesStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { status: new RegExp(salesStatus, 'gi') });
+                }
+                //@ts-ignore
+                const ecr = yield this.emptyCylinder.paginate(q, options);
+                return Promise.resolve(ecr);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchTEcrDetails(tecrNo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.emptyCylinder.findOne({ tecrNo: tecrNo });
+                return Promise.resolve(data);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    //@ts-ignore
+    completeTecr(input) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log(input.tecrId, input.otp);
+                let { tecrId, otp } = input;
+                let data = yield this.emptyCylinder.findById(tecrId);
+                if (!data) {
+                    throw new exceptions_1.BadInputFormatException('sorry this request was not found');
+                }
+                if (data.otp !== otp) {
+                    throw new exceptions_1.BadInputFormatException('invalid otp provided');
+                }
+                data.driverStatus = emptyCylinder_1.EcrApproval.APPROVED;
+                yield data.save();
+                return Promise.resolve(data);
             }
             catch (e) {
                 this.handleException(e);

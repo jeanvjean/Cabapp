@@ -70,7 +70,7 @@ router.get(
 );
 
 router.get(
-  '/fetch-route-plan/:vehicleId',
+  '/fetch-route-plan/:routeId',
   auth.verify(),
   vehicleCtrl.fetchRoutePlan()
 );
@@ -94,7 +94,7 @@ router.get(
 );
 
 router.post(
-  '/mark-route-as-complete/:vehicleId/:routeId',
+  '/mark-route-as-complete/:routeId',
   auth.verify(),
   vehicleCtrl.markRouteAsComplete()
 );

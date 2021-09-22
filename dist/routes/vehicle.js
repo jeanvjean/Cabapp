@@ -16,11 +16,11 @@ router.get('/approve-inspection/:vehicleId/:inspectionId', auth.verify(), contro
 router.post('/record-route/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.recordRoute());
 router.post('/start-route/:routeId', auth.verify(), controllers_1.vehicleCtrl.startRoute());
 router.get('/vehicle-performance/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.fetchVehiclePerformance());
-router.get('/fetch-route-plan/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.fetchRoutePlan());
+router.get('/fetch-route-plan/:routeId', auth.verify(), controllers_1.vehicleCtrl.fetchRoutePlan());
 router.post('/assign-driver/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.assignDriver());
 router.delete('/delete-vehicle/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.deleteVehicle());
 router.get('/remove-driver/:vehicleId/:driver', auth.verify(), controllers_1.vehicleCtrl.removeDriver());
-router.post('/mark-route-as-complete/:vehicleId/:routeId', auth.verify(), controllers_1.vehicleCtrl.markRouteAsComplete());
+router.post('/mark-route-as-complete/:routeId', auth.verify(), controllers_1.vehicleCtrl.markRouteAsComplete());
 router.get('/fetch-activityLogs/:userId', auth.verify(), controllers_1.vehicleCtrl.fetchActivityLogs());
 router.get('/fetch-all-vehicle', auth.verify(), controllers_1.vehicleCtrl.fetchallVehicles());
 router.get('/download-routePlan/:vehicleId', controllers_1.vehicleCtrl.vehicleRoutePlan());

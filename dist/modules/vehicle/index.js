@@ -23,6 +23,7 @@ const schedule = require("node-schedule");
 exports.schedule = schedule;
 const resolve_template_1 = require("../../util/resolve-template");
 const cylinder_1 = require("../cylinder");
+const emptyCylinder_1 = require("../../models/emptyCylinder");
 class Vehicle extends module_1.default {
     constructor(props) {
         super();
@@ -35,6 +36,7 @@ class Vehicle extends module_1.default {
         this.routeReport = props.routeReport;
         this.customer = props.customer;
         this.supplier = props.supplier;
+        this.ecr = props.ecr;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -212,28 +214,51 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search } = query;
-                const options = Object.assign({}, query);
-                let aggregate = this.vehicle.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        {
-                                            vehCategory: {
-                                                $regex: search || ""
-                                            }
-                                        }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
+                const { search, vehicleName, vehicleType, vehicleNumber, vehicleMake, vehicleModel, lastMileage } = query;
+                const options = {
+                    limit: query.limit || 10,
+                    page: query.page || 1,
+                    populate: [
+                        { path: 'assignedTo', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ]
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (vehicleName) {
+                    or.push({ vehicleType: new RegExp(vehicleName, 'gi') });
+                }
+                if (vehicleType) {
+                    or.push({ vehicleType: new RegExp(vehicleType, 'gi') });
+                }
+                if (vehicleNumber) {
+                    or.push({ regNo: new RegExp(vehicleNumber, 'gi') });
+                }
+                if (vehicleMake) {
+                    or.push({ manufacturer: new RegExp(vehicleMake, 'gi') });
+                }
+                if (vehicleModel) {
+                    or.push({ vModel: new RegExp(vehicleModel, 'gi') });
+                }
+                if (lastMileage) {
+                    or.push({ lastMileage: new RegExp(lastMileage, 'gi') });
+                }
+                if (search) {
+                    or.push({ lastMileage: new RegExp(search, 'gi') });
+                    or.push({ vModel: new RegExp(search, 'gi') });
+                    or.push({ manufacturer: new RegExp(search, 'gi') });
+                    or.push({ regNo: new RegExp(search, 'gi') });
+                    or.push({ vehicleType: new RegExp(search, 'gi') });
+                    or.push({ vehicleName: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const vehicles = yield this.vehicle.aggregatePaginate(aggregate, options);
+                const vehicles = yield this.vehicle.paginate(q, options);
                 return Promise.resolve(vehicles);
             }
             catch (e) {
@@ -406,36 +431,33 @@ class Vehicle extends module_1.default {
                 }
                 const num = token_1.padLeft(routePlan.serialNo, 6, "");
                 const ecr = "ECR" + num;
-                routePlan.pprNo = "PPR" + num;
+                routePlan.rppNo = "RPP" + num;
                 routePlan.ecrNo = ecr;
                 // routePlan.icnNo = "ICN"+num;
-                if (routePlan.orderType == order_1.pickupType.CUSTOMER) {
-                    if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
-                        let init = 'TECR';
-                        //@ts-ignore
-                        let tecrNo = init + num;
-                        routePlan.tecrNo = tecrNo;
-                    }
-                    else if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
-                        let init = 'TFCR';
-                        //@ts-ignore
-                        let tfcrNo = init + num;
-                        routePlan.tfcrNo = tfcrNo;
-                    }
-                }
-                else if (routePlan.orderType == order_1.pickupType.SUPPLIER) {
-                    if (routePlan.activity == vehicle_1.RouteActivity.DELIVERY) {
-                        let init = 'TECR';
-                        let tecrNo = init + num;
-                        routePlan.tecrNo = tecrNo;
-                    }
-                    else if (routePlan.activity == vehicle_1.RouteActivity.PICKUP) {
-                        let init = 'TFCR';
-                        //@ts-ignore
-                        let tfcrNo = init + num;
-                        routePlan.tfcrNo = tfcrNo;
-                    }
-                }
+                // if(routePlan.orderType == pickupType.CUSTOMER) {
+                //   if(routePlan.activity == RouteActivity.PICKUP) {
+                //     let init = 'TECR'
+                //     //@ts-ignore
+                //     let tecrNo = init+num;
+                //     routePlan.tecrNo = tecrNo
+                //   } else if(routePlan.activity == RouteActivity.DELIVERY) {
+                //     let init = 'TFCR'
+                //     //@ts-ignore
+                //     let tfcrNo = init+num;
+                //     routePlan.tfcrNo = tfcrNo
+                //   }
+                // }else if(routePlan.orderType == pickupType.SUPPLIER) {
+                //   if(routePlan.activity == RouteActivity.DELIVERY) {
+                //     let init = 'TECR'
+                //     let tecrNo = init+num;
+                //     routePlan.tecrNo = tecrNo
+                //   } else if(routePlan.activity == RouteActivity.PICKUP) {
+                //     let init = 'TFCR'
+                //     //@ts-ignore
+                //     let tfcrNo = init+num;
+                //     routePlan.tfcrNo = tfcrNo
+                //   }
+                // }
                 // console.log(routePlan);
                 yield routePlan.save();
                 yield logs_1.createLog({
@@ -532,74 +554,60 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { vehicleId, query } = data;
+                let { routeId, query } = data;
                 //@ts-ignore
-                let { driver, tecr, tfcr, supplier, customer, search, fromDate, toDate } = query;
-                // console.log(driver, tecr, tfcr, supplier, customer, search);
-                // const search = query?.search;
-                // if(driver?.length) {
-                //   // console.log(driver)
-                //   let u = await this.user.findOne({name:driver, role:"sales", subrole:"driver"});
-                //   //@ts-ignore
-                //   let vi = await this.vehicle.findOne({assignedTo:`${u?._id}`});
-                //   console.log(vi);
-                //   if(!vi) {
-                //     throw new BadInputFormatException('Driver\'s vehicle information not found');
-                //   }
-                //   vehicleId = vi?._id;
-                // }
+                let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+                let q = {
+                    _id: `${routeId}`,
+                    deleted: false
+                };
                 let or = [];
                 if (search) {
                     or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                or.push({ "customers.name": new RegExp(search || "", "gi") });
-                // console.log(or)
-                let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            },
-                            { vehicle: ObjectId(`${vehicleId}`) },
-                            { deleted: false }
-                        ]
-                    }
-                };
-                if (tecr === null || tecr === void 0 ? void 0 : tecr.length) {
+                if (email) {
                     //@ts-ignore
-                    q.$match.$and.push({ tecrNo: new RegExp(tecr, "gi") });
-                }
-                if (tfcr === null || tfcr === void 0 ? void 0 : tfcr.length) {
-                    //@ts-ignore
-                    q.$match.$and.push({ tfcrNo: new RegExp(tfcr, "gi") });
+                    q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
                 }
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
                     //@ts-ignore
-                    q.$match.$and.push({ 'suppliers.name': new RegExp(supplier, "gi") });
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.name': new RegExp(supplier, "gi") });
                 }
                 if (customer === null || customer === void 0 ? void 0 : customer.length) {
                     //@ts-ignore
-                    q.$match.$and.push({ 'customers.name': new RegExp(customer, "gi") });
+                    q = Object.assign(Object.assign({}, q), { 'customers.name': new RegExp(customer, "gi") });
                 }
-                // console.log(or)
-                if (fromDate && toDate) {
-                    // {...q.$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}} 
-                    let { $match } = q;
+                if (fromDate) {
                     //@ts-ignore
-                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
                 }
-                // console.log(q)
-                const options = Object.assign({}, query);
-                let aggregate = this.pickup.aggregate([q]);
-                //@ts-ignore
-                const routePlan = yield this.pickup.aggregatePaginate(aggregate, options);
-                for (let route of routePlan.docs) {
-                    route.customer = yield this.customer.findById(route.customer);
-                    route.supplier = yield this.supplier.findById(route.supplier);
-                    route.vehicle = yield this.vehicle.findById(route.vehicle).populate('assignedTo');
-                    route.security = yield this.user.findById(route.security);
-                    route.recievedBy = yield this.user.findById(route.recievedBy);
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                const options = {
+                    page: query === null || query === void 0 ? void 0 : query.page,
+                    limit: query === null || query === void 0 ? void 0 : query.limit,
+                    populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'vehicle', model: 'vehicle' },
+                        { path: 'security', model: 'User' },
+                        { path: 'recievedBy', model: 'User' }
+                    ]
+                };
+                // let aggregate = this.pickup.aggregate([q]);
+                const routePlan = yield this.pickup.findOne(q).populate([
+                    { path: 'customer', model: 'customer' },
+                    { path: 'supplier', model: 'supplier' },
+                    { path: 'vehicle', model: 'vehicle' },
+                    { path: 'security', model: 'User' },
+                    { path: 'recievedBy', model: 'User' }
+                ]);
                 return Promise.resolve(routePlan);
             }
             catch (e) {
@@ -607,12 +615,57 @@ class Vehicle extends module_1.default {
             }
         });
     }
-    vehicleRoutePlan(vehicleId) {
+    vehicleRoutePlan(vehicleId, query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 //@ts-ignore
-                const vr = yield this.pickup.find({ vehicle: vehicleId });
+                let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+                let q = {
+                    vehicle: vehicleId,
+                    deleted: false
+                };
+                let or = [];
+                if (search) {
+                    or.push({ modeOfService: new RegExp(search || "", "gi") });
+                }
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
+                }
+                if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.name': new RegExp(supplier, "gi") });
+                }
+                if (customer === null || customer === void 0 ? void 0 : customer.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.name': new RegExp(customer, "gi") });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                const options = {
+                    page: query === null || query === void 0 ? void 0 : query.page,
+                    limit: query === null || query === void 0 ? void 0 : query.limit,
+                    populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'supplier', model: 'supplier' },
+                        { path: 'vehicle', model: 'vehicle' },
+                        { path: 'security', model: 'User' },
+                        { path: 'recievedBy', model: 'User' }
+                    ]
+                };
+                //@ts-ignore
+                const vr = yield this.pickup.find(q, options);
                 ;
                 return Promise.resolve(vr);
             }
@@ -635,7 +688,7 @@ class Vehicle extends module_1.default {
                 if ((plan === null || plan === void 0 ? void 0 : plan.orderType) == order_1.pickupType.SUPPLIER) {
                     if (plan.suppliers.length > 0) {
                         for (let supplier of plan.suppliers) {
-                            if (supplier.name == data.name) {
+                            if (supplier.email == data.email) {
                                 let payload = {
                                     vehicle: plan.vehicle,
                                     dateStarted: new Date().toISOString(),
@@ -658,7 +711,7 @@ class Vehicle extends module_1.default {
                 else if (plan.orderType == order_1.pickupType.CUSTOMER) {
                     if (plan.customers.length > 0) {
                         for (let customer of plan.customers) {
-                            if (customer.name == data.name) {
+                            if (customer.email == data.email) {
                                 let payload = {
                                     vehicle: plan.vehicle,
                                     dateStarted: new Date().toISOString(),
@@ -686,13 +739,13 @@ class Vehicle extends module_1.default {
             }
         });
     }
-    markRouteAsComplete(data) {
+    markRouteAsComplete(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { query } = data;
+                // console.log(user)
+                const { query, ecrData, routeId } = data;
                 //@ts-ignore
-                const { search } = query;
-                const { status, routeId } = data;
+                const { name, email } = query;
                 const pickup = yield this.pickup.findById(routeId);
                 if (!pickup) {
                     throw new exceptions_1.BadInputFormatException('Route Plan not found');
@@ -704,7 +757,7 @@ class Vehicle extends module_1.default {
                 if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.SUPPLIER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
                     if (pickup.suppliers.length > 0) {
                         for (let supplier of pickup.suppliers) {
-                            if (supplier.name == `${search}`) {
+                            if (supplier.email == `${email}`) {
                                 if (supplier.cylinders.length > 0) {
                                     for (let cylinder of supplier.cylinders) {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
@@ -714,6 +767,7 @@ class Vehicle extends module_1.default {
                                         cyl === null || cyl === void 0 ? void 0 : cyl.supplierType = supplier.supplierType;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
                                             heldBy: "supplier",
+                                            //@ts-ignore
                                             name: supplier.name,
                                             location: supplier.destination,
                                             date: new Date().toISOString()
@@ -737,7 +791,7 @@ class Vehicle extends module_1.default {
                 else if ((pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.CUSTOMER && pickup.activity == vehicle_1.RouteActivity.DELIVERY) {
                     if (pickup.customers.length > 0) {
                         for (let customer of pickup.customers) {
-                            if (customer.name == `${search}`) {
+                            if (customer.email == `${email}`) {
                                 if (customer.cylinders.length > 0) {
                                     for (let cylinder of customer.cylinders) {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
@@ -768,7 +822,7 @@ class Vehicle extends module_1.default {
                 else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP && (pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.CUSTOMER) {
                     if (pickup.customers.length > 0) {
                         for (let customer of pickup.customers) {
-                            if (customer.name == `${search}`) {
+                            if (customer.email == `${email}`) {
                                 if (customer.cylinders.length > 0) {
                                     for (let cylinder of customer.cylinders) {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
@@ -785,6 +839,7 @@ class Vehicle extends module_1.default {
                                 }
                                 //@ts-ignore
                                 customer.status = vehicle_1.RoutePlanStatus.DONE;
+                                customer.tecrNo = pickup.tecrNo;
                                 let routeReport = yield this.routeReport.findById(customer.reportId);
                                 //@ts-ignore
                                 routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
@@ -792,6 +847,44 @@ class Vehicle extends module_1.default {
                                 routeReport === null || routeReport === void 0 ? void 0 : routeReport.mileageOut = data.mileageOut;
                                 //@ts-ignore
                                 routeReport === null || routeReport === void 0 ? void 0 : routeReport.timeOut = new Date().getTime();
+                                let cust = yield this.customer.findOne({ email: customer.email });
+                                let ecr = new this.ecr(Object.assign({}, ecrData));
+                                let available = yield this.ecr.find({}).sort({ initNum: -1 }).limit(1);
+                                if (available[0]) {
+                                    //@ts-ignore
+                                    ecr.initNum = available[0].initNum + 1;
+                                }
+                                else {
+                                    ecr.initNum = 1;
+                                }
+                                if (cust) {
+                                    ecr.customer = cust._id;
+                                }
+                                ecr.priority = emptyCylinder_1.Priority.TRUCK;
+                                ecr.type = emptyCylinder_1.EcrType.TRUCK;
+                                ecr.status = emptyCylinder_1.EcrApproval.TRUCK;
+                                ecr.position = emptyCylinder_1.ProductionSchedule.TRUCK;
+                                ecr.branch = user.branch;
+                                ecr.initiator = user._id;
+                                let num = token_1.padLeft(ecr.initNum, 6, "");
+                                const ecrN = "TECR" + num;
+                                let otp = Math.floor(1000 + Math.random() * 9000);
+                                ecr.otp = otp.toString();
+                                ecr.tecrNo = ecrN;
+                                yield ecr.save();
+                                const html = yield resolve_template_1.getTemplate('OTP', {
+                                    name: cust === null || cust === void 0 ? void 0 : cust.name,
+                                    email: cust === null || cust === void 0 ? void 0 : cust.email,
+                                    otp: `${otp}`,
+                                    driver: user.name,
+                                    ref: ecr.tecrNo
+                                });
+                                let mailLoad = {
+                                    content: html,
+                                    subject: 'Complete TECR',
+                                    email: cust === null || cust === void 0 ? void 0 : cust.email,
+                                }; //@ts-ignore
+                                new mail_1.default().sendMail(mailLoad);
                             }
                         }
                     }
@@ -799,7 +892,7 @@ class Vehicle extends module_1.default {
                 else if ((pickup === null || pickup === void 0 ? void 0 : pickup.activity) == vehicle_1.RouteActivity.PICKUP && (pickup === null || pickup === void 0 ? void 0 : pickup.orderType) == order_1.pickupType.SUPPLIER) {
                     if (pickup.suppliers.length > 0) {
                         for (let supplier of pickup.suppliers) {
-                            if (supplier.name == `${search}`) {
+                            if (supplier.email == `${email}`) {
                                 if (supplier.cylinders.length > 0) {
                                     for (let cylinder of supplier.cylinders) {
                                         let cyl = yield this.registerCylinder.findById(cylinder);
@@ -807,6 +900,7 @@ class Vehicle extends module_1.default {
                                         cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.ASNL;
                                         cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
                                             heldBy: "supplier",
+                                            //@ts-ignore
                                             name: supplier.name,
                                             location: supplier.destination,
                                             date: new Date().toISOString()
@@ -816,6 +910,7 @@ class Vehicle extends module_1.default {
                                 }
                                 //@ts-ignore
                                 supplier.status = vehicle_1.RoutePlanStatus.DONE;
+                                supplier.tfcrNo = pickup.tfcrNo;
                                 let routeReport = yield this.routeReport.findById(supplier.reportId);
                                 //@ts-ignore
                                 routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
@@ -827,11 +922,6 @@ class Vehicle extends module_1.default {
                         }
                     }
                 }
-                //@ts-ignore
-                // pickup?.dateCompleted = new Date().toISOString();
-                // routeReport.dateCompleted = pickup.dateCompleted;
-                // //@ts-ignore
-                // pickup?.status = status;
                 yield (pickup === null || pickup === void 0 ? void 0 : pickup.save());
                 yield routeReport.save();
                 return Promise.resolve(pickup);

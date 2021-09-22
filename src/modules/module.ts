@@ -11,16 +11,24 @@ export interface QueryInterface {
   holder?:string,
   condition?:string
   owner:string
+  subrole?:string
   cylinderType?:string,
+  cylinderNumber?:string
+  assignedNumber?:string
+  gasVolume?:string
+  waterCapacity:string
+  manufactureDate:string
   gasType?:string,
   customer?:string,
   driver?:string
+  driverStatus?:string
+  salesStatus?:string
   tecr?:string
   tfcr?:string
   supplier?:string,
   produced?:boolean;
   sort?: object;
-  type:string
+  type?:string
   branch?:string,
   fromBranch?:string
   range?: string[];
@@ -33,6 +41,9 @@ export interface QueryInterface {
   active:boolean
   suspended?:boolean
   unverified?:boolean
+  name?:string
+  email?:string
+  phone?:string
 }
 
 /**

@@ -15,10 +15,10 @@ import { generateToken, padLeft } from "../../util/token";
 import * as schedule from 'node-schedule'
 import { getTemplate } from '../../util/resolve-template';
 import { vehiclePerformance } from "../../models/pickupReport";
-import router from "../../routes/person";
 import { mongoose } from "../cylinder";
 import { CustomerInterface } from "../../models/customer";
 import { SupplierInterface } from "../../models/supplier";
+import { EcrApproval, EcrType, EmptyCylinderInterface, Priority, ProductionSchedule } from "../../models/emptyCylinder";
 
 export { schedule };
 
@@ -32,6 +32,7 @@ interface vehicleProps{
   routeReport:Model<vehiclePerformance>
   customer:Model<CustomerInterface>
   supplier:Model<SupplierInterface>
+  ecr:Model<EmptyCylinderInterface>
 }
 
 type NewVehicle = {
@@ -94,7 +95,7 @@ interface InspectionData {
 
 interface startRouteInput {
   departure?:string,
-  name?:string;
+  email?:string;
   mileIn?:string,
   mileOut?:string
 }
@@ -125,6 +126,18 @@ type RouteRecordInput = {
   timeIn:PickupInterface['timeIn']
 }
 
+interface vehicleSearchInterface {
+  search?:string, 
+  vehicleName?:string, 
+  vehicleType?:string, 
+  vehicleNumber?:string, 
+  vehicleMake?:string, 
+  vehicleModel?:string, 
+  lastMileage?:string
+  page?: number | 1
+  limit?: number | 10;
+}
+
 
 
 type Parameters = {
@@ -135,7 +148,12 @@ type Parameters = {
   driver?:string
   status?:string,
   query?:QueryInterface,
-  mileageOut?:string
+  mileageOut?:string,
+  ecrData?:{
+    cylinders?:EmptyCylinderInterface['cylinders'],
+    fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
+    reason?:EmptyCylinderInterface['reason']
+  }
 }
 
 interface ApproveInspectionData {
@@ -159,6 +177,7 @@ class Vehicle extends Module{
   private routeReport:Model<vehiclePerformance>
   private customer:Model<CustomerInterface>
   private supplier:Model<SupplierInterface>
+  private ecr:Model<EmptyCylinderInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -171,6 +190,7 @@ class Vehicle extends Module{
     this.routeReport = props.routeReport
     this.customer = props.customer
     this.supplier = props.supplier
+    this.ecr = props.ecr
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -348,33 +368,54 @@ class Vehicle extends Module{
     }
   }
 
-  public async fetchVehicles(query:QueryInterface, user:UserInterface):Promise<VehicleInterface[]|undefined> {
+  public async fetchVehicles(query:vehicleSearchInterface, user:UserInterface):Promise<VehicleInterface[]|undefined> {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      const { search } = query;
+      const { search, vehicleName, vehicleType, vehicleNumber, vehicleMake, vehicleModel, lastMileage } = query;
       const options = {
-        ...query
+        limit:query.limit || 10,
+        page:query.page || 1,
+        populate:[
+          {path:'assignedTo', model:'User'},
+          {path:'branch', model:'branches'}
+        ]
       }
-      let aggregate = this.vehicle.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {
-                    vehCategory:{
-                      $regex: search || ""
-                    }
-                  }
-                ]
-              },
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ])
+      let q = {
+        branch:user.branch
+      }
+      let or = [];
+      if(vehicleName) {
+        or.push({vehicleType: new RegExp(vehicleName, 'gi')});
+      }
+      if(vehicleType) {
+        or.push({vehicleType: new RegExp(vehicleType, 'gi')})
+      }
+      if(vehicleNumber) {
+        or.push({regNo: new RegExp(vehicleNumber, 'gi')})
+      }
+      if(vehicleMake) {
+        or.push({manufacturer: new RegExp(vehicleMake, 'gi')})
+      }
+      if(vehicleModel) {
+        or.push({vModel: new RegExp(vehicleModel, 'gi')})
+      }
+      if(lastMileage) {
+        or.push({lastMileage: new RegExp(lastMileage, 'gi')});
+      }
+      if(search) {
+        or.push({lastMileage: new RegExp(search, 'gi')});
+        or.push({vModel: new RegExp(search, 'gi')})
+        or.push({manufacturer: new RegExp(search, 'gi')})
+        or.push({regNo: new RegExp(search, 'gi')})
+        or.push({vehicleType: new RegExp(search, 'gi')})
+        or.push({vehicleName: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
       //@ts-ignore
-      const vehicles = await this.vehicle.aggregatePaginate(aggregate, options);
+      const vehicles = await this.vehicle.paginate(q, options);
       return Promise.resolve(vehicles);
     } catch (e) {
       this.handleException(e);
@@ -542,33 +583,33 @@ class Vehicle extends Module{
       const num = padLeft(routePlan.serialNo , 6, "");
       const ecr = "ECR"+num;
 
-      routePlan.pprNo = "PPR"+num;
+      routePlan.rppNo = "RPP"+num;
       routePlan.ecrNo = ecr;
       // routePlan.icnNo = "ICN"+num;
-      if(routePlan.orderType == pickupType.CUSTOMER) {
-        if(routePlan.activity == RouteActivity.PICKUP) {
-          let init = 'TECR'
-          //@ts-ignore
-          let tecrNo = init+num;
-          routePlan.tecrNo = tecrNo
-        } else if(routePlan.activity == RouteActivity.DELIVERY) {
-          let init = 'TFCR'
-          //@ts-ignore
-          let tfcrNo = init+num;
-          routePlan.tfcrNo = tfcrNo
-        }
-      }else if(routePlan.orderType == pickupType.SUPPLIER) {
-        if(routePlan.activity == RouteActivity.DELIVERY) {
-          let init = 'TECR'
-          let tecrNo = init+num;
-          routePlan.tecrNo = tecrNo
-        } else if(routePlan.activity == RouteActivity.PICKUP) {
-          let init = 'TFCR'
-          //@ts-ignore
-          let tfcrNo = init+num;
-          routePlan.tfcrNo = tfcrNo
-        }
-      }
+      // if(routePlan.orderType == pickupType.CUSTOMER) {
+      //   if(routePlan.activity == RouteActivity.PICKUP) {
+      //     let init = 'TECR'
+      //     //@ts-ignore
+      //     let tecrNo = init+num;
+      //     routePlan.tecrNo = tecrNo
+      //   } else if(routePlan.activity == RouteActivity.DELIVERY) {
+      //     let init = 'TFCR'
+      //     //@ts-ignore
+      //     let tfcrNo = init+num;
+      //     routePlan.tfcrNo = tfcrNo
+      //   }
+      // }else if(routePlan.orderType == pickupType.SUPPLIER) {
+      //   if(routePlan.activity == RouteActivity.DELIVERY) {
+      //     let init = 'TECR'
+      //     let tecrNo = init+num;
+      //     routePlan.tecrNo = tecrNo
+      //   } else if(routePlan.activity == RouteActivity.PICKUP) {
+      //     let init = 'TFCR'
+      //     //@ts-ignore
+      //     let tfcrNo = init+num;
+      //     routePlan.tfcrNo = tfcrNo
+      //   }
+      // }
       // console.log(routePlan);
       await routePlan.save();
       await createLog({
@@ -651,92 +692,125 @@ class Vehicle extends Module{
     }
   }
 
-  public async fetchRoutePlan(data:Parameters):Promise<PickupInterface[]|undefined>{
+  public async fetchRoutePlan(data:Parameters):Promise<PickupInterface|undefined>{
     try {
       let ObjectId = mongoose.Types.ObjectId;
-      let { vehicleId, query } = data;
+      let { routeId, query } = data;
       //@ts-ignore
-      let { driver, tecr, tfcr, supplier, customer, search, fromDate, toDate } = query;
-      // console.log(driver, tecr, tfcr, supplier, customer, search);
-      // const search = query?.search;
-      // if(driver?.length) {
-      //   // console.log(driver)
-      //   let u = await this.user.findOne({name:driver, role:"sales", subrole:"driver"});
-      //   //@ts-ignore
-      //   let vi = await this.vehicle.findOne({assignedTo:`${u?._id}`});
-      //   console.log(vi);
-      //   if(!vi) {
-      //     throw new BadInputFormatException('Driver\'s vehicle information not found');
-      //   }
-      //   vehicleId = vi?._id;
-      // }
-      
+      let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+
+      let q = {
+            _id:`${routeId}`,
+            deleted:false
+      }
       let or = [];
       if(search) {
         or.push({modeOfService: new RegExp(search || "", "gi")})
       }
-      or.push({"customers.name": new RegExp(search || "", "gi")})
-      // console.log(or)
-      let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },            
-            {vehicle:ObjectId(`${vehicleId}`)},
-            {deleted:false}
-          ]
-        }
-      }
-
-      if(tecr?.length) {
+       if(email) {
         //@ts-ignore
-        q.$match.$and.push({tecrNo: new RegExp(tecr, "gi")})
-      }
-      if(tfcr?.length) {
-        //@ts-ignore
-        q.$match.$and.push({tfcrNo: new RegExp(tfcr, "gi")})
+        q = {...q, 'customers.email': new RegExp(email, "gi")}
       }
       if(supplier?.length) {
         //@ts-ignore
-        q.$match.$and.push({'suppliers.name': new RegExp(supplier, "gi")})
+        q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
       }
       if(customer?.length) {
         //@ts-ignore
-        q.$match.$and.push({'customers.name': new RegExp(customer, "gi")})
+        q = {...q, 'customers.name': new RegExp(customer, "gi")}
       }
-      // console.log(or)
-      if(fromDate && toDate) {
-        // {...q.$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}} 
-        let { $match } = q;
+      if(fromDate) {
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        q = {...q, createdAt:{ $gte:new Date(fromDate) }}
       }
-      // console.log(q)
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $lte:new Date(toDate) }}
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+
       const options = {
-        ...query
+        page:query?.page,
+        limit:query?.limit,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'supplier', model:'supplier'},
+          {path:'vehicle', model:'vehicle'},
+          {path:'security', model:'User'},
+          {path:'recievedBy', model:'User'}
+        ]
       }
-      let aggregate = this.pickup.aggregate([q]);
-      //@ts-ignore
-      const routePlan = await this.pickup.aggregatePaginate(aggregate, options);
-      for(let route of routePlan.docs) {
-        route.customer = await this.customer.findById(route.customer);
-        route.supplier = await this.supplier.findById(route.supplier);
-        route.vehicle = await this.vehicle.findById(route.vehicle).populate('assignedTo');
-        route.security = await this.user.findById(route.security);
-        route.recievedBy = await this.user.findById(route.recievedBy);
-      }
-      return Promise.resolve(routePlan);
+      // let aggregate = this.pickup.aggregate([q]);
+      const routePlan = await this.pickup.findOne(q).populate(
+        [
+          {path:'customer', model:'customer'},
+          {path:'supplier', model:'supplier'},
+          {path:'vehicle', model:'vehicle'},
+          {path:'security', model:'User'},
+          {path:'recievedBy', model:'User'}
+        ]
+      );
+      return Promise.resolve(routePlan as PickupInterface);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async vehicleRoutePlan(vehicleId:string):Promise<PickupInterface[]|undefined>{
+  public async vehicleRoutePlan(vehicleId:string, query:QueryInterface):Promise<PickupInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       //@ts-ignore
-      const vr = await this.pickup.find({vehicle:vehicleId});;
+      let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+
+      let q = {
+        vehicle:vehicleId,
+        deleted:false
+      }
+      let or = [];
+      if(search) {
+        or.push({modeOfService: new RegExp(search || "", "gi")})
+      }
+        if(email) {
+        //@ts-ignore
+        q = {...q, 'customers.email': new RegExp(email, "gi")}
+      }
+      if(supplier?.length) {
+        //@ts-ignore
+        q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+      }
+      if(customer?.length) {
+        //@ts-ignore
+        q = {...q, 'customers.name': new RegExp(customer, "gi")}
+      }
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $gte:new Date(fromDate) }}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $lte:new Date(toDate) }}
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+
+      const options = {
+        page:query?.page,
+        limit:query?.limit,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'supplier', model:'supplier'},
+          {path:'vehicle', model:'vehicle'},
+          {path:'security', model:'User'},
+          {path:'recievedBy', model:'User'}
+        ]
+      }
+      //@ts-ignore
+      const vr = await this.pickup.find(q, options);;
       return Promise.resolve(vr);
     } catch (e) {
       this.handleException(e);
@@ -756,7 +830,7 @@ class Vehicle extends Module{
       if(plan?.orderType == pickupType.SUPPLIER) {
         if(plan.suppliers.length > 0){
           for(let supplier of plan.suppliers) {
-            if(supplier.name == data.name) {
+            if(supplier.email == data.email) {
               let payload = {
                 vehicle:plan.vehicle,
                 dateStarted:new Date().toISOString(),
@@ -778,7 +852,7 @@ class Vehicle extends Module{
       }else if(plan.orderType == pickupType.CUSTOMER) {
         if(plan.customers.length > 0) {
           for(let customer of plan.customers) {
-            if(customer.name == data.name) {
+            if(customer.email == data.email) {
               let payload = {
                 vehicle:plan.vehicle,
                 dateStarted:new Date().toISOString(),
@@ -805,12 +879,12 @@ class Vehicle extends Module{
     }
   }
 
-  public async markRouteAsComplete(data:Parameters):Promise<PickupInterface|undefined>{
+  public async markRouteAsComplete(data:Parameters, user:UserInterface):Promise<PickupInterface|undefined>{
     try {
-      const { query } = data;
+      // console.log(user)
+      const { query, ecrData, routeId } = data;
       //@ts-ignore
-      const { search } = query;
-      const { status, routeId } = data;
+      const { name, email } = query;
       const pickup = await this.pickup.findById(routeId);
       if(!pickup) {
         throw new BadInputFormatException('Route Plan not found');
@@ -822,7 +896,7 @@ class Vehicle extends Module{
       if(pickup?.orderType == pickupType.SUPPLIER && pickup.activity == RouteActivity.DELIVERY) {
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
-            if(supplier.name == `${search}`) {
+            if(supplier.email == `${email}`) {
               if(supplier.cylinders.length > 0) {
                 for(let cylinder of supplier.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -832,6 +906,7 @@ class Vehicle extends Module{
                     cyl?.supplierType = supplier.supplierType;
                     cyl?.tracking.push({
                       heldBy:"supplier",
+                      //@ts-ignore
                       name:supplier.name,
                       location:supplier.destination,
                       date:new Date().toISOString()
@@ -854,7 +929,7 @@ class Vehicle extends Module{
       }else if(pickup?.orderType == pickupType.CUSTOMER && pickup.activity == RouteActivity.DELIVERY){
         if(pickup.customers.length > 0){
           for(let customer of pickup.customers) {
-            if(customer.name == `${search}`) {
+            if(customer.email == `${email}`) {
               if(customer.cylinders.length > 0) {
                 for(let cylinder of customer.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -884,7 +959,7 @@ class Vehicle extends Module{
       }else if(pickup?.activity == RouteActivity.PICKUP && pickup?.orderType == pickupType.CUSTOMER){
         if(pickup.customers.length > 0){
           for(let customer of pickup.customers) {
-            if(customer.name == `${search}`) {
+            if(customer.email == `${email}`) {
               if(customer.cylinders.length > 0) {
                 for(let cylinder of customer.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -900,7 +975,8 @@ class Vehicle extends Module{
                 }
               }
               //@ts-ignore
-              customer.status = RoutePlanStatus.DONE              
+              customer.status = RoutePlanStatus.DONE;
+              customer.tecrNo = pickup.tecrNo;
               let routeReport = await this.routeReport.findById(customer.reportId);
               //@ts-ignore
               routeReport?.dateCompleted = new Date().toISOString();
@@ -908,13 +984,55 @@ class Vehicle extends Module{
               routeReport?.mileageOut = data.mileageOut;
               //@ts-ignore
               routeReport?.timeOut = new Date().getTime();
+
+              let cust = await this.customer.findOne({email:customer.email});
+            let ecr = new this.ecr({
+              ...ecrData
+            });
+            let available = await this.ecr.find({}).sort({initNum:-1}).limit(1);
+            if(available[0]) {
+              //@ts-ignore
+              ecr.initNum = available[0].initNum+1;
+            }else {
+              ecr.initNum = 1;
+            }
+            if(cust) {
+              ecr.customer = cust._id
+            }            
+            ecr.priority = Priority.TRUCK
+            ecr.type = EcrType.TRUCK
+            ecr.status = EcrApproval.TRUCK
+            ecr.position = ProductionSchedule.TRUCK
+            ecr.branch = user.branch
+            ecr.initiator= user._id
+
+            let num = padLeft(ecr.initNum , 6, "");
+            const ecrN = "TECR"+num;
+            let otp = Math.floor(1000 + Math.random() * 9000);
+            ecr.otp = otp.toString();
+            ecr.tecrNo = ecrN;
+            await ecr.save();
+
+            const html = await getTemplate('OTP', {//8639
+              name:cust?.name,
+              email:cust?.email,
+              otp:`${otp}`,
+              driver:user.name,
+              ref:ecr.tecrNo
+            });
+            let mailLoad = {
+              content:html,
+              subject:'Complete TECR',
+              email:cust?.email,
+            }//@ts-ignore
+            new Notify().sendMail(mailLoad);
             }
           }
         }
       }else if(pickup?.activity == RouteActivity.PICKUP && pickup?.orderType == pickupType.SUPPLIER){
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
-            if(supplier.name == `${search}`) {
+            if(supplier.email == `${email}`) {
               if(supplier.cylinders.length > 0) {
                 for(let cylinder of supplier.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -922,6 +1040,7 @@ class Vehicle extends Module{
                     cyl?.holder = cylinderHolder.ASNL;
                     cyl?.tracking.push({
                       heldBy:"supplier",
+                      //@ts-ignore
                       name:supplier.name,
                       location:supplier.destination,
                       date:new Date().toISOString()
@@ -931,6 +1050,7 @@ class Vehicle extends Module{
               }
               //@ts-ignore
               supplier.status = RoutePlanStatus.DONE
+              supplier.tfcrNo = pickup.tfcrNo;
               let routeReport = await this.routeReport.findById(supplier.reportId);
               //@ts-ignore
               routeReport?.dateCompleted = new Date().toISOString();
@@ -942,11 +1062,6 @@ class Vehicle extends Module{
           }
         }
       }
-      //@ts-ignore
-      // pickup?.dateCompleted = new Date().toISOString();
-      // routeReport.dateCompleted = pickup.dateCompleted;
-      // //@ts-ignore
-      // pickup?.status = status;
       await pickup?.save();
       await routeReport.save();
       return Promise.resolve(pickup as PickupInterface);

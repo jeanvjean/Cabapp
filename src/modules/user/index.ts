@@ -272,53 +272,77 @@ class User extends Module {
   public async fetchUsers(query:QueryInterface, user:UserInterface) {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
+      let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
+      let options = {
+        page:query.page || 1,
+        limit:query.limit || 10
+      }
+      let q = {}
+      //@ts-ignore
       let or = [];
-      if(departments && departments.length > 0) {
-        for(let filter of departments) {
-          or.push({role: new RegExp(filter, "gi")})
-        }
-      }
-      or.push({name: new RegExp(search || "", "gi")});
-      let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            }
-          ]
-        }
-      }
+      // console.log(q)
       if(verified) {
         //@ts-ignore
-        q.$match.$and.push({isVerified: !!verified})
+        q = {...q, isVerified: !!verified};
+        // q.$or.push({isVerified: !!verified});
       }
       if(active) {
         //@ts-ignore
-        q.$match.$and.push({deactivated: !!active})
-      }
-
-      if(unverified) {
-        //@ts-ignore
-        q.$match.$and.push({isVerified: !unverified})
+        // q.$or.push({deactivated: !!active});
+        q = {...q, deactivated: !active};
       }
       if(suspended) {
         //@ts-ignore
-        q.$match.$and.push({deactivated: !suspended})
+        // q.$or.push({deactivated: !suspended});
+        q = {...q, deactivated: !!suspended};
       }
-      if(fromDate && toDate) {
-        let { $match } = q;
+      if(unverified) {
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        // q.$or.push({deactivated: !unverified});
+        q = {...q, isVerified: !unverified};
       }
-      let options = {
-        ...query
+      if(email) {
+        //@ts-ignore
+        // q.$or.push({email: new RegExp(email, "gi")});
+        q = {...q, email: new RegExp(email, 'gi')};
+      }
+      if(subrole) {
+        //@ts-ignore
+        // q.$or.push({subrole: new RegExp(subrole, "gi")});
+        q = {...q, subrole: new RegExp(subrole, "gi")};
+      }
+      if(departments) {
+          //@ts-ignore
+          q = {...q, role: {$in:departments}};
+      }
+      if(fromDate) {
+        //@ts-ignore
+          // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+          q = {...q, createdAt: { $gte: new Date(fromDate)}};
+          
+      }      
+      if(toDate) {
+        //@ts-ignore
+          // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+          //@ts-ignore
+          q = {...q, createdAt: { $lte: new Date(toDate) }};
+      }
+      if(name) {
+        // q.$or.push({"name": new RegExp(name || "", "gi")})
+        //@ts-ignore
+        // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        //@ts-ignore
+        q = {...q, name: new RegExp(name, 'gi')};
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
       }
       // let aggregate;
-      let aggregate = this.user.aggregate([q]);
-      let users;
+      // let aggregate = this.user.aggregate([q]);
+
       //@ts-ignore
-      users = await this.user.aggregatePaginate(aggregate, options);
+      let users = await this.user.paginate(q, options);
       return Promise.resolve(users);
 
       //@ts-ignore
@@ -328,58 +352,81 @@ class User extends Module {
       this.handleException(e);
     }
   }
-//@ts-ignore
+
   public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
     try {     
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, filter, verified, active, unverified, suspended, departments, fromDate, toDate } = query;
-      let or = [];
-      if(departments && departments.length > 0) {
-        for(let filter of departments) {
-          or.push({role: new RegExp(filter, "gi")})
-        }
+      let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
+      let options = {
+        page:query.page || 1,
+        limit:query.limit || 10
       }
-      or.push({name: new RegExp(search || "", "gi")});
       let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },
-            {branch:ObjectId(user.branch.toString())}
-          ]
-        }
+        branch: user.branch
       }
+
+      //@ts-ignore
+      let or = [];
+      // console.log(q)
       if(verified) {
         //@ts-ignore
-        q.$match.$and.push({isVerified: !!verified})
+        q = {...q, isVerified: !!verified};
+        // q.$or.push({isVerified: !!verified});
       }
       if(active) {
         //@ts-ignore
-        q.$match.$and.push({deactivated: !!active})
-      }
-
-      if(unverified) {
-        //@ts-ignore
-        q.$match.$and.push({isVerified: !unverified})
+        // q.$or.push({deactivated: !!active});
+        q = {...q, deactivated: !active};
       }
       if(suspended) {
         //@ts-ignore
-        q.$match.$and.push({deactivated: !suspended})
+        // q.$or.push({deactivated: !suspended});
+        q = {...q, deactivated: !!suspended};
       }
-      let options = {
-        ...query
-      }
-      if(fromDate && toDate) {
-        let { $match } = q;
+      if(unverified) {
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        // q.$or.push({deactivated: !unverified});
+        q = {...q, isVerified: !unverified};
       }
-      // let aggregate;
-      let aggregate = this.user.aggregate([q]);
-      let users;
+      if(email) {
+        //@ts-ignore
+        // q.$or.push({email: new RegExp(email, "gi")});
+        q = {...q, email: new RegExp(email, 'gi')};
+      }
+      if(subrole) {
+        //@ts-ignore
+        // q.$or.push({subrole: new RegExp(subrole, "gi")});
+        q = {...q, subrole: new RegExp(subrole, "gi")};
+      }
+      if(departments) {
+          //@ts-ignore
+          q = {...q, role: {$in:departments}};
+      }
+      if(fromDate) {
+        //@ts-ignore
+          // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+          q = {...q, createdAt: { $gte: new Date(fromDate)}};
+          
+      }      
+      if(toDate) {
+        //@ts-ignore
+          // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+          //@ts-ignore
+          q = {...q, createdAt: { $lte: new Date(toDate) }};
+      }
+      if(name) {
+        // q.$or.push({"name": new RegExp(name || "", "gi")})
+        //@ts-ignore
+        // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        //@ts-ignore
+        q = {...q, name: new RegExp(name, 'gi')};
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
       //@ts-ignore
-      users = await this.user.aggregatePaginate(aggregate, options);
+      let users = await this.user.paginate(q, options);
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);

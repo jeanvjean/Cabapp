@@ -10,32 +10,38 @@ import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { SupplierTypes } from './supplier';
 
-interface RouteCylinderInterface{
+export interface RouteCylinderInterface{
   cylinderNo:string
   cylinderSize:string
   totalVolume:string
-  totalQuantity:string
+  totalQuantity:number
 }
 
 export interface customerPickupInterface{
   name:string
+  email:string
   destination:string
   departure:string
   numberOfCylinders:number,
   cylinders:Schema.Types.ObjectId[]
+  fringeCylinders:RouteCylinderInterface[]
   status:RoutePlanStatus,
   reportId:string
+  tecrNo:string
 }
 
 export interface supplierPickupInterface{
   supplierType: SupplierTypes;
   name?:string
+  email:string
   destination:string
   departure:string
   numberOfCylinders:number,
   cylinders:Schema.Types.ObjectId[]
+  fringeCylinders:RouteCylinderInterface[]
   status:RoutePlanStatus,  
   reportId:string
+  tfcrNo:string
 }
 
 
@@ -73,32 +79,36 @@ export interface PickupInterface extends Document{
   fuelsConsumed:string
   timeOut:string
   timeIn:string
-  pprNo:string
+  rppNo:string
 }
 
-const routeCylinderSchema = new Schema({
+export const routeCylinderSchema = new Schema({
   cylinderNo:String,
   cylinderSize:String,
   totalVolume:String,
-  totalQuantity:String
+  totalQuantity:Number
 });
 
 const routeSupplier = new Schema({
   name:String,
+  email:String,
   destination:String,
   departure:String,
   numberOfCylinders:Number,
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
+  fringeCylinders:[routeCylinderSchema],
   status:String,  
   reportId:String
 });
 
 const routeCustomer = new Schema({
   name:String,
+  email:String,
   destination:String,
   departure:String,
   numberOfCylinders:Number,
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
+  fringeCylinders:[routeCylinderSchema],
   status:String,
   reportId:String
 });
@@ -137,7 +147,7 @@ const routeSchema = new Schema({
   fuelsConsumed:{type:String},
   timeOut:{type:String},
   timeIn:{type:String},
-  pprNo:String
+  rppNo:String
 },{
   timestamps:true
 });

@@ -140,7 +140,7 @@ class VehicleController extends ctrl_1.default {
             try {
                 const { vehicleId } = req.params;
                 //@ts-ignore
-                const data = yield this.module.fetchRoutePlan({ vehicleId, query: req.query });
+                const data = yield this.module.fetchRoutePlan({ routeId, query: req.query });
                 this.ok(res, 'fetched route plans', data);
             }
             catch (e) {
@@ -189,9 +189,9 @@ class VehicleController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const { vehicleId, routeId } = req.params;
-                const { status } = req.body;
+                const { status, ecr } = req.body;
                 //@ts-ignore
-                const data = yield this.module.markRouteAsComplete({ vehicleId, routeId, status, query: req.query });
+                const data = yield this.module.markRouteAsComplete({ routeId, status, query: req.query, ecrData: ecr }, req.user);
                 this.ok(res, 'Completed', data);
             }
             catch (e) {
@@ -237,7 +237,8 @@ class VehicleController extends ctrl_1.default {
     vehicleRoutePlan() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.module.vehicleRoutePlan(req.params.vehicleId);
+                //@ts-ignore
+                const data = yield this.module.vehicleRoutePlan(req.params.vehicleId, req.query);
                 this.ok(res, 'download', data);
             }
             catch (e) {

@@ -136,7 +136,7 @@ class VehicleController extends Ctrl{
       try {
         const {vehicleId} = req.params;
         //@ts-ignore
-        const data = await this.module.fetchRoutePlan({vehicleId, query:req.query});
+        const data = await this.module.fetchRoutePlan({routeId, query:req.query});
         this.ok(res, 'fetched route plans', data)
       } catch (e) {
         this.handleError(e, req, res);
@@ -185,9 +185,9 @@ class VehicleController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const { vehicleId, routeId } = req.params;
-        const { status } = req.body;
+        const { status, ecr } = req.body;
         //@ts-ignore
-        const data = await this.module.markRouteAsComplete({vehicleId, routeId, status, query:req.query });
+        const data = await this.module.markRouteAsComplete({routeId, status, query:req.query, ecrData:ecr }, req.user);
         this.ok(res, 'Completed', data);
       } catch (e) {
         this.handleError(e, req, res);
@@ -233,7 +233,8 @@ class VehicleController extends Ctrl{
   vehicleRoutePlan():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {
-        const data = await this.module.vehicleRoutePlan(req.params.vehicleId);
+        //@ts-ignore
+        const data = await this.module.vehicleRoutePlan(req.params.vehicleId, req.query);
         this.ok(res, 'download', data);
       } catch (e) {
         this.handleError(e, req, res);

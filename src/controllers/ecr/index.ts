@@ -1,4 +1,4 @@
-import { RequestHandler, Request, Response } from "express";
+import { RequestHandler, Request, Response, response } from "express";
 import EmptyCylinderModule from "../../modules/ecr";
 import Ctrl from "../ctrl";
 
@@ -65,6 +65,41 @@ class EcrController extends Ctrl{
                 //@ts-ignore
                 const data = await this.module.fetchPendingApprovals(req.query, req.user);
                 this.ok(res, 'fetched', data);
+            } catch (e) {
+                this.handleError(e, req, res);
+            }
+        }
+    }
+
+    fetchEcrs():RequestHandler {
+        return async(req:Request, res:Response)=>{
+            try {
+                //@ts-ignore
+                const data = await this.module.fetchTECR(req.query, req.user);
+                this.ok(res, 'fetched ecrs', data);
+            } catch (e) {
+                this.handleError(e, req, res);
+            }
+        }
+    }
+
+    fetchTEcrDetails():RequestHandler{
+        return async(req:Request, res:Response)=>{
+            try {
+                const data = await this.module.fetchTEcrDetails(req.params.ecrNo)
+                this.ok(res, 'details fetched', data);
+            } catch (e) {
+                this.handleError(e, req, res);
+            }
+        }
+    }
+
+    completeTecr():RequestHandler{
+        return async(req:Request, res:Response)=>{
+            try {
+                let { tecrId, otp } = req.params;
+                const data = await this.module.completeTecr({tecrId, otp});
+                this.ok(res, 'approved', data);
             } catch (e) {
                 this.handleError(e, req, res);
             }

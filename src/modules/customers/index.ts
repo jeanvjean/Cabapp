@@ -154,6 +154,11 @@ class Customer extends Module{
     try {
       const date = new Date()
       date.setDate(date.getDate() + data.cylinderHoldingTime);
+      let exist = await this.customer.findOne({email:data.email, branch:user.branch});
+      console.log(exist)
+      if(exist) {
+        throw new BadInputFormatException('a customer with this email exists');
+      }
       const customer = await this.customer.create({
         ...data,
         cylinderHoldingTime:date.toISOString(),

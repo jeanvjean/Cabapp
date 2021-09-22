@@ -726,11 +726,15 @@ class Cylinder extends Module {
 
   public async fetchRegisteredCylinders(query:QueryInterface, user:UserInterface):Promise<RegisteredCylinderPoolInterface|undefined>{
     try {
-      const {search, holder, cylinderType, gasType, customer, supplier, branch, fromBranch, fromDate, toDate, condition, owner} = query;
+      const {search, holder, cylinderType,cylinderNumber, 
+        waterCapacity, gasVolume, gasType, customer, supplier, 
+        branch, fromBranch, fromDate, toDate, condition, owner,
+        manufactureDate
+      } = query;
       const ObjectId = mongoose.Types.ObjectId
       let options = {
-        ...query,
-        populate:[]
+        page:query.page,
+        limit:query.limit
       }
       let or = [];
        if(customer?.length){
@@ -761,9 +765,25 @@ class Cylinder extends Module {
           {condition: new RegExp(condition, 'gi')}
         )
       }
+      if(cylinderNumber?.length) {
+        or.push(
+          {cylinderNumber: new RegExp(cylinderNumber, 'gi')},
+          {assignedNumber: new RegExp(cylinderNumber, 'gi')}
+        )
+      }
       if(owner?.length) {
         or.push(
           {owner: new RegExp(owner, 'gi')}
+        )
+      }
+      if(gasVolume?.length) {
+        or.push(
+          {gasVolumeContent: new RegExp(gasVolume, 'gi')}
+        )
+      }
+      if(waterCapacity?.length) {
+        or.push(
+          {waterCapacity: new RegExp(waterCapacity, 'gi')}
         )
       }
       or.push({cylinderStatus: new RegExp(search || "", 'gi')});
@@ -781,17 +801,6 @@ class Cylinder extends Module {
       let lookUp = {}
       let unwind = {}
       if(supplier?.length ) {
-        // lookUp = {
-        //   $lookup:{
-        //     from: "supplier",
-        //     localField: "supplier",
-        //     foreignField: "_id",
-        //     as: "supplierInfo"
-        //   }
-        // }
-        // unwind = {"$unwind":"$supplierInfo"};
-        //@ts-ignore
-        // q = {...q, lookUp, unwind};
           or.push(
             {'supplierType': new RegExp(supplier,'gi')}
         )
@@ -820,6 +829,11 @@ class Cylinder extends Module {
         let { $match } = q;
         //@ts-ignore
         q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+      }
+      if(manufactureDate) {
+        let { $match } = q;
+        //@ts-ignore
+        q.$match = {...$match, dateManufactured:{$eq:new Date(manufactureDate)}}
       }
       let aggregate = this.registerCylinder.aggregate([q]);
       //@ts-ignore

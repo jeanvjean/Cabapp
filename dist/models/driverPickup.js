@@ -1,31 +1,36 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.routeCylinderSchema = void 0;
 const mongoose_1 = require("mongoose");
 const order_1 = require("./order");
 const vehicle_1 = require("./vehicle");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
-const routeCylinderSchema = new mongoose_1.Schema({
+exports.routeCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     cylinderSize: String,
     totalVolume: String,
-    totalQuantity: String
+    totalQuantity: Number
 });
 const routeSupplier = new mongoose_1.Schema({
     name: String,
+    email: String,
     destination: String,
     departure: String,
     numberOfCylinders: Number,
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
+    fringeCylinders: [exports.routeCylinderSchema],
     status: String,
     reportId: String
 });
 const routeCustomer = new mongoose_1.Schema({
     name: String,
+    email: String,
     destination: String,
     departure: String,
     numberOfCylinders: Number,
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
+    fringeCylinders: [exports.routeCylinderSchema],
     status: String,
     reportId: String
 });
@@ -49,7 +54,7 @@ const routeSchema = new mongoose_1.Schema({
     modeOfService: { type: String },
     date: { type: Date },
     serialNo: { type: Number },
-    cylinders: { type: [routeCylinderSchema] },
+    cylinders: { type: [exports.routeCylinderSchema] },
     vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' },
     recievedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     security: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
@@ -63,7 +68,7 @@ const routeSchema = new mongoose_1.Schema({
     fuelsConsumed: { type: String },
     timeOut: { type: String },
     timeIn: { type: String },
-    pprNo: String
+    rppNo: String
 }, {
     timestamps: true
 });

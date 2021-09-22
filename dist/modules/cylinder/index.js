@@ -554,9 +554,12 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search, holder, cylinderType, gasType, customer, supplier, branch, fromBranch, fromDate, toDate, condition, owner } = query;
+                const { search, holder, cylinderType, cylinderNumber, waterCapacity, gasVolume, gasType, customer, supplier, branch, fromBranch, fromDate, toDate, condition, owner, manufactureDate } = query;
                 const ObjectId = mongoose.Types.ObjectId;
-                let options = Object.assign(Object.assign({}, query), { populate: [] });
+                let options = {
+                    page: query.page,
+                    limit: query.limit
+                };
                 let or = [];
                 if (customer === null || customer === void 0 ? void 0 : customer.length) {
                     or.push({ 'assignedTo': new RegExp(customer, 'gi') });
@@ -576,8 +579,17 @@ class Cylinder extends module_1.default {
                 if (condition === null || condition === void 0 ? void 0 : condition.length) {
                     or.push({ condition: new RegExp(condition, 'gi') });
                 }
+                if (cylinderNumber === null || cylinderNumber === void 0 ? void 0 : cylinderNumber.length) {
+                    or.push({ cylinderNumber: new RegExp(cylinderNumber, 'gi') }, { assignedNumber: new RegExp(cylinderNumber, 'gi') });
+                }
                 if (owner === null || owner === void 0 ? void 0 : owner.length) {
                     or.push({ owner: new RegExp(owner, 'gi') });
+                }
+                if (gasVolume === null || gasVolume === void 0 ? void 0 : gasVolume.length) {
+                    or.push({ gasVolumeContent: new RegExp(gasVolume, 'gi') });
+                }
+                if (waterCapacity === null || waterCapacity === void 0 ? void 0 : waterCapacity.length) {
+                    or.push({ waterCapacity: new RegExp(waterCapacity, 'gi') });
                 }
                 or.push({ cylinderStatus: new RegExp(search || "", 'gi') });
                 let q = {
@@ -593,17 +605,6 @@ class Cylinder extends module_1.default {
                 let lookUp = {};
                 let unwind = {};
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
-                    // lookUp = {
-                    //   $lookup:{
-                    //     from: "supplier",
-                    //     localField: "supplier",
-                    //     foreignField: "_id",
-                    //     as: "supplierInfo"
-                    //   }
-                    // }
-                    // unwind = {"$unwind":"$supplierInfo"};
-                    //@ts-ignore
-                    // q = {...q, lookUp, unwind};
                     or.push({ 'supplierType': new RegExp(supplier, 'gi') });
                 }
                 let lu = {
@@ -628,6 +629,11 @@ class Cylinder extends module_1.default {
                     let { $match } = q;
                     //@ts-ignore
                     q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                }
+                if (manufactureDate) {
+                    let { $match } = q;
+                    //@ts-ignore
+                    q.$match = Object.assign(Object.assign({}, $match), { dateManufactured: { $eq: new Date(manufactureDate) } });
                 }
                 let aggregate = this.registerCylinder.aggregate([q]);
                 //@ts-ignore

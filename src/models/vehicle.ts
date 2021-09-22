@@ -77,6 +77,7 @@ export type RecordRoute = {
 }
 
 export interface VehicleInterface extends Document{
+  vehicleName:string
   vehicleType:string
   manufacturer:string
   vModel:string
@@ -152,6 +153,7 @@ const disposalSchema = new Schema({
 });
 
 export const vehicleSchema = new Schema({
+  vehicleName:{type:String},
   vehicleType:{type:String},
   manufacturer:{type:String},
   vModel:{type:String},

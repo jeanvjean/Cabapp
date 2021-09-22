@@ -35,4 +35,22 @@ router.get(
     ecrCtrl.fetchPendingApprovals()
 );
 
+router.get(
+    '/fetch-all-ecr',
+    auth.verify(),
+    ecrCtrl.fetchEcrs()
+)
+
+router.get(
+    '/tecr-details/:ecrNo',
+    auth.verify(),
+    ecrCtrl.fetchTEcrDetails()
+)
+
+router.get(
+    '/submit-otp/:tecrId/:otp',
+    auth.verify(),
+    ecrCtrl.completeTecr()
+);
+
 export default router;

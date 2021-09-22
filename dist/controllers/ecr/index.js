@@ -74,6 +74,41 @@ class EcrController extends ctrl_1.default {
             }
         });
     }
+    fetchEcrs() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchTECR(req.query, req.user);
+                this.ok(res, 'fetched ecrs', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchTEcrDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const data = yield this.module.fetchTEcrDetails(req.params.ecrNo);
+                this.ok(res, 'details fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    completeTecr() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { tecrId, otp } = req.params;
+                const data = yield this.module.completeTecr({ tecrId, otp });
+                this.ok(res, 'approved', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = EcrController;
 //# sourceMappingURL=index.js.map

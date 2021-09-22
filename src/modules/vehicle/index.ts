@@ -697,7 +697,7 @@ class Vehicle extends Module{
       let ObjectId = mongoose.Types.ObjectId;
       let { routeId, query } = data;
       //@ts-ignore
-      let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType  } = query;
 
       let q = {
             _id:`${routeId}`,
@@ -707,9 +707,13 @@ class Vehicle extends Module{
       if(search) {
         or.push({modeOfService: new RegExp(search || "", "gi")})
       }
-       if(email) {
+       if(email && customer) {
         //@ts-ignore
         q = {...q, 'customers.email': new RegExp(email, "gi")}
+      }
+      if(email && supplier) {
+        //@ts-ignore
+        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
       }
       if(supplier?.length) {
         //@ts-ignore
@@ -718,6 +722,14 @@ class Vehicle extends Module{
       if(customer?.length) {
         //@ts-ignore
         q = {...q, 'customers.name': new RegExp(customer, "gi")}
+      }
+      if(activity?.length) {
+        //@ts-ignore
+        q = {...q, 'activity': new RegExp(activity, "gi")}
+      }
+      if(pickupType?.length) {
+        //@ts-ignore
+        q = {...q, 'orderType': new RegExp(pickupType, "gi")}
       }
       if(fromDate) {
         //@ts-ignore
@@ -732,17 +744,17 @@ class Vehicle extends Module{
         q = {...q, $or:or}
       }
 
-      const options = {
-        page:query?.page,
-        limit:query?.limit,
-        populate:[
-          {path:'customer', model:'customer'},
-          {path:'supplier', model:'supplier'},
-          {path:'vehicle', model:'vehicle'},
-          {path:'security', model:'User'},
-          {path:'recievedBy', model:'User'}
-        ]
-      }
+      // const options = {
+      //   page:query?.page,
+      //   limit:query?.limit,
+      //   populate:[
+      //     {path:'customer', model:'customer'},
+      //     {path:'supplier', model:'supplier'},
+      //     {path:'vehicle', model:'vehicle'},
+      //     {path:'security', model:'User'},
+      //     {path:'recievedBy', model:'User'}
+      //   ]
+      // }
       // let aggregate = this.pickup.aggregate([q]);
       const routePlan = await this.pickup.findOne(q).populate(
         [
@@ -758,24 +770,27 @@ class Vehicle extends Module{
       this.handleException(e);
     }
   }
-
+//@ts-ignore
   public async vehicleRoutePlan(vehicleId:string, query:QueryInterface):Promise<PickupInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      //@ts-ignore
-      let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+      
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
 
       let q = {
-        vehicle:vehicleId,
-        deleted:false
+        vehicle:`${vehicleId}`
       }
       let or = [];
       if(search) {
         or.push({modeOfService: new RegExp(search || "", "gi")})
       }
-        if(email) {
+      if(email && customer) {
         //@ts-ignore
         q = {...q, 'customers.email': new RegExp(email, "gi")}
+      }
+      if(email && supplier) {
+        //@ts-ignore
+        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
       }
       if(supplier?.length) {
         //@ts-ignore
@@ -785,6 +800,14 @@ class Vehicle extends Module{
         //@ts-ignore
         q = {...q, 'customers.name': new RegExp(customer, "gi")}
       }
+      if(activity?.length) {
+        //@ts-ignore
+        q = {...q, 'activity': new RegExp(activity, "gi")}
+      }
+      if(pickupType?.length) {
+        //@ts-ignore
+        q = {...q, 'orderType': new RegExp(pickupType, "gi")}
+      }
       if(fromDate) {
         //@ts-ignore
         q = {...q, createdAt:{ $gte:new Date(fromDate) }}
@@ -793,6 +816,7 @@ class Vehicle extends Module{
         //@ts-ignore
         q = {...q, createdAt:{ $lte:new Date(toDate) }}
       }
+      // console.log(q)
       if(or.length > 0) {
         //@ts-ignore
         q = {...q, $or:or}
@@ -810,8 +834,8 @@ class Vehicle extends Module{
         ]
       }
       //@ts-ignore
-      const vr = await this.pickup.find(q, options);;
-      return Promise.resolve(vr);
+      let v = await this.pickup.paginate(q, options);
+      return Promise.resolve(v);
     } catch (e) {
       this.handleException(e);
     }

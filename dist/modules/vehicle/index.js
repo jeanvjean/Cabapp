@@ -556,7 +556,7 @@ class Vehicle extends module_1.default {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { routeId, query } = data;
                 //@ts-ignore
-                let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+                let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
                 let q = {
                     _id: `${routeId}`,
                     deleted: false
@@ -565,9 +565,13 @@ class Vehicle extends module_1.default {
                 if (search) {
                     or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                if (email) {
+                if (email && customer) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
+                }
+                if (email && supplier) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi") });
                 }
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
                     //@ts-ignore
@@ -576,6 +580,14 @@ class Vehicle extends module_1.default {
                 if (customer === null || customer === void 0 ? void 0 : customer.length) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.name': new RegExp(customer, "gi") });
+                }
+                if (activity === null || activity === void 0 ? void 0 : activity.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'activity': new RegExp(activity, "gi") });
+                }
+                if (pickupType === null || pickupType === void 0 ? void 0 : pickupType.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'orderType': new RegExp(pickupType, "gi") });
                 }
                 if (fromDate) {
                     //@ts-ignore
@@ -589,17 +601,17 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
-                const options = {
-                    page: query === null || query === void 0 ? void 0 : query.page,
-                    limit: query === null || query === void 0 ? void 0 : query.limit,
-                    populate: [
-                        { path: 'customer', model: 'customer' },
-                        { path: 'supplier', model: 'supplier' },
-                        { path: 'vehicle', model: 'vehicle' },
-                        { path: 'security', model: 'User' },
-                        { path: 'recievedBy', model: 'User' }
-                    ]
-                };
+                // const options = {
+                //   page:query?.page,
+                //   limit:query?.limit,
+                //   populate:[
+                //     {path:'customer', model:'customer'},
+                //     {path:'supplier', model:'supplier'},
+                //     {path:'vehicle', model:'vehicle'},
+                //     {path:'security', model:'User'},
+                //     {path:'recievedBy', model:'User'}
+                //   ]
+                // }
                 // let aggregate = this.pickup.aggregate([q]);
                 const routePlan = yield this.pickup.findOne(q).populate([
                     { path: 'customer', model: 'customer' },
@@ -615,23 +627,26 @@ class Vehicle extends module_1.default {
             }
         });
     }
+    //@ts-ignore
     vehicleRoutePlan(vehicleId, query) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                //@ts-ignore
-                let { driver, tecr, tfcr, email, supplier, customer, search, fromDate, toDate } = query;
+                let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
                 let q = {
-                    vehicle: vehicleId,
-                    deleted: false
+                    vehicle: `${vehicleId}`
                 };
                 let or = [];
                 if (search) {
                     or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                if (email) {
+                if (email && customer) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
+                }
+                if (email && supplier) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi") });
                 }
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
                     //@ts-ignore
@@ -641,6 +656,14 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.name': new RegExp(customer, "gi") });
                 }
+                if (activity === null || activity === void 0 ? void 0 : activity.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'activity': new RegExp(activity, "gi") });
+                }
+                if (pickupType === null || pickupType === void 0 ? void 0 : pickupType.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'orderType': new RegExp(pickupType, "gi") });
+                }
                 if (fromDate) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
@@ -649,10 +672,12 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
                 }
+                // console.log(q)
                 if (or.length > 0) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
+                console.log(q);
                 const options = {
                     page: query === null || query === void 0 ? void 0 : query.page,
                     limit: query === null || query === void 0 ? void 0 : query.limit,
@@ -665,9 +690,9 @@ class Vehicle extends module_1.default {
                     ]
                 };
                 //@ts-ignore
-                const vr = yield this.pickup.find(q, options);
-                ;
-                return Promise.resolve(vr);
+                let v = yield this.pickup.paginate(q);
+                console.log(v);
+                return Promise.resolve(v);
             }
             catch (e) {
                 this.handleException(e);

@@ -239,7 +239,7 @@ class VehicleController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.vehicleRoutePlan(req.params.vehicleId, req.query);
-                this.ok(res, 'download', data);
+                this.ok(res, 'vehicle route plans', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

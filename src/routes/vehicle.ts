@@ -112,7 +112,8 @@ router.get(
 );
 
 router.get(
-  '/download-routePlan/:vehicleId',
+  '/vehicle-routePlan/:vehicleId',
+  auth.verify(),
   vehicleCtrl.vehicleRoutePlan()
 );
 

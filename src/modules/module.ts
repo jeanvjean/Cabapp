@@ -44,6 +44,8 @@ export interface QueryInterface {
   name?:string
   email?:string
   phone?:string
+  activity?:string
+  pickupType?:string
 }
 
 /**

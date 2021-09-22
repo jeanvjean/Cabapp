@@ -235,7 +235,7 @@ class VehicleController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.vehicleRoutePlan(req.params.vehicleId, req.query);
-        this.ok(res, 'download', data);
+        this.ok(res, 'vehicle route plans', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

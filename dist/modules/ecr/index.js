@@ -181,7 +181,6 @@ class EmptyCylinderModule extends module_1.default {
     completeTecr(input) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(input.tecrId, input.otp);
                 let { tecrId, otp } = input;
                 let data = yield this.emptyCylinder.findById(tecrId);
                 if (!data) {

@@ -823,8 +823,8 @@ class Vehicle extends Module{
       }
 
       const options = {
-        page:query?.page,
-        limit:query?.limit,
+        page:query?.page || 1,
+        limit:query?.limit || 10,
         populate:[
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},

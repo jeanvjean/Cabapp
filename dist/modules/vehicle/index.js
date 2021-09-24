@@ -555,6 +555,7 @@ class Vehicle extends module_1.default {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { routeId, query } = data;
+                console.log(routeId);
                 //@ts-ignore
                 let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
                 let q = {
@@ -677,7 +678,6 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
-                console.log(q);
                 const options = {
                     page: query === null || query === void 0 ? void 0 : query.page,
                     limit: query === null || query === void 0 ? void 0 : query.limit,
@@ -690,8 +690,7 @@ class Vehicle extends module_1.default {
                     ]
                 };
                 //@ts-ignore
-                let v = yield this.pickup.paginate(q);
-                console.log(v);
+                let v = yield this.pickup.paginate(q, options);
                 return Promise.resolve(v);
             }
             catch (e) {

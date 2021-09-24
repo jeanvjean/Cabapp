@@ -35,5 +35,6 @@ router.get('/fetch-all-customers', auth.verify(), controllers_1.customerCtrl.fet
 router.get('/fetch-complaint-details/:complaintId', auth.verify(), controllers_1.customerCtrl.fetchComplaintDetails());
 router.delete('/delete-customer/:customerId', auth.verify(), controllers_1.customerCtrl.deleteCustomer());
 router.get('/fetch-deleted-customers', auth.verify(), controllers_1.customerCtrl.fetchDeletedCustomers());
+router.get('/fetch-order-history', auth.verify(), controllers_1.customerCtrl.fetchOrderHistory());
 exports.default = router;
 //# sourceMappingURL=customer.js.map

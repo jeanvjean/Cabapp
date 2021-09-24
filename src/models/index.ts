@@ -69,7 +69,7 @@ export const Branch:Model<BranchInterface> = branchFactory(conn);
 
 export const Archive:Model<ArchivedCylinder> = archiveFactory(conn);
 
-export const PickupRoutes:Model<PickupInterface> = driverPickupFactory(conn);
+export const PickupModel:Model<PickupInterface> = driverPickupFactory(conn);
 
 export const WalkInCustomer:Model<WalkinCustomerInterface> = walkinCustomerFactory(conn);
 

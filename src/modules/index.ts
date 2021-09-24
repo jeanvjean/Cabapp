@@ -15,7 +15,7 @@ import {
   Complain,
   Branch,
   Archive,
-  PickupRoutes,
+  PickupModel,
   WalkInCustomer,
   SalesReq,
   Production,
@@ -83,7 +83,7 @@ export const product = new ProductModule({
 
 export const vehicle = new VehicleModule({
   vehicle:Vehicle,
-  pickup:PickupRoutes,
+  pickup:PickupModel,
   user:User,
   activity:Activity,
   registerCylinder:RegisteredCylinder,
@@ -109,7 +109,8 @@ export const customer = new CustomerModule({
   vehicle:Vehicle,
   supplier:Supplier,
   cylinder:Cylinder,
-  deleteCustomer:DeletedCustomers
+  deleteCustomer:DeletedCustomers,
+  pickup:PickupModel
 });
 
 export const sales = new SalesModule({

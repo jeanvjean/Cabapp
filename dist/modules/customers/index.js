@@ -34,6 +34,7 @@ class Customer extends module_1.default {
         this.supplier = props.supplier;
         this.cylinder = props.cylinder;
         this.deleteCustomer = props.deleteCustomer;
+        this.pickup = props.pickup;
     }
     createCustomer(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -69,67 +70,38 @@ class Customer extends module_1.default {
                         { path: 'branch', model: 'branches' },
                         { path: 'products', model: 'products' }
                     ] });
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, name, email, phone } = query;
                 let aggregate;
-                const aggregate1 = this.customer.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { name: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { customerType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { nickName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { contactPerson: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.customer.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { name: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { customerType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { nickName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { contactPerson: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                if (name) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { name: name });
                 }
-                else {
-                    aggregate = aggregate2;
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { email: email });
+                }
+                if (phone) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { phoneNumber: phone });
+                }
+                if (search) {
+                    or.push({ nickName: new RegExp(search, 'gi') });
+                    or.push({ customerType: new RegExp(search, 'gi') });
+                    or.push({ address: new RegExp(search, 'gi') });
+                    or.push({ TIN: new RegExp(search, 'gi') });
+                    or.push({ rcNumber: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const customers = yield this.customer.aggregatePaginate(aggregate, options);
-                for (let cust of customers.docs) {
-                    let branch = yield this.branch.findById(cust.branch);
-                    cust.branch = branch;
-                    let products = [];
-                    for (let prod of cust.products) {
-                        let product = yield this.product.findById(prod);
-                        products.push(product);
-                    }
-                    cust.products = products;
-                }
+                const customers = yield this.customer.paginate(q, options);
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -1275,6 +1247,52 @@ class Customer extends module_1.default {
                     cyl.branch = branch;
                 }
                 return cylinders;
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    customerOrderHistory(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { search, email, activity } = query;
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ tecrNo: new RegExp(search, 'gi') });
+                }
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { "customers.email": email });
+                }
+                if (activity) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { activity: activity });
+                }
+                let orders = yield this.pickup.find(q);
+                if (orders.length <= 0) {
+                    throw new exceptions_1.BadInputFormatException('no order matches the parameters');
+                }
+                //@ts-ignore
+                let mappedCustomer = orders.map(doc => {
+                    return doc.customers;
+                });
+                //@ts-ignore
+                let customerOrder = [];
+                for (let ar of mappedCustomer) {
+                    for (let a of ar) {
+                        if (a.email == email) {
+                            customerOrder.push(a);
+                        }
+                    }
+                }
+                //@ts-ignore
+                // console.log(customerOrder);
+                // let custOr = mappedCustomer[0].filter(o=> o.email == email);
+                return Promise.resolve(customerOrder);
             }
             catch (e) {
                 this.handleException(e);

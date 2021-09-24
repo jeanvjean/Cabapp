@@ -49,7 +49,7 @@ exports.product = new inventory_1.default({
 });
 exports.vehicle = new vehicle_1.default({
     vehicle: index_1.Vehicle,
-    pickup: index_1.PickupRoutes,
+    pickup: index_1.PickupModel,
     user: index_1.User,
     activity: index_1.Activity,
     registerCylinder: index_1.RegisteredCylinder,
@@ -73,7 +73,8 @@ exports.customer = new customers_1.default({
     vehicle: index_1.Vehicle,
     supplier: index_1.Supplier,
     cylinder: index_1.Cylinder,
-    deleteCustomer: index_1.DeletedCustomers
+    deleteCustomer: index_1.DeletedCustomers,
+    pickup: index_1.PickupModel
 });
 exports.sales = new sales_1.default({
     sales: index_1.SalesReq,

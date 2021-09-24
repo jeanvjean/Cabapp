@@ -378,6 +378,18 @@ class customerCtrl extends ctrl_1.default {
             }
         });
     }
+    fetchOrderHistory() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.customerOrderHistory(req.query, req.user);
+                this.ok(res, 'order hist', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = customerCtrl;
 //# sourceMappingURL=index.js.map

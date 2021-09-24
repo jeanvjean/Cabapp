@@ -22,6 +22,8 @@ const routeSupplier = new mongoose_1.Schema({
     fringeCylinders: [exports.routeCylinderSchema],
     status: String,
     reportId: String
+}, {
+    timestamps: true
 });
 const routeCustomer = new mongoose_1.Schema({
     name: String,
@@ -33,6 +35,8 @@ const routeCustomer = new mongoose_1.Schema({
     fringeCylinders: [exports.routeCylinderSchema],
     status: String,
     reportId: String
+}, {
+    timestamps: true
 });
 const routeSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },

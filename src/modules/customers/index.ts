@@ -18,6 +18,7 @@ import { VehicleInterface } from "../../models/vehicle";
 import { SupplierInterface } from "../../models/supplier";
 import { CylinderInterface } from "../../models/cylinder";
 import { DeletedCustomer } from "../../models/deletedCustomers";
+import { PickupInterface } from "../../models/driverPickup";
 
 
 
@@ -33,6 +34,7 @@ export interface CustomerInterfaceProp{
   supplier:Model<SupplierInterface>
   cylinder:Model<CylinderInterface>
   deleteCustomer:Model<DeletedCustomer>
+  pickup:Model<PickupInterface>
 }
 
 interface newCustomerInterface {
@@ -134,6 +136,7 @@ class Customer extends Module{
   private vehicle:Model<VehicleInterface>
   private cylinder:Model<CylinderInterface>
   private deleteCustomer:Model<DeletedCustomer>
+  private pickup:Model<PickupInterface>
 
   constructor(props:CustomerInterfaceProp){
     super()
@@ -148,6 +151,7 @@ class Customer extends Module{
     this.supplier = props.supplier
     this.cylinder = props.cylinder
     this.deleteCustomer = props.deleteCustomer
+    this.pickup = props.pickup
   }
 
   public async createCustomer(data:newCustomerInterface, user:UserInterface):Promise<CustomerInterface|undefined> {
@@ -188,66 +192,40 @@ class Customer extends Module{
           {path:'products', model:'products'}
         ]
       }
+      let q = {
+        branch:user.branch
+      }
+      let or = []
       const ObjectId = mongoose.Types.ObjectId;
-      const { search, filter } = query;
+      const { search, filter,name, email, phone } = query;
       let aggregate;
-      const aggregate1 = this.customer.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {name:{
-                  $regex: search?.toLowerCase() || ''
-                }},{customerType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{nickName:{
-                  $regex:search?.toLowerCase() || ''
-                }},{contactPerson:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.customer.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {name:{
-                  $regex: search?.toLowerCase() || ''
-                }},{customerType:{
-                  $regex:search?.toLowerCase() || ''
-                }},{nickName:{
-                  $regex:search?.toLowerCase() || ''
-                }},{contactPerson:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              { branch:ObjectId(user.branch.toString()) }
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else {
-        aggregate = aggregate2
-      }
+     if(name) {
+       //@ts-ignore
+       q = {...q, name:name}
+     }
+     if(email) {
+       //@ts-ignore
+       q = {...q, email:email}
+     }
+     if(phone) {
       //@ts-ignore
-      const customers = await this.customer.aggregatePaginate(aggregate, options);
-      for(let cust of customers.docs) {
-        let branch = await this.branch.findById(cust.branch);
-        cust.branch = branch;
-        let products = []
-        for(let prod of cust.products) {
-          let product = await this.product.findById(prod);
-          products.push(product)
-        }
-        cust.products = products
-      }
+      q = {...q, phoneNumber:phone}
+    }
+
+    if(search) {
+      or.push({nickName:new RegExp(search, 'gi')})
+      or.push({customerType:new RegExp(search, 'gi')})
+      or.push({address:new RegExp(search, 'gi')})
+      or.push({TIN:new RegExp(search, 'gi')})
+      or.push({rcNumber:new RegExp(search, 'gi')})
+    }
+
+    if(or.length > 0) {
+      //@ts-ignore
+      q = {...q, $or:or}
+    }
+      //@ts-ignore
+      const customers = await this.customer.paginate(q, options);
       return Promise.resolve(customers);
     } catch (e) {
       this.handleException(e)
@@ -1376,6 +1354,47 @@ class Customer extends Module{
         cyl.branch = branch;
       }
       return cylinders;
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async customerOrderHistory(query:QueryInterface, user:UserInterface):Promise<any>{
+    try {
+      let { search, email, activity } = query;
+      let q = {
+        branch:user.branch
+      }
+      let or = []
+      if(search) {
+        or.push({tecrNo:new RegExp(search, 'gi')})
+      }
+      if(email) {
+        //@ts-ignore
+        q ={...q, "customers.email": email}
+      }
+      if(activity) {
+        //@ts-ignore
+        q = {...q, activity:activity}
+      }
+      let orders = await this.pickup.find(q);
+      if(orders.length <= 0) {
+        throw new BadInputFormatException('no order matches the parameters');
+      }
+      //@ts-ignore
+     let mappedCustomer = orders.map(doc=>{
+        return doc.customers
+      });
+      //@ts-ignore
+      let customerOrder=[]
+      for(let ar of mappedCustomer) {
+        for(let a of ar) {
+          if(a.email == email) {
+            customerOrder.push(a)
+          }
+        }
+      }
+      return Promise.resolve(customerOrder);
     } catch (e) {
       this.handleException(e);
     }

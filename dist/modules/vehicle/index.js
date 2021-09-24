@@ -555,7 +555,6 @@ class Vehicle extends module_1.default {
             try {
                 let ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 let { routeId, query } = data;
-                console.log(routeId);
                 //@ts-ignore
                 let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
                 let q = {
@@ -679,8 +678,8 @@ class Vehicle extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 const options = {
-                    page: query === null || query === void 0 ? void 0 : query.page,
-                    limit: query === null || query === void 0 ? void 0 : query.limit,
+                    page: (query === null || query === void 0 ? void 0 : query.page) || 1,
+                    limit: (query === null || query === void 0 ? void 0 : query.limit) || 10,
                     populate: [
                         { path: 'customer', model: 'customer' },
                         { path: 'supplier', model: 'supplier' },

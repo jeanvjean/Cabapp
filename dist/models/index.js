@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmptyCylinder = exports.DeletedCustomers = exports.VehicleReport = exports.DeletedUsers = exports.ChangeCylinder = exports.Condemn = exports.Activity = exports.Reciept = exports.OCN = exports.PurchaseOrder = exports.Production = exports.SalesReq = exports.WalkInCustomer = exports.PickupRoutes = exports.Archive = exports.Branch = exports.Complain = exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
+exports.EmptyCylinder = exports.DeletedCustomers = exports.VehicleReport = exports.DeletedUsers = exports.ChangeCylinder = exports.Condemn = exports.Activity = exports.Reciept = exports.OCN = exports.PurchaseOrder = exports.Production = exports.SalesReq = exports.WalkInCustomer = exports.PickupModel = exports.Archive = exports.Branch = exports.Complain = exports.Order = exports.Customer = exports.Driver = exports.Vehicle = exports.DisburseProduct = exports.Inventory = exports.Supplier = exports.Product = exports.TransferCyl = exports.RegisteredCylinder = exports.Cylinder = exports.User = exports.Person = exports.conn = void 0;
 const mongoose_1 = require("mongoose");
 const mongo_1 = require("../configs/mongo");
 const cylinder_1 = require("./cylinder");
@@ -50,7 +50,7 @@ exports.Order = order_1.default(exports.conn);
 exports.Complain = complaint_1.default(exports.conn);
 exports.Branch = branch_1.default(exports.conn);
 exports.Archive = archiveCylinder_1.default(exports.conn);
-exports.PickupRoutes = driverPickup_1.default(exports.conn);
+exports.PickupModel = driverPickup_1.default(exports.conn);
 exports.WalkInCustomer = walk_in_customers_1.default(exports.conn);
 exports.SalesReq = sales_requisition_1.default(exports.conn);
 exports.Production = productionSchedule_1.default(exports.conn);

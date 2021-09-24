@@ -175,4 +175,10 @@ router.get(
   customerCtrl.fetchDeletedCustomers()
 );
 
+router.get(
+  '/fetch-order-history',
+  auth.verify(),
+  customerCtrl.fetchOrderHistory()
+);
+
 export default router;

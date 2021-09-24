@@ -99,6 +99,8 @@ const routeSupplier = new Schema({
   fringeCylinders:[routeCylinderSchema],
   status:String,  
   reportId:String
+},{
+  timestamps:true
 });
 
 const routeCustomer = new Schema({
@@ -111,6 +113,8 @@ const routeCustomer = new Schema({
   fringeCylinders:[routeCylinderSchema],
   status:String,
   reportId:String
+},{
+  timestamps:true
 });
 
 const routeSchema = new Schema({

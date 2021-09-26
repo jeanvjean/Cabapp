@@ -238,8 +238,20 @@ class VehicleController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 //@ts-ignore
-                const data = yield this.module.vehicleRoutePlan(req.params.vehicleId, req.query);
+                const data = yield this.module.vehicleRoutePlan(req.params.vehicleId, req.query, req.user);
                 this.ok(res, 'vehicle route plans', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    RoutePlans() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.RoutePlans(req.query, req.user);
+                this.ok(res, 'route plans', data);
             }
             catch (e) {
                 this.handleError(e, req, res);

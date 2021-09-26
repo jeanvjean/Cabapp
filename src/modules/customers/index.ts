@@ -886,62 +886,23 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {customerName:{
-                  $regex: search?.toLowerCase() || ''
-                }},{issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {approvalStatus:TransferStatus.PENDING},
-              {nextApprovalOfficer: ObjectId(user._id.toString())},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {title:{
-                  $regex: search?.toLowerCase() || ''
-                }},{issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {approvalStatus:TransferStatus.PENDING},
-              {nextApprovalOfficer: ObjectId(user._id.toString())},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate2
+      let q = {
+        branch: user.branch,
+        approvalStatus:TransferStatus.PENDING,
+        nextApprovalOfficer: user._id
+      }
+      let or = [];
+      if(search) {
+        or.push({customerName: new RegExp(search, 'gi')})
+        or.push({issue: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complaints = await this.complaint.aggregatePaginate(aggregate,options);
-      //populate id reference fields
-        for(let comp of complaints.docs) {
-          let branch = await this.branch.findById(comp.branch);
-          comp.branch = branch
-          let initiator = await this.user.findById(comp.initiator);
-          comp.initiator = initiator;
-          let nextApprovalOfficer = await this.user.findById(comp.nextApprovalOfficer);
-          comp.nextApprovalOfficer = nextApprovalOfficer;
-          let customer = await this.customer.findById(comp.customer);
-          comp.customer = customer;
-        }
-      return Promise.resolve(complaints)
+      const complaints = await this.complaint.paginate(aggregate,options);
+      return Promise.resolve(complaints);
     } catch (e) {
       this.handleException(e);
     }
@@ -960,60 +921,25 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {title:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {approvalStatus: filter?.toLowerCase()},
-              {customer: ObjectId(customerId)}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {title:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {customer: ObjectId(customerId)}
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate2
+      let q = {
+        customer: customerId
+      }
+
+      let or = [];
+      if(search) {
+        or.push({title: new RegExp(search, 'gi')})
+        or.push({issue: new RegExp(search, 'gi')})
+      }
+      if(filter?.length) {
+        //@ts-ignore
+        q = {...q, approvalStatus:filter}
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complains = await this.complaint.aggregatePaginate(aggregate, options);
-      //populate id reference fields
-      for(let comp of complains.docs) {
-        let branch = await this.branch.findById(comp.branch);
-        comp.branch = branch
-        let initiator = await this.user.findById(comp.initiator);
-        comp.initiator = initiator;
-        let nextApprovalOfficer = await this.user.findById(comp.nextApprovalOfficer);
-        comp.nextApprovalOfficer = nextApprovalOfficer;
-        let customer = await this.customer.findById(comp.customer);
-        comp.customer = customer;
-      }
+      const complains = await this.complaint.paginate(aggregate, options);
       return Promise.resolve(complains);
     } catch (e) {
       this.handleException(e);
@@ -1033,49 +959,25 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {title:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {approvalStatus: filter?.toLowerCase()},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.complaint.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {title:{
-                  $regex: search?.toLowerCase() || ''
-                }},
-                {issue:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate2
+      let q = {
+        branch: user._id
+      }
+
+      let or = [];
+      if(search) {
+        or.push({title: new RegExp(search, 'gi')})
+        or.push({issue: new RegExp(search, 'gi')})
+      }
+      if(filter?.length) {
+        //@ts-ignore
+        q = {...q, approvalStatus:filter}
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complaints = await this.complaint.aggregatePaginate(aggregate, options);
+      const complaints = await this.complaint.paginate(aggregate, options);
       //populate id reference fields
       for(let comp of complaints.docs) {
         let branch = await this.branch.findById(comp.branch);

@@ -585,32 +585,6 @@ class Vehicle extends Module{
 
       routePlan.rppNo = "RPP"+num;
       routePlan.ecrNo = ecr;
-      // routePlan.icnNo = "ICN"+num;
-      // if(routePlan.orderType == pickupType.CUSTOMER) {
-      //   if(routePlan.activity == RouteActivity.PICKUP) {
-      //     let init = 'TECR'
-      //     //@ts-ignore
-      //     let tecrNo = init+num;
-      //     routePlan.tecrNo = tecrNo
-      //   } else if(routePlan.activity == RouteActivity.DELIVERY) {
-      //     let init = 'TFCR'
-      //     //@ts-ignore
-      //     let tfcrNo = init+num;
-      //     routePlan.tfcrNo = tfcrNo
-      //   }
-      // }else if(routePlan.orderType == pickupType.SUPPLIER) {
-      //   if(routePlan.activity == RouteActivity.DELIVERY) {
-      //     let init = 'TECR'
-      //     let tecrNo = init+num;
-      //     routePlan.tecrNo = tecrNo
-      //   } else if(routePlan.activity == RouteActivity.PICKUP) {
-      //     let init = 'TFCR'
-      //     //@ts-ignore
-      //     let tfcrNo = init+num;
-      //     routePlan.tfcrNo = tfcrNo
-      //   }
-      // }
-      // console.log(routePlan);
       await routePlan.save();
       await createLog({
         user:user._id,
@@ -743,24 +717,14 @@ class Vehicle extends Module{
         //@ts-ignore
         q = {...q, $or:or}
       }
-
-      // const options = {
-      //   page:query?.page,
-      //   limit:query?.limit,
-      //   populate:[
-      //     {path:'customer', model:'customer'},
-      //     {path:'supplier', model:'supplier'},
-      //     {path:'vehicle', model:'vehicle'},
-      //     {path:'security', model:'User'},
-      //     {path:'recievedBy', model:'User'}
-      //   ]
-      // }
       // let aggregate = this.pickup.aggregate([q]);
       const routePlan = await this.pickup.findOne(q).populate(
         [
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},
-          {path:'vehicle', model:'vehicle'},
+          {path:'vehicle', model:'vehicle' ,populate:{
+            path:'assignedTo', model:"User"
+          }},
           {path:'security', model:'User'},
           {path:'recievedBy', model:'User'}
         ]
@@ -770,15 +734,16 @@ class Vehicle extends Module{
       this.handleException(e);
     }
   }
-//@ts-ignore
-  public async vehicleRoutePlan(vehicleId:string, query:QueryInterface):Promise<PickupInterface[]|undefined>{
+
+  public async vehicleRoutePlan(vehicleId:string, query:QueryInterface, user:UserInterface):Promise<PickupInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       
       let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
 
       let q = {
-        vehicle:`${vehicleId}`
+        vehicle:`${vehicleId}`,
+        branch:user.branch
       }
       let or = [];
       if(search) {
@@ -828,7 +793,81 @@ class Vehicle extends Module{
         populate:[
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},
-          {path:'vehicle', model:'vehicle'},
+          {path:'vehicle', model:'vehicle',populate:{
+            path:'assignedTo', model:"User"
+          }},
+          {path:'security', model:'User'},
+          {path:'recievedBy', model:'User'}
+        ]
+      }
+      //@ts-ignore
+      let v = await this.pickup.paginate(q, options);
+      return Promise.resolve(v);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async RoutePlans(query:QueryInterface, user:UserInterface):Promise<PickupInterface[]|undefined>{
+    try {
+      const ObjectId = mongoose.Types.ObjectId;
+      
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
+
+      let q = {
+        branch:user.branch
+      }
+      let or = [];
+      if(search) {
+        or.push({modeOfService: new RegExp(search || "", "gi")})
+      }
+      if(email && customer) {
+        //@ts-ignore
+        q = {...q, 'customers.email': new RegExp(email, "gi")}
+      }
+      if(email && supplier) {
+        //@ts-ignore
+        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
+      }
+      if(supplier?.length) {
+        //@ts-ignore
+        q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+      }
+      if(customer?.length) {
+        //@ts-ignore
+        q = {...q, 'customers.name': new RegExp(customer, "gi")}
+      }
+      if(activity?.length) {
+        //@ts-ignore
+        q = {...q, 'activity': new RegExp(activity, "gi")}
+      }
+      if(pickupType?.length) {
+        //@ts-ignore
+        q = {...q, 'orderType': new RegExp(pickupType, "gi")}
+      }
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $gte:new Date(fromDate) }}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $lte:new Date(toDate) }}
+      }
+      // console.log(q)
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+
+      const options = {
+        page:query?.page || 1,
+        limit:query?.limit || 10,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'supplier', model:'supplier'},
+          {path:'vehicle', model:'vehicle', populate:{
+            path:'assignedTo', model:"User"
+          }},
           {path:'security', model:'User'},
           {path:'recievedBy', model:'User'}
         ]

@@ -765,62 +765,22 @@ class Customer extends module_1.default {
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
                     ] });
-                let aggregate;
-                const aggregate1 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { customerName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING },
-                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { title: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING },
-                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                let q = {
+                    branch: user.branch,
+                    approvalStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id
+                };
+                let or = [];
+                if (search) {
+                    or.push({ customerName: new RegExp(search, 'gi') });
+                    or.push({ issue: new RegExp(search, 'gi') });
                 }
-                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate2;
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complaints = yield this.complaint.aggregatePaginate(aggregate, options);
-                //populate id reference fields
-                for (let comp of complaints.docs) {
-                    let branch = yield this.branch.findById(comp.branch);
-                    comp.branch = branch;
-                    let initiator = yield this.user.findById(comp.initiator);
-                    comp.initiator = initiator;
-                    let nextApprovalOfficer = yield this.user.findById(comp.nextApprovalOfficer);
-                    comp.nextApprovalOfficer = nextApprovalOfficer;
-                    let customer = yield this.customer.findById(comp.customer);
-                    comp.customer = customer;
-                }
+                const complaints = yield this.complaint.paginate(aggregate, options);
                 return Promise.resolve(complaints);
             }
             catch (e) {
@@ -839,61 +799,24 @@ class Customer extends module_1.default {
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
                     ] });
-                let aggregate;
-                const aggregate1 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { title: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { approvalStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { customer: ObjectId(customerId) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { title: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { customer: ObjectId(customerId) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                let q = {
+                    customer: customerId
+                };
+                let or = [];
+                if (search) {
+                    or.push({ title: new RegExp(search, 'gi') });
+                    or.push({ issue: new RegExp(search, 'gi') });
                 }
-                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate2;
+                if (filter === null || filter === void 0 ? void 0 : filter.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { approvalStatus: filter });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complains = yield this.complaint.aggregatePaginate(aggregate, options);
-                //populate id reference fields
-                for (let comp of complains.docs) {
-                    let branch = yield this.branch.findById(comp.branch);
-                    comp.branch = branch;
-                    let initiator = yield this.user.findById(comp.initiator);
-                    comp.initiator = initiator;
-                    let nextApprovalOfficer = yield this.user.findById(comp.nextApprovalOfficer);
-                    comp.nextApprovalOfficer = nextApprovalOfficer;
-                    let customer = yield this.customer.findById(comp.customer);
-                    comp.customer = customer;
-                }
+                const complains = yield this.complaint.paginate(aggregate, options);
                 return Promise.resolve(complains);
             }
             catch (e) {
@@ -912,50 +835,24 @@ class Customer extends module_1.default {
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
                     ] });
-                let aggregate;
-                const aggregate1 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { title: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { approvalStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.complaint.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { title: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { issue: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                let q = {
+                    branch: user._id
+                };
+                let or = [];
+                if (search) {
+                    or.push({ title: new RegExp(search, 'gi') });
+                    or.push({ issue: new RegExp(search, 'gi') });
                 }
-                else if ((search === null || search === void 0 ? void 0 : search.length) && !(filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate2;
+                if (filter === null || filter === void 0 ? void 0 : filter.length) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { approvalStatus: filter });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complaints = yield this.complaint.aggregatePaginate(aggregate, options);
+                const complaints = yield this.complaint.paginate(aggregate, options);
                 //populate id reference fields
                 for (let comp of complaints.docs) {
                     let branch = yield this.branch.findById(comp.branch);
@@ -1289,9 +1186,6 @@ class Customer extends module_1.default {
                         }
                     }
                 }
-                //@ts-ignore
-                // console.log(customerOrder);
-                // let custOr = mappedCustomer[0].filter(o=> o.email == email);
                 return Promise.resolve(customerOrder);
             }
             catch (e) {

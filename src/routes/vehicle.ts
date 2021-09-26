@@ -81,6 +81,12 @@ router.post(
   vehicleCtrl.assignDriver()
 );
 
+router.get(
+  '/fetch-routePlans',
+  auth.verify(),
+  vehicleCtrl.RoutePlans()
+);
+
 router.delete(
   '/delete-vehicle/:vehicleId',
   auth.verify(),

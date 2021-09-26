@@ -18,6 +18,7 @@ router.post('/start-route/:routeId', auth.verify(), controllers_1.vehicleCtrl.st
 router.get('/vehicle-performance/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.fetchVehiclePerformance());
 router.get('/fetch-route-plan/:routeId', auth.verify(), controllers_1.vehicleCtrl.fetchRoutePlan());
 router.post('/assign-driver/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.assignDriver());
+router.get('/fetch-routePlans', auth.verify(), controllers_1.vehicleCtrl.RoutePlans());
 router.delete('/delete-vehicle/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.deleteVehicle());
 router.get('/remove-driver/:vehicleId/:driver', auth.verify(), controllers_1.vehicleCtrl.removeDriver());
 router.post('/mark-route-as-complete/:routeId', auth.verify(), controllers_1.vehicleCtrl.markRouteAsComplete());

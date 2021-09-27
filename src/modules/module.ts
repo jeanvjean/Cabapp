@@ -45,7 +45,8 @@ export interface QueryInterface {
   email?:string
   phone?:string
   activity?:string
-  pickupType?:string
+  pickupType?:string,
+  routeStatus?:string
 }
 
 /**

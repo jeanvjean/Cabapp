@@ -685,6 +685,10 @@ class Vehicle extends Module{
         //@ts-ignore
         q = {...q, 'customers.email': new RegExp(email, "gi")}
       }
+      if(email) {
+        //@ts-ignore
+        q = {...q, 'customers.email': new RegExp(email, "gi")}
+      }
       if(email && supplier) {
         //@ts-ignore
         q = {...q, 'suppliers.email': new RegExp(email, "gi")}
@@ -739,7 +743,7 @@ class Vehicle extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       
-      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType, routeStatus } = query;
 
       let q = {
         vehicle:`${vehicleId}`,
@@ -749,17 +753,25 @@ class Vehicle extends Module{
       if(search) {
         or.push({modeOfService: new RegExp(search || "", "gi")})
       }
-      if(email && customer) {
+      if(email) {
         //@ts-ignore
         q = {...q, 'customers.email': new RegExp(email, "gi")}
       }
+      if(email && customer) {
+        //@ts-ignore
+        q = {...q, 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi")}
+      }
       if(email && supplier) {
         //@ts-ignore
-        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
+        q = {...q, 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi")}
       }
       if(supplier?.length) {
         //@ts-ignore
         q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+      }
+      if(routeStatus) {
+        //@ts-ignore
+        q ={...q,'customers.status': new RegExp(routeStatus, "gi")}
       }
       if(customer?.length) {
         //@ts-ignore
@@ -821,13 +833,17 @@ class Vehicle extends Module{
       if(search) {
         or.push({modeOfService: new RegExp(search || "", "gi")})
       }
-      if(email && customer) {
+      if(email) {
         //@ts-ignore
         q = {...q, 'customers.email': new RegExp(email, "gi")}
       }
+      if(email && customer) {
+        //@ts-ignore
+        q = {...q, 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi")}
+      }
       if(email && supplier) {
         //@ts-ignore
-        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
+        q = {...q, 'suppliers.email': new RegExp(email, "gi"),'suppliers.name': new RegExp(supplier, "gi")}
       }
       if(supplier?.length) {
         //@ts-ignore

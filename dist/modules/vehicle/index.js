@@ -543,6 +543,10 @@ class Vehicle extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
                 }
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
+                }
                 if (email && supplier) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi") });
@@ -596,7 +600,7 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
+                let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType, routeStatus } = query;
                 let q = {
                     vehicle: `${vehicleId}`,
                     branch: user.branch
@@ -605,17 +609,25 @@ class Vehicle extends module_1.default {
                 if (search) {
                     or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                if (email && customer) {
+                if (email) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
                 }
+                if (email && customer) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi") });
+                }
                 if (email && supplier) {
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi") });
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi") });
                 }
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'suppliers.name': new RegExp(supplier, "gi") });
+                }
+                if (routeStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.status': new RegExp(routeStatus, "gi") });
                 }
                 if (customer === null || customer === void 0 ? void 0 : customer.length) {
                     //@ts-ignore
@@ -676,13 +688,17 @@ class Vehicle extends module_1.default {
                 if (search) {
                     or.push({ modeOfService: new RegExp(search || "", "gi") });
                 }
-                if (email && customer) {
+                if (email) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi") });
                 }
+                if (email && customer) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi") });
+                }
                 if (email && supplier) {
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi") });
+                    q = Object.assign(Object.assign({}, q), { 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi") });
                 }
                 if (supplier === null || supplier === void 0 ? void 0 : supplier.length) {
                     //@ts-ignore

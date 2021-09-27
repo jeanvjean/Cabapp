@@ -50,7 +50,9 @@ const ecrSchema = new mongoose_1.Schema({
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     reason: String,
     driverStatus: { type: String, enum: Object.values(EcrApproval), default: EcrApproval.PENDING },
-    otp: String
+    otp: String,
+    totalVolume: String,
+    totalQuantity: String
 }, {
     timestamps: true
 });

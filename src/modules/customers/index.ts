@@ -878,7 +878,8 @@ class Customer extends Module{
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
       const options = {
-        ...query,
+        page:query.page || 1,
+        limit:query.limit || 10,
         populate:[
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
@@ -901,7 +902,7 @@ class Customer extends Module{
         q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complaints = await this.complaint.paginate(aggregate,options);
+      const complaints = await this.complaint.paginate(q,options);
       return Promise.resolve(complaints);
     } catch (e) {
       this.handleException(e);
@@ -912,8 +913,10 @@ class Customer extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
+      console.log(customerId);
       const options = {
-        ...query,
+        page:query.page || 1,
+        limit:query.limit || 10,
         populate:[
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
@@ -939,7 +942,7 @@ class Customer extends Module{
         q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complains = await this.complaint.paginate(aggregate, options);
+      const complains = await this.complaint.paginate(q, options);
       return Promise.resolve(complains);
     } catch (e) {
       this.handleException(e);
@@ -951,7 +954,8 @@ class Customer extends Module{
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
       const options = {
-        ...query,
+        page:query.page || 1,
+        limit:query.limit || 10,
         populate:[
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
@@ -977,7 +981,7 @@ class Customer extends Module{
         q = { ...q, $or:or }
       }
       //@ts-ignore
-      const complaints = await this.complaint.paginate(aggregate, options);
+      const complaints = await this.complaint.paginate(q, options);
       //populate id reference fields
       for(let comp of complaints.docs) {
         let branch = await this.branch.findById(comp.branch);

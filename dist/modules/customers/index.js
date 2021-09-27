@@ -759,12 +759,16 @@ class Customer extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
                         { path: 'branch', model: 'branches' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
-                    ] });
+                    ]
+                };
                 let q = {
                     branch: user.branch,
                     approvalStatus: transferCylinder_1.TransferStatus.PENDING,
@@ -780,7 +784,7 @@ class Customer extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complaints = yield this.complaint.paginate(aggregate, options);
+                const complaints = yield this.complaint.paginate(q, options);
                 return Promise.resolve(complaints);
             }
             catch (e) {
@@ -793,12 +797,17 @@ class Customer extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                console.log(customerId);
+                const options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
                         { path: 'branch', model: 'branches' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
-                    ] });
+                    ]
+                };
                 let q = {
                     customer: customerId
                 };
@@ -816,7 +825,7 @@ class Customer extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complains = yield this.complaint.paginate(aggregate, options);
+                const complains = yield this.complaint.paginate(q, options);
                 return Promise.resolve(complains);
             }
             catch (e) {
@@ -829,12 +838,16 @@ class Customer extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
                         { path: 'branch', model: 'branches' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'customer', model: 'customer' }
-                    ] });
+                    ]
+                };
                 let q = {
                     branch: user._id
                 };
@@ -852,7 +865,7 @@ class Customer extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const complaints = yield this.complaint.paginate(aggregate, options);
+                const complaints = yield this.complaint.paginate(q, options);
                 //populate id reference fields
                 for (let comp of complaints.docs) {
                     let branch = yield this.branch.findById(comp.branch);

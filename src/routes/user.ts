@@ -13,6 +13,13 @@ const router: expressRouter = expressRouter();
       userCtrl.create()
     );
 
+  router.post(
+    '/create-supremeUser',
+    Validator.validateUser(),
+    val.validate(),
+    userCtrl.registerSupremeUser()
+  );
+
   router.post('/login',
       Validator.validateLogin(),
       val.validate(),

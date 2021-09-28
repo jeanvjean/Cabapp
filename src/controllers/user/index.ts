@@ -32,6 +32,18 @@ class UserController extends Ctrl{
     }
   }
 
+  registerSupremeUser(): RequestHandler{
+    return async(req:Request, res:Response): Promise<void> => {
+      try {
+        const { body } = req;
+        const user:UserInterface | undefined = await this.module.register(body);
+        this.ok(res,'Registered successfully', user);
+      } catch (error) {
+        this.handleError(error, req, res)
+      }
+    }
+  }
+
   inviteUser():RequestHandler{
     return async(req:Request, res:Response)=> {
       try {

@@ -28,13 +28,37 @@ class User extends module_1.default {
         this.user = props.user;
         this.deleted = props.deleted;
     }
-    register(data) {
+    registerSupremeUser(data) {
         return __awaiter(this, void 0, void 0, function* () {
             let newUser;
             try {
                 let existUser = yield this.user.findOne({ email: data.email });
                 if (existUser) {
+                    throw new exceptions_1.BadInputFormatException('A user exists with this email... use another email');
+                }
+                let hasSupreme = yield this.user.findOne({ subrole: "supreme", role: "supreme" });
+                if (hasSupreme) {
+                    throw new exceptions_1.BadInputFormatException('there can only be one supreme user');
+                }
+                newUser = yield this.user.create(Object.assign(Object.assign({}, data), { subrole: 'supreme', role: "supreme", isVerified: true }));
+                return Promise.resolve(newUser);
+            }
+            catch (error) {
+                this.handleException(error);
+            }
+        });
+    }
+    register(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let newUser;
+            try {
+                let existUser = yield this.user.findOne({ email: data.email, branch: data.branch });
+                if (existUser) {
                     throw new exceptions_1.BadInputFormatException('A user already exists with this email');
+                }
+                let hasSuperadmin = yield this.user.findOne({ branch: data.branch, subrole: "superadmin" });
+                if (hasSuperadmin) {
+                    throw new exceptions_1.BadInputFormatException('only one superadmin can exist in a branch');
                 }
                 newUser = yield this.user.create(Object.assign(Object.assign({}, data), { subrole: 'superadmin', isVerified: true }));
                 // let payload = {
@@ -124,6 +148,39 @@ class User extends module_1.default {
                             }
                             else {
                                 exists.push(user.email);
+                            }
+                        }
+                        else if (user.subrole == 'superadmin') {
+                            if (userInfo.subrole !== 'supreme') {
+                                const html = yield resolve_template_1.getTemplate('invite_decline', {
+                                    message: "only supreme user can add a superadmin to a branch",
+                                });
+                                let mailLoad = {
+                                    content: html,
+                                    subject: 'Invite Declined',
+                                    email: userInfo.email,
+                                };
+                                new mail_1.default().sendMail(mailLoad);
+                            }
+                            else {
+                                let password = yield token_1.generateToken(4);
+                                //@ts-ignore
+                                yield this.user.create(Object.assign(Object.assign({}, user), { branch: branch === null || branch === void 0 ? void 0 : branch.branch._id, password }));
+                                const html = yield resolve_template_1.getTemplate('invite', {
+                                    team: user.role,
+                                    role: user.subrole,
+                                    email: user.email,
+                                    link: `${static_1.default.FRONTEND_URL}`,
+                                    //@ts-ignore
+                                    branch: branch === null || branch === void 0 ? void 0 : branch.branch.name,
+                                    password
+                                });
+                                let mailLoad = {
+                                    content: html,
+                                    subject: 'New User registeration',
+                                    email: user.email,
+                                };
+                                new mail_1.default().sendMail(mailLoad);
                             }
                         }
                         else {

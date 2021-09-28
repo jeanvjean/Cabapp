@@ -965,6 +965,7 @@ class Product extends module_1.default {
                         return Promise.resolve(disbursement);
                     }
                     else if ((disbursement === null || disbursement === void 0 ? void 0 : disbursement.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         let track = {
                             title: "Approval Prorcess",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -972,7 +973,7 @@ class Product extends module_1.default {
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
                             //@ts-ignore
-                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                            nextApprovalOfficer: branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id
                         };
                         let checkOfficer = disbursement.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
@@ -988,7 +989,7 @@ class Product extends module_1.default {
                         disbursement.tracking.push(track);
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        disbursement.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        disbursement.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         disbursement.comments.push({
                             comment: data.comment,
                             commentBy: user._id
@@ -1115,6 +1116,7 @@ class Product extends module_1.default {
                             path: 'branch', model: 'branches'
                         });
                         // console.log(brenchRequestApproval)
+                        let branchAdmin = yield this.user.findOne({ branch: brenchRequestApproval === null || brenchRequestApproval === void 0 ? void 0 : brenchRequestApproval.branch, subrole: "superadmin" });
                         let track = {
                             title: "Approval Prorcess",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -1122,7 +1124,7 @@ class Product extends module_1.default {
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
                             //@ts-ignore
-                            nextApprovalOfficer: brenchRequestApproval === null || brenchRequestApproval === void 0 ? void 0 : brenchRequestApproval.branch.branchAdmin
+                            nextApprovalOfficer: branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id
                         };
                         let checkOfficer = disbursement.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
@@ -1138,7 +1140,7 @@ class Product extends module_1.default {
                         disbursement.tracking.push(track);
                         disbursement.requestStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        disbursement.nextApprovalOfficer = brenchRequestApproval === null || brenchRequestApproval === void 0 ? void 0 : brenchRequestApproval.branch.branchAdmin;
+                        disbursement.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         disbursement.comments.push({
                             comment: data.comment,
                             commentBy: user._id

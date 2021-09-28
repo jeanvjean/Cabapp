@@ -1308,6 +1308,7 @@ class Cylinder extends Module {
           return Promise.resolve(condem)
         }else if(condem?.approvalStage == stagesOfApproval.STAGE1){
           // console.log(condem)
+          let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
           let track = {
             title:"Condemn cylinder",
             stage:stagesOfApproval.STAGE2,
@@ -1315,7 +1316,7 @@ class Cylinder extends Module {
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
             //@ts-ignore
-            nextApprovalOfficer:hod?.branch.branchAdmin
+            nextApprovalOfficer:branchAdmin?._id
           }
           // console.log(track);
           let checkOfficer = condem.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
@@ -1332,7 +1333,7 @@ class Cylinder extends Module {
           condem.tracking.push(track)
           condem.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          condem.nextApprovalOfficer = hod?.branch.branchAdmin;
+          condem.nextApprovalOfficer = branchAdmin?._id;
           condem.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -1882,6 +1883,7 @@ class Cylinder extends Module {
             transfer
           })
         }else if(transfer?.approvalStage == stagesOfApproval.STAGE1){
+          let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
           let track = {
             title:"Initiate Transfer",
             stage:stagesOfApproval.STAGE2,
@@ -1889,7 +1891,7 @@ class Cylinder extends Module {
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
             //@ts-ignore
-            nextApprovalOfficer:hod?.branch.branchAdmin
+            nextApprovalOfficer:branchAdmin?._id
           }
           // console.log(track);
           let checkOfficer = transfer.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
@@ -1906,7 +1908,7 @@ class Cylinder extends Module {
           transfer.tracking.push(track)
           transfer.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          transfer.nextApprovalOfficer = hod?.branch.branchAdmin;
+          transfer.nextApprovalOfficer = branchAdmin?._id;
           transfer.comments.push({
             comment:data.comment,
             commentBy:user._id,

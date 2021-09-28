@@ -93,7 +93,8 @@ class PurchaseOrder extends Module{
             const order = await this.purchase.findById(orderId).populate([
               {path:'customer', model:'customer'},
               {path:'initiator', model:'User'},
-              {path:'nextApprovalOfficer', model:'User'}
+              {path:'nextApprovalOfficer', model:'User'},
+              {path:"customer", model:"customer"}
             ]);
             return Promise.resolve(order as PurchaseOrderInterface);
         } catch (e) {
@@ -103,12 +104,22 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrders(query:QueryInterface, user:UserInterface):Promise<purchaseOrderPool|undefined>{
         try {
+          let options = {
+            page: query.page || 1,
+            limit:query.limit || 10,
+            populate:[
+              {path:"nextApprovalOfficer", model:"User"},
+              {path:"initiator", model:"User"},
+              {path:"branch", model:"branches"},
+              {path:"customer", model:"customer"}
+            ]
+          }
           //@ts-ignore
-            const purchases = await this.purchase.paginate({ branch:user.branch },{...query});
+            const purchases = await this.purchase.paginate({ branch:user.branch },options);
             //@ts-ignore
-            const approved = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.COMPLETED },{...query});
+            const approved = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.COMPLETED },options);
             //@ts-ignore
-            const pending = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.PENDING },{...query});
+            const pending = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.PENDING },options);
             return Promise.resolve({
                 purchaseOrders:purchases,
                 approvedOrders:approved,
@@ -135,14 +146,7 @@ class PurchaseOrder extends Module{
             if(data.status == ApprovalStatus.REJECTED) {
                 if(purchase?.approvalStage == stagesOfApproval.STAGE1){
                   let AO = purchase.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE1);
-                //   let track = {
-                //     title:"Approval Process",
-                //     stage:stagesOfApproval.STAGE2,
-                //     status:ApprovalStatus.REJECTED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     nextApprovalOfficer:AO[0].id
-                //   }
+               
                   let checkOfficer = purchase.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`)
                   if(checkOfficer.length == 0) {
                     purchase.approvalOfficers.push({
@@ -180,14 +184,7 @@ class PurchaseOrder extends Module{
                   return Promise.resolve(purchase);
                 }else if(purchase?.approvalStage == stagesOfApproval.STAGE2) {
                   let AO = purchase.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
-                //   let track = {
-                //     title:"Approval Process",
-                //     stage:stagesOfApproval.STAGE3,
-                //     status:ApprovalStatus.REJECTED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     nextApprovalOfficer:AO[0].id
-                //   }
+                
                   let checkOfficer = purchase.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`)
                   if(checkOfficer.length == 0) {
                     purchase.approvalOfficers.push({
@@ -230,14 +227,7 @@ class PurchaseOrder extends Module{
                 });
                 // console.log(hod);
                 if(purchase?.approvalStage == stagesOfApproval.START){
-                //   let track = {
-                //     title:"Approval Prorcess",
-                //     stage:stagesOfApproval.STAGE1,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     nextApprovalOfficer:hod?._id
-                //   }
+                
                   let checkOfficer = purchase.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
                   if(checkOfficer.length == 0) {
                     purchase.approvalOfficers.push({
@@ -275,16 +265,7 @@ class PurchaseOrder extends Module{
                   });
                   return Promise.resolve(purchase)
                 }else if(purchase?.approvalStage == stagesOfApproval.STAGE1){
-                //   let track = {
-                //     title:"Initiate Transfer",
-                //     stage:stagesOfApproval.STAGE2,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     //@ts-ignore
-                //     nextApprovalOfficer:hod?.branch.branchAdmin
-                //   }
-                  // console.log(track);
+               
                   let checkOfficer = purchase.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
                   if(checkOfficer.length == 0){
                     purchase.approvalOfficers.push({
@@ -297,9 +278,11 @@ class PurchaseOrder extends Module{
                   }
                   //@ts-ignore
                 //   purchase.tracking.push(track)
+                
+                  let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
                   purchase.approvalStage = stagesOfApproval.STAGE2;
                   //@ts-ignore
-                  purchase.nextApprovalOfficer = hod?.branch.branchAdmin;
+                  purchase.nextApprovalOfficer = branchAdmin?._id;
                   purchase.comments.push({
                     comment:data.comment,
                     commentBy:user._id,
@@ -323,14 +306,7 @@ class PurchaseOrder extends Module{
                   });
                   return Promise.resolve(purchase)
                 } else if(purchase?.approvalStage == stagesOfApproval.STAGE2){
-                //   let track = {
-                //     title:"Initiate Transfer",
-                //     stage:stagesOfApproval.STAGE3,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     // nextApprovalOfficer:data.nextApprovalOfficer
-                //   }
+                
                   let checkOfficer = purchase.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
                   if(checkOfficer.length == 0){
                     purchase.approvalOfficers.push({
@@ -378,59 +354,22 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrderRequests(query:QueryInterface, user:UserInterface):Promise<PurchaseOrderInterface[]|undefined>{
         try {
+          let options = {
+            page: query.page || 1,
+            limit:query.limit || 10,
+            populate:[
+              {path:"nextApprovalOfficer", model:"User"},
+              {path:"initiator", model:"User"},
+              {path:"branch", model:"branches"},
+              {path:"customer", model:"customer"}
+            ]
+          }
           //@ts-ignore
             const purchaseOrders = await this.purchase.paginate({
               branch:user.branch,
               nextApprovalOfficer:user._id,
               approvalStatus:TransferStatus.PENDING
-            }, {...query});
-            // let startStage = purchaseOrders.filter(purchase=> {
-            //     if(purchase.approvalStage == stagesOfApproval.START) {
-            //       for(let tofficer of purchase.approvalOfficers) {
-            //         if(`${tofficer.id}` == `${user._id}`){
-            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-            //             return purchase
-            //           }
-            //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-            //           return purchase
-            //         }
-            //       }
-            //     }
-            //   });
-            //   let stage1 = purchaseOrders.filter(purchase=>{
-            //     if(purchase.approvalStage == stagesOfApproval.STAGE1) {
-            //       for(let tofficer of purchase.approvalOfficers) {
-            //         if(`${tofficer.id}` == `${user._id}`){
-            //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-            //             return purchase
-            //           }
-            //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-            //           return purchase
-            //         }
-            //       }
-            //     }
-            //   });
-              // let stage2 = purchaseOrders.filter(purchase=>{
-              //   if(purchase.approvalStage == stagesOfApproval.STAGE2) {
-              //     for(let tofficer of purchase.approvalOfficers) {
-              //       if(`${tofficer.id}` == `${user._id}`){
-              //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-              //           return purchase
-              //         }
-              //       }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-              //         return purchase
-              //       }
-              //     }
-              //   }
-              // });
-              // let pendingApprovals;
-              // if(user.subrole == 'superadmin'){
-              //   pendingApprovals = stage2;
-              // }else if(user.subrole == 'head of department'){
-              //   pendingApprovals = stage1
-              // }else {
-              //   pendingApprovals = startStage;
-              // }
+            }, options);
             return Promise.resolve(purchaseOrders);
         } catch (e) {
             this.handleException(e)

@@ -231,14 +231,6 @@ class OutGoingCylinder extends Module{
                 });
                 // console.log(hod);
                 if(ocn?.approvalStage == stagesOfApproval.START){
-                //   let track = {
-                //     title:"Approval Prorcess",
-                //     stage:stagesOfApproval.STAGE1,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     nextApprovalOfficer:hod?._id
-                //   }
                   let checkOfficer = ocn.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
                   console.log(checkOfficer);
                   if(checkOfficer.length == 0) {
@@ -278,16 +270,6 @@ class OutGoingCylinder extends Module{
                   });
                   return Promise.resolve(ocn)
                 }else if(ocn?.approvalStage == stagesOfApproval.STAGE1){
-                //   let track = {
-                //     title:"Initiate ocn",
-                //     stage:stagesOfApproval.STAGE2,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     //@ts-ignore
-                //     nextApprovalOfficer:hod?.branch.branchAdmin
-                //   }
-                  // console.log(track);
                   let checkOfficer = ocn.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
                   if(checkOfficer.length == 0){
                     ocn.approvalOfficers.push({
@@ -302,8 +284,9 @@ class OutGoingCylinder extends Module{
                   // ocn.tracking.push(track)
                   ocn.approvalStage = stagesOfApproval.STAGE2;
                   // console.log(hod)
+                  let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
                   //@ts-ignore
-                  ocn.nextApprovalOfficer = hod?.branch.branchAdmin;
+                  ocn.nextApprovalOfficer = branchAdmin?._id;
                 //   ocn.comments.push({
                 //     comment:data.comment,
                 //     commentBy:user._id
@@ -326,14 +309,6 @@ class OutGoingCylinder extends Module{
                   });
                   return Promise.resolve(ocn)
                 } else if(ocn?.approvalStage == stagesOfApproval.STAGE2){
-                //   let track = {
-                //     title:"Initiate Transfer",
-                //     stage:stagesOfApproval.STAGE3,
-                //     status:ApprovalStatus.APPROVED,
-                //     dateApproved:new Date().toISOString(),
-                //     approvalOfficer:user._id,
-                //     // nextApprovalOfficer:data.nextApprovalOfficer
-                //   }
                   let checkOfficer = ocn.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
                   if(checkOfficer.length == 0){
                     ocn.approvalOfficers.push({

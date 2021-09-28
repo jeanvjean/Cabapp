@@ -111,14 +111,6 @@ class ProductionSchedule extends Module{
       if(data.status == ApprovalStatus.REJECTED) {
         if(production?.approvalStage == stagesOfApproval.STAGE1){
           let AO = production.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE1);
-          // let track = {
-          //   title:"Approval Process",
-          //   stage:stagesOfApproval.STAGE2,
-          //   status:ApprovalStatus.REJECTED,
-          //   dateApproved:new Date().toISOString(),
-          //   approvalOfficer:user._id,
-          //   nextApprovalOfficer:AO[0].id
-          // }
           let checkOfficer = production.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
             production.approvalOfficers.push({
@@ -157,14 +149,7 @@ class ProductionSchedule extends Module{
           return Promise.resolve(production);
         }else if(production?.approvalStage == stagesOfApproval.STAGE2) {
           let AO = production.approvalOfficers.filter(officer=>officer.stageOfApproval == stagesOfApproval.STAGE2);
-          // let track = {
-          //   title:"Approval Process",
-          //   stage:stagesOfApproval.STAGE3,
-          //   status:ApprovalStatus.REJECTED,
-          //   dateApproved:new Date().toISOString(),
-          //   approvalOfficer:user._id,
-          //   nextApprovalOfficer:AO[0].id
-          // }
+         
           let checkOfficer = production.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`)
           if(checkOfficer.length == 0) {
             production.approvalOfficers.push({
@@ -208,14 +193,6 @@ class ProductionSchedule extends Module{
         });
         // console.log(hod);
         if(production?.approvalStage == stagesOfApproval.START){
-          // let track = {
-          //   title:"Approval Prorcess",
-          //   stage:stagesOfApproval.STAGE1,
-          //   status:ApprovalStatus.APPROVED,
-          //   dateApproved:new Date().toISOString(),
-          //   approvalOfficer:user._id,
-          //   nextApprovalOfficer:hod?._id
-          // }
           let checkOfficer = production.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
             production.approvalOfficers.push({
@@ -253,16 +230,7 @@ class ProductionSchedule extends Module{
           });
           return Promise.resolve(production)
         }else if(production?.approvalStage == stagesOfApproval.STAGE1){
-          // let track = {
-          //   title:"Initiate Transfer",
-          //   stage:stagesOfApproval.STAGE2,
-          //   status:ApprovalStatus.APPROVED,
-          //   dateApproved:new Date().toISOString(),
-          //   approvalOfficer:user._id,
-          //   //@ts-ignore
-          //   nextApprovalOfficer:hod?.branch.branchAdmin
-          // }
-          // console.log(track);
+          let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
           let checkOfficer = production.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0){
             production.approvalOfficers.push({
@@ -277,7 +245,7 @@ class ProductionSchedule extends Module{
           // transfer.tracking.push(track)
           production.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          production.nextApprovalOfficer = hod?.branch.branchAdmin;
+          production.nextApprovalOfficer = branchAdmin?._id;
           production.comments.push({
             comment:data.comment,
             commentBy:user._id,
@@ -301,14 +269,6 @@ class ProductionSchedule extends Module{
           });
           return Promise.resolve(production)
         } else if(production?.approvalStage == stagesOfApproval.STAGE2){
-          // let track = {
-          //   title:"Initiate Transfer",
-          //   stage:stagesOfApproval.STAGE3,
-          //   status:ApprovalStatus.APPROVED,
-          //   dateApproved:new Date().toISOString(),
-          //   approvalOfficer:user._id,
-          //   // nextApprovalOfficer:data.nextApprovalOfficer
-          // }
           let checkOfficer = production.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0){
             production.approvalOfficers.push({

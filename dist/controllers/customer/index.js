@@ -228,7 +228,7 @@ class customerCtrl extends ctrl_1.default {
             try {
                 const { complaintId } = req.params;
                 //@ts-ignore
-                const data = yield this.module.approveComplaint(Object.assign(Object.assign({}, req.body), { id: complaintId }), req.user);
+                const data = yield this.module.approveComplaint(Object.assign({}, req.body), req.user);
                 this.ok(res, 'Approval status updated', data);
             }
             catch (e) {

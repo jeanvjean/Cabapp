@@ -42,7 +42,7 @@ class Customer extends module_1.default {
                 const date = new Date();
                 date.setDate(date.getDate() + data.cylinderHoldingTime);
                 let exist = yield this.customer.findOne({ email: data.email, branch: user.branch });
-                console.log(exist);
+                // console.log(exist)
                 if (exist) {
                     throw new exceptions_1.BadInputFormatException('a customer with this email exists');
                 }
@@ -507,11 +507,12 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // console.log(data)
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
-                }
+                yield token_1.passWdCheck(user, data.password);
+                // let loginUser = await this.user.findById(user._id).select('+password');
+                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+                // if(!matchPWD) {
+                //   throw new BadInputFormatException('Incorrect password... please check the password');
+                // }
                 const complaint = yield this.complaint.findById(data.id).populate([
                     { path: 'customer', ref: 'User' }
                 ]);
@@ -654,16 +655,6 @@ class Customer extends module_1.default {
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
-                            // let track = {
-                            //   title:"Initiate complaint",
-                            //   stage:stagesOfApproval.STAGE2,
-                            //   status:ApprovalStatus.APPROVED,
-                            //   dateApproved:new Date().toISOString(),
-                            //   approvalOfficer:user._id,
-                            //   //@ts-ignore
-                            //   nextApprovalOfficer:hod?.branch.branchAdmin
-                            // }
-                            // console.log(track);
                             let checkOfficer = complaint.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                             if (checkOfficer.length == 0) {
                                 complaint.approvalOfficers.push({
@@ -675,8 +666,9 @@ class Customer extends module_1.default {
                                 });
                             }
                             complaint.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
-                            //@ts-ignore
-                            complaint.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                            let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
+                            // console.log(branchAdmin)
+                            complaint.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                             complaint.comments.push({
                                 comment: data.comment,
                                 commentBy: user._id
@@ -700,14 +692,6 @@ class Customer extends module_1.default {
                             return Promise.resolve(complaint);
                         }
                         else if ((complaint === null || complaint === void 0 ? void 0 : complaint.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
-                            // let track = {
-                            //   title:"Initiate complaint",
-                            //   stage:stagesOfApproval.STAGE3,
-                            //   status:ApprovalStatus.APPROVED,
-                            //   dateApproved:new Date().toISOString(),
-                            //   approvalOfficer:user._id,
-                            //   // nextApprovalOfficer:data.nextApprovalOfficer
-                            // }
                             let checkOfficer = complaint.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                             if (checkOfficer.length == 0) {
                                 complaint.approvalOfficers.push({
@@ -769,6 +753,7 @@ class Customer extends module_1.default {
                         { path: 'customer', model: 'customer' }
                     ]
                 };
+                // console.log(user);
                 let q = {
                     branch: user.branch,
                     approvalStatus: transferCylinder_1.TransferStatus.PENDING,
@@ -797,7 +782,7 @@ class Customer extends module_1.default {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter } = query;
-                console.log(customerId);
+                // console.log(customerId);
                 const options = {
                     page: query.page || 1,
                     limit: query.limit || 10,

@@ -1079,6 +1079,7 @@ class Cylinder extends module_1.default {
                     }
                     else if ((condem === null || condem === void 0 ? void 0 : condem.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         // console.log(condem)
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         let track = {
                             title: "Condemn cylinder",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -1086,7 +1087,7 @@ class Cylinder extends module_1.default {
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
                             //@ts-ignore
-                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                            nextApprovalOfficer: branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id
                         };
                         // console.log(track);
                         let checkOfficer = condem.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
@@ -1103,7 +1104,7 @@ class Cylinder extends module_1.default {
                         condem.tracking.push(track);
                         condem.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        condem.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        condem.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         condem.comments.push({
                             comment: data.comment,
                             commentBy: user._id
@@ -1656,6 +1657,7 @@ class Cylinder extends module_1.default {
                         });
                     }
                     else if ((transfer === null || transfer === void 0 ? void 0 : transfer.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         let track = {
                             title: "Initiate Transfer",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -1663,7 +1665,7 @@ class Cylinder extends module_1.default {
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
                             //@ts-ignore
-                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                            nextApprovalOfficer: branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id
                         };
                         // console.log(track);
                         let checkOfficer = transfer.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
@@ -1680,7 +1682,7 @@ class Cylinder extends module_1.default {
                         transfer.tracking.push(track);
                         transfer.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        transfer.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        transfer.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         transfer.comments.push({
                             comment: data.comment,
                             commentBy: user._id,

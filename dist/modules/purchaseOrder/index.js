@@ -69,7 +69,8 @@ class PurchaseOrder extends module_1.default {
                 const order = yield this.purchase.findById(orderId).populate([
                     { path: 'customer', model: 'customer' },
                     { path: 'initiator', model: 'User' },
-                    { path: 'nextApprovalOfficer', model: 'User' }
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: "customer", model: "customer" }
                 ]);
                 return Promise.resolve(order);
             }
@@ -81,12 +82,22 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
+                        { path: "nextApprovalOfficer", model: "User" },
+                        { path: "initiator", model: "User" },
+                        { path: "branch", model: "branches" },
+                        { path: "customer", model: "customer" }
+                    ]
+                };
                 //@ts-ignore
-                const purchases = yield this.purchase.paginate({ branch: user.branch }, Object.assign({}, query));
+                const purchases = yield this.purchase.paginate({ branch: user.branch }, options);
                 //@ts-ignore
-                const approved = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                const approved = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, options);
                 //@ts-ignore
-                const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
+                const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, options);
                 return Promise.resolve({
                     purchaseOrders: purchases,
                     approvedOrders: approved,
@@ -115,14 +126,6 @@ class PurchaseOrder extends module_1.default {
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = purchase.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);
-                        //   let track = {
-                        //     title:"Approval Process",
-                        //     stage:stagesOfApproval.STAGE2,
-                        //     status:ApprovalStatus.REJECTED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:AO[0].id
-                        //   }
                         let checkOfficer = purchase.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             purchase.approvalOfficers.push({
@@ -161,14 +164,6 @@ class PurchaseOrder extends module_1.default {
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
                         let AO = purchase.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2);
-                        //   let track = {
-                        //     title:"Approval Process",
-                        //     stage:stagesOfApproval.STAGE3,
-                        //     status:ApprovalStatus.REJECTED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:AO[0].id
-                        //   }
                         let checkOfficer = purchase.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             purchase.approvalOfficers.push({
@@ -212,14 +207,6 @@ class PurchaseOrder extends module_1.default {
                     });
                     // console.log(hod);
                     if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
-                        //   let track = {
-                        //     title:"Approval Prorcess",
-                        //     stage:stagesOfApproval.STAGE1,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:hod?._id
-                        //   }
                         let checkOfficer = purchase.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             purchase.approvalOfficers.push({
@@ -258,16 +245,6 @@ class PurchaseOrder extends module_1.default {
                         return Promise.resolve(purchase);
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        //   let track = {
-                        //     title:"Initiate Transfer",
-                        //     stage:stagesOfApproval.STAGE2,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     //@ts-ignore
-                        //     nextApprovalOfficer:hod?.branch.branchAdmin
-                        //   }
-                        // console.log(track);
                         let checkOfficer = purchase.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             purchase.approvalOfficers.push({
@@ -280,9 +257,10 @@ class PurchaseOrder extends module_1.default {
                         }
                         //@ts-ignore
                         //   purchase.tracking.push(track)
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         purchase.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        purchase.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        purchase.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         purchase.comments.push({
                             comment: data.comment,
                             commentBy: user._id,
@@ -307,14 +285,6 @@ class PurchaseOrder extends module_1.default {
                         return Promise.resolve(purchase);
                     }
                     else if ((purchase === null || purchase === void 0 ? void 0 : purchase.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        //   let track = {
-                        //     title:"Initiate Transfer",
-                        //     stage:stagesOfApproval.STAGE3,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     // nextApprovalOfficer:data.nextApprovalOfficer
-                        //   }
                         let checkOfficer = purchase.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             purchase.approvalOfficers.push({
@@ -364,59 +334,22 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrderRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
+                        { path: "nextApprovalOfficer", model: "User" },
+                        { path: "initiator", model: "User" },
+                        { path: "branch", model: "branches" },
+                        { path: "customer", model: "customer" }
+                    ]
+                };
                 //@ts-ignore
                 const purchaseOrders = yield this.purchase.paginate({
                     branch: user.branch,
                     nextApprovalOfficer: user._id,
                     approvalStatus: transferCylinder_1.TransferStatus.PENDING
-                }, Object.assign({}, query));
-                // let startStage = purchaseOrders.filter(purchase=> {
-                //     if(purchase.approvalStage == stagesOfApproval.START) {
-                //       for(let tofficer of purchase.approvalOfficers) {
-                //         if(`${tofficer.id}` == `${user._id}`){
-                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE1){
-                //             return purchase
-                //           }
-                //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                //           return purchase
-                //         }
-                //       }
-                //     }
-                //   });
-                //   let stage1 = purchaseOrders.filter(purchase=>{
-                //     if(purchase.approvalStage == stagesOfApproval.STAGE1) {
-                //       for(let tofficer of purchase.approvalOfficers) {
-                //         if(`${tofficer.id}` == `${user._id}`){
-                //           if(tofficer.stageOfApproval == stagesOfApproval.STAGE2){
-                //             return purchase
-                //           }
-                //         }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                //           return purchase
-                //         }
-                //       }
-                //     }
-                //   });
-                // let stage2 = purchaseOrders.filter(purchase=>{
-                //   if(purchase.approvalStage == stagesOfApproval.STAGE2) {
-                //     for(let tofficer of purchase.approvalOfficers) {
-                //       if(`${tofficer.id}` == `${user._id}`){
-                //         if(tofficer.stageOfApproval == stagesOfApproval.STAGE3){
-                //           return purchase
-                //         }
-                //       }else if(`${purchase.nextApprovalOfficer}` == `${user._id}`){
-                //         return purchase
-                //       }
-                //     }
-                //   }
-                // });
-                // let pendingApprovals;
-                // if(user.subrole == 'superadmin'){
-                //   pendingApprovals = stage2;
-                // }else if(user.subrole == 'head of department'){
-                //   pendingApprovals = stage1
-                // }else {
-                //   pendingApprovals = startStage;
-                // }
+                }, options);
                 return Promise.resolve(purchaseOrders);
             }
             catch (e) {

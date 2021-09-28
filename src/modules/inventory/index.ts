@@ -1057,6 +1057,7 @@ class Product extends Module{
           });
           return Promise.resolve(disbursement)
         }else if(disbursement?.approvalStage == stagesOfApproval.STAGE1){
+          let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE2,
@@ -1064,7 +1065,7 @@ class Product extends Module{
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
             //@ts-ignore
-            nextApprovalOfficer:hod?.branch.branchAdmin
+            nextApprovalOfficer:branchAdmin?._id
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -1080,7 +1081,7 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = hod?.branch.branchAdmin
+          disbursement.nextApprovalOfficer = branchAdmin?._id
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id
@@ -1208,6 +1209,7 @@ class Product extends Module{
             path:'branch', model:'branches'
           });
           // console.log(brenchRequestApproval)
+          let branchAdmin = await this.user.findOne({branch:brenchRequestApproval?.branch, subrole:"superadmin"});
           let track = {
             title:"Approval Prorcess",
             stage:stagesOfApproval.STAGE2,
@@ -1215,7 +1217,7 @@ class Product extends Module{
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
             //@ts-ignore
-            nextApprovalOfficer:brenchRequestApproval?.branch.branchAdmin
+            nextApprovalOfficer:branchAdmin?._id
           }
           let checkOfficer = disbursement.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
           if(checkOfficer.length == 0) {
@@ -1231,7 +1233,7 @@ class Product extends Module{
           disbursement.tracking.push(track)
           disbursement.requestStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          disbursement.nextApprovalOfficer = brenchRequestApproval?.branch.branchAdmin
+          disbursement.nextApprovalOfficer = branchAdmin?._id
           disbursement.comments.push({
             comment:data.comment,
             commentBy:user._id

@@ -50,8 +50,17 @@ class Sale extends module_1.default {
     fetchSalesRequisition(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'preparedBy', model: 'User' }
+                    ]
+                };
                 //@ts-ignore
-                const sales = yield this.sales.paginate({ branch: user.branch }, Object.assign({}, query));
+                const sales = yield this.sales.paginate({ branch: user.branch }, options);
                 return Promise.resolve(sales);
             }
             catch (e) {
@@ -236,6 +245,7 @@ class Sale extends module_1.default {
                         return Promise.resolve(sales);
                     }
                     else if ((sales === null || sales === void 0 ? void 0 : sales.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         let track = {
                             title: "Initiate Transfer",
                             stage: transferCylinder_1.stagesOfApproval.STAGE2,
@@ -243,7 +253,7 @@ class Sale extends module_1.default {
                             dateApproved: new Date().toISOString(),
                             approvalOfficer: user._id,
                             //@ts-ignore
-                            nextApprovalOfficer: hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin
+                            nextApprovalOfficer: branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id
                         };
                         // console.log(track);
                         let checkOfficer = sales.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
@@ -260,7 +270,7 @@ class Sale extends module_1.default {
                         sales.tracking.push(track);
                         sales.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         //@ts-ignore
-                        sales.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        sales.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         // sales.comments.push({
                         //   comment:data.comment,
                         //   commentBy:user._id
@@ -444,12 +454,22 @@ class Sale extends module_1.default {
     purchaseOrderReport(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = {
+                    page: query.page || 1,
+                    limit: query.limit || 10,
+                    populate: [
+                        { path: "nextApprovalOfficer", model: "User" },
+                        { path: "initiator", model: "User" },
+                        { path: "branch", model: "branches" },
+                        { path: "customer", model: "customer" }
+                    ]
+                };
                 //@ts-ignore
-                const purchaseOrder = yield this.purchase.paginate({ branch: user.branch }, Object.assign({}, query));
+                const purchaseOrder = yield this.purchase.paginate({ branch: user.branch }, options);
                 //@ts-ignore
-                const completed = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, Object.assign({}, query));
+                const completed = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, options);
                 //@ts-ignore
-                const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, Object.assign({}, query));
+                const pending = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, options);
                 return Promise.resolve({
                     orders: purchaseOrder,
                     completed,
@@ -464,12 +484,22 @@ class Sale extends module_1.default {
     purchaseReportDowndload(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let options = {
+                    // page: query.page || 1,
+                    // limit:query.limit || 10,
+                    populate: [
+                        { path: "nextApprovalOfficer", model: "User" },
+                        { path: "initiator", model: "User" },
+                        { path: "branch", model: "branches" },
+                        { path: "customer", model: "customer" }
+                    ]
+                };
                 //@ts-ignore
-                const purchaseOrder = yield this.purchase.find({ branch: user.branch });
+                const purchaseOrder = yield this.purchase.find({ branch: user.branch }, options);
                 //@ts-ignore
-                const completed = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED });
+                const completed = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, options);
                 //@ts-ignore
-                const pending = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING });
+                const pending = yield this.purchase.find({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.PENDING }, options);
                 return Promise.resolve({
                     orders: purchaseOrder,
                     completed,

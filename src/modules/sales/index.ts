@@ -87,8 +87,17 @@ class Sale extends Module{
 
   public async fetchSalesRequisition(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
+      let options = {
+        page: query.page || 1,
+        limit:query.limit || 10,
+        populate:[
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'preparedBy', model:'User'}
+        ]
+      }
       //@ts-ignore
-      const sales = await this.sales.paginate({ branch:user.branch},{...query});
+      const sales = await this.sales.paginate({ branch:user.branch},options);
       return Promise.resolve(sales);
     } catch (e) {
       this.handleException(e);
@@ -267,7 +276,8 @@ class Sale extends Module{
             user: approvalUser
           });
           return Promise.resolve(sales)
-        }else if(sales?.approvalStage == stagesOfApproval.STAGE1){
+        }else if(sales?.approvalStage == stagesOfApproval.STAGE1){          
+          let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
           let track = {
             title:"Initiate Transfer",
             stage:stagesOfApproval.STAGE2,
@@ -275,7 +285,7 @@ class Sale extends Module{
             dateApproved:new Date().toISOString(),
             approvalOfficer:user._id,
             //@ts-ignore
-            nextApprovalOfficer:hod?.branch.branchAdmin
+            nextApprovalOfficer:branchAdmin?._id
           }
           // console.log(track);
           let checkOfficer = sales.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
@@ -292,7 +302,7 @@ class Sale extends Module{
           sales.tracking.push(track)
           sales.approvalStage = stagesOfApproval.STAGE2;
           //@ts-ignore
-          sales.nextApprovalOfficer = hod?.branch.branchAdmin;
+          sales.nextApprovalOfficer = branchAdmin?._id;
           // sales.comments.push({
           //   comment:data.comment,
           //   commentBy:user._id
@@ -466,12 +476,22 @@ class Sale extends Module{
 
   public async purchaseOrderReport(query:QueryInterface, user:UserInterface):Promise<purchaseOrderReport|undefined>{
     try {
+      let options = {
+        page: query.page || 1,
+        limit:query.limit || 10,
+        populate:[
+          {path:"nextApprovalOfficer", model:"User"},
+          {path:"initiator", model:"User"},
+          {path:"branch", model:"branches"},
+          {path:"customer", model:"customer"}
+        ]
+      }
       //@ts-ignore
-      const purchaseOrder = await this.purchase.paginate({branch:user.branch},{...query});
+      const purchaseOrder = await this.purchase.paginate({branch:user.branch},options);
       //@ts-ignore
-      const completed =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.COMPLETED},{...query});
+      const completed =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.COMPLETED},options);
       //@ts-ignore
-      const pending =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.PENDING},{...query});
+      const pending =  await this.purchase.paginate({branch:user.branch, approvalStatus:TransferStatus.PENDING},options);
       return Promise.resolve({
         orders:purchaseOrder,
         completed,
@@ -484,12 +504,22 @@ class Sale extends Module{
 
   public async purchaseReportDowndload(user:UserInterface):Promise<any>{
     try {
+      let options = {
+        // page: query.page || 1,
+        // limit:query.limit || 10,
+        populate:[
+          {path:"nextApprovalOfficer", model:"User"},
+          {path:"initiator", model:"User"},
+          {path:"branch", model:"branches"},
+          {path:"customer", model:"customer"}
+        ]
+      }
       //@ts-ignore
-      const purchaseOrder = await this.purchase.find({branch:user.branch});
+      const purchaseOrder = await this.purchase.find({branch:user.branch},options);
       //@ts-ignore
-      const completed =  await this.purchase.find({branch:user.branch, approvalStatus:TransferStatus.COMPLETED});
+      const completed =  await this.purchase.find({branch:user.branch, approvalStatus:TransferStatus.COMPLETED}, options);
       //@ts-ignore
-      const pending =  await this.purchase.find({branch:user.branch, approvalStatus:TransferStatus.PENDING});
+      const pending =  await this.purchase.find({branch:user.branch, approvalStatus:TransferStatus.PENDING},options);
       return Promise.resolve({
         orders:purchaseOrder,
         completed,

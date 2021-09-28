@@ -87,13 +87,13 @@ router.get(
 );
 
 router.post(
-  '/approve-complaint/:complaintId',
+  '/approve-complaint',
   auth.verify(),
   customerCtrl.approveComplaint()
 );
 
 router.get(
-  '/fetch-pending-comment-approval',
+  '/fetch-pending-complaint-approval',
   auth.verify(),
   customerCtrl.fetchPendingComplaintApproval()
 );

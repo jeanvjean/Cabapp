@@ -11,7 +11,7 @@ import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
-import { generateToken, padLeft } from "../../util/token";
+import { generateToken, padLeft, passWdCheck } from "../../util/token";
 import { BranchInterface } from "../../models/branch";
 import { ProductInterface } from "../../models/inventory";
 import { VehicleInterface } from "../../models/vehicle";
@@ -159,7 +159,7 @@ class Customer extends Module{
       const date = new Date()
       date.setDate(date.getDate() + data.cylinderHoldingTime);
       let exist = await this.customer.findOne({email:data.email, branch:user.branch});
-      console.log(exist)
+      // console.log(exist)
       if(exist) {
         throw new BadInputFormatException('a customer with this email exists');
       }
@@ -629,11 +629,12 @@ class Customer extends Module{
   public async approveComplaint(data:ApprovalInput, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try {
       // console.log(data)
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
-      }
+      await passWdCheck(user, data.password);
+      // let loginUser = await this.user.findById(user._id).select('+password');
+      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+      // if(!matchPWD) {
+      //   throw new BadInputFormatException('Incorrect password... please check the password');
+      // }
       const complaint = await this.complaint.findById(data.id).populate([
         {path:'customer', ref:'User'}
       ]);
@@ -773,16 +774,6 @@ class Customer extends Module{
             });
             return Promise.resolve(complaint);
           }else if(complaint?.approvalStage == stagesOfApproval.STAGE1){
-            // let track = {
-            //   title:"Initiate complaint",
-            //   stage:stagesOfApproval.STAGE2,
-            //   status:ApprovalStatus.APPROVED,
-            //   dateApproved:new Date().toISOString(),
-            //   approvalOfficer:user._id,
-            //   //@ts-ignore
-            //   nextApprovalOfficer:hod?.branch.branchAdmin
-            // }
-            // console.log(track);
             let checkOfficer = complaint.approvalOfficers.filter(officer=>`${officer.id}` == `${user._id}`);
             if(checkOfficer.length == 0){
               complaint.approvalOfficers.push({
@@ -794,8 +785,10 @@ class Customer extends Module{
               });
             }
             complaint.approvalStage = stagesOfApproval.STAGE2;
-            //@ts-ignore
-            complaint.nextApprovalOfficer = hod?.branch.branchAdmin;
+            let branchAdmin = await this.user.findOne({branch:hod?.branch, subrole:"superadmin"});
+            // console.log(branchAdmin)
+            
+            complaint.nextApprovalOfficer = branchAdmin?._id;
 
             complaint.comments.push({
               comment:data.comment,
@@ -819,14 +812,6 @@ class Customer extends Module{
             });
             return Promise.resolve(complaint)
           } else if(complaint?.approvalStage == stagesOfApproval.STAGE2){
-            // let track = {
-            //   title:"Initiate complaint",
-            //   stage:stagesOfApproval.STAGE3,
-            //   status:ApprovalStatus.APPROVED,
-            //   dateApproved:new Date().toISOString(),
-            //   approvalOfficer:user._id,
-            //   // nextApprovalOfficer:data.nextApprovalOfficer
-            // }
             let checkOfficer = complaint.approvalOfficers.filter(officer=> `${officer.id}` == `${user._id}`);
             if(checkOfficer.length == 0){
               complaint.approvalOfficers.push({
@@ -887,6 +872,7 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
+      // console.log(user);
       let q = {
         branch: user.branch,
         approvalStatus:TransferStatus.PENDING,
@@ -913,7 +899,7 @@ class Customer extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
-      console.log(customerId);
+      // console.log(customerId);
       const options = {
         page:query.page || 1,
         limit:query.limit || 10,

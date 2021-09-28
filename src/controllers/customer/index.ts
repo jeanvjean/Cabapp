@@ -223,7 +223,7 @@ class customerCtrl extends Ctrl{
       try {
         const { complaintId } = req.params;
         //@ts-ignore
-        const data = await this.module.approveComplaint({...req.body, id:complaintId}, req.user);
+        const data = await this.module.approveComplaint({...req.body}, req.user);
         this.ok(res, 'Approval status updated', data);
       } catch (e) {
         this.handleError(e, req, res);

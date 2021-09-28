@@ -124,12 +124,40 @@ class User extends Module {
     this.deleted = props.deleted
   }
 
-  public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
+  public async registerSupremeUser(data: NewUserInterface) : Promise<UserInterface|undefined>{
     let newUser : UserInterface|undefined;
     try {
       let existUser:UserInterface | null = await this.user.findOne({email:data.email});
       if(existUser) {
+        throw new BadInputFormatException('A user exists with this email... use another email');
+      }
+      let hasSupreme = await this.user.findOne({subrole:"supreme", role:"supreme"}); 
+      if(hasSupreme) {
+        throw new BadInputFormatException('there can only be one supreme user');
+      }
+      newUser = await this.user.create({
+        ...data,
+        subrole:'supreme',
+        role:"supreme",
+        isVerified:true
+      });
+      return Promise.resolve(newUser as UserInterface);
+    } catch (error) {
+      this.handleException(error)
+    }
+  }
+
+  public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
+    let newUser : UserInterface|undefined;
+    try {
+      let existUser:UserInterface | null = await this.user.findOne({email:data.email, branch:data.branch});
+      if(existUser) {
         throw new BadInputFormatException('A user already exists with this email');
+      }
+
+      let hasSuperadmin = await this.user.findOne({branch:data.branch, subrole:"superadmin"}); 
+      if(hasSuperadmin) {
+        throw new BadInputFormatException('only one superadmin can exist in a branch');
       }
 
       newUser = await this.user.create({
@@ -220,7 +248,38 @@ class User extends Module {
             }else {
               exists.push(user.email);
             }
-          } else {
+          } else if(user.subrole == 'superadmin'){
+            if(userInfo.subrole !== 'supreme') {
+              const html = await getTemplate('invite_decline', {
+                message:"only supreme user can add a superadmin to a branch",
+              });
+              let mailLoad = {
+                content:html,
+                subject:'Invite Declined',
+                email:userInfo.email,
+              }
+              new Notify().sendMail(mailLoad);
+            }else {
+              let password = await generateToken(4);
+                  //@ts-ignore
+                  await this.user.create({...user, branch:branch?.branch._id, password});
+                  const html = await getTemplate('invite', {
+                    team: user.role,
+                    role:user.subrole,
+                    email:user.email,
+                    link:`${Environment.FRONTEND_URL}`,
+                    //@ts-ignore
+                    branch:branch?.branch.name,
+                    password
+                  });
+                  let mailLoad = {
+                    content:html,
+                    subject:'New User registeration',
+                    email:user.email,
+                  }
+                  new Notify().sendMail(mailLoad);
+            }
+          }else {
             let password = await generateToken(4);
             //@ts-ignore
             await this.user.create({...user, branch:branch?.branch._id, password});

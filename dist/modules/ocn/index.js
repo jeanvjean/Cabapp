@@ -211,14 +211,6 @@ class OutGoingCylinder extends module_1.default {
                     });
                     // console.log(hod);
                     if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.START) {
-                        //   let track = {
-                        //     title:"Approval Prorcess",
-                        //     stage:stagesOfApproval.STAGE1,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:hod?._id
-                        //   }
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         console.log(checkOfficer);
                         if (checkOfficer.length == 0) {
@@ -259,16 +251,6 @@ class OutGoingCylinder extends module_1.default {
                         return Promise.resolve(ocn);
                     }
                     else if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
-                        //   let track = {
-                        //     title:"Initiate ocn",
-                        //     stage:stagesOfApproval.STAGE2,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     //@ts-ignore
-                        //     nextApprovalOfficer:hod?.branch.branchAdmin
-                        //   }
-                        // console.log(track);
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             ocn.approvalOfficers.push({
@@ -283,8 +265,9 @@ class OutGoingCylinder extends module_1.default {
                         // ocn.tracking.push(track)
                         ocn.approvalStage = transferCylinder_1.stagesOfApproval.STAGE2;
                         // console.log(hod)
+                        let branchAdmin = yield this.user.findOne({ branch: hod === null || hod === void 0 ? void 0 : hod.branch, subrole: "superadmin" });
                         //@ts-ignore
-                        ocn.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod.branch.branchAdmin;
+                        ocn.nextApprovalOfficer = branchAdmin === null || branchAdmin === void 0 ? void 0 : branchAdmin._id;
                         //   ocn.comments.push({
                         //     comment:data.comment,
                         //     commentBy:user._id
@@ -308,14 +291,6 @@ class OutGoingCylinder extends module_1.default {
                         return Promise.resolve(ocn);
                     }
                     else if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
-                        //   let track = {
-                        //     title:"Initiate Transfer",
-                        //     stage:stagesOfApproval.STAGE3,
-                        //     status:ApprovalStatus.APPROVED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     // nextApprovalOfficer:data.nextApprovalOfficer
-                        //   }
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             ocn.approvalOfficers.push({

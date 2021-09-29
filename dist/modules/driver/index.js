@@ -51,11 +51,29 @@ class Driver extends module_1.default {
     fetchDrivers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                let { search, name, email } = query;
+                const options = {
+                    page: query.page,
+                    limit: query.limit,
+                    populate: [
                         { path: 'vehicle', model: 'vehicle' }
-                    ] });
+                    ]
+                };
+                let q = {
+                    branch: user.branch,
+                    subrole: 'driver'
+                };
+                let or = [];
+                if (name) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { name: name });
+                }
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { email: email });
+                }
                 //@ts-ignore
-                const users = yield this.driver.paginate({ branch: user.branch, subrole: 'driver' }, options);
+                const users = yield this.driver.paginate(q, options);
                 return Promise.resolve(users);
             }
             catch (e) {

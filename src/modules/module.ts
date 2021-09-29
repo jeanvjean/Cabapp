@@ -47,6 +47,11 @@ export interface QueryInterface {
   activity?:string
   pickupType?:string,
   routeStatus?:string
+  approvalStatus?:string
+  totalCost?:string, 
+  partNo?:string, 
+  quantity?:string, 
+  productName?:string
 }
 
 /**

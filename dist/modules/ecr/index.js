@@ -118,8 +118,7 @@ class EmptyCylinderModule extends module_1.default {
     fetchTECR(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let { tecr, customer, type, driverStatus, salesStatus } = query;
-                console.log(tecr);
+                let { tecr, customer, type, driverStatus, salesStatus, search } = query;
                 let q = {
                     branch: user.branch
                 };
@@ -156,6 +155,13 @@ class EmptyCylinderModule extends module_1.default {
                 if (salesStatus) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { status: new RegExp(salesStatus, 'gi') });
+                }
+                if (search) {
+                    or.push({ tecrNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
                 const ecr = yield this.emptyCylinder.paginate(q, options);
@@ -239,35 +245,27 @@ class EmptyCylinderModule extends module_1.default {
     fetchPendingApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
+                const { search, page, limit } = query;
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const options = Object.assign({}, query);
-                let aggregate = this.emptyCylinder.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } },
-                                        { ecrNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { status: emptyCylinder_1.EcrApproval.PENDING },
-                                { priority: emptyCylinder_1.Priority.URGENT }
-                            ]
-                        }
-                    },
-                    {
-                        $sort: { createdAt: 1 }
-                    }
-                ]);
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    sort: { priority: emptyCylinder_1.Priority.URGENT }
+                };
+                let q = {
+                    branch: user.branch,
+                    status: emptyCylinder_1.EcrApproval.PENDING
+                };
+                let or = [];
+                if (search) {
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const request = yield this.emptyCylinder.aggregatePaginate(aggregate, options);
+                const request = yield this.emptyCylinder.aggregatePaginate(q, options);
                 return Promise.resolve(request);
             }
             catch (e) {

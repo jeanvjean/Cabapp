@@ -7,6 +7,7 @@ import Module, { QueryInterface } from "../module";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
+import { passWdCheck } from "../../util/token";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -97,11 +98,7 @@ class ProductionSchedule extends Module{
 
   public async approveProductionSchedule(data:ProductionApprovalInput, user:UserInterface):Promise<ProductionScheduleInterface|undefined>{
     try {
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
-      }
+      await passWdCheck(user, data.password)
       const production = await this.production.findById(data.productionId).populate({
         path:'initiator', model:'User'
       });
@@ -316,12 +313,39 @@ class ProductionSchedule extends Module{
 
   public async fetchPendingProductionApprovals(query:QueryInterface, user:UserInterface):Promise<ProductionScheduleInterface[]|undefined>{
     try {
-      //@ts-ignore
-      const productions = await this.production.paginate({
+      let { page, limit, search, fromDate, toDate } = query;
+      let options = {
+        page:page||1,
+        limit:limit||10,
+        sort:{priority:1}
+      }
+      let q = {
         branch:user.branch,
         nextApprovalOfficer:user._id,
         status:TransferStatus.PENDING
-      },{...query, sort:{priority:1}});
+      }
+      let or = []
+
+      if(search) {
+        or.push({ecrNo: new RegExp(search, 'gi')})
+        or.push({quantityToFill: new RegExp(search, 'gi')})
+        or.push({status: new RegExp(search, 'gi')})
+        or.push({productionNo: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = { ...q, $or:or }
+      }
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $gte:new Date(fromDate) }}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{ $lte:new Date(toDate) }}
+      }
+      //@ts-ignore
+      const productions = await this.production.paginate(q,options);
       return Promise.resolve(productions)
     } catch (e) {
       this.handleException(e);

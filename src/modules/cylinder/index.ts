@@ -12,7 +12,7 @@ import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
-import { generateToken, padLeft } from "../../util/token";
+import { generateToken, padLeft, passWdCheck } from "../../util/token";
 import { CondemnCylinderInterface } from "../../models/condemnCylinder";
 import { ChangeCylinderInterface } from "../../models/change-cylinder";
 import { SupplierInterface, SupplierTypes } from "../../models/supplier";
@@ -275,18 +275,6 @@ class Cylinder extends Module {
         throw new BadInputFormatException('this cylinder has been registered');
       }
       let manDate = new Date(data.dateManufactured);
-      // let checkReg = await this.registerCylinder.find({branch:user.branch}).sort({cylNo:-1}).limit(1);
-      // let initNum;
-      // if(checkReg[0] == undefined) {
-      //   initNum = 1
-      // }else {
-      //   initNum = checkReg[0].cylNo+1;
-      // }
-      // const num = padLeft(initNum, 6, "");
-      // let asnl = "ASNL";
-      // let cyl = "CYL";
-      // data.cylinderNumber = cyl+num;
-      // data.assignedNumber = asnl+num
       let gName = await this.cylinder.findById(data.gasType);
       let payload = {
         ...data,
@@ -558,16 +546,14 @@ class Cylinder extends Module {
           //@ts-ignore
           change.tracking.push(track)
           change.approvalStage = stagesOfApproval.STAGE2;
+          let branchAdmin = await this.user.findOne({branch:user.branch, subrole:"superadmin"});
           //@ts-ignore
-          change.nextApprovalOfficer = hod?.branch.branchAdmin;
+          change.nextApprovalOfficer = branchAdmin?._id;
           change.comments.push({
             comment:data.comment,
             commentBy:user._id
           })
           await change.save();
-          // console.log(transfer)
-          // let logMan = condem.initiator;
-          // console.log(logMan);
           await createLog({
             user:user._id,
             activities:{
@@ -656,25 +642,26 @@ class Cylinder extends Module {
     try {
       const { search } = query;
       const options = {
-        ...query,
+        page:query.page,
+        limit:query.limit,
         populate:[
           {path:'cylinders', model:'registered-cylinders'},
           {path:'nextApprovalOfficer', model:'User'},
           {path:'initiator', model:'User'},
           {path:'branch', model:'branches'},
           {path:'gasType', model:'cylinder'},
-          {path:'assignedTo', miodel:'customer'}
+          {path:'assignedTo', model:'customer'}
         ]
       }
-      let changes;
-      if(search?.length) {
-        //@ts-ignore
-        changes = await this.change_gas.paginate({branch:user.branch, $or:[{approvalStatus:search}]}, options);
-      } else {
-        //@ts-ignore
-        changes = await this.change_gas.paginate({branch:user.branch}, options);
+      let q = {
+        branch:user.branch
       }
-      // console.log(changes)
+      let or = []
+      if(search) {
+        or.push({approvalStatus:search});
+      }
+      //@ts-ignore
+      let changes = await this.change_gas.paginate(q, options);      
       return changes
     } catch (e) {
       this.handleException(e)
@@ -695,13 +682,18 @@ class Cylinder extends Module {
           {path:'assignedTo', miodel:'customer'}
         ]
       }
-      //@ts-ignore
-      const change_requests = await this.change_gas.paginate({
+      let q = {
         branch:user.branch,
         approvaStatus:TransferStatus.PENDING,
         nextApprovalOfficer:user._id
-      }, options);
-      return change_requests;
+      }
+      let or = [];
+      if(search) {
+        or.push({approvalStatus:search});
+      }
+      //@ts-ignore
+      const change_requests = await this.change_gas.paginate(q, options);
+      return Promise.resolve(change_requests);
     } catch (e) {
       this.handleException(e)
     }
@@ -734,124 +726,90 @@ class Cylinder extends Module {
       const ObjectId = mongoose.Types.ObjectId
       let options = {
         page:query.page,
-        limit:query.limit
+        limit:query.limit,
+        populate:[
+          {path:'gasType', model:'cylinder'},
+          {path:"assignedTo", model:'customer'},
+          {path:"supplier", model:'supplier'},
+          {path:"branch", model:"branches"},
+          {path:"fromBranch", model:'branches'}
+        ]
+      }
+      let q = {
+          branch: user.branch
       }
       let or = [];
-       if(customer?.length){
-        or.push(
-          {'assignedTo': new RegExp(customer, 'gi')}
-        )
+       if(customer){
+         //@ts-ignore
+        q = {...q, 'assignedTo': customer}
       }
-       if(cylinderType?.length) {
+       if(cylinderType) {
         // aggregate = aggregate4
-        or.push(
-          {cylinderType: new RegExp(cylinderType, 'gi')}
-        )
+        //@ts-ignore
+        q = {...q, cylinderType: cylinderType}
       }
-       if(gasType?.length){
+       if(gasType){
         // aggregate = aggregate3
-        or.push(
-          {'gasName': new RegExp(gasType, 'gi')}
-        )
+        //@ts-ignore
+        q = {...q, 'gasName': gasType}
       } 
-        if(holder?.length){
+        if(holder){
         // aggregate = aggregate2
-        or.push(          
-          {holder: new RegExp(holder, 'gi')}
-        )
+        //@ts-ignore
+        q = {...q, holder: holder}
       }
-      if(condition?.length) {
-        or.push(
-          {condition: new RegExp(condition, 'gi')}
-        )
+      if(condition) {
+        //@ts-ignore
+        q = {...q, condition: condition}
       }
-      if(cylinderNumber?.length) {
-        or.push(
-          {cylinderNumber: new RegExp(cylinderNumber, 'gi')},
-          {assignedNumber: new RegExp(cylinderNumber, 'gi')}
-        )
+      if(cylinderNumber) {
+        or.push({cylinderNumber: new RegExp(cylinderNumber, 'gi')})
+        or.push({assignedNumber: new RegExp(cylinderNumber, 'gi')})
       }
-      if(owner?.length) {
-        or.push(
-          {owner: new RegExp(owner, 'gi')}
-        )
+      if(owner) {
+        //@ts-ignore
+        q = {...q, owner: owner}
       }
-      if(gasVolume?.length) {
+      if(gasVolume) {
         or.push(
           {gasVolumeContent: new RegExp(gasVolume, 'gi')}
         )
       }
-      if(waterCapacity?.length) {
-        or.push(
-          {waterCapacity: new RegExp(waterCapacity, 'gi')}
-        )
+      if(waterCapacity) {
+        or.push({waterCapacity: new RegExp(waterCapacity, 'gi')})
       }
-      or.push({cylinderStatus: new RegExp(search || "", 'gi')});
-
-      let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },
-            {branch: ObjectId(user.branch.toString())},
-          ]
-        }
+      if(search) {
+        or.push({cylinderStatus: new RegExp(search || "", 'gi')});
       }
-      let lookUp = {}
-      let unwind = {}
-      if(supplier?.length ) {
-          or.push(
-            {'supplierType': new RegExp(supplier,'gi')}
-        )
+      if(supplier ) {
+        //@ts-ignore
+          q = {...q, 'supplierType':supplier}
       }
-      let lu = {
-        $lookup:{
-            from: 'cylinder',
-            localField: "gasType",
-            foreignField: "_id",
-            as: "gasType"
-          }
-     }
       if(fromBranch?.length){
         // aggregate = aggregate7
-        q.$match.$and.push(
-          //@ts-ignore
-          {fromBranch: ObjectId(fromBranch)}
-        )
-      } else if(branch?.length){
+        //@ts-ignore
+        q = {...q, fromBranch: fromBranch}
+      }
+      if(branch?.length){
         // aggregate = branchCylinders
-        q.$match.$and.push(          
-          {branch: ObjectId(branch)}
-        )
+        //@ts-ignore
+        q = {...q, branch: branch}
       }
       if(fromDate && toDate) {
-        let { $match } = q;
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
       }
       if(manufactureDate) {
-        let { $match } = q;
         //@ts-ignore
-        q.$match = {...$match, dateManufactured:{$eq:new Date(manufactureDate)}}
+        q = {...q, dateManufactured:{$eq:new Date(manufactureDate)}}
       }
-      let aggregate = this.registerCylinder.aggregate([q]);
-      //@ts-ignore
-      var registeredCylinders = await this.registerCylinder.aggregatePaginate(aggregate, options);
-      // await this.cylinder.populate(registeredCylinders, {path: "gasType"});
-      for(let cyl of registeredCylinders.docs){
-        let gas = await this.cylinder.findOne({_id: cyl.gasType});
-        cyl.gasType = gas;
-        let customer = await this.customer.findById(cyl.assignedTo);
-        cyl.assignedTo = customer;
-        let supplier = await this.supplier.findById(cyl.supplier);
-        cyl.supplier = supplier;
-        let branch = await this.branch.findById(cyl.branch);
-        cyl.branch = branch;
-        let fromBranch = await this.branch.findById(cyl.fromBranch);
-        cyl.fromBranch = fromBranch;
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
       }
       //@ts-ignore
+      var registeredCylinders = await this.registerCylinder.paginate(q, options);
+
       const cylinders = await this.registerCylinder.find({branch:user.branch});
       const bufferCylinders = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER);
       //@ts-ignore
@@ -1041,21 +999,16 @@ class Cylinder extends Module {
           {path:'gasType', model:'cylinder'},
         ]
       }
-      let cylinders
-      if(search?.length) {
-        //@ts-ignore
-        cylinders= await this.registerCylinder.paginate({
-          branch:user.branch,
-          condition:CylinderCondition.FAULTY,
-          $or:[{cylinderType:search}]
-        }, options);
-      }else {
-        //@ts-ignore
-        cylinders= await this.registerCylinder.paginate({
-          branch:user.branch,
-          condition:CylinderCondition.FAULTY
-        }, options);
+      let q = {
+        branch:user.branch,
+        condition:CylinderCondition.FAULTY
       }
+      let or = [];
+      if(search) {
+        or.push({cylinderType:new RegExp(search, 'gi')})
+      }
+      //@ts-ignore
+      let cylinders = await this.registerCylinder.paginate(q, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
@@ -1420,7 +1373,8 @@ class Cylinder extends Module {
       const { search } = query;
       const ObjectId = mongoose.Types.ObjectId;
       const options = {
-        ...query,
+        page:query.page,
+        limit:query.limit,
         populate:[
           {path:'cylinders', model:'registered-cylinders'},
           {path:'nextApprovalOfficer', model:'User'},
@@ -1428,40 +1382,15 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.condemn.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {approvalStatus:{
-                    $regex:search?.toLowerCase() || ""
-                  }}
-                ]
-              },
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      aggregate = aggregate1;
-      //@ts-ignore
-      let requests = await this.condemn.aggregatePaginate(aggregate, options);
-      for(let req of requests.docs) {
-        let cylinders=[];
-        for(let cyl of req.cylinders) {
-          let cylinder = await this.registerCylinder.findById(cyl);
-          cylinders.push(cylinder)
-        }
-        req.cylinders = cylinders;
-        let nextApprovalOfficer = await this.user.findById(req.nextApprovalOfficer);
-        req.nextApprovalOfficer = nextApprovalOfficer;
-        let initiator = await this.user.findById(req.initiator);
-        req.initiator = initiator;
-        let branch = await this.branch.findById(req.branch);
-        req.branch = branch;
+      let q = {
+        branch:user.branch
       }
+      let or = []
+      if(search) {
+        or.push({approvalStatus: new RegExp(search, 'gi')});
+      }
+      //@ts-ignore
+      let requests = await this.condemn.paginate(q, options);
       return Promise.resolve(requests);
     } catch (e) {
       this.handleException(e)
@@ -1473,7 +1402,8 @@ class Cylinder extends Module {
       const { search } = query;
       const ObjectId = mongoose.Types.ObjectId;
       const options = {
-        ...query,
+        page:query.page,
+        limit:query.limit,
         populate:[
           {path:'cylinders', model:'registered-cylinders'},
           {path:'nextApprovalOfficer', model:'User'},
@@ -1481,42 +1411,15 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.condemn.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {approvalStatus:{
-                    $regex:search?.toLowerCase() || ""
-                  }}
-                ]
-              },
-              {branch: ObjectId(user.branch.toString())},
-              {approvalStatus:TransferStatus.PENDING},
-              {nextApprovalOfficer:ObjectId(user._id.toString())}
-            ]
-          }
-        }
-      ]);
-      aggregate = aggregate1;
-      //@ts-ignore
-      const requests = await this.condemn.aggregatePaginate(aggregate, options);
-      for(let req of requests.docs) {
-        let cylinders=[];
-        for(let cyl of req.cylinders) {
-          let cylinder = await this.registerCylinder.findById(cyl);
-          cylinders.push(cylinder)
-        }
-        req.cylinders = cylinders;
-        let nextApprovalOfficer = await this.user.findById(req.nextApprovalOfficer);
-        req.nextApprovalOfficer = nextApprovalOfficer;
-        let initiator = await this.user.findById(req.initiator);
-        req.initiator = initiator;
-        let branch = await this.branch.findById(req.branch);
-        req.branch = branch;
+      let q = {
+        branch:user.branch
       }
+      let or = []
+      if(search) {
+        or.push({approvalStatus: new RegExp(search, 'gi')});
+      }
+      //@ts-ignore
+      const requests = await this.condemn.paginate(q, options)
       return Promise.resolve(requests);
     } catch (e) {
       this.handleException(e);
@@ -1547,29 +1450,21 @@ class Cylinder extends Module {
           {path:'branch', model:'branches'}
         ]
       }
-      let cylinders;
-      if(!search?.length) {
-        //@ts-ignore
-        cylinders = await this.archive.paginate({
-          branch:user.branch,
-          $or:[{assignedNumber:search?.toLowerCase()},
-            {cylinderNumber:search?.toLowerCase()},
-            {cylinderType:search?.toLowerCase()}
-          ]}, options);
-      }else {
-        //@ts-ignore
-        cylinders = await this.archive.paginate({branch:user.branch}, options);
+      let q = {
+        branch:user.branch
       }
+      let or = [];
+      if(search) {
+        or.push({assignedNumber:new RegExp(search, 'gi')})
+        or.push({cylinderNumber:new RegExp(search, 'gi')})
+        or.push({cylinderType:new RegExp(search, 'gi')})
+      }
+      //@ts-ignore
+      let cylinders = await this.archive.paginate(q, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e);
     }
-  }
-
-  private async arrayRemove(arr:Schema.Types.ObjectId[], value:Schema.Types.ObjectId) {
-    return arr.filter(function(ele){
-        return ele != value;
-    });
   }
 
   public async transferCylinders(data:TransferCylinderInput, user:UserInterface):Promise<ApprovalResponse|undefined>{
@@ -1668,11 +1563,7 @@ class Cylinder extends Module {
 
   public async approveTransfer(data:ApprovalInput, user:UserInterface):Promise<ApprovalResponse|undefined>{
     try {
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
-      }
+      await passWdCheck(user, data.password);
       let transfer = await this.transfer.findById(data.id).populate(
         [
           {path:'initiator', model:'User'}
@@ -2159,7 +2050,7 @@ class Cylinder extends Module {
   public async fetchTransferRequets(query:QueryInterface, user:UserInterface):Promise<TransferRequestPool|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, type, cylinderNumber, gasVolume, approvalStatus } = query;
       const options = {
         ...query,
         populate:[
@@ -2168,61 +2059,51 @@ class Cylinder extends Module {
           {path:'to', model:'customer'},
           {path:'nextApprovalOfficer', model:'User'},
           {path:'fromBranch', model:'branches'},
-          {path:'branch', model:'branches'}
+          {path:'branch', model:'branches'},
+          {path:'cylinders', model:'registered-cylinders'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.transfer.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {transferStatus:{
-                  $regex: search?.toLowerCase() || ""
-                }}
-              ]},
-              {type: filter?.toLowerCase()},
-              {branch: ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-
-      const aggregate2 = this.transfer.aggregate([
-        {
-          $match:{
-              $or:[
-                {transferStatus:{
-                  $regex: search?.toLowerCase() || ""
-                }}
-              ],
-              $and:[
-                {branch: ObjectId(user.branch.toString())}
-              ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else if(search?.length && !filter?.length) {
-        aggregate = aggregate2
+      let q = {
+        branch: user.branch
       }
+      let or = []
+      if(search) {
+        or.push({TransferStatus: new RegExp(search, 'gi')})
+      }
+      if(type) {
+        //@ts-ignore
+        q = {...q, type: type}
+      }
+      // if(type) {
+      //   //@ts-ignore
+      //   q = {...q, gaName: type}
+      // }
+
+      // if(gasVolume) {
+      //   //@ts-ignore
+      //   q = {...q, gasVolumeContent: gasVolume}
+      // }
+
+      // if(gasVolume) {
+      //   //@ts-ignore
+      //   q = {...q, gasVolumeContent: gasVolume}
+      // }
+      
+      if(approvalStatus) {
+        //@ts-ignore
+        q = {...q, transferStatus: approvalStatus}
+      }
+      if(cylinderNumber) {
+        //@ts-ignore
+        or.push({cylinderNumber: new RegExp(cylinderNumber, 'gi')})
+        or.push({assignedNumber: new RegExp(cylinderNumber, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = { ...q, $or:or }
+      }      
       //@ts-ignore
-       let transfers = await this.transfer.aggregatePaginate(aggregate,options);
-       for(let trans of transfers.docs) {
-          let gasType = await this.cylinder.findById(trans.gasType);
-          trans.gasType = gasType;
-          let initiator = await this.user.findById(trans.initiator);
-          trans.initiator = initiator;
-          let to = await this.user.findById(trans.to);
-          trans.to = to;
-          let nextApprovalOfficer = await this.user.findById(trans.nextApprovalOfficer);
-          trans.nextApprovalOfficer = nextApprovalOfficer;
-          let toBranch = await this.branch.findById(trans.toBranch);
-          trans.toBranch = toBranch;
-          let branch = await this.branch.findById(trans.branch);
-          trans.branch = branch;
-       }
+       let transfers = await this.transfer.paginate(q,options);
       const transferReq= await this.transfer.find({branch:user.branch})
       let totalApproved = transferReq.filter(
         //@ts-ignore
@@ -2288,49 +2169,22 @@ class Cylinder extends Module {
           {path:'to', model:'customer'}
         ]
       }
-      const aggregate = this.transfer.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {transferStatus:{
-                    $regex: search?.toLowerCase() || ""
-                  }},{type:{
-                    $regex: search?.toLowerCase() || ""
-                  }}
-                ]
-              },
-              {branch:ObjectId(user.branch.toString())},
-              {nextApprovalOfficer:ObjectId(user._id.toString())},
-              {transferStatus:TransferStatus.PENDING}
-            ]
-          }
-        }
-      ]);
+      let q = {
+        branch:user.branch,
+        nextApprovalOfficer:user._id,
+        transferStatus:TransferStatus.PENDING
+      }
+      let or = []
+      if(search) {
+        or.push({type: new RegExp(search, 'gi')})
+        or.push({transferStatus: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
         //@ts-ignore
-        let transfers = await this.transfer.aggregatePaginate(aggregate,options);
-        //populate reference fields
-        for(let trans of transfers.docs) {
-          let gasType = await this.cylinder.findById(trans.gasType);
-          trans.gasType = gasType;
-          let initiator = await this.user.findById(trans.initiator);
-          trans.initiator = initiator;
-          let to = await this.customer.findById(trans.to);
-          trans.to = to;
-          let nextApprovalOfficer = await this.user.findById(trans.nextApprovalOfficer);
-          trans.nextApprovalOfficer = nextApprovalOfficer;
-          let toBranch = await this.branch.findById(trans.toBranch);
-          trans.toBranch = toBranch;
-          let branch = await this.branch.findById(trans.branch);
-          trans.branch = branch;
-          let cylinders = [];
-          for(let cyl of trans.cylinders) {
-            let cy = await this.registerCylinder.findById(cyl);
-            cylinders.push(cy);
-          }
-          trans.cylinders = cylinders;
-       }
+        q = {...q, $or:or}
+      }
+        //@ts-ignore
+      let transfers = await this.transfer.paginate(q,options);
       return Promise.resolve(transfers)
     } catch (e) {
       this.handleException(e);
@@ -2363,7 +2217,7 @@ class Cylinder extends Module {
 
   public async fetchCustomerCylinders(query:QueryInterface, customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
-      const { search } = query;
+      const { search, cylinderNumber } = query;
       let options = {
         ...query,
         populate:[
@@ -2371,18 +2225,23 @@ class Cylinder extends Module {
           {path:'assignedTo', model:'customer'}
         ]
       }
-      //@ts-ignore
-      let cylinders;
-      if(!search?.length) {
-        //@ts-ignore
-        cylinders = await this.registerCylinder.paginate({assignedTo:customerId, $or:[
-          {cylinderNumber:search?.toLowerCase()},
-          {assignedNumber:search?.toLowerCase()}
-        ]}, options);
-      }else{
-        //@ts-ignore
-        cylinders = await this.registerCylinder.paginate({assignedTo:customerId}, options);
+      let q = {
+        assignedTo:customerId,
       }
+      let or = []
+      if(cylinderNumber) {
+        or.push({cylinderNumber:new RegExp(cylinderNumber, 'gi')})
+        or.push({assignedNumber:new RegExp(cylinderNumber, 'gi')})
+      }
+      if(search) {
+        or.push({type: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+      //@ts-ignore
+      let cylinders= await this.registerCylinder.paginate(q, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e)
@@ -2409,7 +2268,7 @@ class Cylinder extends Module {
         {
           branch:user.branch, TransferStatus:`${TransferStatus.COMPLETED}`,
           $or:[
-            {type: search?.toLowerCase()}
+            {type: new RegExp(search || "", 'gi')}
           ]
       },{...query});
       //@ts-ignore

@@ -15,6 +15,7 @@ const module_1 = require("../module");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
 class ProductionSchedule extends module_1.default {
     constructor(props) {
         super();
@@ -67,11 +68,7 @@ class ProductionSchedule extends module_1.default {
     approveProductionSchedule(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
-                }
+                yield token_1.passWdCheck(user, data.password);
                 const production = yield this.production.findById(data.productionId).populate({
                     path: 'initiator', model: 'User'
                 });
@@ -291,12 +288,38 @@ class ProductionSchedule extends module_1.default {
     fetchPendingProductionApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //@ts-ignore
-                const productions = yield this.production.paginate({
+                let { page, limit, search, fromDate, toDate } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    sort: { priority: 1 }
+                };
+                let q = {
                     branch: user.branch,
                     nextApprovalOfficer: user._id,
                     status: transferCylinder_1.TransferStatus.PENDING
-                }, Object.assign(Object.assign({}, query), { sort: { priority: 1 } }));
+                };
+                let or = [];
+                if (search) {
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                    or.push({ quantityToFill: new RegExp(search, 'gi') });
+                    or.push({ status: new RegExp(search, 'gi') });
+                    or.push({ productionNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
+                }
+                //@ts-ignore
+                const productions = yield this.production.paginate(q, options);
                 return Promise.resolve(productions);
             }
             catch (e) {

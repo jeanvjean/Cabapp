@@ -135,93 +135,26 @@ class Product extends module_1.default {
                         { path: 'branch', model: 'branches' },
                         { path: 'division', model: 'branches' }
                     ] });
-                let aggregate;
-                const aggregate1 = this.product.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { productName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { equipmentType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { location: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { deleted: false }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.product.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { productName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { equipmentType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { location: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { quantity: { $lt: 1 } },
-                                { deleted: false }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate3 = this.product.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { productName: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { equipmentType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { location: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { quantity: { $gt: 0 } },
-                                { deleted: false }
-                            ]
-                        }
-                    }
-                ]);
-                if (out === null || out === void 0 ? void 0 : out.length) {
-                    aggregate = aggregate2;
+                let q = {
+                    branch: user.branch,
+                    deleted: false
+                };
+                let or = [];
+                if (instock) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { quantity: { $gt: 0 } });
                 }
-                else if (instock === null || instock === void 0 ? void 0 : instock.length) {
-                    aggregate = aggregate3;
+                if (out) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { quantity: { $lt: 1 } });
                 }
-                else {
-                    aggregate = aggregate1;
+                if (search) {
+                    or.push({ productName: new RegExp(search, 'gi') });
+                    or.push({ equipmentType: new RegExp(search, 'gi') });
+                    or.push({ location: new RegExp(search, 'gi') });
                 }
                 //@ts-ignore
-                const products = yield this.product.aggregatePaginate(aggregate, options);
-                //Populate reference fields
-                for (let product of products.docs) {
-                    let supplier = yield this.supplier.findById(product.supplier);
-                    product.supplier = supplier;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let division = yield this.branch.findById(product.division);
-                    product.division = division;
-                }
-                // console.log(products);
+                const products = yield this.product.paginate(q, options);
                 return Promise.resolve(products);
             }
             catch (e) {
@@ -385,20 +318,32 @@ class Product extends module_1.default {
     fetchSuppliers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
-                // const aggregate = this.supplier.aggregate()
-                const options = Object.assign({}, query);
-                // console.log(search?.length)
-                let suppliers;
-                if ((search === null || search === void 0 ? void 0 : search.length) !== undefined) {
+                const { search, page, limit, name, email } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: {
+                        path: 'branch', model: 'branches'
+                    }
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (name) {
                     //@ts-ignore
-                    suppliers = yield this.supplier.paginate({ branch: user.branch, $or: [{ supplierType: search }, { productType: search }] }, options);
+                    q = Object.assign(Object.assign({}, q), { name: name });
                 }
-                else {
+                if (email) {
                     //@ts-ignore
-                    suppliers = yield this.supplier.paginate({ branch: user.branch }, options);
+                    q = Object.assign(Object.assign({}, q), { email: email });
                 }
-                // console.log(suppliers);
+                if (search) {
+                    or.push({ supplierType: new RegExp(search, 'gi') });
+                    or.push({ productType: new RegExp(search, 'gi') });
+                }
+                //@ts-ignore
+                let suppliers = yield this.supplier.paginate(q, options);
                 return Promise.resolve(suppliers);
             }
             catch (e) {
@@ -584,44 +529,37 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter, fromDate, toDate } = query;
+                const { search, filter, page, limit, fromDate, toDate, totalCost, partNo, quantity, productName } = query;
                 let or = [];
-                if (search) {
-                    or.push({ modeOfService: new RegExp(search, "gi") }, { direction: new RegExp(search, "gi") }, { grnNo: new RegExp(search, "gi") }, { "products.productName": new RegExp(search, "gi") }, { "products.equipmentModel": new RegExp(search, "gi") }, { "products.equipmentType": new RegExp(search, "gi") });
+                if (productName) {
+                    or.push({ "products.productName": new RegExp(productName, "gi") });
                 }
-                else {
-                    or.push({ "products.productName": new RegExp("", "gi") });
+                if (partNo) {
+                    or.push({ "products.partNumber": new RegExp(partNo, "gi") });
+                }
+                if (quantity) {
+                    or.push({ "products.quantity": new RegExp(quantity, "gi") });
+                }
+                if (totalCost) {
+                    or.push({ "products.totalCost": new RegExp(totalCost, "gi") });
                 }
                 let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            },
-                            { branch: ObjectId(user.branch.toString()) },
-                        ]
-                    }
+                    branch: user.branch
                 };
                 if (fromDate && toDate) {
-                    // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
-                    let { $match } = q;
                     //@ts-ignore
-                    q.$match = Object.assign(Object.assign({}, $match), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate), $lte: new Date(toDate) } });
                 }
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
                         { path: 'inspectingOfficer', model: 'User' },
                         { path: 'branch', model: 'branches' }
-                    ] });
-                const aggregate = this.inventory.aggregate([q]);
+                    ]
+                };
                 //@ts-ignore
-                const inventories = yield this.inventory.aggregatePaginate(aggregate, options);
-                //Populate reference fields
-                for (let product of inventories.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                }
+                const inventories = yield this.inventory.paginate(q, options);
                 return Promise.resolve({
                     inventory: inventories
                 });
@@ -1034,12 +972,6 @@ class Product extends module_1.default {
                         disbursement.tracking.push(track);
                         disbursement.approvalStage = transferCylinder_1.stagesOfApproval.APPROVED;
                         disbursement.disburseStatus = transferCylinder_1.TransferStatus.COMPLETED;
-                        // for(let product of disbursement.products) {
-                        //   let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
-                        //   //@ts-ignore
-                        //   pro?.quantity -= +product.quantityReleased;
-                        //   await pro?.save();
-                        // }
                         //@ts-ignore
                         disbursement.comments.push({
                             comment: data.comment,
@@ -1229,52 +1161,36 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 0,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                const aggregate = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { disburseStatus: transferCylinder_1.TransferStatus.PENDING },
-                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
-                                { fromBranch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                //@ts-ignore
-                const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
-                //Populate reference fields
-                for (let product of disbursement.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
+                    ]
+                };
+                let q = {
+                    disburseStatus: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id,
+                    fromBranch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ mrn: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const disbursement = yield this.disburse.aggregatePaginate(q, options);
                 return Promise.resolve(disbursement);
             }
             catch (e) {
@@ -1286,51 +1202,36 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 0,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                const aggregate = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { requestApproval: transferCylinder_1.TransferStatus.PENDING },
-                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                //@ts-ignore
-                const disbursement = yield this.disburse.aggregatePaginate(aggregate, options);
-                for (let product of disbursement.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
+                    ]
+                };
+                let q = {
+                    requestApproval: transferCylinder_1.TransferStatus.PENDING,
+                    nextApprovalOfficer: user._id,
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ mrn: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const disbursement = yield this.disburse.aggregatePaginate(q, options);
                 return Promise.resolve(disbursement);
             }
             catch (e) {
@@ -1360,87 +1261,40 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                let aggregate;
-                const aggregate1 = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { customer: {
-                                                $regex: ObjectId(search) || ''
-                                            } },
-                                        { requestDepartment: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { disburseStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { fromBranch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } },
-                                        { customer: {
-                                                $regex: ObjectId(search) || ''
-                                            } },
-                                        { requestDepartment: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { fromBranch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                    ]
+                };
+                let q = {
+                    fromBranch: user.branch
+                };
+                let or = [];
+                if (filter) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { disburseStatus: filter });
                 }
-                else {
-                    aggregate = aggregate2;
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ mrn: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
+                    or.push({ customer: new RegExp(search, 'gi') });
+                    or.push({ requestDepartment: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
-                for (let product of disbursements.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
-                }
+                const disbursements = yield this.disburse.paginate(q, options);
                 let totalApproved = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, disburseStatus: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1461,75 +1315,40 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                let aggregate;
-                const aggregate1 = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { disburseStatus: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                const aggregate2 = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if ((search === null || search === void 0 ? void 0 : search.length) && (filter === null || filter === void 0 ? void 0 : filter.length)) {
-                    aggregate = aggregate1;
+                    ]
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (filter) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { disburseStatus: filter });
                 }
-                else {
-                    aggregate = aggregate2;
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ mrn: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
+                    or.push({ customer: new RegExp(search, 'gi') });
+                    or.push({ requestDepartment: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
-                for (let product of disbursements.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
-                }
+                const disbursements = yield this.disburse.paginate(q, options);
                 let totalApproved = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.COMPLETED });
                 let totalPending = yield this.disburse.find({ branch: user.branch, requestApproval: transferCylinder_1.TransferStatus.PENDING });
                 return Promise.resolve({
@@ -1550,50 +1369,34 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                const aggregate = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { disburseStatus: transferCylinder_1.TransferStatus.COMPLETED },
-                                { fromBranch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                //@ts-ignore
-                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
-                for (let product of disbursements.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
+                    ]
+                };
+                let q = {
+                    disburseStatus: transferCylinder_1.TransferStatus.COMPLETED,
+                    fromBranch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const disbursements = yield this.disburse.paginate(q, options);
                 return Promise.resolve(disbursements);
             }
             catch (e) {
@@ -1605,50 +1408,34 @@ class Product extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const { search, filter, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
                         { path: 'nextApprovalOffice', model: 'User' },
                         { path: 'initiator', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'customer', model: 'customer' },
                         { path: 'releasedTo', model: 'User' },
                         { path: 'releasedBy', model: 'User' }
-                    ] });
-                const aggregate = this.disburse.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                { $or: [
-                                        { grnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { mrn: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }, { jobTag: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ] },
-                                { disburseStatus: transferCylinder_1.TransferStatus.COMPLETED },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                //@ts-ignore
-                const disbursements = yield this.disburse.aggregatePaginate(aggregate, options);
-                for (let product of disbursements.docs) {
-                    let inspectingOfficer = yield this.user.findById(product.inspectingOfficer);
-                    product.inspectingOfficer = inspectingOfficer;
-                    let branch = yield this.branch.findById(product.branch);
-                    product.branch = branch;
-                    let initiator = yield this.user.findById(product.initiator);
-                    product.initiator = initiator;
-                    let customer = yield this.customer.findById(product.customer);
-                    product.customer = customer;
-                    let releasedTo = yield this.user.findById(product.releasedTo);
-                    product.releasedTo = releasedTo;
-                    let releasedBy = yield this.user.findById(product.releasedBy);
-                    product.releasedBy = releasedBy;
+                    ]
+                };
+                let q = {
+                    disburseStatus: transferCylinder_1.TransferStatus.COMPLETED,
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ grnNo: new RegExp(search, 'gi') });
+                    or.push({ jobTag: new RegExp(search, 'gi') });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const disbursements = yield this.disburse.paginate(q, options);
                 return Promise.resolve(disbursements);
             }
             catch (e) {

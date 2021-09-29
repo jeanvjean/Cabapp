@@ -57,25 +57,26 @@ class Account extends module_1.default {
             try {
                 const { search } = query;
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const options = Object.assign({}, query);
-                const aggregate = this.account.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { invoiceNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
+                const options = {
+                    page: query.page,
+                    limit: query.limit,
+                    populate: {
+                        path: 'preparedBy', model: 'User'
                     }
-                ]);
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ invoiceNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const invoices = yield this.account.aggregatePaginate(aggregate, options);
+                const invoices = yield this.account.paginate(q, options);
                 return Promise.resolve(invoices);
             }
             catch (e) {

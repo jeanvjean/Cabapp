@@ -152,8 +152,7 @@ class EmptyCylinderModule extends Module {
 
     public async fetchTECR(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
         try {
-            let { tecr, customer, type, driverStatus, salesStatus } = query;
-            console.log(tecr)
+            let { tecr, customer, type, driverStatus, salesStatus, search } = query;
             let q = {
                 branch:user.branch
             }
@@ -192,6 +191,13 @@ class EmptyCylinderModule extends Module {
             if(salesStatus) {
                 //@ts-ignore
                 q = {...q, status:new RegExp(salesStatus, 'gi')}
+            }
+            if(search) {
+                or.push({tecrNo: new RegExp(search, 'gi')})
+            }
+            if(or.length > 0) {
+                //@ts-ignore
+                q = {...q, $or:or}
             }
             //@ts-ignore
             const ecr = await this.emptyCylinder.paginate(q, options);
@@ -269,37 +275,27 @@ class EmptyCylinderModule extends Module {
 
     public async fetchPendingApprovals(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const { search } = query;
+            const { search,page,limit } = query;
             const ObjectId = mongoose.Types.ObjectId;
             const options = {
-                ...query
+                page:page||1,
+                limit:limit||10,
+                sort:{priority: Priority.URGENT}
             }
-            let aggregate = this.emptyCylinder.aggregate([
-                {
-                    $match:{
-                        $and:[
-                            {
-                                $or:[
-                                    {ecrNo:{
-                                        $regex: search?.toLowerCase || ""
-                                    }},
-                                    {ecrNo:{
-                                        $regex: search?.toLowerCase || ""
-                                    }}
-                                ]
-                            },
-                            {branch:ObjectId(user.branch.toString())},
-                            {status: EcrApproval.PENDING},
-                            {priority: Priority.URGENT}
-                        ]
-                    }
-                },
-                {
-                    $sort:{createdAt:1}
-                }
-            ]);
+            let q = {
+                branch:user.branch,
+                status: EcrApproval.PENDING
+            }
+            let or = []
+            if(search){
+                or.push({ecrNo: new RegExp(search, 'gi')})
+            }
+            if(or.length>0){
+                //@ts-ignore
+                q = {...q, $or:or}
+            }            
             //@ts-ignore
-            const request = await this.emptyCylinder.aggregatePaginate(aggregate, options);
+            const request = await this.emptyCylinder.aggregatePaginate(q, options);
             return Promise.resolve(request);
         } catch (e) {
             this.handleException(e)

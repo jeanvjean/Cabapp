@@ -198,7 +198,6 @@ class Customer extends Module{
       let or = []
       const ObjectId = mongoose.Types.ObjectId;
       const { search, filter,name, email, phone } = query;
-      let aggregate;
      if(name) {
        //@ts-ignore
        q = {...q, name:name}
@@ -267,33 +266,30 @@ class Customer extends Module{
 
   public async fetchDeletedCustomers(query:QueryInterface, user:UserInterface):Promise<DeletedCustomer[]|undefined>{
     try {
-      const { search } = query;
+      const { search, name, email } = query;
       let options = {
-        ...query
+        page:query.page,
+        limit:query.limit
+      }
+      let q={
+        branch:user.branch
+      }
+      let or = [];
+      if(name) {
+        //@ts-ignore
+        q = {...q, name:name}
+      }
+      if(email) {
+        //@ts-ignore
+        q = {...q, email:email}
+      }
+      if(search) {
+        or.push({reason: new RegExp(search, 'gi')});
       }
       const ObjectId = mongoose.Types.ObjectId
-      let aggregate = this.deleteCustomer.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {name:{
-                    $regex: search?.toLowerCase() || ""
-                  }},{reason:{
-                    $regex: search?.toLowerCase() || ""
-                  }},{email:{
-                    $regex: search?.toLowerCase() || ""
-                  }}
-                ]
-              },
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
+      
       //@ts-ignore
-      const customers = await this.deleteCustomer.aggregatePaginate(aggregate, options);
+      const customers = await this.deleteCustomer.paginate(q, options);
       return Promise.resolve(customers)
     } catch (e) {
       this.handleException(e);
@@ -369,7 +365,8 @@ class Customer extends Module{
   public async fetchOrdersAssignedToVehicle(query:QueryInterface,data:orderVehicle):Promise<vehicleOrderResponse|undefined>{
     try {
       const options = {
-        ...query,
+        page:query.page,
+        limit:query.limit,
         populate:[
           {path:'vehicle', model:'vehicle',populate:{
               path:'assignedTo', model:'User'
@@ -379,42 +376,27 @@ class Customer extends Module{
           {path:'customer', model:'customer'}
         ]
       }
-      const ObjectId = mongoose.Types.ObjectId;
       const { search, filter } = query;
       let or = [];
-      or.push(
-        {status: new RegExp(search || '', 'gi')},
-        {orderNumber: new RegExp(search || '', 'gi')},
-        {ecrNo: new RegExp(search || '', 'gi')}
-        );
       let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },
-            {vehicle: data.vehicle}
-          ]
-        }
+          vehicle: data.vehicle
       }
-      if(filter?.length) {
-        q.$match.$and.push(
-          //@ts-ignore
-          {pickupType: new RegExp(filter || '', 'gi')},
-        );
+
+      if(filter) {
+        //@ts-ignore
+          q = {...q, pickupType: filter}
       }
-      let aggregate = this.order.aggregate([q]);
+      if(search) {
+        or.push({status: new RegExp(search, 'gi')})
+        or.push({orderNumber: new RegExp(search, 'gi')}),
+        or.push({ecrNo: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
       //@ts-ignore
-      const orders = await this.order.aggregatePaginate(aggregate,options);
-      //Populate the reference fields
-      for(let order of orders.docs) {
-        let vehicle = await this.vehicle.findById(order.vehicle).populate('assignedTo');
-        order.vehicle = vehicle
-        let supplier = await this.supplier.findById(order.supplier);
-        order.supplier = supplier;
-        let customer = await this.customer.findById(order.supplier);
-        order.customer = customer;
-      }
+      const orders = await this.order.paginate(q,options);
       return Promise.resolve({
         orders
       });
@@ -446,58 +428,43 @@ class Customer extends Module{
   public async fetchAllOrders(query:QueryInterface, user:UserInterface):Promise<fetchPickupOrderRersponse|undefined>{
     try {
       let options = {
-        ...query,
+        
+        page:query.page,
+        limit:query.limit,
         populate:[
-          {path:'vehicle', model:'vehicle'},
+          {path:'vehicle', model:'vehicle',populate:{
+            path:'assignedTo', model:'User'
+          }},
           {path:'supplier', model:'supplier'},
           {path:'customer', model:'customer'},
           {path:'gasType', model:'cylinder'}
         ]
       }
-      const ObjectId = mongoose.Types.ObjectId;
       const { search, filter, type } = query;
       let or = [];
-      or.push(
-        {status: new RegExp(search || '', 'gi')},
-        {orderNumber: new RegExp(search || '', 'gi')},
-        {ecrNo: new RegExp(search || '', 'gi')}
-        );
       let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },
-            {branch: ObjectId(user.branch.toString())}
-          ]
-        }
+          branch: user.branch
       }
-      if(filter?.length) {
-        q.$match.$and.push(
-          //@ts-ignore
-          {pickupType: new RegExp(filter || '', 'gi')},
-        );
+
+      if(filter) {
+        //@ts-ignore
+          q = {...q, pickupType: filter}
       }
-      if(type?.length) {
-        q.$match.$and.push(
-          //@ts-ignore
-          {orderType: new RegExp(type || '', 'gi')},
-        );
+      if(type) {
+        //@ts-ignore
+          q = {...q, orderType: type}
       }
-      let aggregate = this.order.aggregate([q]);
+      if(search) {
+        or.push({status: new RegExp(search, 'gi')})
+        or.push({orderNumber: new RegExp(search, 'gi')}),
+        or.push({ecrNo: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
       //@ts-ignore
-      const orders = await this.order.aggregatePaginate(aggregate, options);
-      //Populate reference fields
-        for(let order of orders.docs) {
-          let vehicle = await this.vehicle.findById(order.vehicle).populate('assignedTo');
-          order.vehicle = vehicle
-          let supplier = await this.supplier.findById(order.supplier);
-          order.supplier = supplier;
-          let customer = await this.customer.findById(order.supplier);
-          order.customer = customer;
-          let gasType = await this.cylinder.findById(order.gasType);
-          order.gasType = gasType;
-        }
+      const orders = await this.order.paginate(q, options);
       return Promise.resolve({
         orders
       });
@@ -628,13 +595,7 @@ class Customer extends Module{
 
   public async approveComplaint(data:ApprovalInput, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try {
-      // console.log(data)
       await passWdCheck(user, data.password);
-      // let loginUser = await this.user.findById(user._id).select('+password');
-      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      // if(!matchPWD) {
-      //   throw new BadInputFormatException('Incorrect password... please check the password');
-      // }
       const complaint = await this.complaint.findById(data.id).populate([
         {path:'customer', ref:'User'}
       ]);

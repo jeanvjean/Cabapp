@@ -8,6 +8,7 @@ const val = new user_1.Validator();
 const auth = new authentication_1.default();
 const router = express_1.Router();
 router.post('/register', user_1.Validator.validateUser(), val.validate(), controllers_1.userCtrl.create());
+router.post('/create-supremeUser', user_1.Validator.validateUser(), val.validate(), controllers_1.userCtrl.registerSupremeUser());
 router.post('/login', user_1.Validator.validateLogin(), val.validate(), controllers_1.userCtrl.login());
 router.post('/invite-user', auth.verify(), user_1.Validator.validateInvite(), val.validate(), controllers_1.userCtrl.inviteUser());
 router.get('/get-roles', auth.verify(), controllers_1.userCtrl.getConstantRoles());

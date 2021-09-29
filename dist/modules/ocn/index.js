@@ -114,14 +114,6 @@ class OutGoingCylinder extends module_1.default {
                 if (status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
                         let AO = ocn.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE1);
-                        //   let track = {
-                        //     title:"Approval Process",
-                        //     stage:stagesOfApproval.STAGE2,
-                        //     status:ApprovalStatus.REJECTED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:AO[0].id
-                        //   }
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
                             ocn.approvalOfficers.push({
@@ -160,13 +152,6 @@ class OutGoingCylinder extends module_1.default {
                     }
                     else if ((ocn === null || ocn === void 0 ? void 0 : ocn.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE2) {
                         let AO = ocn.approvalOfficers.filter(officer => officer.stageOfApproval == transferCylinder_1.stagesOfApproval.STAGE2);
-                        //   let track = {
-                        //     title:"Approval Process",
-                        //     stage:stagesOfApproval.STAGE3,
-                        //     status:ApprovalStatus.REJECTED,
-                        //     dateApproved:new Date().toISOString(),
-                        //     approvalOfficer:user._id,
-                        //     nextApprovalOfficer:AO[0].id
                         //   }
                         let checkOfficer = ocn.approvalOfficers.filter(officer => `${officer.id}` == `${user._id}`);
                         if (checkOfficer.length == 0) {
@@ -337,35 +322,31 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search } = query;
-                const aggregate = this.ocn.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { cylinderType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { nextApprovalOfficer: ObjectId(user._id.toString()) },
-                                { approvalStatus: transferCylinder_1.TransferStatus.PENDING }
-                            ]
-                        }
-                    }
-                ]);
-                //@ts-ignore
-                const outgoing = yield this.ocn.aggregatePaginate(aggregate, Object.assign({}, query));
-                for (let o of outgoing.docs) {
-                    let nextApprovalOfficer = yield this.user.findById(o.nextApprovalOfficer);
-                    o.nextApprovalOfficer = nextApprovalOfficer;
-                    let customer = yield this.customer.findById(o.customer);
-                    o.customer = customer;
-                    let branch = yield this.branch.findById(o.branch);
-                    o.branch = branch;
+                const { search, page, limit } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 1,
+                    populate: [
+                        { path: "customer", model: "customer" },
+                        { path: "branch", model: "branches" },
+                        { path: "nextApprovalOfficer", model: "User" }
+                    ]
+                };
+                let q = {
+                    branch: user.branch,
+                    nextApprovalOfficer: user._id,
+                    approvalStatus: transferCylinder_1.TransferStatus.PENDING
+                };
+                let or = [];
+                if (search) {
+                    or.push({ cylinderType: new RegExp(search, 'gi') });
                 }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const outgoing = yield this.ocn.paginate(q, options);
                 return Promise.resolve(outgoing);
             }
             catch (e) {
@@ -377,73 +358,36 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
-                let aggregate;
-                let aggregate1 = this.ocn.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { cylinderType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { approvalStatus: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } },
-                                        ,
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { ocnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) },
-                                { status: filter === null || filter === void 0 ? void 0 : filter.toLowerCase() }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate2 = this.ocn.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { cylinderType: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { approvalStatus: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } },
-                                        ,
-                                        { icnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { ocnNo: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
-                if (filter === null || filter === void 0 ? void 0 : filter.length) {
-                    aggregate = aggregate1;
+                const { search, filter, page, limit } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 1,
+                    populate: [
+                        { path: "customer", model: "customer" },
+                        { path: "branch", model: "branches" },
+                        { path: "nextApprovalOfficer", model: "User" }
+                    ]
+                };
+                let q = {
+                    branch: user.branch,
+                };
+                let or = [];
+                if (search) {
+                    or.push({ cylinderType: new RegExp(search, 'gi') });
+                    or.push({ approvalStatus: new RegExp(search, 'gi') });
+                    or.push({ icnNo: new RegExp(search, "gi") });
+                    or.push({ ocnNo: new RegExp(search, 'gi') });
                 }
-                else {
-                    aggregate = aggregate2;
+                if (filter) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { status: filter });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const outgoing = yield this.ocn.aggregatePaginate(aggregate, Object.assign({}, query));
-                for (let o of outgoing.docs) {
-                    let nextApprovalOfficer = yield this.user.findById(o.nextApprovalOfficer);
-                    o.nextApprovalOfficer = nextApprovalOfficer;
-                    let customer = yield this.customer.findById(o.customer);
-                    o.customer = customer;
-                    let branch = yield this.branch.findById(o.branch);
-                    o.branch = branch;
-                }
+                const outgoing = yield this.ocn.paginate(q, options);
                 return Promise.resolve(outgoing);
             }
             catch (e) {

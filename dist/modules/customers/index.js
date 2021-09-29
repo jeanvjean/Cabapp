@@ -76,7 +76,6 @@ class Customer extends module_1.default {
                 let or = [];
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const { search, filter, name, email, phone } = query;
-                let aggregate;
                 if (name) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { name: name });
@@ -149,31 +148,29 @@ class Customer extends module_1.default {
     fetchDeletedCustomers(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search } = query;
-                let options = Object.assign({}, query);
+                const { search, name, email } = query;
+                let options = {
+                    page: query.page,
+                    limit: query.limit
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (name) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { name: name });
+                }
+                if (email) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { email: email });
+                }
+                if (search) {
+                    or.push({ reason: new RegExp(search, 'gi') });
+                }
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                let aggregate = this.deleteCustomer.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { name: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { reason: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }, { email: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ""
-                                            } }
-                                    ]
-                                },
-                                { branch: ObjectId(user.branch.toString()) }
-                            ]
-                        }
-                    }
-                ]);
                 //@ts-ignore
-                const customers = yield this.deleteCustomer.aggregatePaginate(aggregate, options);
+                const customers = yield this.deleteCustomer.paginate(q, options);
                 return Promise.resolve(customers);
             }
             catch (e) {
@@ -255,45 +252,38 @@ class Customer extends module_1.default {
     fetchOrdersAssignedToVehicle(query, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const options = Object.assign(Object.assign({}, query), { populate: [
+                const options = {
+                    page: query.page,
+                    limit: query.limit,
+                    populate: [
                         { path: 'vehicle', model: 'vehicle', populate: {
                                 path: 'assignedTo', model: 'User'
                             }
                         },
                         { path: 'supplier', model: 'supplier' },
                         { path: 'customer', model: 'customer' }
-                    ] });
-                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                    ]
+                };
                 const { search, filter } = query;
                 let or = [];
-                or.push({ status: new RegExp(search || '', 'gi') }, { orderNumber: new RegExp(search || '', 'gi') }, { ecrNo: new RegExp(search || '', 'gi') });
                 let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            },
-                            { vehicle: data.vehicle }
-                        ]
-                    }
+                    vehicle: data.vehicle
                 };
-                if (filter === null || filter === void 0 ? void 0 : filter.length) {
-                    q.$match.$and.push(
+                if (filter) {
                     //@ts-ignore
-                    { pickupType: new RegExp(filter || '', 'gi') });
+                    q = Object.assign(Object.assign({}, q), { pickupType: filter });
                 }
-                let aggregate = this.order.aggregate([q]);
+                if (search) {
+                    or.push({ status: new RegExp(search, 'gi') });
+                    or.push({ orderNumber: new RegExp(search, 'gi') }),
+                        or.push({ ecrNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const orders = yield this.order.aggregatePaginate(aggregate, options);
-                //Populate the reference fields
-                for (let order of orders.docs) {
-                    let vehicle = yield this.vehicle.findById(order.vehicle).populate('assignedTo');
-                    order.vehicle = vehicle;
-                    let supplier = yield this.supplier.findById(order.supplier);
-                    order.supplier = supplier;
-                    let customer = yield this.customer.findById(order.supplier);
-                    order.customer = customer;
-                }
+                const orders = yield this.order.paginate(q, options);
                 return Promise.resolve({
                     orders
                 });
@@ -324,50 +314,42 @@ class Customer extends module_1.default {
     fetchAllOrders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let options = Object.assign(Object.assign({}, query), { populate: [
-                        { path: 'vehicle', model: 'vehicle' },
+                let options = {
+                    page: query.page,
+                    limit: query.limit,
+                    populate: [
+                        { path: 'vehicle', model: 'vehicle', populate: {
+                                path: 'assignedTo', model: 'User'
+                            } },
                         { path: 'supplier', model: 'supplier' },
                         { path: 'customer', model: 'customer' },
                         { path: 'gasType', model: 'cylinder' }
-                    ] });
-                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                    ]
+                };
                 const { search, filter, type } = query;
                 let or = [];
-                or.push({ status: new RegExp(search || '', 'gi') }, { orderNumber: new RegExp(search || '', 'gi') }, { ecrNo: new RegExp(search || '', 'gi') });
                 let q = {
-                    $match: {
-                        $and: [
-                            {
-                                $or: or
-                            },
-                            { branch: ObjectId(user.branch.toString()) }
-                        ]
-                    }
+                    branch: user.branch
                 };
-                if (filter === null || filter === void 0 ? void 0 : filter.length) {
-                    q.$match.$and.push(
+                if (filter) {
                     //@ts-ignore
-                    { pickupType: new RegExp(filter || '', 'gi') });
+                    q = Object.assign(Object.assign({}, q), { pickupType: filter });
                 }
-                if (type === null || type === void 0 ? void 0 : type.length) {
-                    q.$match.$and.push(
+                if (type) {
                     //@ts-ignore
-                    { orderType: new RegExp(type || '', 'gi') });
+                    q = Object.assign(Object.assign({}, q), { orderType: type });
                 }
-                let aggregate = this.order.aggregate([q]);
+                if (search) {
+                    or.push({ status: new RegExp(search, 'gi') });
+                    or.push({ orderNumber: new RegExp(search, 'gi') }),
+                        or.push({ ecrNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const orders = yield this.order.aggregatePaginate(aggregate, options);
-                //Populate reference fields
-                for (let order of orders.docs) {
-                    let vehicle = yield this.vehicle.findById(order.vehicle).populate('assignedTo');
-                    order.vehicle = vehicle;
-                    let supplier = yield this.supplier.findById(order.supplier);
-                    order.supplier = supplier;
-                    let customer = yield this.customer.findById(order.supplier);
-                    order.customer = customer;
-                    let gasType = yield this.cylinder.findById(order.gasType);
-                    order.gasType = gasType;
-                }
+                const orders = yield this.order.paginate(q, options);
                 return Promise.resolve({
                     orders
                 });
@@ -506,13 +488,7 @@ class Customer extends module_1.default {
     approveComplaint(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // console.log(data)
                 yield token_1.passWdCheck(user, data.password);
-                // let loginUser = await this.user.findById(user._id).select('+password');
-                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-                // if(!matchPWD) {
-                //   throw new BadInputFormatException('Incorrect password... please check the password');
-                // }
                 const complaint = yield this.complaint.findById(data.id).populate([
                     { path: 'customer', ref: 'User' }
                 ]);

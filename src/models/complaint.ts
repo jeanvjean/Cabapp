@@ -82,6 +82,7 @@ export const complaintSchema = new Schema({
   approvalStatus:{type:String},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   complaintType:{type:String},
+  replaceCylinder:{type:cylinderReplaceSchema},
   icnNo:String,
   ecrNo:String
 },{

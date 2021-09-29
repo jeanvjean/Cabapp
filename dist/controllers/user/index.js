@@ -32,6 +32,18 @@ class UserController extends ctrl_1.default {
             }
         });
     }
+    registerSupremeUser() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { body } = req;
+                const user = yield this.module.register(body);
+                this.ok(res, 'Registered successfully', user);
+            }
+            catch (error) {
+                this.handleError(error, req, res);
+            }
+        });
+    }
     inviteUser() {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {

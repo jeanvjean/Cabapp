@@ -78,26 +78,25 @@ class Account extends Module{
           const { search } = query;
           const ObjectId = mongoose.Types.ObjectId;
           const options = {
-            ...query
-          }
-          const aggregate = this.account.aggregate([
-            {
-              $match:{
-                $and:[
-                  {
-                    $or:[
-                      {invoiceNo:{
-                        $regex: search?.toLowerCase() || ""
-                      }}
-                    ]
-                  },
-                  {branch: ObjectId(user.branch.toString())}
-                ]
-              }
+            page:query.page,
+            limit:query.limit,
+            populate:{
+              path:'preparedBy', model:'User'
             }
-          ]);
+          }
+          let q = {
+            branch:user.branch
+          }
+          let or=[];
+          if(search) {
+            or.push({invoiceNo: new RegExp(search, 'gi')});
+          }
+          if(or.length > 0) {
+            //@ts-ignore
+            q = {...q, $or:or}
+          }
           //@ts-ignore
-            const invoices = await this.account.aggregatePaginate(aggregate,options);
+            const invoices = await this.account.paginate(q,options);
             return Promise.resolve(invoices);
         } catch (e) {
             this.handleException(e)

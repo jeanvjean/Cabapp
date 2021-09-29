@@ -253,91 +253,26 @@ class Product extends Module{
           {path:'division', model:'branches'}
         ]
       }
-      let aggregate
-      const aggregate1 = this.product.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {productName:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{equipmentType:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{location:{
-                    $regex: search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {branch: ObjectId(user.branch.toString())},
-              {deleted: false}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.product.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {productName:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{equipmentType:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{location:{
-                    $regex: search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {branch: ObjectId(user.branch.toString())},
-              {quantity: {$lt:1}},
-              {deleted: false}
-            ]
-          }
-        }
-      ]);
-      const aggregate3 = this.product.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {productName:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{equipmentType:{
-                    $regex: search?.toLowerCase() || ''
-                  }},{location:{
-                    $regex: search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {branch: ObjectId(user.branch.toString())},
-              {quantity: {$gt:0}},
-              {deleted: false}
-            ]
-          }
-        }
-      ]);
-      if(out?.length) {
-        aggregate = aggregate2
-      }else if(instock?.length) {
-        aggregate = aggregate3
-      }else {
-        aggregate = aggregate1
+      let q = {
+        branch: user.branch,
+        deleted: false
+      }
+      let or =[]
+      if(instock) {
+        //@ts-ignore
+        q = {...q, quantity: {$gt:0}}
+      }
+      if(out) {
+        //@ts-ignore
+        q = {...q, quantity: {$lt:1}}
+      }
+      if(search) {
+        or.push({productName: new RegExp(search, 'gi')})
+        or.push({equipmentType: new RegExp(search, 'gi')})
+        or.push({location: new RegExp(search, 'gi')})
       }
       //@ts-ignore
-      const products = await this.product.aggregatePaginate(aggregate,options);
-      //Populate reference fields
-      for(let product of products.docs) {
-        let supplier = await this.supplier.findById(product.supplier);
-        product.supplier = supplier;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let division = await this.branch.findById(product.division);
-        product.division = division;
-      }
-      // console.log(products);
+      const products = await this.product.paginate(q,options);
       return Promise.resolve(products);
     } catch (e) {
       this.handleException(e);
@@ -488,21 +423,32 @@ class Product extends Module{
 
   public async fetchSuppliers(query:QueryInterface, user:UserInterface):Promise<SupplierInterface[]|undefined>{
     try {
-      const { search } = query
-    // const aggregate = this.supplier.aggregate()
+      const { search, page, limit, name, email } = query
       const options = {
-        ...query
+        page:page||1,
+        limit:limit||10,
+        populate:{
+          path:'branch', model:'branches'
+        }
       }
-      // console.log(search?.length)
-      let suppliers;
-      if(search?.length !== undefined) {
-        //@ts-ignore
-        suppliers = await this.supplier.paginate({branch:user.branch,$or:[{supplierType:search}, {productType:search}]},options);
-      }else{
-        //@ts-ignore
-        suppliers = await this.supplier.paginate({branch:user.branch},options);
+      let q = {
+        branch:user.branch
       }
-      // console.log(suppliers);
+      let or =[]
+      if(name) {
+        //@ts-ignore
+        q = {...q, name: name}
+      }
+      if(email) {
+        //@ts-ignore
+        q = {...q, email: email}
+      }
+      if(search) {
+        or.push({supplierType:new RegExp(search, 'gi')})
+        or.push({productType:new RegExp(search, 'gi')})
+      }
+      //@ts-ignore
+      let suppliers= await this.supplier.paginate(q,options);
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);
@@ -674,53 +620,38 @@ class Product extends Module{
   public async fetchInventories(query:QueryInterface, user:UserInterface):Promise<InventoryPoolResponse|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter, fromDate, toDate } = query;
+      const { search, filter,page, limit, fromDate, toDate, totalCost, partNo, quantity, productName } = query;
 
       let or = [];
-      if(search) {
-        or.push(
-          {modeOfService: new RegExp(search, "gi")},
-          {direction: new RegExp(search, "gi")},
-          {grnNo: new RegExp(search, "gi")},
-          {"products.productName": new RegExp(search, "gi")},
-          {"products.equipmentModel": new RegExp(search, "gi")},
-          {"products.equipmentType": new RegExp(search, "gi")})
-      }else {
-        or.push({"products.productName": new RegExp("", "gi")})
+      if(productName) {
+        or.push({"products.productName": new RegExp(productName, "gi")})
       }
-      let q = {
-        $match:{
-          $and:[
-            {
-              $or:or
-            },            
-            {branch:ObjectId(user.branch.toString())},
-          ]
-        }
+      if(partNo) {
+        or.push({"products.partNumber": new RegExp(partNo, "gi")})
+      }
+      if(quantity){
+        or.push({"products.quantity": new RegExp(quantity, "gi")})
+      }
+      if(totalCost){
+        or.push({"products.totalCost": new RegExp(totalCost, "gi")})
+      }
+      let q = {           
+          branch:user.branch
       }
       if(fromDate && toDate) {
-        // {...q.$match, createdAt:{$gte:new Date(query?.fromDate), $lte:new Date(query?.toDate)}} 
-        let { $match } = q;
         //@ts-ignore
-        q.$match = {...$match, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
+        q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
       }
       const options = {
-        ...query,
+        page: page ||1,
+        limit: limit || 10,
         populate:[
           {path:'inspectingOfficer', model:'User'},
           {path:'branch', model:'branches'}
         ]
       }
-      const aggregate = this.inventory.aggregate([q]);
       //@ts-ignore
-      const inventories = await this.inventory.aggregatePaginate(aggregate, options);
-      //Populate reference fields
-      for(let product of inventories.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-      }
+      const inventories = await this.inventory.paginate(q, options);
       return Promise.resolve({
           inventory:inventories
         });
@@ -1127,14 +1058,6 @@ class Product extends Module{
           disbursement.tracking.push(track);
           disbursement.approvalStage = stagesOfApproval.APPROVED;
           disbursement.disburseStatus = TransferStatus.COMPLETED;
-
-          // for(let product of disbursement.products) {
-          //   let pro = await this.product.findOne({asnlNumber:product.productNumber, branch:user.branch});
-          //   //@ts-ignore
-          //   pro?.quantity -= +product.quantityReleased;
-          //   await pro?.save();
-          // }
-
           //@ts-ignore
           disbursement.comments.push({
             comment:data.comment,
@@ -1322,9 +1245,10 @@ class Product extends Module{
   public async fetchusersDisburseApprovals(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, page, limit } = query;
       const options = {
-        ...query,
+        page:page||1,
+        limit:limit ||0,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1334,43 +1258,24 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
-      const aggregate = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {disburseStatus:TransferStatus.PENDING},
-              {nextApprovalOfficer:ObjectId(user._id.toString())},
-              {fromBranch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      //@ts-ignore
-      const disbursement = await this.disburse.aggregatePaginate(aggregate,options);
-      //Populate reference fields
-      for(let product of disbursement.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
+
+      let q = {
+        disburseStatus:TransferStatus.PENDING,
+        nextApprovalOfficer:user._id,
+        fromBranch:user.branch
       }
+      let or = [];
+      if(search) {
+        or.push({grnNo: new RegExp(search, 'gi')})
+        or.push({mrn: new RegExp(search, 'gi')})
+        or.push({jobTag:new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+       //@ts-ignore
+      const disbursement = await this.disburse.aggregatePaginate(q,options);
       return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
@@ -1380,9 +1285,10 @@ class Product extends Module{
   public async fetchusersDisburseRequests(query:QueryInterface,user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, page, limit } = query;
       const options = {
-        ...query,
+        page:page||1,
+        limit:limit ||0,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1392,42 +1298,23 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
-      const aggregate = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {requestApproval:TransferStatus.PENDING},
-              {nextApprovalOfficer:ObjectId(user._id.toString())},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      //@ts-ignore
-      const disbursement = await this.disburse.aggregatePaginate(aggregate, options);
-      for(let product of disbursement.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
+      let q = {
+        requestApproval:TransferStatus.PENDING,
+        nextApprovalOfficer:user._id,
+        branch:user.branch
       }
+      let or = [];
+      if(search) {
+        or.push({grnNo: new RegExp(search, 'gi')})
+        or.push({mrn: new RegExp(search, 'gi')})
+        or.push({jobTag:new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+      //@ts-ignore
+      const disbursement = await this.disburse.aggregatePaginate(q, options);
       return Promise.resolve(disbursement);
     } catch (e) {
       this.handleException(e);
@@ -1453,9 +1340,10 @@ class Product extends Module{
   public async fetchDisburseRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, page, limit } = query;
       const options = {
-        ...query,
+        page:page||1,
+        limit:limit||10,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1465,73 +1353,27 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }},{customer:{
-                  $regex: ObjectId(search) || ''
-                }},{requestDepartment:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {disburseStatus: filter?.toLowerCase()},
-              {fromBranch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }},{customer:{
-                  $regex: ObjectId(search) || ''
-                }},{requestDepartment:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {fromBranch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else {
-        aggregate = aggregate2
+      let q = {
+        fromBranch:user.branch
+      }
+      let or = []
+      if(filter) {
+        //@ts-ignore
+        q = {...q, disburseStatus: filter}
+      }
+      if(search) {
+        or.push({grnNo: new RegExp(search, 'gi')})
+        or.push({mrn: new RegExp(search, 'gi')})
+        or.push({jobTag:new RegExp(search, 'gi')})
+        or.push({customer: new RegExp(search, 'gi')})
+        or.push({requestDepartment:new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
       }
       //@ts-ignore
-      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
-      for(let product of disbursements.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
-      }
+      const disbursements = await this.disburse.paginate(q, options);
 
       let totalApproved = await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.COMPLETED});
     let totalPending =  await this.disburse.find({branch:user.branch, disburseStatus:TransferStatus.PENDING});
@@ -1551,9 +1393,10 @@ class Product extends Module{
   public async fetchProductRequests(query:QueryInterface, user:UserInterface):Promise<DisbursePoolResponse|undefined>{
     try{
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, page, limit } = query;
       const options = {
-        ...query,
+        page:page||1,
+        limit:limit||10,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1563,65 +1406,27 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
-      let aggregate;
-      const aggregate1 = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {disburseStatus: filter?.toLowerCase()},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      const aggregate2 = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      if(search?.length && filter?.length) {
-        aggregate = aggregate1
-      }else {
-        aggregate = aggregate2
+      let q = {
+        branch:user.branch
+      }
+      let or = []
+      if(filter) {
+        //@ts-ignore
+        q = {...q, disburseStatus: filter}
+      }
+      if(search) {
+        or.push({grnNo: new RegExp(search, 'gi')})
+        or.push({mrn: new RegExp(search, 'gi')})
+        or.push({jobTag:new RegExp(search, 'gi')})
+        or.push({customer: new RegExp(search, 'gi')})
+        or.push({requestDepartment:new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
       }
       //@ts-ignore
-      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
-      for(let product of disbursements.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
-      }
+      const disbursements = await this.disburse.paginate(q, options);
 
       let totalApproved = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.COMPLETED});
       let totalPending = await this.disburse.find({branch:user.branch, requestApproval:TransferStatus.PENDING});
@@ -1641,9 +1446,10 @@ class Product extends Module{
   public async disburseReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
+      const { search, filter, page, limit } = query;
       const options = {
-        ...query,
+        page: page||1,
+        limit:limit||10,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1654,41 +1460,21 @@ class Product extends Module{
         ]
       }
 
-      const aggregate = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {disburseStatus:TransferStatus.COMPLETED},
-              {fromBranch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      //@ts-ignore
-      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
-      for(let product of disbursements.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
+      let q = {
+        disburseStatus:TransferStatus.COMPLETED,
+        fromBranch:user.branch
       }
+      let or = []
+      if(search) {
+        or.push({grnNo:new RegExp(search, 'gi')})
+        or.push({jobTag: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+      //@ts-ignore
+      const disbursements = await this.disburse.paginate(q, options);
       return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);
@@ -1698,9 +1484,10 @@ class Product extends Module{
   public async restockReport(query:QueryInterface, user:UserInterface):Promise<DisburseProductInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
-      const { search, filter } = query;
-      const options = {
-        ...query,
+      const { search, filter, page, limit } = query;
+      const options = {        
+        page: page||1,
+        limit:limit||10,
         populate:[
           {path:'nextApprovalOffice', model:'User'},
           {path:'initiator', model:'User'},
@@ -1710,42 +1497,21 @@ class Product extends Module{
           {path:'releasedBy', model:'User'}
         ]
       }
-
-      const aggregate = this.disburse.aggregate([
-        {
-          $match:{
-            $and:[
-              {$or:[
-                {grnNo:{
-                  $regex: search?.toLowerCase() || ''
-                }},{mrn:{
-                  $regex: search?.toLowerCase() || ''
-                }},{jobTag:{
-                  $regex: search?.toLowerCase() || ''
-                }}
-              ]},
-              {disburseStatus:TransferStatus.COMPLETED},
-              {branch:ObjectId(user.branch.toString())}
-            ]
-          }
-        }
-      ]);
-      //@ts-ignore
-      const disbursements = await this.disburse.aggregatePaginate(aggregate, options);
-      for(let product of disbursements.docs) {
-        let inspectingOfficer = await this.user.findById(product.inspectingOfficer);
-        product.inspectingOfficer = inspectingOfficer;
-        let branch = await this.branch.findById(product.branch);
-        product.branch = branch;
-        let initiator = await this.user.findById(product.initiator);
-        product.initiator = initiator;
-        let customer = await this.customer.findById(product.customer);
-        product.customer = customer;
-        let releasedTo = await this.user.findById(product.releasedTo);
-        product.releasedTo = releasedTo;
-        let releasedBy = await this.user.findById(product.releasedBy);
-        product.releasedBy = releasedBy;
+      let q = {
+        disburseStatus:TransferStatus.COMPLETED,
+        branch:user.branch
       }
+      let or = []
+      if(search) {
+        or.push({grnNo:new RegExp(search, 'gi')})
+        or.push({jobTag: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+      //@ts-ignore
+      const disbursements = await this.disburse.paginate(q, options);
       return Promise.resolve(disbursements);
     } catch (e) {
       this.handleException(e);

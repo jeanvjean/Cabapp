@@ -38,6 +38,7 @@ exports.complaintSchema = new mongoose_1.Schema({
     approvalStatus: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     complaintType: { type: String },
+    replaceCylinder: { type: cylinderReplaceSchema },
     icnNo: String,
     ecrNo: String
 }, {

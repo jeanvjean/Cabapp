@@ -598,7 +598,7 @@ class Product extends Module{
       let initiator = await this.user.findById(grn.inspectingOfficer);
         await new Notify().push({
           subject: "GRN approval",
-          content: `Your Grn approval request was rejected, click the link to view. ${Environment.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+          content: `Your Grn approval request was approved, click the link to view. ${Environment.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
           user: initiator
         });
     await grn.save();
@@ -662,7 +662,10 @@ class Product extends Module{
 
   public async viewInventory(inventoryId:string):Promise<InventoryInterface|undefined>{
     try {
-      const inventory = await this.inventory.findById(inventoryId);
+      const inventory = await this.inventory.findById(inventoryId).populate([
+        {path:'inspectingOfficer', model:'User'},
+        {path:'branch', model:'branches'}
+      ]);
       return Promise.resolve(inventory as InventoryInterface)
     } catch (e) {
       this.handleException(e);

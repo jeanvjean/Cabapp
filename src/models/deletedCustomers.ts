@@ -14,6 +14,7 @@ export interface DeletedCustomer extends Document{
     email:string
     branch:Schema.Types.ObjectId
     reason:string
+    type:string
     createdAt:Date
     updatedAt:Date
 }
@@ -22,7 +23,8 @@ const deletedCustomerSchema = new Schema({
     name:{type:String},
     email:{type:String},
     branch:{type:Schema.Types.ObjectId, ref:"branches"},
-    reason:{type:String}
+    reason:{type:String},
+    type:String
 },{
     timestamps:true
 });

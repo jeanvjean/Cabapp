@@ -253,7 +253,8 @@ class Customer extends Module{
         name:customer.name,
         email:customer.email,
         branch:user.branch,
-        reason
+        reason,
+        type:customer.customerType
       });
       await customer.remove();
       return Promise.resolve({

@@ -502,7 +502,7 @@ class Product extends module_1.default {
                 let initiator = yield this.user.findById(grn.inspectingOfficer);
                 yield new mail_1.default().push({
                     subject: "GRN approval",
-                    content: `Your Grn approval request was rejected, click the link to view. ${static_1.default.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
+                    content: `Your Grn approval request was approved, click the link to view. ${static_1.default.FRONTEND_URL}/inventory/fetch-inventory/${grn._id}`,
                     user: initiator
                 });
                 yield grn.save();
@@ -572,7 +572,10 @@ class Product extends module_1.default {
     viewInventory(inventoryId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const inventory = yield this.inventory.findById(inventoryId);
+                const inventory = yield this.inventory.findById(inventoryId).populate([
+                    { path: 'inspectingOfficer', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(inventory);
             }
             catch (e) {

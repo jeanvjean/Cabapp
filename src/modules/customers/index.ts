@@ -857,10 +857,10 @@ class Customer extends Module{
     }
   }
 
-  public async fetchComplaints(query:QueryInterface, customerId:string):Promise<ComplaintInterface[]|undefined>{
+  public async fetchComplaints(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      const { search, filter } = query;
+      const { search, filter, customer, complaintStatus } = query;
       // console.log(customerId);
       const options = {
         page:query.page || 1,
@@ -873,7 +873,7 @@ class Customer extends Module{
         ]
       }
       let q = {
-        customer: customerId
+        branch: user.branch
       }
 
       let or = [];
@@ -881,9 +881,17 @@ class Customer extends Module{
         or.push({title: new RegExp(search, 'gi')})
         or.push({issue: new RegExp(search, 'gi')})
       }
-      if(filter?.length) {
+      if(filter) {
         //@ts-ignore
         q = {...q, approvalStatus:filter}
+      }
+      if(complaintStatus) {
+        //@ts-ignore
+        q = {...q,status: complaintStatus }
+      }
+      if(customer) {
+        //@ts-ignore
+        q = {...q,customer: customer }
       }
       if(or.length > 0) {
         //@ts-ignore

@@ -133,7 +133,8 @@ class Customer extends module_1.default {
                     name: customer.name,
                     email: customer.email,
                     branch: user.branch,
-                    reason
+                    reason,
+                    type: customer.customerType
                 });
                 yield customer.remove();
                 return Promise.resolve({
@@ -753,11 +754,11 @@ class Customer extends module_1.default {
             }
         });
     }
-    fetchComplaints(query, customerId) {
+    fetchComplaints(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, customer, complaintStatus } = query;
                 // console.log(customerId);
                 const options = {
                     page: query.page || 1,
@@ -770,16 +771,24 @@ class Customer extends module_1.default {
                     ]
                 };
                 let q = {
-                    customer: customerId
+                    branch: user.branch
                 };
                 let or = [];
                 if (search) {
                     or.push({ title: new RegExp(search, 'gi') });
                     or.push({ issue: new RegExp(search, 'gi') });
                 }
-                if (filter === null || filter === void 0 ? void 0 : filter.length) {
+                if (filter) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { approvalStatus: filter });
+                }
+                if (complaintStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { status: complaintStatus });
+                }
+                if (customer) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { customer: customer });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

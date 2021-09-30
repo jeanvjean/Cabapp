@@ -7,7 +7,8 @@ const deletedCustomerSchema = new mongoose_1.Schema({
     name: { type: String },
     email: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: "branches" },
-    reason: { type: String }
+    reason: { type: String },
+    type: String
 }, {
     timestamps: true
 });

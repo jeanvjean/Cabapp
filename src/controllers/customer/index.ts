@@ -235,7 +235,7 @@ class customerCtrl extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         //@ts-ignore
-        const data = await this.module.fetchComplaints(req.query, req.params.customerId);
+        const data = await this.module.fetchComplaints(req.query, req.user);
         this.ok(res, 'complaints fetched', data);
       } catch (e) {
         this.handleError(e, req, res);

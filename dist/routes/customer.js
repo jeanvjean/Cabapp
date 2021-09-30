@@ -19,7 +19,7 @@ router.post('/assign-vehicle/:orderId', auth.verify(), controllers_1.customerCtr
 router.get('/fetch-vehicle-orders/:vehicleId', auth.verify(), controllers_1.customerCtrl.fetchOrdersForVehicle());
 router.post('/make-complain/:customerId', auth.verify(), controllers_1.customerCtrl.createComplaint());
 router.get('/get-all-pickup-orders', auth.verify(), controllers_1.customerCtrl.fetchCreatedOrders());
-router.get('/fetch-complaints/:customerId', controllers_1.customerCtrl.fetchComplaints());
+router.get('/fetch-complaints', auth.verify(), controllers_1.customerCtrl.fetchComplaints());
 router.post('/approve-complaint', auth.verify(), controllers_1.customerCtrl.approveComplaint());
 router.get('/fetch-pending-complaint-approval', auth.verify(), controllers_1.customerCtrl.fetchPendingComplaintApproval());
 router.get('/fetch-approved-complaints', auth.verify(), controllers_1.customerCtrl.fetchApprovedComplaints());

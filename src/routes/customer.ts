@@ -82,7 +82,8 @@ router.get(
 );
 
 router.get(
-  '/fetch-complaints/:customerId',
+  '/fetch-complaints',
+  auth.verify(),
   customerCtrl.fetchComplaints()
 );
 

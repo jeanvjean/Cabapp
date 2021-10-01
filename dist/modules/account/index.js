@@ -22,6 +22,18 @@ class Account extends module_1.default {
     createReciept(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                if (data.receiptType == 'product') {
+                    if (!data.products) {
+                        throw new exceptions_1.BadInputFormatException('products array is required');
+                    }
+                    data = Object.assign(Object.assign({}, data), { cylinders: [] });
+                }
+                if (data.receiptType == 'cylinder') {
+                    if (!data.cylinders) {
+                        throw new exceptions_1.BadInputFormatException('cylinders array is required');
+                    }
+                    data = Object.assign(Object.assign({}, data), { products: [] });
+                }
                 const reciept = new this.account(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
                 let exists = yield this.account.find({}).sort({ invInit: -1 }).limit(1);

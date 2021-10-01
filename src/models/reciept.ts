@@ -29,8 +29,8 @@ export enum paymentMode {
 export interface RecieptInterface extends Document{
     customer:string
     cylinderType:string
-    type:receiptType
-    cylinders?:Schema.Types.ObjectId[],
+    recieptType:receiptType
+    cylinders?:saleCylinder[],
     products?:ReceivedProduct[]
     invoiceNo:string
     invInit:number
@@ -49,7 +49,7 @@ const recieptSchema = new Schema({
     cylinderType:{type:String},
     recieptType:{type:String, enum:Object.values(receiptType)},
     customerType:{type:String, enum:Object.values(CustomerType)},
-    cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
+    cylinders:[{type:saleCylinderSchema}],
     products:{type:[productRecievedSchema]},
     invoiceNo:{type:String},
     invInit:{type:Number},

@@ -14,7 +14,7 @@ interface accountPropInterface {
 interface newRecieptInterface {
     customer:RecieptInterface['customer']
     cylinderType?:RecieptInterface['cylinderType']
-    receiptType?:RecieptInterface['type']
+    receiptType?:RecieptInterface['recieptType']
     cylinders?:RecieptInterface['cylinders']
     products?:RecieptInterface['products']
     totalAmount:RecieptInterface['totalAmount']
@@ -44,6 +44,24 @@ class Account extends Module{
 
     public async createReciept(data:newRecieptInterface, user:UserInterface):Promise<RecieptInterface|undefined>{
         try {
+            if(data.receiptType == 'product') {
+                if(!data.products) {
+                    throw new BadInputFormatException('products array is required')
+                }
+                data = {
+                    ...data,
+                    cylinders:[]
+                }
+            }
+            if(data.receiptType == 'cylinder') {
+                if(!data.cylinders) {
+                    throw new BadInputFormatException('cylinders array is required')
+                }
+                data = {
+                    ...data,
+                    products:[]
+                }
+            }
             const reciept = new this.account({...data, branch:user.branch});
             reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
             let exists = await this.account.find({}).sort({invInit:-1}).limit(1);

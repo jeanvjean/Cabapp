@@ -758,7 +758,7 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter, customer, complaintStatus } = query;
+                const { search, filter, customer, complaintStatus, fromDate, toDate } = query;
                 // console.log(customerId);
                 const options = {
                     page: query.page || 1,
@@ -789,6 +789,14 @@ class Customer extends module_1.default {
                 if (customer) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { customer: customer });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

@@ -13,7 +13,6 @@ interface accountPropInterface {
 
 interface newRecieptInterface {
     customer:RecieptInterface['customer']
-    cylinderType?:RecieptInterface['cylinderType']
     recieptType:RecieptInterface['recieptType']
     cylinders?:RecieptInterface['cylinders']
     products?:RecieptInterface['products']

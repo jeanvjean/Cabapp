@@ -9,7 +9,8 @@ exports.saleCylinderSchema = new mongoose_1.Schema({
     noOfCylinders: Number,
     volume: String,
     unitPrice: Number,
-    amount: Number
+    amount: Number,
+    cylinderType: String
 });
 const salesReqSchema = new mongoose_1.Schema({
     customerName: { type: String },

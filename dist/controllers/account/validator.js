@@ -30,9 +30,6 @@ class validateAccount extends ctrl_1.default {
             express_validator_1.check('customer')
                 .exists()
                 .withMessage('Provide customer name'),
-            express_validator_1.check('cylinderType')
-                .exists()
-                .withMessage('Please provide cylinder type'),
             express_validator_1.check('totalAmount')
                 .exists()
                 .withMessage('total amount is required')
@@ -49,10 +46,9 @@ class validateAccount extends ctrl_1.default {
             express_validator_1.check('amountInWords')
                 .exists()
                 .withMessage('write the total amount in words'),
-            express_validator_1.check('products')
-                //@ts-ignore
-                .exists().if((value, { req }) => req.body.recieptType == 'product')
-                .withMessage('products array is required for this reciept type')
+            express_validator_1.check('recieptType')
+                .exists()
+                .withMessage('recieptType is required'),
         ];
         return rules;
     }

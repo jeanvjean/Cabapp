@@ -24,7 +24,6 @@ var paymentMode;
 })(paymentMode = exports.paymentMode || (exports.paymentMode = {}));
 const recieptSchema = new mongoose_1.Schema({
     customer: { type: String },
-    cylinderType: { type: String },
     recieptType: { type: String, enum: Object.values(receiptType) },
     customerType: { type: String, enum: Object.values(CustomerType) },
     cylinders: [{ type: sales_requisition_1.saleCylinderSchema }],

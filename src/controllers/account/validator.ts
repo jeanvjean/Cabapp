@@ -27,9 +27,6 @@ class validateAccount extends Ctrl{
             check('customer')
                 .exists()
                 .withMessage('Provide customer name'),
-            check('cylinderType')
-                .exists()
-                .withMessage('Please provide cylinder type'),
             check('totalAmount')
                 .exists()
                 .withMessage('total amount is required')
@@ -49,16 +46,17 @@ class validateAccount extends Ctrl{
             check('recieptType')
                 .exists()
                 .withMessage('recieptType is required'),
-            check('products')
-            //@ts-ignore
-                .exists().if((value, {req})=> req.body.recieptType == 'product')
-                .withMessage('products array is required for this reciept type')
-                .isArray(),
-            check('cylinders')
-            //@ts-ignore
-                .exists().if((value, {req})=> req.body.recieptType == 'cylinder')
-                .withMessage('cylinders array is required for this reciept type')
-                .isArray(),
+            // check('products')
+            // //@ts-ignore
+            //     .exists()
+            //     .if((value, {req})=> req.body.recieptType == 'product')
+            //     .withMessage('products array is required for this reciept type')
+            //     .isArray(),
+            // check('cylinders')
+            // //@ts-ignore
+            //     .exists().if((value, {req})=> req.body.recieptType == 'cylinder')
+            //     .withMessage('cylinders array is required for this reciept type')
+            //     .isArray(),
           ]
 
           return rules;

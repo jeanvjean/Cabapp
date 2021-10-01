@@ -44,24 +44,6 @@ class Account extends Module{
 
     public async createReciept(data:newRecieptInterface, user:UserInterface):Promise<RecieptInterface|undefined>{
         try {
-            if(data.recieptType == 'product') {
-                if(!data.products) {
-                    throw new BadInputFormatException('products array is required')
-                }
-                data = {
-                    ...data,
-                    cylinders:[]
-                }
-            }
-            if(data.recieptType == 'cylinder') {
-                if(!data.cylinders) {
-                    throw new BadInputFormatException('cylinders array is required')
-                }
-                data = {
-                    ...data,
-                    products:[]
-                }
-            }
             const reciept = new this.account({...data, branch:user.branch});
             // console.log(reciept);
             reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;

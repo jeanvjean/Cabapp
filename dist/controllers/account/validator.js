@@ -48,7 +48,11 @@ class validateAccount extends ctrl_1.default {
                 .withMessage('provide date'),
             express_validator_1.check('amountInWords')
                 .exists()
-                .withMessage('write the total amount in words')
+                .withMessage('write the total amount in words'),
+            express_validator_1.check('products')
+                //@ts-ignore
+                .exists().if((value, { req }) => req.body.recieptType == 'product')
+                .withMessage('products array is required for this reciept type')
         ];
         return rules;
     }

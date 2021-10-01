@@ -22,24 +22,25 @@ class Account extends module_1.default {
     createReciept(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (data.receiptType == 'product') {
+                if (data.recieptType == 'product') {
                     if (!data.products) {
                         throw new exceptions_1.BadInputFormatException('products array is required');
                     }
                     data = Object.assign(Object.assign({}, data), { cylinders: [] });
                 }
-                if (data.receiptType == 'cylinder') {
+                if (data.recieptType == 'cylinder') {
                     if (!data.cylinders) {
                         throw new exceptions_1.BadInputFormatException('cylinders array is required');
                     }
                     data = Object.assign(Object.assign({}, data), { products: [] });
                 }
                 const reciept = new this.account(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                // console.log(reciept);
                 reciept.outstandingBalance = reciept.totalAmount - reciept.amountPaid;
                 let exists = yield this.account.find({}).sort({ invInit: -1 }).limit(1);
                 let sn;
                 if (exists[0]) {
-                    sn = exists[0].invInit++;
+                    sn = exists[0].invInit + 1;
                 }
                 else {
                     sn = 1;
@@ -47,6 +48,7 @@ class Account extends module_1.default {
                 let init = 'INV';
                 let invoiceNumber = token_1.padLeft(sn, 6, "");
                 reciept.invoiceNo = init + invoiceNumber;
+                reciept.invInit = sn;
                 yield reciept.save();
                 yield logs_1.createLog({
                     user: user._id,

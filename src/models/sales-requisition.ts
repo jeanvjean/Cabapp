@@ -13,7 +13,8 @@ export interface saleCylinder{
   noOfCylinders:number
   volume:string
   unitPrice:number
-  amount:number
+  amount:number,
+  cyliderType:string
 }
 
 
@@ -37,7 +38,8 @@ export const saleCylinderSchema = new Schema({
   noOfCylinders:Number,
   volume:String,
   unitPrice:Number,
-  amount:Number
+  amount:Number,
+  cylinderType:String
 });
 
 const salesReqSchema = new Schema({

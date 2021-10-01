@@ -17,7 +17,7 @@ export enum receiptType {
 
 export enum CustomerType{
   WALKIN="walk-in",
-  REGISTERED = "registered"
+  REGISTERED = "regular"
 }
 
 export enum paymentMode {

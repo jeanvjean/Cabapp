@@ -860,7 +860,7 @@ class Customer extends Module{
   public async fetchComplaints(query:QueryInterface, user:UserInterface):Promise<ComplaintInterface[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      const { search, filter, customer, complaintStatus } = query;
+      const { search, filter, customer, complaintStatus, fromDate, toDate } = query;
       // console.log(customerId);
       const options = {
         page:query.page || 1,
@@ -892,6 +892,15 @@ class Customer extends Module{
       if(customer) {
         //@ts-ignore
         q = {...q,customer: customer }
+      }
+
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q,createdAt:{$gte: new Date(fromDate)} }
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q,createdAt:{$lte: new Date(toDate)} }
       }
       if(or.length > 0) {
         //@ts-ignore

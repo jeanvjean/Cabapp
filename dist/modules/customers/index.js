@@ -882,7 +882,7 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const complaint = yield this.complaint.findById(complaintId).populate([
-                    { path: 'customer', model: 'User' }
+                    { path: 'customer', model: 'customer' }
                 ]);
                 if (!complaint) {
                     throw new exceptions_1.BadInputFormatException('complaint not found');

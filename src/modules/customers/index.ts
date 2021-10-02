@@ -982,7 +982,10 @@ class Customer extends Module{
   public async resolveComplaint(complaintId:string, user:UserInterface):Promise<ComplaintInterface|undefined>{
     try{
       const complaint = await this.complaint.findById(complaintId).populate([
-        {path:'customer', model:'User'}
+          {path:'customer', model:'customer'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:'branch', model:'branches'}
       ]);
       if(!complaint) {
         throw new BadInputFormatException('complaint not found');

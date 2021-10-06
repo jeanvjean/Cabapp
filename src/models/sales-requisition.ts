@@ -10,11 +10,12 @@ import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface saleCylinder{
-  noOfCylinders:number
-  volume:string
-  unitPrice:number
-  amount:number,
-  cyliderType:string
+  noOfCylinders?:number
+  cylinderNumber?:string
+  volume?:string
+  unitPrice?:number
+  amount?:number,
+  cyliderType?:string
 }
 
 
@@ -22,7 +23,7 @@ export interface SalesRequisitionInterface extends Document{
   customerName:string
   ecrNo:string
   date:Date
-  cylinders:Schema.Types.ObjectId[]
+  cylinders:saleCylinder[]
   initiator:Schema.Types.ObjectId
   approvalStage:stagesOfApproval
   tracking:ApprovalStage[]
@@ -36,6 +37,7 @@ export interface SalesRequisitionInterface extends Document{
 
 export const saleCylinderSchema = new Schema({
   noOfCylinders:Number,
+  cylinderNumber:String,
   volume:String,
   unitPrice:Number,
   amount:Number,
@@ -46,16 +48,16 @@ const salesReqSchema = new Schema({
   customerName:{type:String},
   ecrNo:{type:String},
   date:{type:Date},
-  cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
+  cylinders:[saleCylinderSchema],
   tracking:[approvalStageShema],
-  initiator:{type:Schema.Types.ObjectId, ref:'users'},
+  initiator:{type:Schema.Types.ObjectId, ref:'User'},
   approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.START},
   approvalOfficers:[ApprovalOfficerSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   status:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
-  preparedBy:{type:Schema.Types.ObjectId, ref:'users'},
+  preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
   initiated:{type:Boolean, default:false},
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'users'}
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'}
 },{
   timestamps:true
 });

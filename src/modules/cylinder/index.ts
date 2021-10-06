@@ -45,7 +45,7 @@ interface NewCylinderRegisterationInterface{
   cylinderType:RegisteredCylinderInterface['cylinderType'],
   waterCapacity:RegisteredCylinderInterface['waterCapacity'],
   dateManufactured:RegisteredCylinderInterface['dateManufactured'],
-  assignedTo:RegisteredCylinderInterface['assignedTo'],
+  assignedTo?:RegisteredCylinderInterface['assignedTo'],
   gasType:RegisteredCylinderInterface['gasType'],
   standardColor:RegisteredCylinderInterface['standardColor'],
   assignedNumber:RegisteredCylinderInterface['assignedNumber'],

@@ -7,3 +7,4 @@ keys/*
 tsconfig2.json
 k8t/*
 argocd-install.yaml
+./dist/

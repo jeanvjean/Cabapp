@@ -57,7 +57,7 @@ export interface RegisteredCylinderInterface extends Document{
    * @param assignedTo cylinder assigned to
    */
 
-  assignedTo:Schema.Types.ObjectId
+  assignedTo?:Schema.Types.ObjectId
 
   /**
    * @param gasType type of gas contained in cylinder

@@ -9,6 +9,7 @@ import { PurchaseOrderInterface } from "../../models/purchaseOrder";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
+import { passWdCheck } from "../../util/token";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -87,7 +88,8 @@ class Sale extends Module{
 
   public async fetchSalesRequisition(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
-      let options = {
+      let { customer, fromDate, toDate, gasVolume, search  } = query;
+       let options = {
         page: query.page || 1,
         limit:query.limit || 10,
         populate:[
@@ -96,8 +98,36 @@ class Sale extends Module{
           {path:'preparedBy', model:'User'}
         ]
       }
+      let q = {
+        branch:user.branch
+      }
+      let or = []
+      if(customer) {
+        //@ts-ignore
+        q = {...q, customer:customer}
+      }
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{$gte:new Date(fromDate)}}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt:{$lte:new Date(toDate)}}
+      }
+
+      if(gasVolume) {
+        //@ts-ignore
+        q = {...q, 'cylinders.volume': gasVolume}
+      }
+
+      if(search) {
+        or.push({customer: new RegExp(search, 'gi')})
+        or.push({gasVolume: new RegExp(search, 'gi')})
+        or.push({ecrNo: new RegExp(search, 'gi')})
+        or.push({status: new RegExp(search, 'gi')})
+      }
       //@ts-ignore
-      const sales = await this.sales.paginate({ branch:user.branch},options);
+      const sales = await this.sales.paginate(q,options);
       return Promise.resolve(sales);
     } catch (e) {
       this.handleException(e);
@@ -119,11 +149,12 @@ class Sale extends Module{
 
   public async approveSalesRequisition(data:SalesApproval, user:UserInterface):Promise<SalesRequisitionInterface|undefined>{
     try {
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
-      }
+      await passWdCheck(user, data.password);
+      // let loginUser = await this.user.findById(user._id).select('+password');
+      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+      // if(!matchPWD) {
+      //   throw new BadInputFormatException('Incorrect password... please check the password');
+      // }
       const sales = await this.sales.findById(data.salesId).populate({
         path:'initiator', model:'User'
       });

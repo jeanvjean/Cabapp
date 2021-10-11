@@ -33,6 +33,7 @@ export interface SalesRequisitionInterface extends Document{
   preparedBy:Schema.Types.ObjectId
   initiated:boolean
   nextApprovalOfficer:Schema.Types.ObjectId
+  cyliderType:string
 }
 
 export const saleCylinderSchema = new Schema({
@@ -57,7 +58,8 @@ const salesReqSchema = new Schema({
   status:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
   preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
   initiated:{type:Boolean, default:false},
-  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'}
+  nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
+  cyliderType:String
 },{
   timestamps:true
 });

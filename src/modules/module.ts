@@ -53,6 +53,7 @@ export interface QueryInterface {
   quantity?:string, 
   productName?:string
   complaintStatus?:string
+  cylinderStatus?:string
 }
 
 /**

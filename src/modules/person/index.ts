@@ -43,12 +43,12 @@ class Person extends Module {
    * @throws DuplicateException
    * @return {Promise<Object>}
    */
-  public async create(data: NewPersonInterface, user: UserInterface): Promise<PersonInterface|undefined> {
+  public async create(data: NewPersonInterface): Promise<PersonInterface|undefined> {
     // Todo: implement create person
     let newPerson: PersonInterface|undefined;
 
     try {
-      newPerson = await this.model.create({...data, creator:user._id});
+      newPerson = await this.model.create({...data});
     } catch (e) {
       this.handleException(e);
     }

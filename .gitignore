@@ -1,4 +1,5 @@
 node_modules/
+dist/
 .env
 .idea
 .DS_Store
@@ -7,4 +8,3 @@ keys/*
 tsconfig2.json
 k8t/*
 argocd-install.yaml
-./dist/

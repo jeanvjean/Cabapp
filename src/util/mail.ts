@@ -141,7 +141,7 @@ class NotificationModule extends Module {
         const mailLoad = {
             email: review.email,
             content: contents,
-            subject: 'Hello Reviewer from Goodtalent.io',
+            subject: 'Hello Reviewer from Airsep.io',
         }
         await this.sendMail(mailLoad)
     }

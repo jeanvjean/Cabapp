@@ -11,7 +11,7 @@
     "start": "node ./dist/index.js",
     "dev": "node_modules/.bin/nodemon ./dist/index.js",
     "lint": "eslint --ext .ts,.json --max-warnings=0 src",
-    "test": "NODE_ENV=test node_modules/.bin/mocha -r ts-node/register src/**/*.spec.ts",
+    "test": "node_modules/.bin/mocha -r ts-node/register src/**/*.spec.ts",
     "build": "rm -rf ./dist && npx tsc && cp -r ./src/util/mailing-templates ./dist/util/mailing-templates && cp -r ./src/util/permissions.json ./dist/util/permissions.json",
     "docs": "node_modules/.bin/jsdoc -c jsdoc.json",
     "deploy": "gh-pages -d docs"

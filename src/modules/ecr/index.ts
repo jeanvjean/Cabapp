@@ -7,11 +7,13 @@ import { OutgoingCylinderInterface } from "../../models/ocn";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { ApprovalStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
+import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { createLog } from "../../util/logs";
 import Notify from '../../util/mail';
 import { padLeft, passWdCheck } from "../../util/token";
 import { mongoose } from "../cylinder";
 import Module, { QueryInterface } from "../module";
+import env from '../../configs/static';
 
 export interface EmptyCylinderProps{
     emptyCylinder:Model<EmptyCylinderInterface>
@@ -35,13 +37,9 @@ interface ApproveEcrInput {
 
 export interface newEcrInterface {
     customer:EmptyCylinderInterface['customer']
-    cylinders:EmptyCylinderInterface['cylinders']
+    cylinders?:EmptyCylinderInterface['cylinders']
+    fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
     priority?:EmptyCylinderInterface['priority']
-    approvalOfficers:EmptyCylinderInterface['approvalOfficers']
-    nextApprovalOfficer:EmptyCylinderInterface['nextApprovalOfficer']
-    status:EmptyCylinderInterface['status']
-    scheduled:EmptyCylinderInterface['scheduled']
-    position:EmptyCylinderInterface['position']
 }
 
 
@@ -71,17 +69,32 @@ class EmptyCylinderModule extends Module {
                 branch:user.branch,
                 type:EcrType.SALES
             });
+            let aprvO = await this.user.findOne({role:user.role, subrole:"head of department", branch:user.branch});
+            if(!aprvO) {
+                throw new BadInputFormatException('can\'t find the HOD cannot create without one');
+            }
+            ecr.nextApprovalOfficer = aprvO?._id;
             if(ecr.priority == Priority.URGENT) {
-                let aprvO = await this.user.findOne({role:user.role, subrole:"head of department", branch:user.branch});
-                if(!aprvO) {
-                    throw new BadInputFormatException('can\'t find the HOD cannot create without one');
-                }
-                ecr.nextApprovalOfficer = aprvO?._id;
                 new Notify().push({
-                    subject: "Created ECR",
-                    content: `An ECR requires your approval please check and review for approval`,
+                    subject: "Created ECR Priority",
+                    content: `An ECR requires your URGENT! approval please check and review for approval ${env.FRONTEND_URL}/ecr/ecr-details/${ecr._id}`,
                     user: aprvO
                 });
+            }
+            if(ecr.priority == Priority.REGULAR) {
+                new Notify().push({
+                    subject: "Created ECR",
+                    content: `An ECR requires your approval please check and review for approval ${env.FRONTEND_URL}/ecr/ecr-details/${ecr._id}`,
+                    user: aprvO
+                });
+            }
+            if(ecr.cylinders.length > 0) {
+                for(let cyl of ecr.cylinders) {
+                    let c = await this.cylinder.findById(cyl);
+                    //@ts-ignore
+                    c?.cylinderStatus = WalkinCustomerStatus.EMPTY;
+                    await c?.save();
+                }
             }
             let avEcr = await this.emptyCylinder.find({}).sort({initNum:-1}).limit(1);
             let init = "ECR"

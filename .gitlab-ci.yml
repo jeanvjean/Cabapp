@@ -12,5 +12,5 @@ deploy-prod:
     - cd $ASNL_BACKEND
     - npm install
     - npm run build
-    - pm2 restart ./dist/index.js
-    - service nginx restart
+    - pm2 restart asnl
+    - service apache2 restart

@@ -51,7 +51,8 @@ export const constants = [
     role:'admin',
     subrole:[
       'superadmin',
-      'admin'
+      'admin',
+      'executive'
     ]
   }
 ]

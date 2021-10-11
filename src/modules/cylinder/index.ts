@@ -721,7 +721,7 @@ class Cylinder extends Module {
       const {search, holder, cylinderType,cylinderNumber, 
         waterCapacity, gasVolume, gasType, customer, supplier, 
         branch, fromBranch, fromDate, toDate, condition, owner,
-        manufactureDate
+        manufactureDate, cylinderStatus
       } = query;
       const ObjectId = mongoose.Types.ObjectId
       let options = {
@@ -802,6 +802,10 @@ class Cylinder extends Module {
       if(manufactureDate) {
         //@ts-ignore
         q = {...q, dateManufactured:{$eq:new Date(manufactureDate)}}
+      }      
+      if(cylinderStatus){
+        //@ts-ignore
+        q = {...q, cylinderStatus: cylinderStatus}
       }
       if(or.length > 0) {
         //@ts-ignore

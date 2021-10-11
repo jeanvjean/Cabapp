@@ -16,6 +16,7 @@ const exceptions_1 = require("../../exceptions");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
 class Sale extends module_1.default {
     constructor(props) {
         super();
@@ -50,6 +51,7 @@ class Sale extends module_1.default {
     fetchSalesRequisition(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let { customer, fromDate, toDate, gasVolume, search } = query;
                 let options = {
                     page: query.page || 1,
                     limit: query.limit || 10,
@@ -59,8 +61,34 @@ class Sale extends module_1.default {
                         { path: 'preparedBy', model: 'User' }
                     ]
                 };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (customer) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { customer: customer });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $gte: new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
+                }
+                if (gasVolume) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'cylinders.volume': gasVolume });
+                }
+                if (search) {
+                    or.push({ customer: new RegExp(search, 'gi') });
+                    or.push({ gasVolume: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                    or.push({ status: new RegExp(search, 'gi') });
+                }
                 //@ts-ignore
-                const sales = yield this.sales.paginate({ branch: user.branch }, options);
+                const sales = yield this.sales.paginate(q, options);
                 return Promise.resolve(sales);
             }
             catch (e) {
@@ -86,11 +114,12 @@ class Sale extends module_1.default {
     approveSalesRequisition(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
-                }
+                yield token_1.passWdCheck(user, data.password);
+                // let loginUser = await this.user.findById(user._id).select('+password');
+                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+                // if(!matchPWD) {
+                //   throw new BadInputFormatException('Incorrect password... please check the password');
+                // }
                 const sales = yield this.sales.findById(data.salesId).populate({
                     path: 'initiator', model: 'User'
                 });
@@ -349,12 +378,52 @@ class Sale extends module_1.default {
     fetchPendingRequisitionApproval(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //@ts-ignore
-                const sales = yield this.sales.paginate({
-                    status: transferCylinder_1.TransferStatus.PENDING,
+                let { stage, page, limit, search, cylinderNumber, cylinderType, fromDate, toDate } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 10
+                };
+                let q = {
                     branch: user.branch,
-                    nextApprovalOfficer: user._id
-                }, Object.assign({}, query));
+                    status: transferCylinder_1.TransferStatus.PENDING,
+                    populate: [
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: 'preparedBy', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' }
+                    ]
+                };
+                let or = [];
+                if (search) {
+                    or.push({ customerName: new RegExp(search, 'gi') });
+                    or.push({ approvalStage: new RegExp(search, 'gi') });
+                    or.push({ cyliderType: new RegExp(search, 'gi') });
+                    or.push({ cyliderType: new RegExp(search, 'gi') });
+                    or.push({ 'cylinders.cylinderNumber': new RegExp(search, 'gi') });
+                    or.push({ 'cylinders.volume': new RegExp(search, 'gi') });
+                }
+                if (stage) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { approvalStage: stage });
+                }
+                if (cylinderNumber) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'cylinders.cylinderNumber': cylinderNumber });
+                }
+                if (cylinderType) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { 'cylinders.cylinderType': cylinderType });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { '$gte': new Date(fromDate) } });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { createdAt: { '$lte': new Date(toDate) } });
+                }
+                //@ts-ignore
+                const sales = yield this.sales.paginate(q, options);
                 return Promise.resolve(sales);
             }
             catch (e) {

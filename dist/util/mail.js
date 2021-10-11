@@ -104,7 +104,7 @@ class NotificationModule extends module_1.default {
             const mailLoad = {
                 email: review.email,
                 content: contents,
-                subject: 'Hello Reviewer from Goodtalent.io',
+                subject: 'Hello Reviewer from Airsep.io',
             };
             yield this.sendMail(mailLoad);
         });

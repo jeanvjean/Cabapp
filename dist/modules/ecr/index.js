@@ -11,11 +11,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const exceptions_1 = require("../../exceptions");
 const emptyCylinder_1 = require("../../models/emptyCylinder");
+const walk_in_customers_1 = require("../../models/walk-in-customers");
 const logs_1 = require("../../util/logs");
 const mail_1 = require("../../util/mail");
 const token_1 = require("../../util/token");
 const cylinder_1 = require("../cylinder");
 const module_1 = require("../module");
+const static_1 = require("../../configs/static");
 class EmptyCylinderModule extends module_1.default {
     constructor(props) {
         super();
@@ -30,17 +32,32 @@ class EmptyCylinderModule extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ecr = new this.emptyCylinder(Object.assign(Object.assign({}, data), { branch: user.branch, type: emptyCylinder_1.EcrType.SALES }));
+                let aprvO = yield this.user.findOne({ role: user.role, subrole: "head of department", branch: user.branch });
+                if (!aprvO) {
+                    throw new exceptions_1.BadInputFormatException('can\'t find the HOD cannot create without one');
+                }
+                ecr.nextApprovalOfficer = aprvO === null || aprvO === void 0 ? void 0 : aprvO._id;
                 if (ecr.priority == emptyCylinder_1.Priority.URGENT) {
-                    let aprvO = yield this.user.findOne({ role: user.role, subrole: "head of department", branch: user.branch });
-                    if (!aprvO) {
-                        throw new exceptions_1.BadInputFormatException('can\'t find the HOD cannot create without one');
-                    }
-                    ecr.nextApprovalOfficer = aprvO === null || aprvO === void 0 ? void 0 : aprvO._id;
                     new mail_1.default().push({
-                        subject: "Created ECR",
-                        content: `An ECR requires your approval please check and review for approval`,
+                        subject: "Created ECR Priority",
+                        content: `An ECR requires your URGENT! approval please check and review for approval ${static_1.default.FRONTEND_URL}/ecr/ecr-details/${ecr._id}`,
                         user: aprvO
                     });
+                }
+                if (ecr.priority == emptyCylinder_1.Priority.REGULAR) {
+                    new mail_1.default().push({
+                        subject: "Created ECR",
+                        content: `An ECR requires your approval please check and review for approval ${static_1.default.FRONTEND_URL}/ecr/ecr-details/${ecr._id}`,
+                        user: aprvO
+                    });
+                }
+                if (ecr.cylinders.length > 0) {
+                    for (let cyl of ecr.cylinders) {
+                        let c = yield this.cylinder.findById(cyl);
+                        //@ts-ignore
+                        c === null || c === void 0 ? void 0 : c.cylinderStatus = walk_in_customers_1.WalkinCustomerStatus.EMPTY;
+                        yield (c === null || c === void 0 ? void 0 : c.save());
+                    }
                 }
                 let avEcr = yield this.emptyCylinder.find({}).sort({ initNum: -1 }).limit(1);
                 let init = "ECR";

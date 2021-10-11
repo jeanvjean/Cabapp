@@ -7,6 +7,7 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.saleCylinderSchema = new mongoose_1.Schema({
     noOfCylinders: Number,
+    cylinderNumber: String,
     volume: String,
     unitPrice: Number,
     amount: Number,
@@ -16,16 +17,17 @@ const salesReqSchema = new mongoose_1.Schema({
     customerName: { type: String },
     ecrNo: { type: String },
     date: { type: Date },
-    cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'registered-cylinders' }],
+    cylinders: [exports.saleCylinderSchema],
     tracking: [transferCylinder_1.approvalStageShema],
-    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval), default: transferCylinder_1.stagesOfApproval.START },
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     status: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), default: transferCylinder_1.TransferStatus.PENDING },
-    preparedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' },
+    preparedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     initiated: { type: Boolean, default: false },
-    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'users' }
+    nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    cyliderType: String
 }, {
     timestamps: true
 });

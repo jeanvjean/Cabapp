@@ -411,12 +411,53 @@ class Sale extends Module{
 
   public async fetchPendingRequisitionApproval(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
-      //@ts-ignore
-      const sales = await this.sales.paginate({
-        status:TransferStatus.PENDING,
+      let { stage, page, limit, search, cylinderNumber, cylinderType, fromDate, toDate } = query;
+      let options = {
+        page:page || 1,
+        limit:limit||10
+      }
+      let q = {
         branch:user.branch,
-        nextApprovalOfficer:user._id
-      },{...query});
+        status:TransferStatus.PENDING,
+        populate:[
+          {path:'initiator', model:'User'},
+          {path:'branch', model:'branches'},
+          {path:'preparedBy', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'}
+        ]
+      }
+      let or = [];
+      if(search) {
+        or.push({customerName: new RegExp(search, 'gi')})
+        or.push({approvalStage: new RegExp(search, 'gi')})
+        or.push({cyliderType: new RegExp(search, 'gi')})
+        or.push({cyliderType: new RegExp(search, 'gi')})
+        or.push({'cylinders.cylinderNumber': new RegExp(search, 'gi')})
+        or.push({'cylinders.volume': new RegExp(search, 'gi')})
+      }      
+      if(stage) {
+        //@ts-ignore
+        q = {...q, approvalStage: stage}
+      }
+      if(cylinderNumber) {
+        //@ts-ignore
+        q = {...q, 'cylinders.cylinderNumber': cylinderNumber}
+      }
+      if(cylinderType) {
+        //@ts-ignore
+        q = {...q, 'cylinders.cylinderType': cylinderType}
+      }
+
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, createdAt: {'$gte': new Date(fromDate)}}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, createdAt: {'$lte': new Date(toDate)}}
+      }
+      //@ts-ignore
+      const sales = await this.sales.paginate(q,options);
       return Promise.resolve(sales)
     } catch (e) {
       this.handleException(e);

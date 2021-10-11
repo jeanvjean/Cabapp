@@ -32,12 +32,12 @@ class Person extends module_1.default {
      * @throws DuplicateException
      * @return {Promise<Object>}
      */
-    create(data, user) {
+    create(data) {
         return __awaiter(this, void 0, void 0, function* () {
             // Todo: implement create person
             let newPerson;
             try {
-                newPerson = yield this.model.create(Object.assign(Object.assign({}, data), { creator: user._id }));
+                newPerson = yield this.model.create(Object.assign({}, data));
             }
             catch (e) {
                 this.handleException(e);

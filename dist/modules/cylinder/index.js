@@ -549,7 +549,7 @@ class Cylinder extends module_1.default {
     fetchRegisteredCylinders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search, holder, cylinderType, cylinderNumber, waterCapacity, gasVolume, gasType, customer, supplier, branch, fromBranch, fromDate, toDate, condition, owner, manufactureDate } = query;
+                const { search, holder, cylinderType, cylinderNumber, waterCapacity, gasVolume, gasType, customer, supplier, branch, fromBranch, fromDate, toDate, condition, owner, manufactureDate, cylinderStatus } = query;
                 const ObjectId = mongoose.Types.ObjectId;
                 let options = {
                     page: query.page,
@@ -627,6 +627,10 @@ class Cylinder extends module_1.default {
                 if (manufactureDate) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { dateManufactured: { $eq: new Date(manufactureDate) } });
+                }
+                if (cylinderStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { cylinderStatus: cylinderStatus });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

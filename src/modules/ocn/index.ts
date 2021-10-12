@@ -22,6 +22,7 @@ interface ocnPropsInterface {
 interface newOcnInterface {
     customer?:OutgoingCylinderInterface['customer'],
     cylinderType?:OutgoingCylinderInterface['cylinderType']
+    otherCylinders?:OutgoingCylinderInterface['otherCylinders']
     date?:OutgoingCylinderInterface['date']
     cylinders?:OutgoingCylinderInterface['cylinders']
     totalQty?:OutgoingCylinderInterface['totalQty']

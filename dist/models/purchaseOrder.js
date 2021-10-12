@@ -1,17 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.cylinderSchema = exports.purchaseType = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
-const cylinderSchema = new mongoose_1.Schema({
+var purchaseType;
+(function (purchaseType) {
+    purchaseType["INTERNAL"] = "internal";
+    purchaseType["EXTERNAL"] = "external";
+})(purchaseType = exports.purchaseType || (exports.purchaseType = {}));
+exports.cylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     volume: String
 });
 const purchaseOrderSchema = new mongoose_1.Schema({
-    customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
+    customer: { type: String, required: true },
     date: Date,
-    cylinders: { type: [cylinderSchema] },
+    type: { type: String, enum: Object.values(purchaseType), required: true },
+    cylinders: { type: [exports.cylinderSchema] },
     comments: { type: [transferCylinder_1.commentSchema] },
     approvalOfficers: { type: [transferCylinder_1.ApprovalOfficerSchema] },
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },

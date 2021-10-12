@@ -258,6 +258,42 @@ class VehicleController extends ctrl_1.default {
             }
         });
     }
+    genWaybill() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.genWaybill(req.body, req.user);
+                this.ok(res, 'created', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchWaybills() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchWaybills(req.query, req.user);
+                this.ok(res, 'fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
+    fetchDeliveryDetails() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchDeliveryDetails(req.params.id, req.user);
+                this.ok(res, 'fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = VehicleController;
 //# sourceMappingURL=index.js.map

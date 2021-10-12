@@ -28,7 +28,8 @@ import {
   VehicleReport,
   DeletedUsers,
   DeletedCustomers,
-  EmptyCylinder
+  EmptyCylinder,
+  Waybill
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -91,7 +92,8 @@ export const vehicle = new VehicleModule({
   routeReport:VehicleReport,
   customer:Customer,
   supplier:Supplier,
-  ecr:EmptyCylinder
+  ecr:EmptyCylinder,
+  waybill:Waybill
 });
 
 export const driver = new DriverModule({

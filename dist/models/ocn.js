@@ -26,6 +26,7 @@ const ocnSchema = new mongoose_1.Schema({
     cylinderType: { type: String },
     date: { type: Date },
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
+    otherCylinders: [ocnCylinderSchema],
     totalQty: { type: Number },
     totalVol: { type: String },
     totalAmount: { type: Number },
@@ -41,7 +42,8 @@ const ocnSchema = new mongoose_1.Schema({
     ocnInit: Number,
     totalAsnlCylinders: Number,
     totalCustomerCylinders: Number,
-    vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: "vehicle" }
+    vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: "vehicle" },
+    invoiceNo: String
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

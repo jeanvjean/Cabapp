@@ -25,5 +25,8 @@ router.post('/mark-route-as-complete/:routeId', auth.verify(), controllers_1.veh
 router.get('/fetch-activityLogs/:userId', auth.verify(), controllers_1.vehicleCtrl.fetchActivityLogs());
 router.get('/fetch-all-vehicle', auth.verify(), controllers_1.vehicleCtrl.fetchallVehicles());
 router.get('/vehicle-routePlan/:vehicleId', auth.verify(), controllers_1.vehicleCtrl.vehicleRoutePlan());
+router.post('/create-delivery-note', auth.verify(), controllers_1.vehicleCtrl.genWaybill());
+router.get('/fetch-delivery-notes', auth.verify(), controllers_1.vehicleCtrl.fetchWaybills);
+router.get('/delivery-note/:id', auth.verify(), controllers_1.vehicleCtrl.fetchDeliveryDetails());
 exports.default = router;
 //# sourceMappingURL=vehicle.js.map

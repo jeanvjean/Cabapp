@@ -253,6 +253,42 @@ class VehicleController extends Ctrl{
       }
     }
   }
+
+  genWaybill():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.genWaybill(req.body, req.user);
+        this.ok(res, 'created', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchWaybills():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchWaybills(req.query, req.user);
+        this.ok(res, 'fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  fetchDeliveryDetails():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchDeliveryDetails(req.params.id, req.user);
+        this.ok(res, 'fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
 }
 
 export default VehicleController;

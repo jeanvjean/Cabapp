@@ -37,6 +37,7 @@ class Vehicle extends module_1.default {
         this.customer = props.customer;
         this.supplier = props.supplier;
         this.ecr = props.ecr;
+        this.waybill = props.waybill;
     }
     createVehicle(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -820,7 +821,7 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // console.log(user)
-                const { query, ecrData, routeId } = data;
+                const { query, ecrData, routeId, deliveryNo } = data;
                 //@ts-ignore
                 const { name, email } = query;
                 const pickup = yield this.pickup.findById(routeId);
@@ -835,32 +836,34 @@ class Vehicle extends module_1.default {
                     if (pickup.suppliers.length > 0) {
                         for (let supplier of pickup.suppliers) {
                             if (supplier.email == `${email}`) {
-                                if (supplier.cylinders.length > 0) {
-                                    for (let cylinder of supplier.cylinders) {
-                                        let cyl = yield this.registerCylinder.findById(cylinder);
-                                        //@ts-ignore
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
-                                        //@ts-ignore
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.supplierType = supplier.supplierType;
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
-                                            heldBy: "supplier",
+                                if (supplier.deliveryNo == `${deliveryNo}`) {
+                                    if (supplier.cylinders.length > 0) {
+                                        for (let cylinder of supplier.cylinders) {
+                                            let cyl = yield this.registerCylinder.findById(cylinder);
                                             //@ts-ignore
-                                            name: supplier.name,
-                                            location: supplier.destination,
-                                            date: new Date().toISOString()
-                                        });
-                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                            cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.SUPPLIER;
+                                            //@ts-ignore
+                                            cyl === null || cyl === void 0 ? void 0 : cyl.supplierType = supplier.supplierType;
+                                            cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                                heldBy: "supplier",
+                                                //@ts-ignore
+                                                name: supplier.name,
+                                                location: supplier.destination,
+                                                date: new Date().toISOString()
+                                            });
+                                            yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                        }
                                     }
+                                    //@ts-ignore
+                                    supplier.status = vehicle_1.RoutePlanStatus.DONE;
+                                    let routeReport = yield this.routeReport.findById(supplier.reportId);
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.timeOut = new Date().getTime();
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.mileageOut = data.mileageOut;
                                 }
-                                //@ts-ignore
-                                supplier.status = vehicle_1.RoutePlanStatus.DONE;
-                                let routeReport = yield this.routeReport.findById(supplier.reportId);
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.timeOut = new Date().getTime();
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.mileageOut = data.mileageOut;
                             }
                         }
                     }
@@ -869,29 +872,31 @@ class Vehicle extends module_1.default {
                     if (pickup.customers.length > 0) {
                         for (let customer of pickup.customers) {
                             if (customer.email == `${email}`) {
-                                if (customer.cylinders.length > 0) {
-                                    for (let cylinder of customer.cylinders) {
-                                        let cyl = yield this.registerCylinder.findById(cylinder);
-                                        //@ts-ignore
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
-                                        cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
-                                            heldBy: "customer",
-                                            name: customer.name,
-                                            location: customer.destination,
-                                            date: new Date().toISOString()
-                                        });
-                                        yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                if (customer.deliveryNo == `${deliveryNo}`) {
+                                    if (customer.cylinders.length > 0) {
+                                        for (let cylinder of customer.cylinders) {
+                                            let cyl = yield this.registerCylinder.findById(cylinder);
+                                            //@ts-ignore
+                                            cyl === null || cyl === void 0 ? void 0 : cyl.holder = registeredCylinders_1.cylinderHolder.CUSTOMER;
+                                            cyl === null || cyl === void 0 ? void 0 : cyl.tracking.push({
+                                                heldBy: "customer",
+                                                name: customer.name,
+                                                location: customer.destination,
+                                                date: new Date().toISOString()
+                                            });
+                                            yield (cyl === null || cyl === void 0 ? void 0 : cyl.save());
+                                        }
                                     }
+                                    //@ts-ignore
+                                    customer.status = vehicle_1.RoutePlanStatus.DONE;
+                                    let routeReport = yield this.routeReport.findById(customer.reportId);
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.mileageOut = data.mileageOut;
+                                    //@ts-ignore
+                                    routeReport === null || routeReport === void 0 ? void 0 : routeReport.timeOut = new Date().getTime();
                                 }
-                                //@ts-ignore
-                                customer.status = vehicle_1.RoutePlanStatus.DONE;
-                                let routeReport = yield this.routeReport.findById(customer.reportId);
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.dateCompleted = new Date().toISOString();
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.mileageOut = data.mileageOut;
-                                //@ts-ignore
-                                routeReport === null || routeReport === void 0 ? void 0 : routeReport.timeOut = new Date().getTime();
                             }
                         }
                     }
@@ -1111,6 +1116,75 @@ class Vehicle extends module_1.default {
                 //@ts-ignore
                 const performance = yield this.routeReport.aggregatePaginate(aggregate, options);
                 return Promise.resolve(performance);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    genWaybill(data, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let delivery = new this.waybill(Object.assign(Object.assign({}, data), { branch: user.branch }));
+                let dn = yield this.waybill.find({}).sort({ numInit: -1 }).limit(1);
+                let wbNo;
+                if (dn[0]) {
+                    wbNo = dn[0].numInit + 1;
+                }
+                else {
+                    wbNo = 1;
+                }
+                let deliveryNo = token_1.padLeft(wbNo, 6, '');
+                delivery.deliveryNo = "D" + deliveryNo;
+                delivery.numInit = wbNo;
+                yield delivery.save();
+                return Promise.resolve(delivery);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchWaybills(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { search, page, limit } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: {
+                        path: 'branch', model: 'branches'
+                    }
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (search) {
+                    or.push({ customer: new RegExp(search, 'gi') });
+                    or.push({ 'cylinders.cylinderNo': new RegExp(search, 'gi') });
+                    or.push({ invoiceNo: new RegExp(search, 'gi') });
+                    or.push({ deliveryType: new RegExp(search, 'gi') });
+                    or.push({ lpoNo: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                let delivery = yield this.waybill.paginate(q, options);
+                return Promise.resolve(delivery);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchDeliveryDetails(deliveryId, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let delivery = yield this.waybill.findById(deliveryId);
+                return Promise.resolve(delivery);
             }
             catch (e) {
                 this.handleException(e);

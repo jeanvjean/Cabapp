@@ -28,6 +28,7 @@ export interface customerPickupInterface{
   status:RoutePlanStatus,
   reportId:string
   tecrNo:string
+  deliveryNo?:string
 }
 
 export interface supplierPickupInterface{
@@ -42,6 +43,7 @@ export interface supplierPickupInterface{
   status:RoutePlanStatus,  
   reportId:string
   tfcrNo:string
+  deliveryNo?:string
 }
 
 

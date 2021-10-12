@@ -14,9 +14,15 @@ export type purchaseCylinderInterface = {
     volume:string
 }
 
+export enum purchaseType {
+    INTERNAL='internal',
+    EXTERNAL='external'
+}
+
 
 export interface PurchaseOrderInterface extends Document{
-    customer:Schema.Types.ObjectId
+    customer:string
+    type:purchaseType
     date:Date
     cylinders:purchaseCylinderInterface[]
     comments:commentInterface[]
@@ -28,14 +34,15 @@ export interface PurchaseOrderInterface extends Document{
     initiator:Schema.Types.ObjectId
 }
 
-const cylinderSchema = new Schema({
+export const cylinderSchema = new Schema({
     cylinderNo:String,
     volume:String
 });
 
 const purchaseOrderSchema = new Schema({
-    customer:{type:Schema.Types.ObjectId, ref:'customer'},
+    customer:{type:String, required:true},
     date:Date,
+    type:{type:String, enum:Object.values(purchaseType), required:true},
     cylinders:{type:[cylinderSchema]},
     comments:{type:[commentSchema]},
     approvalOfficers:{type:[ApprovalOfficerSchema]},

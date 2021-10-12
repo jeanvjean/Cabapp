@@ -57,7 +57,8 @@ exports.vehicle = new vehicle_1.default({
     routeReport: index_1.VehicleReport,
     customer: index_1.Customer,
     supplier: index_1.Supplier,
-    ecr: index_1.EmptyCylinder
+    ecr: index_1.EmptyCylinder,
+    waybill: index_1.Waybill
 });
 exports.driver = new driver_1.default({
     driver: index_1.User

@@ -123,4 +123,22 @@ router.get(
   vehicleCtrl.vehicleRoutePlan()
 );
 
+router.post(
+  '/create-delivery-note',
+  auth.verify(),
+  vehicleCtrl.genWaybill()
+);
+
+router.get(
+  '/fetch-delivery-notes',
+  auth.verify(),
+  vehicleCtrl.fetchWaybills
+);
+
+router.get(
+  '/delivery-note/:id',
+  auth.verify(),
+  vehicleCtrl.fetchDeliveryDetails()
+);
+
 export default router;

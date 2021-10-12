@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cylinderSchema = exports.CylinderCondition = exports.cylinderTypes = void 0;
+exports.CylinderCondition = exports.cylinderTypes = void 0;
 const mongoose_1 = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
@@ -16,7 +16,7 @@ var CylinderCondition;
     CylinderCondition["FAULTY"] = "faulty";
     CylinderCondition["GOOD"] = "good";
 })(CylinderCondition = exports.CylinderCondition || (exports.CylinderCondition = {}));
-exports.cylinderSchema = new mongoose_1.Schema({
+const cylinderSchema = new mongoose_1.Schema({
     gasName: { type: String, required: true },
     colorCode: { type: String, required: true },
     creator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
@@ -29,10 +29,10 @@ exports.cylinderSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
-exports.cylinderSchema.plugin(mongoosePaginate);
-exports.cylinderSchema.plugin(aggregatePaginate);
+cylinderSchema.plugin(mongoosePaginate);
+cylinderSchema.plugin(aggregatePaginate);
 function factory(conn) {
-    return conn.model('cylinder', exports.cylinderSchema);
+    return conn.model('cylinder', cylinderSchema);
 }
 exports.default = factory;
 //# sourceMappingURL=cylinder.js.map

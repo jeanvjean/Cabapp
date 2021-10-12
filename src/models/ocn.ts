@@ -11,8 +11,8 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 type ocnCylinders = {
     cylinderNo:string
     volume:string
-    unitPrice:number
-    price:number
+    unitPrice?:number
+    price?:number
 }
 
 export enum note {
@@ -30,6 +30,7 @@ export interface OutgoingCylinderInterface extends Document {
     cylinderType:string
     date:Date
     cylinders:Schema.Types.ObjectId[]
+    otherCylinders:ocnCylinders[]
     totalQty:number
     totalVol:string
     totalAmount:number
@@ -45,6 +46,7 @@ export interface OutgoingCylinderInterface extends Document {
     totalCustomerCylinders:number
     vehicle?:Schema.Types.ObjectId
     icnNo:string
+    invoiceNo:string
 }
 
 const ocnCylinderSchema = new Schema({
@@ -60,6 +62,7 @@ const ocnSchema = new Schema({
     cylinderType:{type:String},
     date:{type:Date},
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
+    otherCylinders:[ocnCylinderSchema],
     totalQty:{type:Number},
     totalVol:{type:String},
     totalAmount:{type:Number},
@@ -75,7 +78,8 @@ const ocnSchema = new Schema({
     ocnInit:Number,
     totalAsnlCylinders:Number,
     totalCustomerCylinders:Number,
-    vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"}
+    vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"},
+    invoiceNo:String
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

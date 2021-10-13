@@ -21,6 +21,9 @@ interface newPurchaseOrder {
     date:PurchaseOrderInterface['date']
     cylinders:PurchaseOrderInterface['cylinders']
     comment:string
+    gasType:PurchaseOrderInterface['gasType']
+    supplier?:PurchaseOrderInterface['supplier']
+    fromBranch:PurchaseOrderInterface['fromBranch']
 }
 
 interface purchaseOrderPool {

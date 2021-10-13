@@ -38,6 +38,7 @@ export interface QueryInterface {
   instock?:string,
   fromDate:string,
   toDate:string,
+  supplyDate?:string
   verified:boolean
   active:boolean
   suspended?:boolean

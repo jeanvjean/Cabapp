@@ -50,6 +50,8 @@ export interface ComplaintInterface extends Document{
   ecrNo?:string
   createdAt:Date
   updatedAt:Date
+  deliveryNo:string
+  supplyDate:Date
 }
 
 const complaintCylinderSchema = new Schema({
@@ -83,7 +85,9 @@ export const complaintSchema = new Schema({
   complaintType:{type:String},
   replaceCylinder:[{type:cylinderReplaceSchema}],
   icnNo:String,
-  ecrNo:String
+  ecrNo:String,
+  deliveryNo:String,
+  supplyDate:Date
 },{
   timestamps:true
 });

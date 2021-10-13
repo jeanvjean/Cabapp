@@ -4,7 +4,7 @@ Model,
 Document,
 Connection
 } from 'mongoose';
-import { commentInterface, ApprovalOfficers, stagesOfApproval, TransferStatus, ApprovalStatus, commentSchema, ApprovalOfficerSchema } from './transferCylinder';
+import { commentInterface, ApprovalOfficers, stagesOfApproval, TransferStatus, commentSchema, ApprovalOfficerSchema } from './transferCylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
@@ -23,6 +23,7 @@ export enum purchaseType {
 export interface PurchaseOrderInterface extends Document{
     customer:string
     type:purchaseType
+    supplier:Schema.Types.ObjectId
     date:Date
     cylinders:purchaseCylinderInterface[]
     comments:commentInterface[]
@@ -31,7 +32,10 @@ export interface PurchaseOrderInterface extends Document{
     approvalStage:stagesOfApproval
     approvalStatus:TransferStatus
     branch:Schema.Types.ObjectId,
-    initiator:Schema.Types.ObjectId
+    initiator:Schema.Types.ObjectId    
+    initNum:number,
+    orderNumber:string
+    fromBranch:Schema.Types.ObjectId
 }
 
 export const cylinderSchema = new Schema({
@@ -42,6 +46,7 @@ export const cylinderSchema = new Schema({
 const purchaseOrderSchema = new Schema({
     customer:{type:String, required:true},
     date:Date,
+    supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
     type:{type:String, enum:Object.values(purchaseType), required:true},
     cylinders:{type:[cylinderSchema]},
     comments:{type:[commentSchema]},
@@ -50,7 +55,10 @@ const purchaseOrderSchema = new Schema({
     approvalStage:{type:String, default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, default:TransferStatus.PENDING},
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
-    initiator:{type:Schema.Types.ObjectId, ref:'User'}
+    fromBranch:{type:Schema.Types.ObjectId, ref:'branches'},
+    initiator:{type:Schema.Types.ObjectId, ref:'User'},
+    initNum:Number,
+    orderNumber:String
 },{
     timestamps:true
 });

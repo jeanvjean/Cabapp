@@ -17,6 +17,7 @@ exports.cylinderSchema = new mongoose_1.Schema({
 const purchaseOrderSchema = new mongoose_1.Schema({
     customer: { type: String, required: true },
     date: Date,
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     type: { type: String, enum: Object.values(purchaseType), required: true },
     cylinders: { type: [exports.cylinderSchema] },
     comments: { type: [transferCylinder_1.commentSchema] },
@@ -25,7 +26,10 @@ const purchaseOrderSchema = new mongoose_1.Schema({
     approvalStage: { type: String, default: transferCylinder_1.stagesOfApproval.STAGE1 },
     approvalStatus: { type: String, default: transferCylinder_1.TransferStatus.PENDING },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
-    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+    fromBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
+    initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+    initNum: Number,
+    orderNumber: String
 }, {
     timestamps: true
 });

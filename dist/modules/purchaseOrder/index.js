@@ -15,6 +15,7 @@ const exceptions_1 = require("../../exceptions");
 const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
+const token_1 = require("../../util/token");
 class PurchaseOrder extends module_1.default {
     constructor(props) {
         super();
@@ -24,9 +25,17 @@ class PurchaseOrder extends module_1.default {
     createPurchaseOrder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const purchase = new this.purchase(data);
-                purchase.branch = user.branch;
-                purchase.initiator = user._id;
+                const purchase = new this.purchase(Object.assign(Object.assign({}, data), { branch: user.branch, initiator: user._id }));
+                let ex = yield this.purchase.find({}).sort({ initNum: -1 }).limit(1);
+                let on;
+                if (ex[0]) {
+                    on = ex[0].initNum + 1;
+                }
+                else {
+                    on = 1;
+                }
+                let orderNumber = token_1.padLeft(on, 6, '');
+                purchase.orderNumber = 'O' + orderNumber;
                 purchase.comments.push({
                     comment: data.comment,
                     commentBy: user._id
@@ -70,7 +79,9 @@ class PurchaseOrder extends module_1.default {
                     { path: 'customer', model: 'customer' },
                     { path: 'initiator', model: 'User' },
                     { path: 'nextApprovalOfficer', model: 'User' },
-                    { path: "customer", model: "customer" }
+                    { path: "supplier", model: "supplier" },
+                    { path: "branch", model: "branches" },
+                    { path: "fromBranch", model: "branches" }
                 ]);
                 return Promise.resolve(order);
             }
@@ -82,18 +93,59 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrders(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let { page, limit, search, fromBranch, branch, approvalStatus, supplier, fromDate, toDate } = query;
                 let options = {
-                    page: query.page || 1,
-                    limit: query.limit || 10,
+                    page: page || 1,
+                    limit: limit || 10,
                     populate: [
-                        { path: "nextApprovalOfficer", model: "User" },
-                        { path: "initiator", model: "User" },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: "supplier", model: "supplier" },
                         { path: "branch", model: "branches" },
-                        { path: "customer", model: "customer" }
+                        { path: "fromBranch", model: "branches" }
                     ]
                 };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (fromBranch) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { fromBranch: fromBranch });
+                }
+                if (branch) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { branch: branch });
+                }
+                if (supplier) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { supplier: supplier });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { date: new Date(fromDate) });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { date: new Date(toDate) });
+                }
+                if (approvalStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { approvalStatus: approvalStatus });
+                }
+                if (search) {
+                    or.push({ type: new RegExp(search, 'gi') });
+                    or.push({ 'cylinders.volume': new RegExp(search, 'gi') });
+                    or.push({ approvalStage: new RegExp(search, 'gi') });
+                    or.push({ orderNumber: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
                 //@ts-ignore
-                const purchases = yield this.purchase.paginate({ branch: user.branch }, options);
+                const purchases = yield this.purchase.paginate(q, options);
                 //@ts-ignore
                 const approved = yield this.purchase.paginate({ branch: user.branch, approvalStatus: transferCylinder_1.TransferStatus.COMPLETED }, options);
                 //@ts-ignore
@@ -334,22 +386,61 @@ class PurchaseOrder extends module_1.default {
     fetchPurchaseOrderRequests(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let { page, limit, search, fromBranch, branch, approvalStatus, supplier, fromDate, toDate } = query;
                 let options = {
-                    page: query.page || 1,
-                    limit: query.limit || 10,
+                    page: page || 1,
+                    limit: limit || 10,
                     populate: [
-                        { path: "nextApprovalOfficer", model: "User" },
-                        { path: "initiator", model: "User" },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: "supplier", model: "supplier" },
                         { path: "branch", model: "branches" },
-                        { path: "customer", model: "customer" }
+                        { path: "fromBranch", model: "branches" }
                     ]
                 };
-                //@ts-ignore
-                const purchaseOrders = yield this.purchase.paginate({
+                let q = {
                     branch: user.branch,
                     nextApprovalOfficer: user._id,
                     approvalStatus: transferCylinder_1.TransferStatus.PENDING
-                }, options);
+                };
+                let or = [];
+                if (fromBranch) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { fromBranch: fromBranch });
+                }
+                if (branch) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { branch: branch });
+                }
+                if (supplier) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { supplier: supplier });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { date: new Date(fromDate) });
+                }
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { date: new Date(toDate) });
+                }
+                if (approvalStatus) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { approvalStatus: approvalStatus });
+                }
+                if (search) {
+                    or.push({ type: new RegExp(search, 'gi') });
+                    or.push({ 'cylinders.volume': new RegExp(search, 'gi') });
+                    or.push({ approvalStage: new RegExp(search, 'gi') });
+                    or.push({ orderNumber: new RegExp(search, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const purchaseOrders = yield this.purchase.paginate(q, options);
                 return Promise.resolve(purchaseOrders);
             }
             catch (e) {

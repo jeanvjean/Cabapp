@@ -29,7 +29,6 @@ exports.complaintSchema = new mongoose_1.Schema({
     issue: { type: String },
     complaint: { type: String },
     cylinders: [complaintCylinderSchema],
-    cylinderReplace: cylinderReplaceSchema,
     status: { type: String, enum: Object.values(complaintStatus), default: complaintStatus.PENDING },
     approvalStage: { type: String },
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
@@ -38,7 +37,7 @@ exports.complaintSchema = new mongoose_1.Schema({
     approvalStatus: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     complaintType: { type: String },
-    replaceCylinder: { type: cylinderReplaceSchema },
+    replaceCylinder: [{ type: cylinderReplaceSchema }],
     icnNo: String,
     ecrNo: String
 }, {

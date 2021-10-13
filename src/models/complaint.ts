@@ -37,7 +37,7 @@ export interface ComplaintInterface extends Document{
   issue?:string
   comment?:string,
   cylinders?:complaintCylinder[]
-  replaceCylinder:cylinderReplace
+  replaceCylinder:cylinderReplace[]
   approvalStage:stagesOfApproval
   approvalOfficers:ApprovalOfficers[]
   nextApprovalOfficer:Schema.Types.ObjectId
@@ -73,7 +73,6 @@ export const complaintSchema = new Schema({
   issue:{type:String},
   complaint:{type:String},
   cylinders:[complaintCylinderSchema],
-  cylinderReplace:cylinderReplaceSchema,
   status:{type:String, enum:Object.values(complaintStatus),default:complaintStatus.PENDING},
   approvalStage:{type:String},
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
@@ -82,7 +81,7 @@ export const complaintSchema = new Schema({
   approvalStatus:{type:String},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   complaintType:{type:String},
-  replaceCylinder:{type:cylinderReplaceSchema},
+  replaceCylinder:[{type:cylinderReplaceSchema}],
   icnNo:String,
   ecrNo:String
 },{

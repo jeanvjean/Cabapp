@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { PurchaseOrderInterface } from "../../models/purchaseOrder";
+import { PurchaseOrderInterface, purchaseType } from "../../models/purchaseOrder";
 import Module, { QueryInterface } from "../module";
 import { UserInterface } from "../../models/user";
 import { stagesOfApproval, ApprovalStatus, TransferStatus } from "../../models/transferCylinder";
@@ -8,6 +8,7 @@ import { BadInputFormatException } from "../../exceptions";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
+import { padLeft } from "../../util/token";
 
 
 interface purchaseOrderProps{
@@ -47,12 +48,20 @@ class PurchaseOrder extends Module{
 
     public async createPurchaseOrder(data:newPurchaseOrder, user:UserInterface):Promise<PurchaseOrderInterface|undefined>{
         try {
-            const purchase = new this.purchase(data);
-
-            purchase.branch = user.branch
-
-            purchase.initiator = user._id
-
+            const purchase = new this.purchase({
+              ...data, 
+              branch:user.branch, 
+              initiator:user._id
+            });
+            let ex = await this.purchase.find({}).sort({initNum:-1}).limit(1);
+            let on;
+            if(ex[0]) {
+              on = ex[0].initNum + 1
+            }else {
+              on = 1
+            }
+            let orderNumber = padLeft(on, 6, '');
+            purchase.orderNumber = 'O'+orderNumber;
             purchase.comments.push({
                 comment:data.comment,
                 commentBy:user._id
@@ -94,7 +103,9 @@ class PurchaseOrder extends Module{
               {path:'customer', model:'customer'},
               {path:'initiator', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
-              {path:"customer", model:"customer"}
+              {path:"supplier", model:"supplier"},
+              {path:"branch", model:"branches"},
+              {path:"fromBranch", model:"branches"}
             ]);
             return Promise.resolve(order as PurchaseOrderInterface);
         } catch (e) {
@@ -104,18 +115,60 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrders(query:QueryInterface, user:UserInterface):Promise<purchaseOrderPool|undefined>{
         try {
+          let {page, limit, search, fromBranch, branch, approvalStatus, supplier, fromDate, toDate} = query;
           let options = {
-            page: query.page || 1,
-            limit:query.limit || 10,
+            page: page || 1,
+            limit:limit || 10,
             populate:[
-              {path:"nextApprovalOfficer", model:"User"},
-              {path:"initiator", model:"User"},
+              {path:'customer', model:'customer'},
+              {path:'initiator', model:'User'},
+              {path:'nextApprovalOfficer', model:'User'},
+              {path:"supplier", model:"supplier"},
               {path:"branch", model:"branches"},
-              {path:"customer", model:"customer"}
+              {path:"fromBranch", model:"branches"}
             ]
           }
+          let q = {
+            branch:user.branch
+          }
+          let or = [];
+          if(fromBranch) {
+            //@ts-ignore
+            q ={...q, fromBranch:fromBranch}
+          }
+
+          if(branch) {
+            //@ts-ignore
+            q ={...q, branch:branch}
+          }
+          if(supplier) {
+            //@ts-ignore
+            q ={...q, supplier:supplier}
+          }
+          if(fromDate) {
+            //@ts-ignore
+            q ={...q, date:new Date(fromDate)}
+          }
+          if(toDate) {
+            //@ts-ignore
+            q ={...q, date:new Date(toDate)}
+          }
+          if(approvalStatus) {
+            //@ts-ignore
+            q ={...q, approvalStatus:approvalStatus}
+          }
+          if(search) {
+            or.push({type: new RegExp(search, 'gi')})
+            or.push({'cylinders.volume': new RegExp(search, 'gi')})
+            or.push({approvalStage: new RegExp(search, 'gi')})
+            or.push({orderNumber: new RegExp(search, 'gi')})
+          }
+          if(or.length > 0) {
+            //@ts-ignore
+            q ={...q, $or:or}
+          }
           //@ts-ignore
-            const purchases = await this.purchase.paginate({ branch:user.branch },options);
+            const purchases = await this.purchase.paginate(q,options);
             //@ts-ignore
             const approved = await this.purchase.paginate({ branch:user.branch, approvalStatus:TransferStatus.COMPLETED },options);
             //@ts-ignore
@@ -354,22 +407,62 @@ class PurchaseOrder extends Module{
 
     public async fetchPurchaseOrderRequests(query:QueryInterface, user:UserInterface):Promise<PurchaseOrderInterface[]|undefined>{
         try {
+          let {page, limit, search, fromBranch, branch, approvalStatus, supplier, fromDate, toDate} = query;
           let options = {
-            page: query.page || 1,
-            limit:query.limit || 10,
+            page: page || 1,
+            limit:limit || 10,
             populate:[
-              {path:"nextApprovalOfficer", model:"User"},
-              {path:"initiator", model:"User"},
+              {path:'customer', model:'customer'},
+              {path:'initiator', model:'User'},
+              {path:'nextApprovalOfficer', model:'User'},
+              {path:"supplier", model:"supplier"},
               {path:"branch", model:"branches"},
-              {path:"customer", model:"customer"}
+              {path:"fromBranch", model:"branches"}
             ]
           }
+          let q = {
+            branch:user.branch,
+            nextApprovalOfficer:user._id,
+            approvalStatus:TransferStatus.PENDING
+          }
+          let or = [];
+          if(fromBranch) {
+            //@ts-ignore
+            q ={...q, fromBranch:fromBranch}
+          }
+
+          if(branch) {
+            //@ts-ignore
+            q ={...q, branch:branch}
+          }
+          if(supplier) {
+            //@ts-ignore
+            q ={...q, supplier:supplier}
+          }
+          if(fromDate) {
+            //@ts-ignore
+            q ={...q, date:new Date(fromDate)}
+          }
+          if(toDate) {
+            //@ts-ignore
+            q ={...q, date:new Date(toDate)}
+          }
+          if(approvalStatus) {
+            //@ts-ignore
+            q ={...q, approvalStatus:approvalStatus}
+          }
+          if(search) {
+            or.push({type: new RegExp(search, 'gi')})
+            or.push({'cylinders.volume': new RegExp(search, 'gi')})
+            or.push({approvalStage: new RegExp(search, 'gi')})
+            or.push({orderNumber: new RegExp(search, 'gi')})
+          }
+          if(or.length > 0) {
+            //@ts-ignore
+            q ={...q, $or:or}
+          }
           //@ts-ignore
-            const purchaseOrders = await this.purchase.paginate({
-              branch:user.branch,
-              nextApprovalOfficer:user._id,
-              approvalStatus:TransferStatus.PENDING
-            }, options);
+            const purchaseOrders = await this.purchase.paginate(q, options);
             return Promise.resolve(purchaseOrders);
         } catch (e) {
             this.handleException(e)

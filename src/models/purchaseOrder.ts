@@ -21,7 +21,6 @@ export enum purchaseType {
 
 
 export interface PurchaseOrderInterface extends Document{
-    customer:string
     type:purchaseType
     gasType:string,
     supplier?:Schema.Types.ObjectId
@@ -45,7 +44,6 @@ export const cylinderSchema = new Schema({
 });
 
 const purchaseOrderSchema = new Schema({
-    customer:{type:String, required:true},
     date:Date,
     gasType:String,
     supplier:{type:Schema.Types.ObjectId, ref:'supplier'},

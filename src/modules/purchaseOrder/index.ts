@@ -17,7 +17,6 @@ interface purchaseOrderProps{
 }
 
 interface newPurchaseOrder {
-    customer:PurchaseOrderInterface['customer']
     date:PurchaseOrderInterface['date']
     cylinders:PurchaseOrderInterface['cylinders']
     comment:string
@@ -103,7 +102,6 @@ class PurchaseOrder extends Module{
     public async fetchOrderDetails(orderId:string):Promise<PurchaseOrderInterface|undefined>{
         try {
             const order = await this.purchase.findById(orderId).populate([
-              {path:'customer', model:'customer'},
               {path:'initiator', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:"supplier", model:"supplier"},
@@ -123,7 +121,6 @@ class PurchaseOrder extends Module{
             page: page || 1,
             limit:limit || 10,
             populate:[
-              {path:'customer', model:'customer'},
               {path:'initiator', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:"supplier", model:"supplier"},
@@ -415,7 +412,6 @@ class PurchaseOrder extends Module{
             page: page || 1,
             limit:limit || 10,
             populate:[
-              {path:'customer', model:'customer'},
               {path:'initiator', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:"supplier", model:"supplier"},

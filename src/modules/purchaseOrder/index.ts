@@ -64,6 +64,7 @@ class PurchaseOrder extends Module{
             }
             let orderNumber = padLeft(on, 6, '');
             purchase.orderNumber = 'O'+orderNumber;
+            purchase.initNum = on
             purchase.comments.push({
                 comment:data.comment,
                 commentBy:user._id

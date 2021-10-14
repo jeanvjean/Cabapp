@@ -36,6 +36,7 @@ export interface ComplaintInterface extends Document{
   title?:string
   issue?:string
   complaint?:string,
+  comment?:string
   cylinders?:complaintCylinder[]
   replaceCylinder:cylinderReplace[]
   approvalStage:stagesOfApproval

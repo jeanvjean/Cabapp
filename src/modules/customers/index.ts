@@ -85,6 +85,7 @@ type NewComplainInterface = {
   complaintType?:ComplaintInterface['complaintType']
   title?:ComplaintInterface['title']
   issue?:ComplaintInterface['issue']
+  comment?:ComplaintInterface['comment']
   complaint?:ComplaintInterface['complaint']
   cylinders?:ComplaintInterface['cylinders'],
   replaceCylinder?:ComplaintInterface['replaceCylinder']

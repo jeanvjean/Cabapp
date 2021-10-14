@@ -24,9 +24,9 @@ class validatePurchaseOrder extends Ctrl{
 
     static validatePurchase():ValidationChain[]{
         const rules = [
-            check('customer')
-                .exists()
-                .withMessage('Customer is required'),
+            // check('customer')
+            //     .exists()
+            //     .withMessage('Customer is required'),
             check('date'),
             check('cylinders')
                 .exists()

@@ -107,18 +107,18 @@ class CustomerValidation extends Ctrl{
 
   static makeComplaint():ValidationChain[]{
     const rules = [
-      check('icnNo')
-        .exists()
-        .withMessage('icn Number for order is required to make a complaint'),
-      check('ecrNo')
-        .exists()
-        .withMessage('please provide an ecr No to proceed'),
+      // check('icnNo')
+      //   .exists()
+      //   .withMessage('icn Number for order is required to make a complaint'),
+      // check('ecrNo')
+      //   .exists()
+      //   .withMessage('please provide an ecr No to proceed'),
       check('complaintType')
         .exists()
         .withMessage('please provide complaint type'),
-      check('comment')
+      check('complaint')
         .exists()
-        .withMessage('comment is required'),
+        .withMessage('complaint is required'),
       check('customer')
         .exists()
         .withMessage('please pass the customer for this complaint')

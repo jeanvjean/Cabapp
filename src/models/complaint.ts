@@ -35,7 +35,7 @@ export interface ComplaintInterface extends Document{
   complaintType?:string
   title?:string
   issue?:string
-  comment?:string,
+  complaint?:string,
   cylinders?:complaintCylinder[]
   replaceCylinder:cylinderReplace[]
   approvalStage:stagesOfApproval
@@ -50,7 +50,7 @@ export interface ComplaintInterface extends Document{
   ecrNo?:string
   createdAt:Date
   updatedAt:Date
-  deliveryNo:string
+  deliveryNo?:string
   supplyDate:Date
 }
 

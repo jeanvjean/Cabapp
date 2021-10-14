@@ -72,6 +72,8 @@ router.get(
 router.post(
   '/make-complain/:customerId',
   auth.verify(),
+  Validator.makeComplaint(),
+  val.validate(),
   customerCtrl.createComplaint()
 );
 

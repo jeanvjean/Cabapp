@@ -104,6 +104,27 @@ class CustomerValidation extends Ctrl{
     ]
     return rules;
   }
+
+  static makeComplaint():ValidationChain[]{
+    const rules = [
+      check('icnNo')
+        .exists()
+        .withMessage('icn Number for order is required to make a complaint'),
+      check('ecrNo')
+        .exists()
+        .withMessage('please provide an ecr No to proceed'),
+      check('complaintType')
+        .exists()
+        .withMessage('please provide complaint type'),
+      check('comment')
+        .exists()
+        .withMessage('comment is required'),
+      check('customer')
+        .exists()
+        .withMessage('please pass the customer for this complaint')
+    ]
+    return rules;
+  }
 }
 
 export default CustomerValidation;

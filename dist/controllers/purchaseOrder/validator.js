@@ -27,9 +27,12 @@ class validatePurchaseOrder extends ctrl_1.default {
     }
     static validatePurchase() {
         const rules = [
-            express_validator_1.check('customer')
+            express_validator_1.check('gasType')
                 .exists()
-                .withMessage('Customer is required'),
+                .withMessage('Gas Type is required'),
+            express_validator_1.check('type')
+                .exists()
+                .withMessage('purchase order type is required'),
             express_validator_1.check('date'),
             express_validator_1.check('cylinders')
                 .exists()

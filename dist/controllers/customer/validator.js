@@ -106,6 +106,26 @@ class CustomerValidation extends ctrl_1.default {
         ];
         return rules;
     }
+    static makeComplaint() {
+        const rules = [
+            // check('icnNo')
+            //   .exists()
+            //   .withMessage('icn Number for order is required to make a complaint'),
+            // check('ecrNo')
+            //   .exists()
+            //   .withMessage('please provide an ecr No to proceed'),
+            express_validator_1.check('complaintType')
+                .exists()
+                .withMessage('please provide complaint type'),
+            express_validator_1.check('complaint')
+                .exists()
+                .withMessage('complaint is required'),
+            express_validator_1.check('customer')
+                .exists()
+                .withMessage('please pass the customer for this complaint')
+        ];
+        return rules;
+    }
 }
 exports.default = CustomerValidation;
 //# sourceMappingURL=validator.js.map

@@ -15,8 +15,8 @@ exports.cylinderSchema = new mongoose_1.Schema({
     volume: String
 });
 const purchaseOrderSchema = new mongoose_1.Schema({
-    customer: { type: String, required: true },
     date: Date,
+    gasType: String,
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     type: { type: String, enum: Object.values(purchaseType), required: true },
     cylinders: { type: [exports.cylinderSchema] },

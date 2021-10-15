@@ -98,7 +98,8 @@ class EmptyCylinderModule extends module_1.default {
                     limit: query.limit
                 };
                 let q = {
-                    branch: user.branch
+                    branch: user.branch,
+                    type: emptyCylinder_1.EcrType.SALES
                 };
                 let or = [];
                 if (search) {
@@ -137,7 +138,8 @@ class EmptyCylinderModule extends module_1.default {
             try {
                 let { tecr, customer, type, driverStatus, salesStatus, search } = query;
                 let q = {
-                    branch: user.branch
+                    branch: user.branch,
+                    type: emptyCylinder_1.EcrType.TRUCK
                 };
                 let options = {
                     page: query.page || 1,

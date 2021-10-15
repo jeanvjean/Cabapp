@@ -36,6 +36,7 @@ class PurchaseOrder extends module_1.default {
                 }
                 let orderNumber = token_1.padLeft(on, 6, '');
                 purchase.orderNumber = 'O' + orderNumber;
+                purchase.initNum = on;
                 purchase.comments.push({
                     comment: data.comment,
                     commentBy: user._id
@@ -76,7 +77,6 @@ class PurchaseOrder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const order = yield this.purchase.findById(orderId).populate([
-                    { path: 'customer', model: 'customer' },
                     { path: 'initiator', model: 'User' },
                     { path: 'nextApprovalOfficer', model: 'User' },
                     { path: "supplier", model: "supplier" },
@@ -98,7 +98,6 @@ class PurchaseOrder extends module_1.default {
                     page: page || 1,
                     limit: limit || 10,
                     populate: [
-                        { path: 'customer', model: 'customer' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: "supplier", model: "supplier" },
@@ -391,7 +390,6 @@ class PurchaseOrder extends module_1.default {
                     page: page || 1,
                     limit: limit || 10,
                     populate: [
-                        { path: 'customer', model: 'customer' },
                         { path: 'initiator', model: 'User' },
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: "supplier", model: "supplier" },

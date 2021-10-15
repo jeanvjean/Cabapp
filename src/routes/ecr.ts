@@ -36,7 +36,7 @@ router.get(
 );
 
 router.get(
-    '/fetch-all-ecr',
+    '/fetch-tecr',
     auth.verify(),
     ecrCtrl.fetchEcrs()
 )

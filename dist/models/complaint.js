@@ -39,7 +39,9 @@ exports.complaintSchema = new mongoose_1.Schema({
     complaintType: { type: String },
     replaceCylinder: [{ type: cylinderReplaceSchema }],
     icnNo: String,
-    ecrNo: String
+    ecrNo: String,
+    deliveryNo: String,
+    supplyDate: Date
 }, {
     timestamps: true
 });

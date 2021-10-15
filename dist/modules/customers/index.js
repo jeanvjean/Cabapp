@@ -740,6 +740,9 @@ class Customer extends module_1.default {
                 if (search) {
                     or.push({ customerName: new RegExp(search, 'gi') });
                     or.push({ issue: new RegExp(search, 'gi') });
+                    or.push({ deliveryNo: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                    or.push({ icnNo: new RegExp(search, 'gi') });
                 }
                 if (or.length > 0) {
                     //@ts-ignore
@@ -758,7 +761,7 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter, customer, complaintStatus, fromDate, toDate } = query;
+                const { search, filter, customer, complaintStatus, fromDate, toDate, supplyDate } = query;
                 // console.log(customerId);
                 const options = {
                     page: query.page || 1,
@@ -777,6 +780,9 @@ class Customer extends module_1.default {
                 if (search) {
                     or.push({ title: new RegExp(search, 'gi') });
                     or.push({ issue: new RegExp(search, 'gi') });
+                    or.push({ deliveryNo: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                    or.push({ icnNo: new RegExp(search, 'gi') });
                 }
                 if (filter) {
                     //@ts-ignore
@@ -798,6 +804,10 @@ class Customer extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { createdAt: { $lte: new Date(toDate) } });
                 }
+                if (supplyDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { supplyDate: { $eq: new Date(supplyDate) } });
+                }
                 if (or.length > 0) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { $or: or });
@@ -815,7 +825,7 @@ class Customer extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter } = query;
+                const { search, filter, supplyDate } = query;
                 const options = {
                     page: query.page || 1,
                     limit: query.limit || 10,
@@ -833,6 +843,9 @@ class Customer extends module_1.default {
                 if (search) {
                     or.push({ title: new RegExp(search, 'gi') });
                     or.push({ issue: new RegExp(search, 'gi') });
+                    or.push({ deliveryNo: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                    or.push({ icnNo: new RegExp(search, 'gi') });
                 }
                 if (filter === null || filter === void 0 ? void 0 : filter.length) {
                     //@ts-ignore
@@ -841,6 +854,10 @@ class Customer extends module_1.default {
                 if (or.length > 0) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                if (supplyDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { supplyDate: { $eq: new Date(supplyDate) } });
                 }
                 //@ts-ignore
                 const complaints = yield this.complaint.paginate(q, options);

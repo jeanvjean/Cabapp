@@ -97,7 +97,7 @@ class EmptyCylinderModule extends Module {
                 }
             }
             let avEcr = await this.emptyCylinder.find({}).sort({initNum:-1}).limit(1);
-            let init = "ECR"
+            let init = "SECR"
             let num;
             if(!avEcr[0]) {
                 num = 1
@@ -167,7 +167,7 @@ class EmptyCylinderModule extends Module {
 
     public async fetchTECR(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
         try {
-            let { tecr, customer, type, driverStatus, salesStatus, search } = query;
+            let { ecr, customer, type, driverStatus, salesStatus, search } = query;
             let q = {
                 branch:user.branch,
                 type:EcrType.TRUCK
@@ -185,10 +185,10 @@ class EmptyCylinderModule extends Module {
             }
             let or = []
 
-            if(tecr) {
+            if(ecr) {
                 // or.push({tecrNo: new RegExp(tecr, 'gi')})
                 //@ts-ignore
-                q = {...q, tecrNo: new RegExp(tecr, 'gi')}
+                q = {...q, tecrNo: new RegExp(ecr, 'gi')}
             }
             if(customer) {
                 // or.push({"customer.name": new RegExp(customer, 'gi')})
@@ -216,8 +216,8 @@ class EmptyCylinderModule extends Module {
                 q = {...q, $or:or}
             }
             //@ts-ignore
-            const ecr = await this.emptyCylinder.paginate(q, options);
-            return Promise.resolve(ecr);
+            const empty = await this.emptyCylinder.paginate(q, options);
+            return Promise.resolve(empty);
         } catch (e) {
             this.handleException(e)
         }

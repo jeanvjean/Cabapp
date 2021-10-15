@@ -24,7 +24,7 @@ export interface QueryInterface {
   driver?:string
   driverStatus?:string
   salesStatus?:string
-  tecr?:string
+  ecr?:string
   tfcr?:string
   supplier?:string,
   produced?:boolean;

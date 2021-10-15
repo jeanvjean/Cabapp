@@ -1104,7 +1104,7 @@ class Vehicle extends Module{
             const ecrN = "TECR"+num;
             let otp = Math.floor(1000 + Math.random() * 9000);
             ecr.otp = otp.toString();
-            ecr.tecrNo = ecrN;
+            ecr.ecrNo = ecrN;
             await ecr.save();
 
             const html = await getTemplate('OTP', {//8639
@@ -1112,7 +1112,7 @@ class Vehicle extends Module{
               email:cust?.email,
               otp:`${otp}`,
               driver:user.name,
-              ref:ecr.tecrNo
+              ref:ecr.ecrNo
             });
             let mailLoad = {
               content:html,

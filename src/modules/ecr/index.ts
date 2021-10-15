@@ -132,7 +132,8 @@ class EmptyCylinderModule extends Module {
                 limit:query.limit
             }
             let q = {
-                branch:user.branch
+                branch:user.branch,
+                type:EcrType.SALES
             }
             let or =[]
             if(search) {
@@ -167,7 +168,8 @@ class EmptyCylinderModule extends Module {
         try {
             let { tecr, customer, type, driverStatus, salesStatus, search } = query;
             let q = {
-                branch:user.branch
+                branch:user.branch,
+                type:EcrType.TRUCK
             }
             let options = {
                 page:query.page || 1,

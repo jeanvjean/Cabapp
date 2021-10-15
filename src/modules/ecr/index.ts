@@ -138,6 +138,7 @@ class EmptyCylinderModule extends Module {
             let or =[]
             if(search) {
                 or.push({status:new RegExp(search, 'gi')});
+                or.push({ecrNo: new RegExp(search, 'gi')})
             }
             if(type) {
                 //@ts-ignore

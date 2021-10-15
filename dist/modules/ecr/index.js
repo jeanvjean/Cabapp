@@ -60,7 +60,7 @@ class EmptyCylinderModule extends module_1.default {
                     }
                 }
                 let avEcr = yield this.emptyCylinder.find({}).sort({ initNum: -1 }).limit(1);
-                let init = "ECR";
+                let init = "SECR";
                 let num;
                 if (!avEcr[0]) {
                     num = 1;
@@ -104,6 +104,7 @@ class EmptyCylinderModule extends module_1.default {
                 let or = [];
                 if (search) {
                     or.push({ status: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
                 }
                 if (type) {
                     //@ts-ignore
@@ -136,7 +137,7 @@ class EmptyCylinderModule extends module_1.default {
     fetchTECR(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let { tecr, customer, type, driverStatus, salesStatus, search } = query;
+                let { ecr, customer, type, driverStatus, salesStatus, search } = query;
                 let q = {
                     branch: user.branch,
                     type: emptyCylinder_1.EcrType.TRUCK
@@ -153,10 +154,10 @@ class EmptyCylinderModule extends module_1.default {
                     ]
                 };
                 let or = [];
-                if (tecr) {
+                if (ecr) {
                     // or.push({tecrNo: new RegExp(tecr, 'gi')})
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { tecrNo: new RegExp(tecr, 'gi') });
+                    q = Object.assign(Object.assign({}, q), { tecrNo: new RegExp(ecr, 'gi') });
                 }
                 if (customer) {
                     // or.push({"customer.name": new RegExp(customer, 'gi')})
@@ -183,8 +184,8 @@ class EmptyCylinderModule extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const ecr = yield this.emptyCylinder.paginate(q, options);
-                return Promise.resolve(ecr);
+                const empty = yield this.emptyCylinder.paginate(q, options);
+                return Promise.resolve(empty);
             }
             catch (e) {
                 this.handleException(e);

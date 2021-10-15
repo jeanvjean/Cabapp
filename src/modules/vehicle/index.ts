@@ -592,10 +592,10 @@ class Vehicle extends Module{
         routePlan.serialNo = 1;
       }
       const num = padLeft(routePlan.serialNo , 6, "");
-      const ecr = "ECR"+num;
+      // const ecr = "ECR"+num;
 
       routePlan.rppNo = "RPP"+num;
-      routePlan.ecrNo = ecr;
+      // routePlan.ecrNo = ecr;
       await routePlan.save();
       await createLog({
         user:user._id,

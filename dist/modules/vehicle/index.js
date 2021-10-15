@@ -952,14 +952,14 @@ class Vehicle extends module_1.default {
                                 const ecrN = "TECR" + num;
                                 let otp = Math.floor(1000 + Math.random() * 9000);
                                 ecr.otp = otp.toString();
-                                ecr.tecrNo = ecrN;
+                                ecr.ecrNo = ecrN;
                                 yield ecr.save();
                                 const html = yield resolve_template_1.getTemplate('OTP', {
                                     name: cust === null || cust === void 0 ? void 0 : cust.name,
                                     email: cust === null || cust === void 0 ? void 0 : cust.email,
                                     otp: `${otp}`,
                                     driver: user.name,
-                                    ref: ecr.tecrNo
+                                    ref: ecr.ecrNo
                                 });
                                 let mailLoad = {
                                     content: html,

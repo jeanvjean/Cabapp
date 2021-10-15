@@ -125,11 +125,18 @@ class EmptyCylinderModule extends Module {
 
     public async emptyCylinderPool(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
         try {
-            const { search, type } = query;
+            const { search, type, page, limit } = query;
             const ObjectId = mongoose.Types.ObjectId;
             const options = {
-                page:query.page,
-                limit:query.limit
+                page:page || 1,
+                limit:limit || 10,
+                populate:[
+                    {path:'cylinders', model:'registered-cylinders'},
+                    {path:'customer', model:'customer'},
+                    {path:'nextApprovalOfficer', model:'User'},
+                    {path:'initiator', model:'User'},
+                    {path:'branch', model:'branches'}
+                ]
             }
             let q = {
                 branch:user.branch,
@@ -158,7 +165,13 @@ class EmptyCylinderModule extends Module {
 
     public async fetchEcrdetails(ecrId:string):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const ecr = await this.emptyCylinder.findById(ecrId);
+            const ecr = await this.emptyCylinder.findById(ecrId).populate([
+                {path:'cylinders', model:'registered-cylinders'},
+                {path:'customer', model:'customer'},
+                {path:'nextApprovalOfficer', model:'User'},
+                {path:'initiator', model:'User'},
+                {path:'branch', model:'branches'}
+            ]);
             return Promise.resolve(ecr as EmptyCylinderInterface);
         } catch (e) {
             this.handleException(e)
@@ -225,7 +238,13 @@ class EmptyCylinderModule extends Module {
 
     public async fetchTEcrDetails(tecrNo:string):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const data = await this.emptyCylinder.findOne({tecrNo:tecrNo});
+            const data = await this.emptyCylinder.findOne({tecrNo:tecrNo}).populate([
+                {path:'cylinders', model:'registered-cylinders'},
+                {path:'customer', model:'customer'},
+                {path:'nextApprovalOfficer', model:'User'},
+                {path:'initiator', model:'User'},
+                {path:'branch', model:'branches'}
+            ]);
             return Promise.resolve(data as EmptyCylinderInterface);
         } catch (e) {
             this.handleException(e)

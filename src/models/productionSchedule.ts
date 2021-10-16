@@ -42,6 +42,7 @@ export interface ProductionScheduleInterface extends Document{
   branch:Schema.Types.ObjectId
   produced?:boolean
   priority?:Priority
+  initNum:number
 }
 
 const productionCylinderSchema = new Schema({
@@ -69,7 +70,8 @@ const productionSchema = new Schema({
   approvalStage:{type:String},
   comments:{type:[commentSchema]},
   produced:{type:Boolean, default:false},
-  priority:{type:String, enum:Object.values(Priority), default:Priority.REGULAR}
+  priority:{type:String, enum:Object.values(Priority), default:Priority.REGULAR},
+  initNum:Number
 });
 
 productionSchema.plugin(mongoosePaginate)

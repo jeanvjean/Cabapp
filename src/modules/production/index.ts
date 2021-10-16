@@ -7,7 +7,7 @@ import Module, { QueryInterface } from "../module";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
-import { passWdCheck } from "../../util/token";
+import { padLeft, passWdCheck } from "../../util/token";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -70,6 +70,16 @@ class ProductionSchedule extends Module{
         stageOfApproval:stagesOfApproval.STAGE1
       });
 
+      let sche = await this.production.find({}).sort({init:-1}).limit(1);
+      let sn;
+      if(sche[0]) {
+        sn = sche[0].initNum + 1
+      }else {
+        sn = 1
+      }
+      let num = padLeft(sn, 6, '');
+      production.productionNo = "PN"+num;
+      production.initNum = sn;
       production.comments.push({
         comment:data.comment,
         commentBy:user._id

@@ -102,6 +102,12 @@ interface startRouteInput {
   mileOut?:string
 }
 
+interface recordRoutePlanResponse {
+  route_plan: PickupInterface,
+  failed:any,
+  message:string
+}
+
 type RouteRecordInput = {
   customers:PickupInterface['customers']
   suppliers:PickupInterface['suppliers']
@@ -574,7 +580,7 @@ class Vehicle extends Module{
     data:RouteRecordInput,
     params:Parameters,
     user:UserInterface
-    ):Promise<PickupInterface|undefined>{
+    ):Promise<recordRoutePlanResponse|undefined>{
     try {
       const vehicle = await this.vehicle.findById(params.vehicleId).populate('assignedTo');
       if(!vehicle) {
@@ -596,6 +602,32 @@ class Vehicle extends Module{
 
       routePlan.rppNo = "RPP"+num;
       // routePlan.ecrNo = ecr;
+      let failed = [];
+      let routePlanCust = []
+      if(routePlan.orderType == pickupType.CUSTOMER) {
+        for(let cust of routePlan.customers) {
+          let checkCust = await this.customer.findOne({email:cust.email});
+          if(checkCust) {
+            routePlanCust.push(cust);
+          }
+          if(!checkCust) {
+            failed.push(cust)
+          }
+        }
+        routePlan.customers = routePlanCust;
+      }
+      if(routePlan.orderType == pickupType.SUPPLIER) {
+        for(let sup of routePlan.suppliers) {
+          let checkSupplier = await this.supplier.findOne({email:sup.email});
+          if(checkSupplier) {
+            routePlanCust.push(sup);
+          }
+          if(!checkSupplier) {
+            failed.push(sup)
+          }
+        }
+        routePlan.suppliers = routePlanCust;
+      }
       await routePlan.save();
       await createLog({
         user:user._id,
@@ -605,7 +637,12 @@ class Vehicle extends Module{
           time: new Date().toISOString()
         }
       });
-      return Promise.resolve(routePlan as PickupInterface);
+      let message = failed.length > 0 ? "some customers/suppliers were not registered" : "Route record successful";
+      return Promise.resolve({
+        route_plan: routePlan,
+        failed,
+        message
+      });
     } catch (e) {
       this.handleException(e)
     }

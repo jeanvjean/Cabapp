@@ -27,12 +27,12 @@ export interface customerPickupInterface{
   fringeCylinders:RouteCylinderInterface[]
   status:RoutePlanStatus,
   reportId:string
-  tecrNo:string
+  tecrNo?:string
   deliveryNo?:string
 }
 
 export interface supplierPickupInterface{
-  supplierType: SupplierTypes;
+  supplierType?: SupplierTypes;
   name?:string
   email:string
   destination:string
@@ -42,7 +42,7 @@ export interface supplierPickupInterface{
   fringeCylinders:RouteCylinderInterface[]
   status:RoutePlanStatus,  
   reportId:string
-  tfcrNo:string
+  tfcrNo?:string
   deliveryNo?:string
 }
 

@@ -101,7 +101,7 @@ class VehicleController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.recordRoute({...req.body,vehicle:req.params.vehicleId}, req.params, req.user);
-        this.ok(res, 'Recorded', data);
+        this.ok(res, data?.message, data);
       } catch (e) {
         this.handleError(e, req, res);
       }

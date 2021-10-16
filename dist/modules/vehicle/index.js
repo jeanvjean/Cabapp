@@ -431,9 +431,35 @@ class Vehicle extends module_1.default {
                     routePlan.serialNo = 1;
                 }
                 const num = token_1.padLeft(routePlan.serialNo, 6, "");
-                const ecr = "ECR" + num;
+                // const ecr = "ECR"+num;
                 routePlan.rppNo = "RPP" + num;
-                routePlan.ecrNo = ecr;
+                // routePlan.ecrNo = ecr;
+                let failed = [];
+                let routePlanCust = [];
+                if (routePlan.orderType == order_1.pickupType.CUSTOMER) {
+                    for (let cust of routePlan.customers) {
+                        let checkCust = yield this.customer.findOne({ email: cust.email });
+                        if (checkCust) {
+                            routePlanCust.push(cust);
+                        }
+                        if (!checkCust) {
+                            failed.push(cust);
+                        }
+                    }
+                    routePlan.customers = routePlanCust;
+                }
+                if (routePlan.orderType == order_1.pickupType.SUPPLIER) {
+                    for (let sup of routePlan.suppliers) {
+                        let checkSupplier = yield this.supplier.findOne({ email: sup.email });
+                        if (checkSupplier) {
+                            routePlanCust.push(sup);
+                        }
+                        if (!checkSupplier) {
+                            failed.push(sup);
+                        }
+                    }
+                    routePlan.suppliers = routePlanCust;
+                }
                 yield routePlan.save();
                 yield logs_1.createLog({
                     user: user._id,
@@ -443,7 +469,12 @@ class Vehicle extends module_1.default {
                         time: new Date().toISOString()
                     }
                 });
-                return Promise.resolve(routePlan);
+                let message = failed.length > 0 ? "some customers/suppliers were not registered" : "Route record successful";
+                return Promise.resolve({
+                    route_plan: routePlan,
+                    failed,
+                    message
+                });
             }
             catch (e) {
                 this.handleException(e);

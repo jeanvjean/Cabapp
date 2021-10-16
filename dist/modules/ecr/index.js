@@ -91,11 +91,18 @@ class EmptyCylinderModule extends module_1.default {
     emptyCylinderPool(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search, type } = query;
+                const { search, type, page, limit } = query;
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const options = {
-                    page: query.page,
-                    limit: query.limit
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ]
                 };
                 let q = {
                     branch: user.branch,
@@ -126,7 +133,13 @@ class EmptyCylinderModule extends module_1.default {
     fetchEcrdetails(ecrId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const ecr = yield this.emptyCylinder.findById(ecrId);
+                const ecr = yield this.emptyCylinder.findById(ecrId).populate([
+                    { path: 'cylinders', model: 'registered-cylinders' },
+                    { path: 'customer', model: 'customer' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(ecr);
             }
             catch (e) {
@@ -195,7 +208,13 @@ class EmptyCylinderModule extends module_1.default {
     fetchTEcrDetails(tecrNo) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const data = yield this.emptyCylinder.findOne({ tecrNo: tecrNo });
+                const data = yield this.emptyCylinder.findOne({ tecrNo: tecrNo }).populate([
+                    { path: 'cylinders', model: 'registered-cylinders' },
+                    { path: 'customer', model: 'customer' },
+                    { path: 'nextApprovalOfficer', model: 'User' },
+                    { path: 'initiator', model: 'User' },
+                    { path: 'branch', model: 'branches' }
+                ]);
                 return Promise.resolve(data);
             }
             catch (e) {

@@ -5,7 +5,6 @@ import { CustomerInterface } from "../../models/customer";
 import { EcrApproval, EcrType, EmptyCylinderInterface, Priority, ProductionSchedule } from "../../models/emptyCylinder";
 import { OutgoingCylinderInterface } from "../../models/ocn";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
-import { ApprovalStatus } from "../../models/transferCylinder";
 import { UserInterface } from "../../models/user";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { createLog } from "../../util/logs";

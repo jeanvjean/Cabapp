@@ -12,7 +12,7 @@ router.get('/fetch-customers', auth.verify(), controllers_1.customerCtrl.fetchCu
 router.get('/fetch-customer/:customerId', controllers_1.customerCtrl.fetchCustomer());
 router.post('/create-order', auth.verify(), customer_1.Validator.validateOrder(), val.validate(), controllers_1.customerCtrl.createOrder());
 router.get('/fetch-order/:customerId', controllers_1.customerCtrl.fetchUserOrder());
-router.post('/mark-order/:orderId', auth.verify(), controllers_1.customerCtrl.markOrder());
+router.post('/mark-order/:orderId', auth.verify(), customer_1.Validator.markOrder(), val.validate(), controllers_1.customerCtrl.markOrder());
 router.get('/fetch-order/:orderId', controllers_1.customerCtrl.orderDetails());
 router.delete('/delete-pickup/:orderId', auth.verify(), controllers_1.customerCtrl.deletePickupOrder());
 router.post('/assign-vehicle/:orderId', auth.verify(), controllers_1.customerCtrl.assignOrderToVehicle());
@@ -20,7 +20,7 @@ router.get('/fetch-vehicle-orders/:vehicleId', auth.verify(), controllers_1.cust
 router.post('/make-complain/:customerId', auth.verify(), customer_1.Validator.makeComplaint(), val.validate(), controllers_1.customerCtrl.createComplaint());
 router.get('/get-all-pickup-orders', auth.verify(), controllers_1.customerCtrl.fetchCreatedOrders());
 router.get('/fetch-complaints', auth.verify(), controllers_1.customerCtrl.fetchComplaints());
-router.post('/approve-complaint', auth.verify(), controllers_1.customerCtrl.approveComplaint());
+router.post('/approve-complaint', auth.verify(), customer_1.Validator.approveComplaint(), val.validate(), controllers_1.customerCtrl.approveComplaint());
 router.get('/fetch-pending-complaint-approval', auth.verify(), controllers_1.customerCtrl.fetchPendingComplaintApproval());
 router.get('/fetch-approved-complaints', auth.verify(), controllers_1.customerCtrl.fetchApprovedComplaints());
 router.get('/resolve-complaint/:complaintId', auth.verify(), controllers_1.customerCtrl.resolveComplaint());

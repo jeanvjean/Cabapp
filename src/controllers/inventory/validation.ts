@@ -62,6 +62,33 @@ export class InventoryValidator extends Ctrl{
     return rules;
   }
 
+  static updateProduct():ValidationChain[]{
+    const rules = [
+      check('equipmentModel'),
+      check('equipmentType'),
+      check('asnlNumber'),
+      check('partNumber'),
+      check('productName')
+        .exists()
+        .withMessage('product name is required'),
+      check('quantity')
+        .isNumeric()
+        .withMessage('quantity should be a numeric value'),
+      check('unitCost')
+        .isNumeric()
+        .withMessage('Total cost should be numeric value'),
+      check('totalCost')
+        .isNumeric()
+        .withMessage('Total cost should be numeric value'),
+      check('reorderLevel'),
+      check('location'),
+      check('referer'),
+      check('division'),
+      check('supplier')
+    ]
+    return rules;
+  }
+
   static approveInput():ValidationChain[]{
     const rules = [
       check('password')
@@ -89,6 +116,97 @@ export class InventoryValidator extends Ctrl{
       check('direction')
         .exists()
         .withMessage('Direction is required in-coming/out-going')
+    ]
+    return rules;
+  }
+
+  static createSupplier():ValidationChain[]{
+    const rules = [
+      check('name')
+        .exists()
+        .withMessage('pass supplier name'),
+      check('productType')
+        .exists()
+        .withMessage('product type is required'),
+      check('supplierType')
+        .exists()
+        .withMessage('supplier type is required'),
+      check('email')
+        .exists()
+        .withMessage('email is required'),
+      check('phoneNumber')
+        .exists()
+        .withMessage('Phone number is required')
+        .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+        .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+      check('contactPerson')
+        .exists()
+        .withMessage('provide a contact person')
+    ]
+    return rules;
+  }
+
+  static updateSupplier():ValidationChain[]{
+    const rules = [
+      check('name'),
+      check('productType'),
+      check('supplierType'),
+      check('email')
+        .isEmail()
+        .withMessage('email has to be a valid email'),
+      check('phoneNumber')
+        .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+        .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+      check('contactPerson')
+    ]
+    return rules;
+  }
+
+  static validateProductDisbursal():ValidationChain[] {
+    const rules = [
+      check('products')
+        .exists()
+        .withMessage('products is reqired')
+        .isArray()
+        .withMessage('products must be an array'),
+      check('jobTag')
+        .exists()
+        .withMessage('Job tag is required'),
+      check('mrnDocument')
+        .exists()
+        .withMessage('please upload an mrn doc.'),
+      check('customer')
+        .exists()
+        .withMessage('please pass a customer')
+    ]
+    return rules;
+  }
+
+  static createBranch():ValidationChain[]{
+    const rules = [
+      check('name')
+        .exists()
+        .withMessage('please pass the name of the new Branch'),
+      check('branchAdmin')
+        .exists()
+        .withMessage('pass branch admin email')
+        .isEmail()
+        .withMessage('Branch admin has to be an email'),
+      check('location')
+        .exists()
+        .withMessage('provide location (address')
+    ]
+    return rules;
+  }
+
+  static approveGrn():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('status (approved/rejected) is required'),
+      check('grnId')
+        .exists()
+        .withMessage('Grn id is required')
     ]
     return rules;
   }

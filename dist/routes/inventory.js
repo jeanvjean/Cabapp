@@ -10,11 +10,11 @@ const val = new inventory_1.Validator();
 router.post('/create-product', inventory_1.Validator.validateProduct(), val.validate(), auth.verify(), controllers_1.productCtrl.createProduct());
 router.get('/fetch-products', auth.verify(), controllers_1.productCtrl.fetchProducts());
 router.get('/fetch-product/:id', controllers_1.productCtrl.fetchProduct());
-router.post('/create-supplier', auth.verify(), controllers_1.productCtrl.createSupplier());
+router.post('/create-supplier', auth.verify(), inventory_1.Validator.createSupplier(), val.validate(), controllers_1.productCtrl.createSupplier());
 router.post('/register-inventory', auth.verify(), inventory_1.Validator.validateUpdateInventory(), val.validate(), controllers_1.productCtrl.addInventory());
 router.get('/fetch-inventories', auth.verify(), controllers_1.productCtrl.fetchInventories());
 router.get('/fetch-inventory/:inventoryId', auth.verify(), controllers_1.productCtrl.fetchInventoryDetail());
-router.post('/disburse-products', auth.verify(), controllers_1.productCtrl.disburseProducts());
+router.post('/disburse-products', auth.verify(), inventory_1.Validator.validateProductDisbursal(), val.validate(), controllers_1.productCtrl.disburseProducts());
 router.post('/approve-disbursement', auth.verify(), inventory_1.Validator.approveInput(), val.validate(), controllers_1.productCtrl.approveDisbursement());
 router.get('/fetch-pending-disburse', auth.verify(), controllers_1.productCtrl.fetchDisburseApprovals());
 router.get('/fetch-pending-disburse-requests', auth.verify(), controllers_1.productCtrl.fetchUserDisburseRequests());
@@ -22,12 +22,12 @@ router.get('/fetch-disburse-requests', auth.verify(), controllers_1.productCtrl.
 router.get('/fetch-disbursement/:id', controllers_1.productCtrl.fetchDisbursement());
 router.get('/fetch-disbursement-report', auth.verify(), controllers_1.productCtrl.disburseReport());
 router.get('/fetch-restock-report', auth.verify(), controllers_1.productCtrl.restockReport());
-router.post('/create-branch', controllers_1.productCtrl.createBranch());
+router.post('/create-branch', inventory_1.Validator.createBranch(), val.validate(), controllers_1.productCtrl.createBranch());
 router.get('/fetch-branches', controllers_1.productCtrl.fetchBranches());
 router.get('/fetch-suppliers', auth.verify(), controllers_1.productCtrl.fetchSuppliers());
-router.post('/update-supplier/:supplierId', auth.verify(), controllers_1.productCtrl.updateSupplier());
+router.post('/update-supplier/:supplierId', auth.verify(), inventory_1.Validator.updateSupplier(), val.validate(), controllers_1.productCtrl.updateSupplier());
 router.delete('/remove-supplier/:supplierId', auth.verify(), controllers_1.productCtrl.deleteSupplier());
-router.post('/update-product/:productId', auth.verify(), controllers_1.productCtrl.updateProduct());
+router.post('/update-product/:productId', auth.verify(), inventory_1.Validator.updateProduct(), val.validate(), controllers_1.productCtrl.updateProduct());
 router.delete('/delete-product/:productId', auth.verify(), controllers_1.productCtrl.deleteProduct());
 router.get('/fetch-restock-requests', auth.verify(), controllers_1.productCtrl.fetchProductsRequest());
 router.get('/inventory-stats', auth.verify(), controllers_1.productCtrl.inventoryStats());
@@ -36,6 +36,6 @@ router.get('/supplier-details/:supplierId', auth.verify(), controllers_1.product
 router.get('/fetch-all-suppliers', auth.verify(), controllers_1.productCtrl.fetchAllSuppliers());
 router.get('/fetch-mrn-stats', auth.verify(), controllers_1.productCtrl.mrnStats());
 router.get('/fetch-grn-stats', auth.verify(), controllers_1.productCtrl.grnStats());
-router.post('/approve-grn', auth.verify(), controllers_1.productCtrl.approveGrn());
+router.post('/approve-grn', auth.verify(), inventory_1.Validator.approveGrn(), val.validate(), controllers_1.productCtrl.approveGrn());
 exports.default = router;
 //# sourceMappingURL=inventory.js.map

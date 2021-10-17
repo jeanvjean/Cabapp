@@ -608,7 +608,7 @@ class Product extends module_1.default {
                 }
                 let mrn = "MRN";
                 let init = "GRN";
-                let num = yield token_1.padLeft(initGrn, 6, "");
+                let num = token_1.padLeft(initGrn, 6, "");
                 //@ts-ignore
                 disbursement.grnNo = init + num;
                 disbursement.mrn = mrn + num;

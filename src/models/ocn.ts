@@ -28,8 +28,15 @@ export enum statuses {
     PENDING="pending"
 }
 
+export enum noteIcnType{
+    CUSTOMER="customer",
+    SUPPLIER="supplier",
+    WALKIN="walk-in"
+}
+
 export interface OutgoingCylinderInterface extends Document {
-    customer:Schema.Types.ObjectId,
+    customer?:Schema.Types.ObjectId
+    supplier?:Schema.Types.ObjectId
     cylinderType:string
     date:Date
     cylinders:Schema.Types.ObjectId[]
@@ -50,6 +57,7 @@ export interface OutgoingCylinderInterface extends Document {
     vehicle?:Schema.Types.ObjectId
     icnNo:string
     invoiceNo:string
+    type:noteIcnType
 }
 
 const ocnCylinderSchema = new Schema({
@@ -65,6 +73,7 @@ const ocnCylinderSchema = new Schema({
 
 const ocnSchema = new Schema({
     customer:{type:Schema.Types.ObjectId, ref:'customer'},
+    supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
     cylinderType:{type:String},
     date:{type:Date},
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
@@ -85,7 +94,8 @@ const ocnSchema = new Schema({
     totalAsnlCylinders:Number,
     totalCustomerCylinders:Number,
     vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"},
-    invoiceNo:String
+    invoiceNo:String,
+    type:{type:String, enum:Object.values(noteIcnType)}
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

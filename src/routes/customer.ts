@@ -43,6 +43,8 @@ router.get(
 router.post(
   '/mark-order/:orderId',
   auth.verify(),
+  Validator.markOrder(),
+  val.validate(),
   customerCtrl.markOrder()
 );
 
@@ -92,6 +94,8 @@ router.get(
 router.post(
   '/approve-complaint',
   auth.verify(),
+  Validator.approveComplaint(),
+  val.validate(),
   customerCtrl.approveComplaint()
 );
 

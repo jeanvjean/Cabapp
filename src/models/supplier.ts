@@ -34,7 +34,7 @@ export const supplierSchema = new Schema({
   name:{type:String},
   location:{type:String},
   contactPerson:{type:String},
-  emailAddress:{type:String},
+  email:{type:String},
   phoneNumber:{type:Number},
   supplierType:{type:String, enum:Object.values(SupplierTypes), required:true},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},

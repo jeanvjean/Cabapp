@@ -126,6 +126,29 @@ class CustomerValidation extends ctrl_1.default {
         ];
         return rules;
     }
+    static approveComplaint() {
+        const rules = [
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('Pass status approved/rejected'),
+            express_validator_1.check('id')
+                .exists()
+                .withMessage('complaind id is required'),
+            express_validator_1.check('password')
+                .exists()
+                .withMessage('users password is needed to authorize'),
+            express_validator_1.check('comment')
+        ];
+        return rules;
+    }
+    static markOrder() {
+        const rules = [
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('please provide complaint type'),
+        ];
+        return rules;
+    }
 }
 exports.default = CustomerValidation;
 //# sourceMappingURL=validator.js.map

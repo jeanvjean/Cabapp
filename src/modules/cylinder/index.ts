@@ -1123,10 +1123,14 @@ class Cylinder extends Module {
 
   public async approveCondemnation(data:ApproveCondemn, user:UserInterface):Promise<CondemnCylinderInterface|undefined>{
     try {
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
+      await passWdCheck(user, data.password);
+      // let loginUser = await this.user.findById(user._id).select('+password');
+      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+      // if(!matchPWD) {
+      //   throw new BadInputFormatException('Incorrect password... please check the password');
+      // }
+      if(!data.condemnId) {
+        throw new BadInputFormatException('condemn ID is required')
       }
       let condem = await this.condemn.findById(data.condemnId).populate(
         [
@@ -1583,6 +1587,9 @@ class Cylinder extends Module {
   public async approveTransfer(data:ApprovalInput, user:UserInterface):Promise<ApprovalResponse|undefined>{
     try {
       await passWdCheck(user, data.password);
+      if(!data.id) {
+        throw new BadInputFormatException('id is required')
+      }
       let transfer = await this.transfer.findById(data.id).populate(
         [
           {path:'initiator', model:'User'}

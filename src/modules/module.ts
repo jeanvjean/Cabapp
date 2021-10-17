@@ -56,6 +56,7 @@ export interface QueryInterface {
   productName?:string
   complaintStatus?:string
   cylinderStatus?:string
+  noteType?:string
 }
 
 /**

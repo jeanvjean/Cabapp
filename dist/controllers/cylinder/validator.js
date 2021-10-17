@@ -103,6 +103,17 @@ class CylinderValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static validateCylinderCondemnation() {
+        const rules = [
+            express_validator_1.check('cylinders')
+                .exists()
+                .withMessage('provide cylinder(s) to condemn')
+                .isArray()
+                .withMessage('Cylinders must be an array'),
+            express_validator_1.check('comment')
+        ];
+        return rules;
+    }
     static validateGasChange() {
         const rules = [
             express_validator_1.check('cylinders')

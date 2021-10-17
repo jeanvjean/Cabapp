@@ -373,10 +373,10 @@ class OutGoingCylinder extends Module{
     public async fetchOcns(query:QueryInterface, user:UserInterface):Promise<OutgoingCylinderInterface| undefined>{
       try {
         const ObjectId = mongoose.Types.ObjectId;
-          const { search, filter, page, limit } = query;
+          const { search, filter, page, limit, noteType, type } = query;
           let options = {
             page: page||1,
-            limit:limit||1,
+            limit:limit||10,
             populate:[
               {path:"customer", model:"customer"},
               {path:"branch", model:"branches"},
@@ -392,10 +392,19 @@ class OutGoingCylinder extends Module{
             or.push({approvalStatus:new RegExp(search,'gi')})
             or.push({icnNo: new RegExp(search, "gi")})
             or.push({ocnNo:new RegExp(search, 'gi')})
+            or.push({noteType: new RegExp(search, 'gi')})
           }
           if(filter){
             //@ts-ignore
             q = {...q, status: filter}
+          }
+          if(noteType) {
+            //@ts-ignore
+            q = {...q, noteType: noteType}
+          }
+          if(type) {
+            //@ts-ignore
+            q = {...q, type: type}
           }
           if(or.length > 0) {
             //@ts-ignore

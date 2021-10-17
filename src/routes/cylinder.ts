@@ -106,6 +106,8 @@ router.get(
 router.post(
   '/condemn-cylinders',
   auth.verify(),
+  Validator.validateCylinderCondemnation(),
+  val.validate(),
   cylinderCtrl.condemnCylinder()
 );
 

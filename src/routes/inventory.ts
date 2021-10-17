@@ -30,6 +30,8 @@ router.get(
 router.post(
   '/create-supplier',
   auth.verify(),
+  Validator.createSupplier(),
+  val.validate(),
   productCtrl.createSupplier()
 );
 
@@ -56,6 +58,8 @@ router.get(
 router.post(
   '/disburse-products',
   auth.verify(),
+  Validator.validateProductDisbursal(),
+  val.validate(),
   productCtrl.disburseProducts()
 );
 
@@ -104,6 +108,8 @@ router.get(
 
 router.post(
   '/create-branch',
+  Validator.createBranch(),
+  val.validate(),
   productCtrl.createBranch()
 );
 
@@ -120,6 +126,8 @@ router.get(
 router.post(
   '/update-supplier/:supplierId',
   auth.verify(),
+  Validator.updateSupplier(),
+  val.validate(),
   productCtrl.updateSupplier()
 );
 
@@ -132,6 +140,8 @@ router.delete(
 router.post(
   '/update-product/:productId',
   auth.verify(),
+  Validator.updateProduct(),
+  val.validate(),
   productCtrl.updateProduct()
 );
 
@@ -186,6 +196,8 @@ router.get(
 router.post(
   '/approve-grn',
   auth.verify(),
+  Validator.approveGrn(),
+  val.validate(),
   productCtrl.approveGrn()
 );
 

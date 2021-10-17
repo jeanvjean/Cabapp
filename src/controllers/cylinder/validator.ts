@@ -104,6 +104,18 @@ class CylinderValidator extends Ctrl{
     return rules;
   }
 
+  static validateCylinderCondemnation():ValidationChain[]{
+    const rules = [
+      check('cylinders')
+        .exists()
+        .withMessage('provide cylinder(s) to condemn')
+        .isArray()
+        .withMessage('Cylinders must be an array'),
+      check('comment')
+    ]
+    return rules;
+  }
+
   static validateGasChange():ValidationChain[]{
     const rules = [
       check('cylinders')

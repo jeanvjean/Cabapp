@@ -66,6 +66,32 @@ class InventoryValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static updateProduct() {
+        const rules = [
+            express_validator_1.check('equipmentModel'),
+            express_validator_1.check('equipmentType'),
+            express_validator_1.check('asnlNumber'),
+            express_validator_1.check('partNumber'),
+            express_validator_1.check('productName')
+                .exists()
+                .withMessage('product name is required'),
+            express_validator_1.check('quantity')
+                .isNumeric()
+                .withMessage('quantity should be a numeric value'),
+            express_validator_1.check('unitCost')
+                .isNumeric()
+                .withMessage('Total cost should be numeric value'),
+            express_validator_1.check('totalCost')
+                .isNumeric()
+                .withMessage('Total cost should be numeric value'),
+            express_validator_1.check('reorderLevel'),
+            express_validator_1.check('location'),
+            express_validator_1.check('referer'),
+            express_validator_1.check('division'),
+            express_validator_1.check('supplier')
+        ];
+        return rules;
+    }
     static approveInput() {
         const rules = [
             express_validator_1.check('password')
@@ -92,6 +118,92 @@ class InventoryValidator extends ctrl_1.default {
             express_validator_1.check('direction')
                 .exists()
                 .withMessage('Direction is required in-coming/out-going')
+        ];
+        return rules;
+    }
+    static createSupplier() {
+        const rules = [
+            express_validator_1.check('name')
+                .exists()
+                .withMessage('pass supplier name'),
+            express_validator_1.check('productType')
+                .exists()
+                .withMessage('product type is required'),
+            express_validator_1.check('supplierType')
+                .exists()
+                .withMessage('supplier type is required'),
+            express_validator_1.check('email')
+                .exists()
+                .withMessage('email is required'),
+            express_validator_1.check('phoneNumber')
+                .exists()
+                .withMessage('Phone number is required')
+                .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+                .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+            express_validator_1.check('contactPerson')
+                .exists()
+                .withMessage('provide a contact person')
+        ];
+        return rules;
+    }
+    static updateSupplier() {
+        const rules = [
+            express_validator_1.check('name'),
+            express_validator_1.check('productType'),
+            express_validator_1.check('supplierType'),
+            express_validator_1.check('email')
+                .isEmail()
+                .withMessage('email has to be a valid email'),
+            express_validator_1.check('phoneNumber')
+                .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
+                .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
+            express_validator_1.check('contactPerson')
+        ];
+        return rules;
+    }
+    static validateProductDisbursal() {
+        const rules = [
+            express_validator_1.check('products')
+                .exists()
+                .withMessage('products is reqired')
+                .isArray()
+                .withMessage('products must be an array'),
+            express_validator_1.check('jobTag')
+                .exists()
+                .withMessage('Job tag is required'),
+            express_validator_1.check('mrnDocument')
+                .exists()
+                .withMessage('please upload an mrn doc.'),
+            express_validator_1.check('customer')
+                .exists()
+                .withMessage('please pass a customer')
+        ];
+        return rules;
+    }
+    static createBranch() {
+        const rules = [
+            express_validator_1.check('name')
+                .exists()
+                .withMessage('please pass the name of the new Branch'),
+            express_validator_1.check('branchAdmin')
+                .exists()
+                .withMessage('pass branch admin email')
+                .isEmail()
+                .withMessage('Branch admin has to be an email'),
+            express_validator_1.check('location')
+                .exists()
+                .withMessage('provide location (address')
+        ];
+        return rules;
+    }
+    static approveGrn() {
+        const rules = [
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('status (approved/rejected) is required'),
+            express_validator_1.check('grnId')
+                .exists()
+                .withMessage('Grn id is required')
         ];
         return rules;
     }

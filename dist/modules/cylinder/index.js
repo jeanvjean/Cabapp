@@ -610,7 +610,7 @@ class Cylinder extends module_1.default {
                     or.push({ 'gasVolumeContent.volume': new RegExp(gasVolume, 'gi') });
                 }
                 if (waterCapacity) {
-                    or.push({ waterCapacity: new RegExp(waterCapacity, 'gi') });
+                    or.push({ 'waterCapacity.volume': new RegExp(waterCapacity, 'gi') });
                 }
                 if (search) {
                     or.push({ cylinderStatus: new RegExp(search || "", 'gi') });
@@ -910,10 +910,14 @@ class Cylinder extends module_1.default {
     approveCondemnation(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
+                yield token_1.passWdCheck(user, data.password);
+                // let loginUser = await this.user.findById(user._id).select('+password');
+                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+                // if(!matchPWD) {
+                //   throw new BadInputFormatException('Incorrect password... please check the password');
+                // }
+                if (!data.condemnId) {
+                    throw new exceptions_1.BadInputFormatException('condemn ID is required');
                 }
                 let condem = yield this.condemn.findById(data.condemnId).populate([
                     { path: 'initiator', model: 'User' }
@@ -1377,6 +1381,9 @@ class Cylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield token_1.passWdCheck(user, data.password);
+                if (!data.id) {
+                    throw new exceptions_1.BadInputFormatException('id is required');
+                }
                 let transfer = yield this.transfer.findById(data.id).populate([
                     { path: 'initiator', model: 'User' }
                 ]);

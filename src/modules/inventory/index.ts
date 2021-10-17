@@ -92,7 +92,7 @@ type NewInventory={
 }
 
 interface NewDisburseInterface{
-  products:DisburseProduct[]
+  products:DisburseProductInterface['products']
   releasedBy:DisburseProductInterface['releasedBy']
   releasedTo:DisburseProductInterface['releasedTo']
   comment:string
@@ -699,7 +699,7 @@ class Product extends Module{
       }
       let mrn = "MRN"
       let init = "GRN"
-      let num = await padLeft(initGrn, 6, "");
+      let num = padLeft(initGrn, 6, "");
       //@ts-ignore
       disbursement.grnNo = init+num;
       disbursement.mrn = mrn+num;

@@ -358,7 +358,7 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter, page, limit } = query;
+                const { search, filter, page, limit, type } = query;
                 let options = {
                     page: page || 1,
                     limit: limit || 1,
@@ -377,10 +377,15 @@ class OutGoingCylinder extends module_1.default {
                     or.push({ approvalStatus: new RegExp(search, 'gi') });
                     or.push({ icnNo: new RegExp(search, "gi") });
                     or.push({ ocnNo: new RegExp(search, 'gi') });
+                    or.push({ noteType: new RegExp(search, 'gi') });
                 }
                 if (filter) {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { status: filter });
+                }
+                if (type) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { noteType: type });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

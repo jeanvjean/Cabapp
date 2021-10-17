@@ -125,6 +125,31 @@ class CustomerValidation extends Ctrl{
     ]
     return rules;
   }
+
+  static approveComplaint():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('Pass status approved/rejected'),
+      check('id')
+        .exists()
+        .withMessage('complaind id is required'),
+      check('password')
+        .exists()
+        .withMessage('users password is needed to authorize'),
+      check('comment')
+    ]
+    return rules;
+  }
+
+  static markOrder():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('please provide complaint type'),
+    ]
+    return rules;
+  }
 }
 
 export default CustomerValidation;

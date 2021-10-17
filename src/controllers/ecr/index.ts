@@ -1,6 +1,7 @@
 import { RequestHandler, Request, Response, response } from "express";
 import EmptyCylinderModule from "../../modules/ecr";
 import Ctrl from "../ctrl";
+import Validator from './validator';
 
 
 
@@ -98,7 +99,8 @@ class EcrController extends Ctrl{
         return async(req:Request, res:Response)=>{
             try {
                 let { tecrId, otp } = req.params;
-                const data = await this.module.completeTecr({tecrId, otp});
+                //@ts-ignore
+                const data = await this.module.completeTecr({tecrId, otp}, req.user);
                 this.ok(res, 'approved', data);
             } catch (e) {
                 this.handleError(e, req, res);
@@ -106,5 +108,7 @@ class EcrController extends Ctrl{
         }
     }
 }
+
+export { Validator }
 
 export default EcrController;

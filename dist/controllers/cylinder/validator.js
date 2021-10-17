@@ -65,7 +65,28 @@ class CylinderValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('Gas Volume Content required'),
             express_validator_1.check('cylinderNumber'),
-            express_validator_1.check('holdingTime')
+            express_validator_1.check('holdingTime'),
+            express_validator_1.check('purchaseCost')
+                .exists()
+                .withMessage('pass purchase cost object')
+        ];
+        return rules;
+    }
+    static updateCylinder() {
+        const rules = [
+            express_validator_1.check('cylinderType'),
+            express_validator_1.check('waterCapacity'),
+            express_validator_1.check('dateManufactured'),
+            express_validator_1.check('assignedTo'),
+            express_validator_1.check('gasType'),
+            express_validator_1.check('standardColor'),
+            express_validator_1.check('assignedNumber'),
+            express_validator_1.check('testingPresure'),
+            express_validator_1.check('fillingPreasure'),
+            express_validator_1.check('gasVolumeContent'),
+            express_validator_1.check('cylinderNumber'),
+            express_validator_1.check('holdingTime'),
+            express_validator_1.check('purchaseCost')
         ];
         return rules;
     }
@@ -79,6 +100,25 @@ class CylinderValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('type of transfer (Permanent/Temporary)'),
             express_validator_1.check('comment')
+        ];
+        return rules;
+    }
+    static validateGasChange() {
+        const rules = [
+            express_validator_1.check('cylinders')
+                .exists()
+                .withMessage('cylinders are required')
+                .isArray()
+                .withMessage('cylinders must be an array'),
+            express_validator_1.check('comment')
+                .exists()
+                .withMessage('comment is required'),
+            express_validator_1.check('gasType')
+                .exists()
+                .withMessage('gas type is required for the change'),
+            express_validator_1.check('cylinderType')
+                .exists()
+                .withMessage('cylinderType is required')
         ];
         return rules;
     }

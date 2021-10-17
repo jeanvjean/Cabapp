@@ -10,7 +10,10 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 type ocnCylinders = {
     cylinderNo:string
-    volume:string
+    volume:{
+        volume:number,
+        unit:string
+    }
     unitPrice?:number
     price?:number
 }
@@ -51,7 +54,10 @@ export interface OutgoingCylinderInterface extends Document {
 
 const ocnCylinderSchema = new Schema({
     cylinderNo:String,
-    volume:String,
+    volume:{
+        volume:Number,
+        unit:String
+    },
     unitPrice:Number,
     price:Number
 });

@@ -53,21 +53,26 @@ interface NewCylinderRegisterationInterface{
   fillingPreasure:RegisteredCylinderInterface['fillingPreasure'],
   gasVolumeContent:RegisteredCylinderInterface['gasVolumeContent'],
   cylinderNumber:RegisteredCylinderInterface['cylinderNumber'],
+  purchaseDate:RegisteredCylinderInterface['purchaseDate']
+  purchaseCost:RegisteredCylinderInterface['purchaseCost']
   owner:RegisteredCylinderInterface['owner']
 }
 
 interface UpdateRegisteredCylinder {
-  cylinderType?:RegisteredCylinderInterface['cylinderType'],
-  waterCapacity?:RegisteredCylinderInterface['waterCapacity'],
-  dateManufactured?:RegisteredCylinderInterface['dateManufactured'],
+  cylinderType:RegisteredCylinderInterface['cylinderType'],
+  waterCapacity:RegisteredCylinderInterface['waterCapacity'],
+  dateManufactured:RegisteredCylinderInterface['dateManufactured'],
   assignedTo?:RegisteredCylinderInterface['assignedTo'],
-  gasType?:RegisteredCylinderInterface['gasType'],
-  standardColor?:RegisteredCylinderInterface['standardColor'],
-  assignedNumber?:RegisteredCylinderInterface['assignedNumber'],
-  testingPresure?:RegisteredCylinderInterface['testingPresure'],
-  fillingPreasure?:RegisteredCylinderInterface['fillingPreasure'],
-  gasVolumeContent?:RegisteredCylinderInterface['gasVolumeContent'],
-  cylinderNumber?:RegisteredCylinderInterface['cylinderNumber'],
+  gasType:RegisteredCylinderInterface['gasType'],
+  standardColor:RegisteredCylinderInterface['standardColor'],
+  assignedNumber:RegisteredCylinderInterface['assignedNumber'],
+  testingPresure:RegisteredCylinderInterface['testingPresure'],
+  fillingPreasure:RegisteredCylinderInterface['fillingPreasure'],
+  gasVolumeContent:RegisteredCylinderInterface['gasVolumeContent'],
+  cylinderNumber:RegisteredCylinderInterface['cylinderNumber'],
+  purchaseDate:RegisteredCylinderInterface['purchaseDate']
+  purchaseCost:RegisteredCylinderInterface['purchaseCost']
+  owner:RegisteredCylinderInterface['owner']
   cylinderId:string
 }
 
@@ -262,28 +267,34 @@ class Cylinder extends Module {
       this.handleException(e);
     }
   }
-
+//@ts-ignore
   public async regCylinder(data:NewCylinderRegisterationInterface, user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
     try {
       let foundCylinder
-      if(data.cylinderNumber) {
-        foundCylinder = await this.registerCylinder.findOne({cylinderNumber:data.cylinderNumber});
-      }else if(data.assignedNumber) {
-        foundCylinder = await this.registerCylinder.findOne({assignedNumber:data.assignedNumber});
+      if(data.cylinderNumber && data.assignedNumber) {
+        foundCylinder = await this.registerCylinder.findOne(
+          {
+            cylinderNumber:data.cylinderNumber, 
+            assignedNumber:data.assignedNumber
+          });
       }
       if(foundCylinder) {
         throw new BadInputFormatException('this cylinder has been registered');
       }
       let manDate = new Date(data.dateManufactured);
       let gName = await this.cylinder.findById(data.gasType);
+      if(!gName) {
+        throw new BadInputFormatException('select a valid gasType')
+      }
+      // console.log(gName, data);
       let payload = {
         ...data,
-        dateManufactured:manDate.toISOString(),
+        purchaseDate:new Date(data.purchaseDate).toISOString(),
+        dateManufactured:new Date(data.dateManufactured).toISOString(),
         branch:user.branch,
-        gasName:gName?.gasName
-        // cylNo:initNum
+        gasName:gName.gasName
       }
-      let newRegistration:NewCylinderRegisterationInterface|undefined = await this.registerCylinder.create(payload);
+      let newRegistration = await this.registerCylinder.create(payload);
       await createLog({
         user:user._id,
         activities:{
@@ -322,6 +333,9 @@ class Cylinder extends Module {
     try {
       const change = new this.change_gas({...data, branch:user.branch, initiator:user._id});
       let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
+      if(change.cylinderType == 'assigned' && !change.assignedTo) {
+        throw new BadInputFormatException('Assigned To is required to proceed')
+      }
       change.nextApprovalOfficer = hod?._id
       let track = {
         title:"Condemn cylinders",
@@ -367,18 +381,19 @@ class Cylinder extends Module {
 
   public async approveCylinderChange(data:CylinderChangeApproval, user:UserInterface) :Promise<ChangeCylinderInterface|undefined>{
     try {
-      let loginUser = await this.user.findById(user._id).select('+password');
-      let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      if(!matchPWD) {
-        throw new BadInputFormatException('Incorrect password... please check the password');
-      }
+      await passWdCheck(user, data.password);
+      // let loginUser = await this.user.findById(user._id).select('+password');
+      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+      // if(!matchPWD) {
+      //   throw new BadInputFormatException('Incorrect password... please check the password');
+      // }
       let change = await this.change_gas.findById(data.changeId).populate(
         [
           {path:'initiator', model:'User'}
         ]
       );
       if(!change){
-        throw new BadInputFormatException('cylinder change request not found');
+        throw new BadInputFormatException('cylinder change request not found, pass a valid request id');
       }
       if(data.status == ApprovalStatus.REJECTED) {
         if(change?.approvalStage == stagesOfApproval.STAGE1){
@@ -772,11 +787,11 @@ class Cylinder extends Module {
       }
       if(gasVolume) {
         or.push(
-          {gasVolumeContent: new RegExp(gasVolume, 'gi')}
+          {'gasVolumeContent.volume': new RegExp(gasVolume, 'gi')}
         )
       }
       if(waterCapacity) {
-        or.push({waterCapacity: new RegExp(waterCapacity, 'gi')})
+        or.push({'waterCapacity.volume': new RegExp(waterCapacity, 'gi')})
       }
       if(search) {
         or.push({cylinderStatus: new RegExp(search || "", 'gi')});

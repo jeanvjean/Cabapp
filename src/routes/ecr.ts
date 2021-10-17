@@ -1,13 +1,17 @@
 import { Router as expressRouter } from "express";
 import { ecrCtrl } from "../controllers";
 import Auth from '../middlewares/authentication';
+import { Validator } from '../controllers/ecr';
 const auth = new Auth();
+const val = new Validator()
 
 const router:expressRouter = expressRouter();
 
 router.post(
     '/create-ecr',
     auth.verify(),
+    Validator.createEcr(),
+    val.validate(),
     ecrCtrl.createEcr()
 );
 
@@ -20,6 +24,8 @@ router.get(
 router.post(
     '/approve-ecr',
     auth.verify(),
+    Validator.approveEcr(),
+    val.validate(),
     ecrCtrl.approveEcr()
 );
 

@@ -91,22 +91,27 @@ class Cylinder extends module_1.default {
             }
         });
     }
+    //@ts-ignore
     regCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let foundCylinder;
-                if (data.cylinderNumber) {
-                    foundCylinder = yield this.registerCylinder.findOne({ cylinderNumber: data.cylinderNumber });
-                }
-                else if (data.assignedNumber) {
-                    foundCylinder = yield this.registerCylinder.findOne({ assignedNumber: data.assignedNumber });
+                if (data.cylinderNumber && data.assignedNumber) {
+                    foundCylinder = yield this.registerCylinder.findOne({
+                        cylinderNumber: data.cylinderNumber,
+                        assignedNumber: data.assignedNumber
+                    });
                 }
                 if (foundCylinder) {
                     throw new exceptions_1.BadInputFormatException('this cylinder has been registered');
                 }
                 let manDate = new Date(data.dateManufactured);
                 let gName = yield this.cylinder.findById(data.gasType);
-                let payload = Object.assign(Object.assign({}, data), { dateManufactured: manDate.toISOString(), branch: user.branch, gasName: gName === null || gName === void 0 ? void 0 : gName.gasName });
+                if (!gName) {
+                    throw new exceptions_1.BadInputFormatException('select a valid gasType');
+                }
+                // console.log(gName, data);
+                let payload = Object.assign(Object.assign({}, data), { purchaseDate: new Date(data.purchaseDate).toISOString(), dateManufactured: new Date(data.dateManufactured).toISOString(), branch: user.branch, gasName: gName.gasName });
                 let newRegistration = yield this.registerCylinder.create(payload);
                 yield logs_1.createLog({
                     user: user._id,
@@ -146,6 +151,9 @@ class Cylinder extends module_1.default {
             try {
                 const change = new this.change_gas(Object.assign(Object.assign({}, data), { branch: user.branch, initiator: user._id }));
                 let hod = yield this.user.findOne({ role: user.role, subrole: 'head of department', branch: user.branch });
+                if (change.cylinderType == 'assigned' && !change.assignedTo) {
+                    throw new exceptions_1.BadInputFormatException('Assigned To is required to proceed');
+                }
                 change.nextApprovalOfficer = hod === null || hod === void 0 ? void 0 : hod._id;
                 let track = {
                     title: "Condemn cylinders",
@@ -193,16 +201,17 @@ class Cylinder extends module_1.default {
     approveCylinderChange(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
-                }
+                yield token_1.passWdCheck(user, data.password);
+                // let loginUser = await this.user.findById(user._id).select('+password');
+                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+                // if(!matchPWD) {
+                //   throw new BadInputFormatException('Incorrect password... please check the password');
+                // }
                 let change = yield this.change_gas.findById(data.changeId).populate([
                     { path: 'initiator', model: 'User' }
                 ]);
                 if (!change) {
-                    throw new exceptions_1.BadInputFormatException('cylinder change request not found');
+                    throw new exceptions_1.BadInputFormatException('cylinder change request not found, pass a valid request id');
                 }
                 if (data.status == transferCylinder_1.ApprovalStatus.REJECTED) {
                     if ((change === null || change === void 0 ? void 0 : change.approvalStage) == transferCylinder_1.stagesOfApproval.STAGE1) {
@@ -598,7 +607,7 @@ class Cylinder extends module_1.default {
                     q = Object.assign(Object.assign({}, q), { owner: owner });
                 }
                 if (gasVolume) {
-                    or.push({ gasVolumeContent: new RegExp(gasVolume, 'gi') });
+                    or.push({ 'gasVolumeContent.volume': new RegExp(gasVolume, 'gi') });
                 }
                 if (waterCapacity) {
                     or.push({ waterCapacity: new RegExp(waterCapacity, 'gi') });

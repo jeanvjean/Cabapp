@@ -86,6 +86,8 @@ router.get(
 router.post(
   '/update-reg-cylinder/:cylinderId',
   auth.verify(),
+  Validator.updateCylinder(),
+  val.validate(),
   cylinderCtrl.updateRegCylinder()
 );
 
@@ -175,12 +177,16 @@ router.get(
 router.post(
   '/approve-condemn-cylinder',
   auth.verify(),
+  Validator.validateApproval(),
+  val.validate(),
   cylinderCtrl.approveCondemnCylinder()
 );
 
 router.post(
   '/change-cylinder-type',
   auth.verify(),
+  Validator.validateGasChange(),
+  val.validate(),
   cylinderCtrl.changeCylinderType()
 );
 
@@ -193,6 +199,8 @@ router.get(
 router.post(
   '/approve-change-request',
   auth.verify(),
+  Validator.validateApproval(),
+  val.validate(),
   cylinderCtrl.approveChangeCylinder()
 );
 

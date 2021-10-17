@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Validator = void 0;
 const ctrl_1 = require("../ctrl");
+const validator_1 = require("./validator");
+exports.Validator = validator_1.default;
 class EcrController extends ctrl_1.default {
     constructor(module) {
         super();
@@ -101,7 +104,8 @@ class EcrController extends ctrl_1.default {
         return (req, res) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let { tecrId, otp } = req.params;
-                const data = yield this.module.completeTecr({ tecrId, otp });
+                //@ts-ignore
+                const data = yield this.module.completeTecr({ tecrId, otp }, req.user);
                 this.ok(res, 'approved', data);
             }
             catch (e) {

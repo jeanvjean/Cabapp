@@ -250,7 +250,7 @@ class EmptyCylinderModule extends Module {
         }
     }
     //@ts-ignore
-    public async completeTecr(input:tecrApprovalInput):Promise<EmptyCylinderInterface|undefined>{
+    public async completeTecr(input:tecrApprovalInput, user:UserInterface):Promise<EmptyCylinderInterface|undefined>{
         try {
             let { tecrId, otp } = input;
             let data = await this.emptyCylinder.findById(tecrId);
@@ -260,11 +260,14 @@ class EmptyCylinderModule extends Module {
             if(data.otp !== otp) {
                 throw new BadInputFormatException('invalid otp provided');
             }
-
-            data.driverStatus = EcrApproval.APPROVED;
-
+            data.driverStatus = EcrApproval.APPROVED;            
             await data.save();
-
+            let notifyUser = await this.user.findOne({role:'security', subrole:"head of department"});
+            await new Notify().push({
+                subject: "New TECR",
+                content: `A truck ECR has been registered by ${user.name}, click the link to view: ${env.FRONTEND_URL}/tecr-details/${data.ecrNo}`,
+                user: notifyUser
+            })
             return Promise.resolve(data);
         } catch (e) {
             this.handleException(e)

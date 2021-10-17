@@ -34,7 +34,8 @@ const productionSchema = new mongoose_1.Schema({
     approvalStage: { type: String },
     comments: { type: [transferCylinder_1.commentSchema] },
     produced: { type: Boolean, default: false },
-    priority: { type: String, enum: Object.values(emptyCylinder_1.Priority), default: emptyCylinder_1.Priority.REGULAR }
+    priority: { type: String, enum: Object.values(emptyCylinder_1.Priority), default: emptyCylinder_1.Priority.REGULAR },
+    initNum: Number
 });
 productionSchema.plugin(mongoosePaginate);
 productionSchema.plugin(aggregatePaginate);

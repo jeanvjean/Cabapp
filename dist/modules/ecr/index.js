@@ -223,7 +223,7 @@ class EmptyCylinderModule extends module_1.default {
         });
     }
     //@ts-ignore
-    completeTecr(input) {
+    completeTecr(input, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let { tecrId, otp } = input;
@@ -236,6 +236,12 @@ class EmptyCylinderModule extends module_1.default {
                 }
                 data.driverStatus = emptyCylinder_1.EcrApproval.APPROVED;
                 yield data.save();
+                let notifyUser = yield this.user.findOne({ role: 'security', subrole: "head of department" });
+                yield new mail_1.default().push({
+                    subject: "New TECR",
+                    content: `A truck ECR has been registered by ${user.name}, click the link to view: ${static_1.default.FRONTEND_URL}/tecr-details/${data.ecrNo}`,
+                    user: notifyUser
+                });
                 return Promise.resolve(data);
             }
             catch (e) {

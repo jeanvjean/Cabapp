@@ -29,7 +29,10 @@ const trackingSchema = new mongoose_1.Schema({
 });
 exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
-    waterCapacity: { type: String },
+    waterCapacity: {
+        volume: Number,
+        unit: String
+    },
     dateManufactured: { type: Date },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     gasType: { type: mongoose_1.Schema.Types.ObjectId, ref: 'cylinder' },
@@ -38,7 +41,10 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     assignedNumber: { type: String },
     testingPresure: { type: String },
     fillingPreasure: { type: String },
-    gasVolumeContent: { type: String },
+    gasVolumeContent: {
+        volume: Number,
+        unit: String
+    },
     cylinderNumber: { type: String },
     condition: { type: String, enum: Object.values(cylinder_1.CylinderCondition), default: cylinder_1.CylinderCondition.GOOD },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
@@ -49,7 +55,10 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderStatus: { type: String, enum: Object.values(walk_in_customers_1.WalkinCustomerStatus), default: walk_in_customers_1.WalkinCustomerStatus.EMPTY },
     cylNo: { type: Number },
     available: { type: Boolean, default: true },
-    purchaseCost: { type: Number },
+    purchaseCost: {
+        cost: Number,
+        unit: String
+    },
     purchaseDate: { type: Date },
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     supplierType: { type: String, enum: Object.values(supplier_1.SupplierTypes) },

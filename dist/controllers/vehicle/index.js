@@ -105,7 +105,7 @@ class VehicleController extends ctrl_1.default {
             try {
                 //@ts-ignore
                 const data = yield this.module.recordRoute(Object.assign(Object.assign({}, req.body), { vehicle: req.params.vehicleId }), req.params, req.user);
-                this.ok(res, 'Recorded', data);
+                this.ok(res, data === null || data === void 0 ? void 0 : data.message, data);
             }
             catch (e) {
                 this.handleError(e, req, res);

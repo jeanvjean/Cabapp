@@ -45,7 +45,10 @@ export interface RegisteredCylinderInterface extends Document{
   /**
    * @param waterCapacity cylinder water capacity
    */
-  waterCapacity:string
+  waterCapacity:{
+    volume:number,
+    unit:string
+  }
 
   /**
    * @param dateManufactured manufacturing date of cylinder
@@ -95,8 +98,10 @@ export interface RegisteredCylinderInterface extends Document{
    * @param gasVolumeContent
    */
 
-  gasVolumeContent:string
-
+  gasVolumeContent:{
+    volume:number
+    unit:string
+  }
   /**
    * @param cylinderNumber
    */
@@ -127,7 +132,10 @@ export interface RegisteredCylinderInterface extends Document{
 
   available:boolean
 
-  purchaseCost:number
+  purchaseCost:{
+    cost:number,
+    unit:string
+  }
 
   purchaseDate:number
 
@@ -161,7 +169,10 @@ const trackingSchema = new Schema({
 export const registerCylinderSchema = new Schema({
   cylinderType:{type:String, enum:Object.values(TypesOfCylinders), default:TypesOfCylinders.BUFFER},
 
-  waterCapacity:{type:String},
+  waterCapacity:{
+    volume:Number,
+    unit:String
+  },
 
   dateManufactured:{type:Date},
 
@@ -179,7 +190,10 @@ export const registerCylinderSchema = new Schema({
 
   fillingPreasure:{type:String},
 
-  gasVolumeContent:{type:String},
+  gasVolumeContent:{
+    volume:Number,
+    unit:String
+  },
 
   cylinderNumber:{type:String},
 
@@ -201,7 +215,10 @@ export const registerCylinderSchema = new Schema({
 
   available:{type:Boolean, default:true},
 
-  purchaseCost:{type:Number},
+  purchaseCost:{
+    cost:Number,
+    unit:String
+  },
 
   purchaseDate:{type:Date},
 
@@ -209,7 +226,7 @@ export const registerCylinderSchema = new Schema({
 
   supplierType:{type:String, enum:Object.values(SupplierTypes)},
 
-  owner:{type:String, enum:Object.values(cylinderHolder) },
+  owner:{ type:String, enum:Object.values(cylinderHolder) },
 
   tracking:[trackingSchema]
 },{

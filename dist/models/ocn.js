@@ -17,7 +17,10 @@ var statuses;
 })(statuses = exports.statuses || (exports.statuses = {}));
 const ocnCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    volume: String,
+    volume: {
+        volume: Number,
+        unit: String
+    },
     unitPrice: Number,
     price: Number
 });

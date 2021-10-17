@@ -1,5 +1,6 @@
 import { Request, Response, RequestHandler, NextFunction } from 'express';
-import { check, ValidationChain, validationResult } from 'express-validator';
+import { body, check, ValidationChain, validationResult } from 'express-validator';
+import { values } from 'lodash';
 import { BadInputFormatException } from '../../exceptions';
 import Ctrl from '../ctrl';
 
@@ -62,7 +63,29 @@ class CylinderValidator extends Ctrl{
         .exists()
         .withMessage('Gas Volume Content required'),
       check('cylinderNumber'),
-      check('holdingTime')
+      check('holdingTime'),
+      check('purchaseCost')
+        .exists()
+        .withMessage('pass purchase cost object')
+    ]
+    return rules;
+  }
+
+  static updateCylinder():ValidationChain[]{
+    const rules = [
+      check('cylinderType'),
+      check('waterCapacity'),
+      check('dateManufactured'),
+      check('assignedTo'),
+      check('gasType'),
+      check('standardColor'),
+      check('assignedNumber'),
+      check('testingPresure'),
+      check('fillingPreasure'),
+      check('gasVolumeContent'),
+      check('cylinderNumber'),
+      check('holdingTime'),
+      check('purchaseCost')
     ]
     return rules;
   }
@@ -77,6 +100,26 @@ class CylinderValidator extends Ctrl{
         .exists()
         .withMessage('type of transfer (Permanent/Temporary)'),
       check('comment')
+    ]
+    return rules;
+  }
+
+  static validateGasChange():ValidationChain[]{
+    const rules = [
+      check('cylinders')
+        .exists()
+        .withMessage('cylinders are required')
+        .isArray()
+        .withMessage('cylinders must be an array'),
+      check('comment')
+        .exists()
+        .withMessage('comment is required'),
+      check('gasType')
+        .exists()
+        .withMessage('gas type is required for the change'),
+      check('cylinderType')
+        .exists()
+        .withMessage('cylinderType is required')
     ]
     return rules;
   }

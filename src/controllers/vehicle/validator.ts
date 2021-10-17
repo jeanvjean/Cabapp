@@ -23,7 +23,7 @@ class VehicleValidator extends Ctrl{
     }
   }
 
-  validateInput():ValidationChain[]{
+  static validateInput():ValidationChain[]{
     const rules = [
       check('vehicleType')
         .exists()
@@ -60,6 +60,137 @@ class VehicleValidator extends Ctrl{
       check('grossWeight'),
       check('netWeight'),
       check('disposal'),
+    ]
+    return rules;
+  }
+
+  static validateVehicleUpdate():ValidationChain[]{
+    const rules = [
+      check('vehicleType'),
+      check('manufacturer'),
+      check('vModel'),
+      check('regNo'),
+      check('acqisistionDate')
+        .toDate()
+        .withMessage('Acquisition date must be a date type'),
+      check('mileageDate'),
+      check('currMile'),
+      check('assignedTo'),
+      check('vehCategory'),
+      check('tankCapacity'),
+      check('batteryCapacity'),
+      check('fuelType'),
+      check('grossWeight'),
+      check('netWeight'),
+      check('disposal'),
+    ]
+    return rules;
+  }
+
+  static validateInspection():ValidationChain[]{
+    const rules = [
+      check('type')
+        .exists()
+        .withMessage('type is required'),
+      check('operation')
+        .exists()
+        .withMessage('operation is required'),
+      check('cost')
+        .isNumeric()
+        .withMessage('Is a numeric value'),
+      check('date'),
+      check('curMileage')
+        .exists()
+        .withMessage('current Mileage is required'),
+      check('prevMileage')
+        .exists()
+        .withMessage('prev mileage is required'),
+      check('itemsReplaced')
+        .isArray()
+        .withMessage('replaced items should be an array'),
+      check('comment'),
+      check('recomendedMech'),
+      check('referer'),
+      check('analytics')
+    ]
+    return rules;
+  }
+
+  static validateRoutePlan():ValidationChain[]{
+    const rules = [
+      check('activity')
+        .exists()
+        .withMessage('activity is required'),
+      check('orderType')
+        .exists()
+        .withMessage('orderType is required'),
+      check('fuelGiven')
+        .exists()
+        .withMessage('Fuel given is required'),
+      check('customers')
+        .isArray()
+        .withMessage('Customers must be an array'),
+      check('suppliers')
+        .isArray()
+        .withMessage('suppliers must be an array'),
+      check('territory')
+        .exists()
+        .withMessage('territory is required'),
+      check('startDate')
+        .toDate()
+        .withMessage('start date must be a Date'),
+      check('endDate')
+      .toDate()
+      .withMessage('start date must be a Date')
+    ]
+    return rules
+  }
+
+  static startRoute():ValidationChain[]{
+    const rules = [
+      check('email')
+        .isEmail()
+        .withMessage('email should be a valid email')
+        .exists()
+        .withMessage('email is required')
+    ]
+    return rules;
+  }
+
+  static assignDriver():ValidationChain[]{
+    const rules = [
+      check('driver')
+        .exists()
+        .withMessage('driver is required')
+    ]
+    return rules;
+  }
+
+  static routeCompleted():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('status is required'),
+      check('ecr')
+    ]
+    return rules;
+  }
+
+  static validateDeliveryNote():ValidationChain[]{
+    const rules = [
+      check('customer'),
+      check('supplier'),
+      check('cylinders')
+        .exists()
+        .withMessage('cylinders are required')
+        .isArray()
+        .withMessage('cylinders must be an array'),
+      check('invoiceNo')
+        .exists()
+        .withMessage('pass invoice number'),
+      check('deliveryType')
+        .exists()
+        .withMessage('delivery types required')
     ]
     return rules;
   }

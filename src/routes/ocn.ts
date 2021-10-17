@@ -45,6 +45,8 @@ router.get(
 router.post(
     '/update-ocn/:ocnId',
     auth.verify(),
+    Validator.validateOcnUpdate(),
+    val.validate(),
     ocnController.updateOcn()
 );
 

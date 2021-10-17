@@ -1,19 +1,25 @@
 import { Router as expressRouter } from 'express';
 import Auth from '../middlewares/authentication';
 import { vehicleCtrl } from '../controllers';
+import { Validator } from '../controllers/vehicle';
 const auth = new Auth();
+const val = new Validator();
 
 const router:expressRouter = expressRouter();
 
 router.post(
   '/register-vehicle',
   auth.verify(),
+  Validator.validateInput(),
+  val.validate(),
   vehicleCtrl.createVehicle()
 );
 
 router.post(
   '/update-vehicle/:vehicleId',
   auth.verify(),
+  Validator.validateVehicleUpdate(),
+  val.validate(),
   vehicleCtrl.updateVehicle()
 );
 
@@ -31,6 +37,8 @@ router.get(
 router.post(
   '/register-inspection/:vehicleId',
   auth.verify(),
+  Validator.validateInspection(),
+  val.validate(),
   vehicleCtrl.vehicleInspection()
 );
 
@@ -54,12 +62,16 @@ router.get(
 router.post(
   '/record-route/:vehicleId',
   auth.verify(),
+  Validator.validateRoutePlan(),
+  val.validate(),
   vehicleCtrl.recordRoute()
 );
 
 router.post(
   '/start-route/:routeId',
   auth.verify(),
+  Validator.startRoute(),
+  val.validate(),
   vehicleCtrl.startRoute()
 );
 
@@ -78,6 +90,8 @@ router.get(
 router.post(
   '/assign-driver/:vehicleId',
   auth.verify(),
+  Validator.assignDriver(),
+  val.validate(),
   vehicleCtrl.assignDriver()
 );
 
@@ -102,6 +116,8 @@ router.get(
 router.post(
   '/mark-route-as-complete/:routeId',
   auth.verify(),
+  Validator.routeCompleted(),
+  val.validate(),
   vehicleCtrl.markRouteAsComplete()
 );
 
@@ -126,6 +142,8 @@ router.get(
 router.post(
   '/create-delivery-note',
   auth.verify(),
+  Validator.validateDeliveryNote(),
+  val.validate(),
   vehicleCtrl.genWaybill()
 );
 

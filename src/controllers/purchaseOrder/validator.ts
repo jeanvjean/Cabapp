@@ -40,6 +40,22 @@ class validatePurchaseOrder extends Ctrl{
         ]
         return rules;
     }
+
+    static approvePurchaseOrder():ValidationChain[]{
+        const rules = [
+            check('status')
+                .exists()
+                .withMessage('status approved/rejected is required'),
+            check('password')
+                .exists()
+                .withMessage('passeord is required'),
+            check('productionId')
+                .exists()
+                .withMessage('Production id is required'),
+            check('comment')
+        ]
+        return rules;
+    }
 }
 
 export default validatePurchaseOrder;

@@ -43,7 +43,9 @@ router.get(
 
 router.post(
   '/update-completed-cylinders',
-  auth.verify(),
+  auth.verify(),  
+  Validator.markFullCylinders(),
+  val.validate(),
   productionCtrl.markCompletedCylinders()
 );
 

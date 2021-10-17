@@ -133,6 +133,17 @@ class UserValidator extends Ctrl {
     return rules;
   }
 
+  static requestPaswordReset():ValidationChain[]{
+    const rules = [
+      check('email')
+        .exists()
+        .withMessage('pass email')
+        .isEmail()
+        .withMessage('email has to be valid')
+    ]
+    return rules;
+  }
+
 }
 
 export default UserValidator;

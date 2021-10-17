@@ -2,6 +2,7 @@ import { RequestHandler, Response, Request } from "express";
 import { VehicleInterface } from "../../models/vehicle";
 import Vehicle from "../../modules/vehicle";
 import Ctrl from "../ctrl";
+import Validator from './validator';
 
 class VehicleController extends Ctrl{
   private module:Vehicle
@@ -290,5 +291,7 @@ class VehicleController extends Ctrl{
     }
   }
 }
+
+export { Validator }
 
 export default VehicleController;

@@ -25,18 +25,15 @@ class ocnValidator extends Ctrl{
 
     static validateOcn():ValidationChain[]{
         const rules = [
-            check('customer')
-                .exists()
-                .withMessage('customer is required'),
+            check('customer'),
+            check('supplier'),
             check('cylinderType'),
             check('date')
                 .exists()
                 .withMessage('provide date please'),
-            check('cylinders'),
-                // .exists()
-                // .withMessage('Please provide cylinders')
-                // .isArray()
-                // .withMessage('cylinders must be an array'),
+            check('cylinders')
+                .isArray()
+                .withMessage('cylinders must be an array'),
             check('totalQty')
                 .exists()
                 .withMessage('provide total quantity')
@@ -48,7 +45,10 @@ class ocnValidator extends Ctrl{
                 .exists()
                 .withMessage('provide total amount')
                 .isNumeric()
-                .withMessage('Total amount must be a numeric value')
+                .withMessage('Total amount must be a numeric value'),
+            check('type')
+                .exists()
+                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
         ]
         return rules;
     }
@@ -58,6 +58,31 @@ class ocnValidator extends Ctrl{
             check('status')
                 .exists()
                 .withMessage('provide approval status')
+        ]
+        return rules;
+    }
+
+    static validateOcnUpdate():ValidationChain[]{
+        const rules = [
+            check('customer'),
+            check('supplier'),
+            check('cylinderType'),
+            check('date')
+                .exists()
+                .withMessage('provide date please'),
+            check('cylinders')
+                .isArray()
+                .withMessage('cylinders must be an array'),
+            check('totalQty')
+                .isNumeric()
+                .withMessage('Total amount must be a numeric value'),
+            check('totalVol'),
+            check('totalAmount')
+                .isNumeric()
+                .withMessage('Total amount must be a numeric value'),
+            check('type')
+                .exists()
+                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
         ]
         return rules;
     }

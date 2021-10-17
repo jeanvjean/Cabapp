@@ -8,10 +8,13 @@ import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { padLeft, passWdCheck } from "../../util/token";
+import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
+import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
   user:Model<UserInterface>
+  regCylinder:Model<RegisteredCylinderInterface>
 }
 
 interface newProductionInterface{
@@ -46,13 +49,14 @@ interface UpdateProduction {
 class ProductionSchedule extends Module{
   private production:Model<ProductionScheduleInterface>
   private user:Model<UserInterface>
+  private regCylinder:Model<RegisteredCylinderInterface>
 
   constructor(props:productionModuleProps){
     super()
     this.production = props.production
     this.user = props.user
+    this.regCylinder = props.regCylinder
   }
-
 
   public async createProductionSchedule(data:newProductionInterface, user:UserInterface):Promise<ProductionScheduleInterface|undefined>{
     try {
@@ -409,15 +413,31 @@ class ProductionSchedule extends Module{
     }
   }
 
-  public async markcompletedCylinders(updateProduction:UpdateProduction):Promise<ProductionScheduleInterface|undefined>{
+  public async markcompletedCylinders(updateProduction:UpdateProduction):Promise<any>{
     try {
       const { productionId, cylinders } = updateProduction;
       const production = await this.production.findById(productionId)
       if(!production) {
         throw new BadInputFormatException('production schedule not found');
       }
-      await this.production.findByIdAndUpdate(productionId, {cylinders}, {new:true});
-      return Promise.resolve(production);
+      let notFound = []
+      for(let cyl of cylinders) {
+        if(production.cylinders.includes(cyl)) {
+          let c = await this.regCylinder.findById(cyl);
+          //@ts-ignore
+          c?.cylinderStatus = WalkinCustomerStatus.FILLED;
+          await c?.save();
+        }else {
+          notFound.push(cyl);
+        }
+      }
+      let message = notFound.length > 0? "Some cylinders were not found in this schedule" : "cylinders have been set to filled"
+      // await this.production.findByIdAndUpdate(productionId, {cylinders}, {new:true});
+      return Promise.resolve({
+        message,
+        production,
+        not_found:notFound
+      });
     } catch (e) {
       this.handleException(e);
     }

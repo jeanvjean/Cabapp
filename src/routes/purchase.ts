@@ -26,6 +26,8 @@ router.get(
 router.post(
     '/approve-purchase-order/:purchaseId',
     auth.verify(),
+    Validator.approvePurchaseOrder(),
+    val.validate(),
     purchaseCtrl.approvePurchaseOrder()
 );
 

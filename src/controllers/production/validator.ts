@@ -77,6 +77,18 @@ class ProductionValidator extends Ctrl{
     ]
     return rules;
   }
+
+  static markFullCylinders():ValidationChain[]{
+    const rules = [
+      check('productionId')
+        .exists()
+        .withMessage('production id is needed'),
+      check('cylinders')
+        .exists()
+        .withMessage('pass the id of filled cylinders')
+    ]
+    return rules;
+  }
 }
 
 export default ProductionValidator;

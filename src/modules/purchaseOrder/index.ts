@@ -8,7 +8,7 @@ import { BadInputFormatException } from "../../exceptions";
 import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
-import { padLeft } from "../../util/token";
+import { padLeft, passWdCheck } from "../../util/token";
 
 
 interface purchaseOrderProps{
@@ -186,11 +186,12 @@ class PurchaseOrder extends Module{
 
     public async approvePurchaseOrder(data:ApprovePurchase, user:UserInterface):Promise<PurchaseOrderInterface|undefined>{
         try {
-          let loginUser = await this.user.findById(user._id).select('+password');
-          let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-          if(!matchPWD) {
-            throw new BadInputFormatException('Incorrect password... please check the password');
-          }
+          await passWdCheck(user, data.password);
+          // let loginUser = await this.user.findById(user._id).select('+password');
+          // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+          // if(!matchPWD) {
+          //   throw new BadInputFormatException('Incorrect password... please check the password');
+          // }
             const purchase = await this.purchase.findById(data.purchaseId).populate({
               path:'initiator', model:'User'
             });

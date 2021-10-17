@@ -124,7 +124,8 @@ export const sales = new SalesModule({
 
 export const production = new ProductionModule ({
   production:Production,
-  user:User
+  user:User,
+  regCylinder:RegisteredCylinder
 });
 
 export const purchase = new PurchaseOrderModule({

@@ -358,10 +358,10 @@ class OutGoingCylinder extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const { search, filter, page, limit, type } = query;
+                const { search, filter, page, limit, noteType, type } = query;
                 let options = {
                     page: page || 1,
-                    limit: limit || 1,
+                    limit: limit || 10,
                     populate: [
                         { path: "customer", model: "customer" },
                         { path: "branch", model: "branches" },
@@ -383,9 +383,13 @@ class OutGoingCylinder extends module_1.default {
                     //@ts-ignore
                     q = Object.assign(Object.assign({}, q), { status: filter });
                 }
+                if (noteType) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { noteType: noteType });
+                }
                 if (type) {
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { noteType: type });
+                    q = Object.assign(Object.assign({}, q), { type: type });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

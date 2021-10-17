@@ -21,6 +21,7 @@ interface ocnPropsInterface {
 
 interface newOcnInterface {
     customer?:OutgoingCylinderInterface['customer'],
+    supplier?:OutgoingCylinderInterface['supplier']
     cylinderType?:OutgoingCylinderInterface['cylinderType']
     otherCylinders?:OutgoingCylinderInterface['otherCylinders']
     date?:OutgoingCylinderInterface['date']
@@ -31,7 +32,8 @@ interface newOcnInterface {
     noteType?:OutgoingCylinderInterface['noteType']
     totalAsnlCylinders?:OutgoingCylinderInterface['totalAsnlCylinders']
     totalCustomerCylinders?:OutgoingCylinderInterface['totalCustomerCylinders']
-    vehicle?:OutgoingCylinderInterface['vehicle']
+    vehicle?:OutgoingCylinderInterface['vehicle'],
+    type?:OutgoingCylinderInterface['type']
 }
 
 type ocnApproval = {

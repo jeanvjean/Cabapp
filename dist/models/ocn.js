@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.statuses = exports.note = void 0;
+exports.noteIcnType = exports.statuses = exports.note = void 0;
 const mongoose_1 = require("mongoose");
 const transferCylinder_1 = require("./transferCylinder");
 const mongoosePaginate = require("mongoose-paginate-v2");
@@ -15,6 +15,12 @@ var statuses;
     statuses["PASSED"] = "passed";
     statuses["PENDING"] = "pending";
 })(statuses = exports.statuses || (exports.statuses = {}));
+var noteIcnType;
+(function (noteIcnType) {
+    noteIcnType["CUSTOMER"] = "customer";
+    noteIcnType["SUPPLIER"] = "supplier";
+    noteIcnType["WALKIN"] = "walk-in";
+})(noteIcnType = exports.noteIcnType || (exports.noteIcnType = {}));
 const ocnCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
     volume: {
@@ -26,6 +32,7 @@ const ocnCylinderSchema = new mongoose_1.Schema({
 });
 const ocnSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
+    supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     cylinderType: { type: String },
     date: { type: Date },
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
@@ -46,7 +53,8 @@ const ocnSchema = new mongoose_1.Schema({
     totalAsnlCylinders: Number,
     totalCustomerCylinders: Number,
     vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: "vehicle" },
-    invoiceNo: String
+    invoiceNo: String,
+    type: { type: String, enum: Object.values(noteIcnType) }
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

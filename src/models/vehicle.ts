@@ -13,7 +13,10 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 export type Disposal = {
   disposalDate:Date,
   disposalAmount:number
-  disposalMileage:string
+  disposalMileage:{
+    value:number,
+    unit:string
+  }
 }
 
 export enum maintType {
@@ -46,8 +49,14 @@ export type Maintainance = {
   operation:string
   cost:number
   date:Date
-  prevMileage:string
-  curMileage:string,
+  prevMileage:{
+    value:number,
+    unit:string
+  }
+  curMileage:{
+    value:number,
+    unit:string
+  },
   itemsReplaced?:ReplacedItems[]
   comments?:commentInterface[]
   approvalStatus?:InspectApproval
@@ -84,20 +93,35 @@ export interface VehicleInterface extends Document{
   regNo:string
   acqisistionDate:Date
   mileageDate?:Date
-  currMile:string
+  currMile:{
+    value:number,
+    unit:string
+  }
   assignedTo:Schema.Types.ObjectId//driver
   vehCategory:string
-  tankCapacity:string
+  tankCapacity:{
+    value:number,
+    unit:string
+  }
   batteryCapacity:string
   fuelType:string
-  grossWeight:string
-  netWeight:string
+  grossWeight:{
+    value:number,
+    unit:string
+  }
+  netWeight:{
+    value:number,
+    unit:string
+  }
   disposal:Disposal
   maintainace:Maintainance[]
   routes:RecordRoute[]
   licence:string
   insuranceDate:Date
-  lastMileage?:string
+  lastMileage?:{
+    value:number,
+    unit:string
+  }
   comments:commentInterface[]
   branch:Schema.Types.ObjectId
 }
@@ -131,8 +155,14 @@ const maintainaceSchema = new Schema({
   operation:String,
   cost:Number,
   date:Date,
-  curMileage:{type:String},
-  prevMileage:{type:String},
+  curMileage:{
+    value:Number,
+    unit:String
+  },
+  prevMileage:{
+    value:Number,
+    unit:String
+  },
   itemsReplaced:[replacedItemSchema],
   comments:[commentSchema],
   approvalStatus:{type:String},
@@ -147,7 +177,10 @@ const maintainaceSchema = new Schema({
 const disposalSchema = new Schema({
   disposalDate:{type:Date},
   disposalAmount:{type:Number},
-  disposalMileage:{type:String}
+  disposalMileage:{
+    value:Number,
+    unit:String
+  }
 },{
   timestamps:true
 });
@@ -160,20 +193,35 @@ export const vehicleSchema = new Schema({
   regNo:{type:String},
   acqisistionDate:{type:Date},
   mileageDate:{type:Date},
-  currMile:{type:String},
+  currMile:{
+    value:Number,
+    unit:String
+  },
   assignedTo:{type:Schema.Types.ObjectId, ref:'User'},
   vehCategory:{type:String},
-  tankCapacity:{type:String},
+  tankCapacity:{
+    value:Number,
+    unit:String
+  },
   batteryCapacity:{type:String},
   fuelType:{type:String},
-  grossHeight:{type:String},
-  netWeight:{type:String},
+  grossHeight:{
+    value:Number,
+    unit:String
+  },
+  netWeight:{
+    value:Number,
+    unit:String
+  },
   disposal:disposalSchema,
   maintainace:{type:[maintainaceSchema]},
   routes:[routeSchema],
   licence:{type:String},
   insuranceDate:{type:String},
-  lastMileage:{type:String},
+  lastMileage:{
+    value:Number,
+    unit:String
+  },
   comments:[commentSchema],
   branch:{type:Schema.Types.ObjectId, ref:'branches'}
 },{

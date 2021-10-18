@@ -85,7 +85,8 @@ exports.sales = new sales_1.default({
 });
 exports.production = new production_1.default({
     production: index_1.Production,
-    user: index_1.User
+    user: index_1.User,
+    regCylinder: index_1.RegisteredCylinder
 });
 exports.purchase = new purchaseOrder_1.default({
     purchase: index_1.PurchaseOrder,

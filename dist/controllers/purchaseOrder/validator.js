@@ -43,6 +43,21 @@ class validatePurchaseOrder extends ctrl_1.default {
         ];
         return rules;
     }
+    static approvePurchaseOrder() {
+        const rules = [
+            express_validator_1.check('status')
+                .exists()
+                .withMessage('status approved/rejected is required'),
+            express_validator_1.check('password')
+                .exists()
+                .withMessage('passeord is required'),
+            express_validator_1.check('productionId')
+                .exists()
+                .withMessage('Production id is required'),
+            express_validator_1.check('comment')
+        ];
+        return rules;
+    }
 }
 exports.default = validatePurchaseOrder;
 //# sourceMappingURL=validator.js.map

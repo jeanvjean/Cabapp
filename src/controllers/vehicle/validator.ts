@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ValidationChain, validationResult, check } from 'express-validator';
-import { widthElements } from 'juice';
 import BadInputFormatException from '../../exceptions/bad-input-format-exception';
 import Ctrl from '../ctrl';
 
@@ -39,9 +38,7 @@ class VehicleValidator extends Ctrl{
         .withMessage('Registeration Number is required'),
       check('acqisistionDate')
         .exists()
-        .withMessage('Acquistion date is required')
-        .toDate()
-        .withMessage('Acquisition date must be a date type'),
+        .withMessage('Acquistion date is required'),
       check('mileageDate'),
       check('currMile'),
       check('assignedTo'),
@@ -70,9 +67,7 @@ class VehicleValidator extends Ctrl{
       check('manufacturer'),
       check('vModel'),
       check('regNo'),
-      check('acqisistionDate')
-        .toDate()
-        .withMessage('Acquisition date must be a date type'),
+      check('acqisistionDate'),
       check('mileageDate'),
       check('currMile'),
       check('assignedTo'),
@@ -136,12 +131,8 @@ class VehicleValidator extends Ctrl{
       check('territory')
         .exists()
         .withMessage('territory is required'),
-      check('startDate')
-        .toDate()
-        .withMessage('start date must be a Date'),
+      check('startDate'),
       check('endDate')
-      .toDate()
-      .withMessage('start date must be a Date')
     ]
     return rules
   }

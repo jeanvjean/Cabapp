@@ -16,11 +16,13 @@ const static_1 = require("../../configs/static");
 const mail_1 = require("../../util/mail");
 const logs_1 = require("../../util/logs");
 const token_1 = require("../../util/token");
+const walk_in_customers_1 = require("../../models/walk-in-customers");
 class ProductionSchedule extends module_1.default {
     constructor(props) {
         super();
         this.production = props.production;
         this.user = props.user;
+        this.regCylinder = props.regCylinder;
     }
     createProductionSchedule(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -399,8 +401,25 @@ class ProductionSchedule extends module_1.default {
                 if (!production) {
                     throw new exceptions_1.BadInputFormatException('production schedule not found');
                 }
-                yield this.production.findByIdAndUpdate(productionId, { cylinders }, { new: true });
-                return Promise.resolve(production);
+                let notFound = [];
+                for (let cyl of cylinders) {
+                    if (production.cylinders.includes(cyl)) {
+                        let c = yield this.regCylinder.findById(cyl);
+                        //@ts-ignore
+                        c === null || c === void 0 ? void 0 : c.cylinderStatus = walk_in_customers_1.WalkinCustomerStatus.FILLED;
+                        yield (c === null || c === void 0 ? void 0 : c.save());
+                    }
+                    else {
+                        notFound.push(cyl);
+                    }
+                }
+                let message = notFound.length > 0 ? "Some cylinders were not found in this schedule" : "cylinders have been set to filled";
+                // await this.production.findByIdAndUpdate(productionId, {cylinders}, {new:true});
+                return Promise.resolve({
+                    message,
+                    production,
+                    not_found: notFound
+                });
             }
             catch (e) {
                 this.handleException(e);

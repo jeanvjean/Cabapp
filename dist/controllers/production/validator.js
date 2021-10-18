@@ -78,6 +78,17 @@ class ProductionValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static markFullCylinders() {
+        const rules = [
+            express_validator_1.check('productionId')
+                .exists()
+                .withMessage('production id is needed'),
+            express_validator_1.check('cylinders')
+                .exists()
+                .withMessage('pass the id of filled cylinders')
+        ];
+        return rules;
+    }
 }
 exports.default = ProductionValidator;
 //# sourceMappingURL=validator.js.map

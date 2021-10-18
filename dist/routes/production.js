@@ -12,7 +12,7 @@ router.post('/approve-production-schedule', auth.verify(), production_1.Validato
 router.get('/fetch-production-approvals', auth.verify(), controllers_1.productionCtrl.fetchPendingProductionApprovals());
 router.get('/fetch-prodctionSchedule/:productionId', controllers_1.productionCtrl.viewProductionSchedule());
 router.get('/fetch-production-schedules', auth.verify(), controllers_1.productionCtrl.fetchProductions());
-router.post('/update-completed-cylinders', auth.verify(), controllers_1.productionCtrl.markCompletedCylinders());
+router.post('/update-completed-cylinders', auth.verify(), production_1.Validator.markFullCylinders(), val.validate(), controllers_1.productionCtrl.markCompletedCylinders());
 router.get('/mark-completed-production/:productionId', auth.verify(), controllers_1.productionCtrl.markCompletedProduction());
 exports.default = router;
 //# sourceMappingURL=production.js.map

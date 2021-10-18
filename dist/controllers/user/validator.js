@@ -126,6 +126,16 @@ class UserValidator extends ctrl_1.default {
         ];
         return rules;
     }
+    static requestPaswordReset() {
+        const rules = [
+            express_validator_1.check('email')
+                .exists()
+                .withMessage('pass email')
+                .isEmail()
+                .withMessage('email has to be valid')
+        ];
+        return rules;
+    }
 }
 exports.default = UserValidator;
 //# sourceMappingURL=validator.js.map

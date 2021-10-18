@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Validator = void 0;
 const ctrl_1 = require("../ctrl");
+const validator_1 = require("./validator");
+exports.Validator = validator_1.default;
 class VehicleController extends ctrl_1.default {
     constructor(module) {
         super();

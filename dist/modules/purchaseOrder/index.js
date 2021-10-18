@@ -163,11 +163,12 @@ class PurchaseOrder extends module_1.default {
     approvePurchaseOrder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let loginUser = yield this.user.findById(user._id).select('+password');
-                let matchPWD = yield (loginUser === null || loginUser === void 0 ? void 0 : loginUser.comparePWD(data.password, user.password));
-                if (!matchPWD) {
-                    throw new exceptions_1.BadInputFormatException('Incorrect password... please check the password');
-                }
+                yield token_1.passWdCheck(user, data.password);
+                // let loginUser = await this.user.findById(user._id).select('+password');
+                // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
+                // if(!matchPWD) {
+                //   throw new BadInputFormatException('Incorrect password... please check the password');
+                // }
                 const purchase = yield this.purchase.findById(data.purchaseId).populate({
                     path: 'initiator', model: 'User'
                 });

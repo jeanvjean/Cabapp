@@ -17,7 +17,7 @@ router.get('/get-branch-users', auth.verify(), controllers_1.userCtrl.branchUser
 router.get('/user-details/:id/:email', auth.verify(), controllers_1.userCtrl.fetchUser());
 router.post('/update-user/:id', user_1.Validator.validateUserUpdate(), val.validate(), auth.verify(), controllers_1.userCtrl.updateUser());
 router.post('/change-role/:userId', user_1.Validator.validateRoleChange(), val.validate(), auth.verify(), controllers_1.userCtrl.changeUserRole());
-router.post('/request-password-reset', controllers_1.userCtrl.requestPasswordReset());
+router.post('/request-password-reset', user_1.Validator.requestPaswordReset(), val.validate(), controllers_1.userCtrl.requestPasswordReset());
 router.post('/reset-password', user_1.Validator.validatePassword(), val.validate(), controllers_1.userCtrl.resetPassword());
 router.post('/change-password', user_1.Validator.validatePasswordChange(), val.validate(), auth.verify(), controllers_1.userCtrl.changePassword());
 router.delete('/delete-user/:userId', controllers_1.userCtrl.deleteUser());

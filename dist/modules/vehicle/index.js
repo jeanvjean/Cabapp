@@ -1062,90 +1062,32 @@ class Vehicle extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
-                const options = Object.assign({}, query);
-                let { search, filter, fromDate, toDate } = query;
-                let aggregate;
-                let aggregate1 = this.routeReport.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { client: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { vehicle: ObjectId(vehicleId) }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate2 = this.routeReport.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { client: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { vehicle: ObjectId(vehicleId) },
-                                { dateCompleted: { '$gte': fromDate } }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate3 = this.routeReport.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { client: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { vehicle: ObjectId(vehicleId) },
-                                { dateCompleted: { "$gte": new Date().toISOString(), '$lte': toDate } }
-                            ]
-                        }
-                    }
-                ]);
-                let aggregate4 = this.routeReport.aggregate([
-                    {
-                        $match: {
-                            $and: [
-                                {
-                                    $or: [
-                                        { client: {
-                                                $regex: (search === null || search === void 0 ? void 0 : search.toLowerCase()) || ''
-                                            } }
-                                    ]
-                                },
-                                { vehicle: ObjectId(vehicleId) },
-                                { dateCompleted: { "$gte": fromDate, '$lte': toDate } }
-                            ]
-                        }
-                    }
-                ]);
-                if (fromDate.length && toDate.length) {
-                    aggregate = aggregate4;
+                let { search, filter, fromDate, toDate, page, limit } = query;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10
+                };
+                let q = {
+                    vehicle: vehicleId
+                };
+                let or = [];
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { dateCompleted: { '$gte': new Date(fromDate) } });
                 }
-                else if (fromDate.length && !toDate.length) {
-                    aggregate = aggregate2;
+                if (toDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { dateCompleted: { '$lte': new Date(toDate) } });
                 }
-                else if (!fromDate.length && toDate.length) {
-                    aggregate = aggregate3;
+                if (search) {
+                    or.push({ client: new RegExp(search, 'gi') });
                 }
-                else {
-                    aggregate = aggregate1;
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
                 }
                 //@ts-ignore
-                const performance = yield this.routeReport.aggregatePaginate(aggregate, options);
+                const performance = yield this.routeReport.paginate(q, options);
                 return Promise.resolve(performance);
             }
             catch (e) {

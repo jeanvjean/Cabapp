@@ -91,6 +91,7 @@ class VehicleValidator extends Ctrl{
         .exists()
         .withMessage('operation is required'),
       check('cost')
+        .optional({checkFalsy:true})
         .isNumeric()
         .withMessage('Is a numeric value'),
       check('date'),
@@ -101,6 +102,7 @@ class VehicleValidator extends Ctrl{
         .exists()
         .withMessage('prev mileage is required'),
       check('itemsReplaced')
+        .optional({checkFalsy:true})
         .isArray()
         .withMessage('replaced items should be an array'),
       check('comment'),
@@ -123,9 +125,11 @@ class VehicleValidator extends Ctrl{
         .exists()
         .withMessage('Fuel given is required'),
       check('customers')
+        .optional({checkFalsy:true})
         .isArray()
         .withMessage('Customers must be an array'),
       check('suppliers')
+        .optional({checkFalsy:true})
         .isArray()
         .withMessage('suppliers must be an array'),
       check('territory')

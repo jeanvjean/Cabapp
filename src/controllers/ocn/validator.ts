@@ -2,6 +2,7 @@ import Ctrl from "../ctrl";
 import { RequestHandler, Response, Request, NextFunction } from "express";
 import { BadInputFormatException } from "../../exceptions";
 import { validationResult, ValidationChain, check } from "express-validator";
+import { values } from "lodash";
 
 
 
@@ -25,13 +26,17 @@ class ocnValidator extends Ctrl{
 
     static validateOcn():ValidationChain[]{
         const rules = [
-            check('customer'),
-            check('supplier'),
-            check('cylinderType'),
+            check('customer')
+                .optional({checkFalsy:true}),
+            check('supplier')
+                .optional({checkFalsy:true}),
+            check('cylinderType')
+                .optional({checkFalsy:true}),
             check('date')
                 .exists()
                 .withMessage('provide date please'),
             check('cylinders')
+                .optional({checkFalsy:true})
                 .isArray()
                 .withMessage('cylinders must be an array'),
             check('totalQty')
@@ -48,7 +53,7 @@ class ocnValidator extends Ctrl{
                 .withMessage('Total amount must be a numeric value'),
             check('type')
                 .exists()
-                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
+                .withMessage('please pass cn type (customer, supplier, or walk-in)')
         ]
         return rules;
     }
@@ -64,25 +69,29 @@ class ocnValidator extends Ctrl{
 
     static validateOcnUpdate():ValidationChain[]{
         const rules = [
-            check('customer'),
-            check('supplier'),
-            check('cylinderType'),
+            check('customer')
+                .optional({checkFalsy:true}),
+            check('supplier')
+                .optional({checkFalsy:true}),
+            check('cylinderType')
+                .optional({checkFalsy:true}),
             check('date')
-                .exists()
-                .withMessage('provide date please'),
+                .optional({checkFalsy:true}),
             check('cylinders')
+                .optional({checkFalsy:true})
                 .isArray()
                 .withMessage('cylinders must be an array'),
             check('totalQty')
+                .optional({checkFalsy:true})
                 .isNumeric()
                 .withMessage('Total amount must be a numeric value'),
-            check('totalVol'),
+            check('totalVol')
+                .optional({checkFalsy:true}),
             check('totalAmount')
+                .optional({checkFalsy:true})
                 .isNumeric()
                 .withMessage('Total amount must be a numeric value'),
             check('type')
-                .exists()
-                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
         ]
         return rules;
     }

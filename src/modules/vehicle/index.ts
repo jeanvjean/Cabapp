@@ -1216,89 +1216,35 @@ class Vehicle extends Module{
   public async fetchVehiclePerformance(query:QueryInterface, vehicleId:string):Promise<vehiclePerformance[]|undefined>{
     try {
       const ObjectId = mongoose.Types.ObjectId
+      let { search, filter, fromDate, toDate, page, limit } = query;
       const options = {
-        ...query
+        page: page || 1,
+        limit: limit || 10
       }
-      let { search, filter, fromDate, toDate } = query;
-      let aggregate;
-      let aggregate1 = this.routeReport.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {client:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {vehicle: ObjectId(vehicleId)}
-            ]
-          }
-        }
-      ]);
-      let aggregate2 = this.routeReport.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {client:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {vehicle: ObjectId(vehicleId)},
-              {dateCompleted: {'$gte':fromDate}}
-            ]
-          }
-        }
-      ]);
-      let aggregate3 = this.routeReport.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {client:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {vehicle: ObjectId(vehicleId)},
-              {dateCompleted: {"$gte":new Date().toISOString(),'$lte':toDate}}
-            ]
-          }
-        }
-      ]);
-      let aggregate4 = this.routeReport.aggregate([
-        {
-          $match:{
-            $and:[
-              {
-                $or:[
-                  {client:{
-                    $regex:search?.toLowerCase() || ''
-                  }}
-                ]
-              },
-              {vehicle: ObjectId(vehicleId)},
-              {dateCompleted: {"$gte":fromDate,'$lte':toDate}}
-            ]
-          }
-        }
-      ]);
-      if(fromDate.length && toDate.length) {
-        aggregate = aggregate4;
-      }else if(fromDate.length && !toDate.length) {
-        aggregate = aggregate2;
-      }else if(!fromDate.length && toDate.length){
-        aggregate= aggregate3
-      }else{
-        aggregate=aggregate1
+
+      let q = {
+        vehicle: vehicleId
+      }
+
+      let or = [];
+
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, dateCompleted: {'$gte':new Date(fromDate)}}
+      }
+      if(toDate) {
+        //@ts-ignore
+        q = {...q, dateCompleted: {'$lte':new Date(toDate)}}
+      }
+      if(search) {
+        or.push({client: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
       }
       //@ts-ignore
-      const performance = await this.routeReport.aggregatePaginate(aggregate, options);
+      const performance = await this.routeReport.paginate(q, options);
       return Promise.resolve(performance);
     } catch (e) {
       this.handleException(e);

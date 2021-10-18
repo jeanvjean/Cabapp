@@ -92,6 +92,7 @@ class VehicleValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('operation is required'),
             express_validator_1.check('cost')
+                .optional({ checkFalsy: true })
                 .isNumeric()
                 .withMessage('Is a numeric value'),
             express_validator_1.check('date'),
@@ -102,6 +103,7 @@ class VehicleValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('prev mileage is required'),
             express_validator_1.check('itemsReplaced')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('replaced items should be an array'),
             express_validator_1.check('comment'),
@@ -123,9 +125,11 @@ class VehicleValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('Fuel given is required'),
             express_validator_1.check('customers')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('Customers must be an array'),
             express_validator_1.check('suppliers')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('suppliers must be an array'),
             express_validator_1.check('territory')

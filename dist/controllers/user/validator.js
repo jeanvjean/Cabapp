@@ -94,6 +94,8 @@ class UserValidator extends ctrl_1.default {
     static validateInvite() {
         const rules = [
             express_validator_1.check('users')
+                .exists()
+                .withMessage('users array is required')
                 .isArray()
                 .withMessage('provide an array of user objects to be added with (email, role, and subrole)')
         ];
@@ -101,9 +103,14 @@ class UserValidator extends ctrl_1.default {
     }
     static validateUserUpdate() {
         const rules = [
-            express_validator_1.check('name'),
-            express_validator_1.check('email'),
+            express_validator_1.check('name')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('email')
+                .optional({ checkFalsy: true })
+                .isEmail()
+                .withMessage('email needs to be a valid email'),
             express_validator_1.check('phoneNumber')
+                .optional({ checkFalsy: true })
                 .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
                 .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
             express_validator_1.check('gender')

@@ -98,6 +98,8 @@ class UserValidator extends Ctrl {
   static validateInvite():ValidationChain[]{
     const rules = [
       check('users')
+        .exists()
+        .withMessage('users array is required')
         .isArray()
         .withMessage('provide an array of user objects to be added with (email, role, and subrole)')
     ]
@@ -106,9 +108,14 @@ class UserValidator extends Ctrl {
 
   static validateUserUpdate():ValidationChain[]{
     const rules = [
-      check('name'),
-      check('email'),
+      check('name')
+        .optional({checkFalsy:true}),
+      check('email')
+        .optional({checkFalsy:true})
+        .isEmail()
+        .withMessage('email needs to be a valid email'),
       check('phoneNumber')
+        .optional({checkFalsy:true})
         .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
         .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
       check('gender')

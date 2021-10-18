@@ -27,13 +27,17 @@ class ocnValidator extends ctrl_1.default {
     }
     static validateOcn() {
         const rules = [
-            express_validator_1.check('customer'),
-            express_validator_1.check('supplier'),
-            express_validator_1.check('cylinderType'),
+            express_validator_1.check('customer')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('supplier')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('cylinderType')
+                .optional({ checkFalsy: true }),
             express_validator_1.check('date')
                 .exists()
                 .withMessage('provide date please'),
             express_validator_1.check('cylinders')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('cylinders must be an array'),
             express_validator_1.check('totalQty')
@@ -50,7 +54,7 @@ class ocnValidator extends ctrl_1.default {
                 .withMessage('Total amount must be a numeric value'),
             express_validator_1.check('type')
                 .exists()
-                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
+                .withMessage('please pass cn type (customer, supplier, or walk-in)')
         ];
         return rules;
     }
@@ -64,25 +68,29 @@ class ocnValidator extends ctrl_1.default {
     }
     static validateOcnUpdate() {
         const rules = [
-            express_validator_1.check('customer'),
-            express_validator_1.check('supplier'),
-            express_validator_1.check('cylinderType'),
+            express_validator_1.check('customer')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('supplier')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('cylinderType')
+                .optional({ checkFalsy: true }),
             express_validator_1.check('date')
-                .exists()
-                .withMessage('provide date please'),
+                .optional({ checkFalsy: true }),
             express_validator_1.check('cylinders')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('cylinders must be an array'),
             express_validator_1.check('totalQty')
+                .optional({ checkFalsy: true })
                 .isNumeric()
                 .withMessage('Total amount must be a numeric value'),
-            express_validator_1.check('totalVol'),
+            express_validator_1.check('totalVol')
+                .optional({ checkFalsy: true }),
             express_validator_1.check('totalAmount')
+                .optional({ checkFalsy: true })
                 .isNumeric()
                 .withMessage('Total amount must be a numeric value'),
             express_validator_1.check('type')
-                .exists()
-                .withMessage('please pass ocn type (customer, supplier, or walk-in)')
         ];
         return rules;
     }

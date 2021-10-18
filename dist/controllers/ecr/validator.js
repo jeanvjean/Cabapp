@@ -34,9 +34,11 @@ class EcrValidator extends ctrl_1.default {
                 .exists()
                 .withMessage('indicate the priority(1=urgent, 2=regular)'),
             express_validator_1.check('cylinders')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('cylinders must be an array'),
             express_validator_1.check('fringeCylinders')
+                .optional({ checkFalsy: true })
                 .isArray()
                 .withMessage('fringe cylinders must be an array')
         ];

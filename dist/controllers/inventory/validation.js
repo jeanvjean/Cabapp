@@ -148,16 +148,22 @@ class InventoryValidator extends ctrl_1.default {
     }
     static updateSupplier() {
         const rules = [
-            express_validator_1.check('name'),
-            express_validator_1.check('productType'),
-            express_validator_1.check('supplierType'),
+            express_validator_1.check('name')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('productType')
+                .optional({ checkFalsy: true }),
+            express_validator_1.check('supplierType')
+                .optional({ checkFalsy: true }),
             express_validator_1.check('email')
+                .optional({ checkFalsy: true })
                 .isEmail()
                 .withMessage('email has to be a valid email'),
             express_validator_1.check('phoneNumber')
+                .optional({ checkFalsy: true })
                 .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
                 .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
             express_validator_1.check('contactPerson')
+                .optional({ checkFalsy: true })
         ];
         return rules;
     }

@@ -327,9 +327,11 @@ class OutGoingCylinder extends module_1.default {
                     page: page || 1,
                     limit: limit || 1,
                     populate: [
-                        { path: "customer", model: "customer" },
-                        { path: "branch", model: "branches" },
-                        { path: "nextApprovalOfficer", model: "User" }
+                        { path: 'customer', model: 'customer' },
+                        { path: 'approvalOfficers', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: "cylinders", model: "registered-cylinders" }
                     ]
                 };
                 let q = {
@@ -363,9 +365,11 @@ class OutGoingCylinder extends module_1.default {
                     page: page || 1,
                     limit: limit || 10,
                     populate: [
-                        { path: "customer", model: "customer" },
-                        { path: "branch", model: "branches" },
-                        { path: "nextApprovalOfficer", model: "User" }
+                        { path: 'customer', model: 'customer' },
+                        { path: 'approvalOfficers', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'branch', model: 'branches' },
+                        { path: "cylinders", model: "registered-cylinders" }
                     ]
                 };
                 let q = {

@@ -46,8 +46,14 @@ const maintainaceSchema = new mongoose_1.Schema({
     operation: String,
     cost: Number,
     date: Date,
-    curMileage: { type: String },
-    prevMileage: { type: String },
+    curMileage: {
+        value: Number,
+        unit: String
+    },
+    prevMileage: {
+        value: Number,
+        unit: String
+    },
     itemsReplaced: [replacedItemSchema],
     comments: [transferCylinder_1.commentSchema],
     approvalStatus: { type: String },
@@ -61,7 +67,10 @@ const maintainaceSchema = new mongoose_1.Schema({
 const disposalSchema = new mongoose_1.Schema({
     disposalDate: { type: Date },
     disposalAmount: { type: Number },
-    disposalMileage: { type: String }
+    disposalMileage: {
+        value: Number,
+        unit: String
+    }
 }, {
     timestamps: true
 });
@@ -73,20 +82,35 @@ exports.vehicleSchema = new mongoose_1.Schema({
     regNo: { type: String },
     acqisistionDate: { type: Date },
     mileageDate: { type: Date },
-    currMile: { type: String },
+    currMile: {
+        value: Number,
+        unit: String
+    },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     vehCategory: { type: String },
-    tankCapacity: { type: String },
+    tankCapacity: {
+        value: Number,
+        unit: String
+    },
     batteryCapacity: { type: String },
     fuelType: { type: String },
-    grossHeight: { type: String },
-    netWeight: { type: String },
+    grossHeight: {
+        value: Number,
+        unit: String
+    },
+    netWeight: {
+        value: Number,
+        unit: String
+    },
     disposal: disposalSchema,
     maintainace: { type: [maintainaceSchema] },
     routes: [routeSchema],
     licence: { type: String },
     insuranceDate: { type: String },
-    lastMileage: { type: String },
+    lastMileage: {
+        value: Number,
+        unit: String
+    },
     comments: [transferCylinder_1.commentSchema],
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 }, {

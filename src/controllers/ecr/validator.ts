@@ -30,9 +30,11 @@ class EcrValidator extends Ctrl{
         .exists()
         .withMessage('indicate the priority(1=urgent, 2=regular)'),
       check('cylinders')
+        .optional({checkFalsy:true})
         .isArray()
         .withMessage('cylinders must be an array'),
-      check('fringeCylinders')
+      check('fringeCylinders')      
+        .optional({checkFalsy:true})
         .isArray()
         .withMessage('fringe cylinders must be an array')
     ]

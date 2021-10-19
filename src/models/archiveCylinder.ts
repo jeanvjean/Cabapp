@@ -22,7 +22,10 @@ export interface ArchivedCylinder extends Document{
      /**
       * @param waterCapacity cylinder water capacity
       */
-     waterCapacity:string
+     waterCapacity:{
+      value:number,
+      unit:string
+    }
 
      /**
       * @param dateManufactured manufacturing date of cylinder
@@ -70,7 +73,10 @@ export interface ArchivedCylinder extends Document{
       * @param gasVolumeContent
       */
 
-     gasVolumeContent:string
+     gasVolumeContent:{
+      value:number,
+      unit:string
+    }
 
      /**
       * @param cylinderNumber
@@ -90,6 +96,11 @@ export interface ArchivedCylinder extends Document{
 
      holdingTime:Date
 
+     purchaseCost:{
+      cost:number,
+      unit:string
+    }
+
      /**
       * @param createdAt
       */
@@ -106,7 +117,10 @@ export interface ArchivedCylinder extends Document{
 export const archiveCylinderSchema = new Schema({
   cylinderType:{type:String},
 
-  waterCapacity:{type:String},
+  waterCapacity:{
+    value:Number,
+    unit:String
+  },
 
   dateManufactured:{type:Date},
 
@@ -122,7 +136,10 @@ export const archiveCylinderSchema = new Schema({
 
   fillingPreasure:{type:String},
 
-  gasVolumeContent:{type:String},
+  gasVolumeContent:{
+    value:Number,
+    unit:String
+  },
 
   cylinderNumber:{type:String},
 
@@ -134,7 +151,10 @@ export const archiveCylinderSchema = new Schema({
 
   department:{type:String},
 
-  purchaseCost:{type:Number},
+  purchaseCost:{
+    cost:Number,
+    unit:String
+  },
 });
 
 archiveCylinderSchema.plugin(mongoosePagination)

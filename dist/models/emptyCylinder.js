@@ -51,7 +51,10 @@ const ecrSchema = new mongoose_1.Schema({
     reason: String,
     driverStatus: { type: String, enum: Object.values(EcrApproval), default: EcrApproval.PENDING },
     otp: String,
-    totalVolume: String,
+    totalVolume: {
+        value: Number,
+        unit: String
+    },
     totalQuantity: String
 }, {
     timestamps: true

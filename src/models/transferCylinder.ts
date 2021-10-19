@@ -3,7 +3,6 @@ import {
   Schema,
   Document,
   Model,
-  model
 } from 'mongoose';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
@@ -70,7 +69,10 @@ export interface TransferCylinder extends Document {
   holdingTime:number
   type:TransferType
   purchaseDate:Date
-  purchasePrice:number
+  purchasePrice:{
+    value:number,
+    unit:string
+  }
   toBranch:Schema.Types.ObjectId
   fromBranch:Schema.Types.ObjectId
   toDepartment:string
@@ -134,7 +136,10 @@ export const TransferSchema = new Schema({
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'Users'},
   holdingTime:{type:Date},
   purchaseDate:{type:Date},
-  purchasePrice:{type:Number},
+  purchasePrice:{
+    value:Number,
+    unit:String
+  },
   toBranch:{type:Schema.Types.ObjectId, ref:'branches'},
   toDepartment:{type:String},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},

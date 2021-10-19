@@ -19,8 +19,14 @@ export interface vehiclePerformance extends Document {
     destination:string
     driver:string
     routeInfo:Schema.Types.ObjectId
-    mileageIn:string
-    mileageOut:string
+    mileageIn:{
+        value:number,
+        unit:string
+    }
+    mileageOut:{
+        value:number,
+        unit:string
+    }
     timeOut:Date
     timeIn:Date
 }
@@ -35,8 +41,14 @@ const performanceSchema = new Schema({
     destination:{type:String},
     driver:String,
     routeInfo:{type:Schema.Types.ObjectId, ref:"pickup-routes"},
-    mileageIn:String,
-    mileageOut:String,
+    mileageIn:{
+        value:Number,
+        unit:String
+    },
+    mileageOut:{
+        value:Number,
+        unit:String
+    },
     timeOut:Date,
     timeIn:Date
 },{

@@ -17,23 +17,32 @@ enum productionStatus {
 
 interface productionCylinder {
   cylinderNo:string
-  volume:string
+  volume:{
+    value:number,
+    unit:string
+}
   type:string
   status:productionStatus
 }
 
 export interface ProductionScheduleInterface extends Document{
-  customer:Schema.Types.ObjectId
+  customer?:Schema.Types.ObjectId
   productionNo:string
   ecrNo:string
   shift:string
   date:Date
-  cylinders:productionCylinder[]
+  cylinders:Schema.Types.ObjectId[]
   comments:commentInterface[]
   quantityToFill:number
-  volumeToFill:string
+  volumeToFill:{
+      value:number,
+      unit:string
+  }
   totalQuantity:number
-  totalVolume:string
+  totalVolume:{
+      value:number,
+      unit:string
+  }
   initiator:Schema.Types.ObjectId
   approvalOfficers:ApprovalOfficers[]
   nextApprovalOfficer:Schema.Types.ObjectId
@@ -47,7 +56,10 @@ export interface ProductionScheduleInterface extends Document{
 
 const productionCylinderSchema = new Schema({
   cylinderNo:String,
-  volume:String,
+  volume:{
+    value:Number,
+    unit:String
+},
   type:String,
   status:{type:String, enum:Object.values(productionStatus), default:productionStatus.PENDING}
 });
@@ -60,9 +72,15 @@ const productionSchema = new Schema({
   date:{type:Date},
   cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
   quantityToFill:{type:Number},
-  volumeToFill:{type:String},
+  volumeToFill:{
+    value:Number,
+    unit:String
+},
   totalQuantity:{type:Number},
-  totalVolume:{type:String},
+  totalVolume:{
+    value:Number,
+    unit:String
+},
   initiator:{type:Schema.Types.ObjectId, ref:'User'},
   approvalOfficers:[ApprovalOfficerSchema],
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},

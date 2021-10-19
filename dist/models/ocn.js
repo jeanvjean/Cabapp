@@ -37,9 +37,15 @@ const ocnSchema = new mongoose_1.Schema({
     date: { type: Date },
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
     otherCylinders: [ocnCylinderSchema],
-    totalQty: { type: Number },
-    totalVol: { type: String },
-    totalAmount: { type: Number },
+    totalQty: Number,
+    totalVol: {
+        value: Number,
+        unit: String
+    },
+    totalAmount: {
+        value: Number,
+        unit: String
+    },
     approvalOfficers: { type: [transferCylinder_1.approvalStageShema] },
     approvalStage: { type: String, enum: Object.values(transferCylinder_1.stagesOfApproval), default: transferCylinder_1.stagesOfApproval.STAGE1 },
     approvalStatus: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), default: transferCylinder_1.TransferStatus.PENDING },

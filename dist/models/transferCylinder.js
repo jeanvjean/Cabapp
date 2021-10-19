@@ -82,7 +82,10 @@ exports.TransferSchema = new mongoose_1.Schema({
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Users' },
     holdingTime: { type: Date },
     purchaseDate: { type: Date },
-    purchasePrice: { type: Number },
+    purchasePrice: {
+        value: Number,
+        unit: String
+    },
     toBranch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     toDepartment: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },

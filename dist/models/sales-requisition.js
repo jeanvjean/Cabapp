@@ -8,7 +8,10 @@ const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.saleCylinderSchema = new mongoose_1.Schema({
     noOfCylinders: Number,
     cylinderNumber: String,
-    volume: String,
+    volume: {
+        value: Number,
+        unit: String
+    },
     unitPrice: Number,
     amount: Number,
     cylinderType: String

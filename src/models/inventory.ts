@@ -5,7 +5,6 @@ import {
   Model
 } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate-v2';
-import ProductionSchedule from '../modules/production';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface ProductInterface extends Document{
@@ -18,8 +17,14 @@ export interface ProductInterface extends Document{
   partNumber:string
   serialNumber?:number
   quantity:number
-  unitCost:number
-  totalCost:number
+  unitCost:{
+      value:number,
+      unit:string
+  }
+  totalCost:{
+      value:number,
+      unit:string
+  }
   reorderLevel:number
   location:string,
   referer:string
@@ -41,8 +46,14 @@ export const productSchema = new Schema({
   partNumber:{type:String, lowercase:true},
   serialNumber:{type:Number},
   quantity:{type:Number},
-  unitCost:{type:Number},
-  totalCost:{type:Number},
+  unitCost:{
+    value:Number,
+    unit:String
+  },
+  totalCost:{
+    value:Number,
+    unit:String
+  },
   reorderLevel:{type:Number},
   location:{type:String, lowercase:true},
   referer:{type:String, lowercase:true},

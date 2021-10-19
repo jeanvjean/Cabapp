@@ -30,7 +30,7 @@ const trackingSchema = new mongoose_1.Schema({
 exports.registerCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String, enum: Object.values(TypesOfCylinders), default: TypesOfCylinders.BUFFER },
     waterCapacity: {
-        volume: Number,
+        value: Number,
         unit: String
     },
     dateManufactured: { type: Date },
@@ -42,7 +42,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     testingPresure: { type: String },
     fillingPreasure: { type: String },
     gasVolumeContent: {
-        volume: Number,
+        value: Number,
         unit: String
     },
     cylinderNumber: { type: String },

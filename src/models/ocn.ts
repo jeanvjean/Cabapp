@@ -42,8 +42,14 @@ export interface OutgoingCylinderInterface extends Document {
     cylinders:Schema.Types.ObjectId[]
     otherCylinders:ocnCylinders[]
     totalQty:number
-    totalVol:string
-    totalAmount:number
+    totalVol:{
+        value:number,
+        unit:string
+    }
+    totalAmount:{
+        value:number,
+        unit:string
+    }
     approvalOfficers:ApprovalOfficers[]
     approvalStage:stagesOfApproval
     approvalStatus:TransferStatus
@@ -78,9 +84,15 @@ const ocnSchema = new Schema({
     date:{type:Date},
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
     otherCylinders:[ocnCylinderSchema],
-    totalQty:{type:Number},
-    totalVol:{type:String},
-    totalAmount:{type:Number},
+    totalQty:Number,
+    totalVol:{
+        value:Number,
+        unit:String
+    },
+    totalAmount:{
+        value:Number,
+        unit:String
+    },
     approvalOfficers:{type:[approvalStageShema]},
     approvalStage:{type:String, enum:Object.values(stagesOfApproval), default:stagesOfApproval.STAGE1},
     approvalStatus:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},

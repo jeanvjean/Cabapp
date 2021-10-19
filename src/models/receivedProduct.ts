@@ -36,8 +36,14 @@ export interface ReceivedProduct {
   quantity:number
   passed?:number
   rejected?:number
-  unitCost:number
-  totalCost:string
+  unitCost:{
+    value:number,
+    unit:string
+  }
+  totalCost:{
+    value:number,
+    unit:string
+  }
   comment?:string
   totalAvailable?:number,
   equipmentModel?:string,
@@ -51,8 +57,14 @@ export const productRecievedSchema = new Schema({
   quantity:{type:Number},
   passed:{type:Number},
   rejected:{type:Number},
-  unitCost:{type:Number},
-  totalCost:{type:Number},
+  unitCost:{
+    value:Number,
+    unit:String
+  },
+  totalCost:{
+    value:Number,
+    unit:String
+  },
   comment:{type:String},
   totalAvailable:{type:Number},
   equipmentModel:{type:String},

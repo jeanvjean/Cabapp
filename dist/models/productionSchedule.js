@@ -12,7 +12,10 @@ var productionStatus;
 })(productionStatus || (productionStatus = {}));
 const productionCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    volume: String,
+    volume: {
+        value: Number,
+        unit: String
+    },
     type: String,
     status: { type: String, enum: Object.values(productionStatus), default: productionStatus.PENDING }
 });
@@ -24,9 +27,15 @@ const productionSchema = new mongoose_1.Schema({
     date: { type: Date },
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
     quantityToFill: { type: Number },
-    volumeToFill: { type: String },
+    volumeToFill: {
+        value: Number,
+        unit: String
+    },
     totalQuantity: { type: Number },
-    totalVolume: { type: String },
+    totalVolume: {
+        value: Number,
+        unit: String
+    },
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },

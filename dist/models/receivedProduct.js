@@ -15,8 +15,14 @@ exports.productRecievedSchema = new mongoose_1.Schema({
     quantity: { type: Number },
     passed: { type: Number },
     rejected: { type: Number },
-    unitCost: { type: Number },
-    totalCost: { type: Number },
+    unitCost: {
+        value: Number,
+        unit: String
+    },
+    totalCost: {
+        value: Number,
+        unit: String
+    },
     comment: { type: String },
     totalAvailable: { type: Number },
     equipmentModel: { type: String },

@@ -35,7 +35,10 @@ export interface OrderInterface extends Document{
   customer?:Schema.Types.ObjectId
   supplier?:Schema.Types.ObjectId
   vehicle?:Schema.Types.ObjectId
-  cylinderSize?:string
+  cylinderSize?:{
+    value:number,
+    unit:string
+  }
   gasType?:string
   gasColor?:string,
   tracking:trackingOrder[],
@@ -60,7 +63,10 @@ const OrderSchema = new Schema({
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
   supplier:{type:Schema.Types.ObjectId, ref:'supplier'},
   vehicle:{type:Schema.Types.ObjectId, ref:'vehicle'},
-  cylinderSize:{type:String},
+  cylinderSize:{
+    value:Number,
+    unit:String
+  },
   gasType:{type:Schema.Types.ObjectId, ref:'cylinder'},
   gasColor:{type:String},
   tracking:[trackingSchema],

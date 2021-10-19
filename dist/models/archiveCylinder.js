@@ -6,7 +6,10 @@ const mongoosePagination = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.archiveCylinderSchema = new mongoose_1.Schema({
     cylinderType: { type: String },
-    waterCapacity: { type: String },
+    waterCapacity: {
+        value: Number,
+        unit: String
+    },
     dateManufactured: { type: Date },
     assignedTo: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     gasType: { type: String },
@@ -14,13 +17,19 @@ exports.archiveCylinderSchema = new mongoose_1.Schema({
     assignedNumber: { type: String },
     testingPresure: { type: String },
     fillingPreasure: { type: String },
-    gasVolumeContent: { type: String },
+    gasVolumeContent: {
+        value: Number,
+        unit: String
+    },
     cylinderNumber: { type: String },
     condition: { type: String },
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     holdingTime: { type: Date },
     department: { type: String },
-    purchaseCost: { type: Number },
+    purchaseCost: {
+        cost: Number,
+        unit: String
+    },
 });
 exports.archiveCylinderSchema.plugin(mongoosePagination);
 exports.archiveCylinderSchema.plugin(aggregatePaginate);

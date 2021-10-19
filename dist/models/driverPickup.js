@@ -8,8 +8,14 @@ const mongoosePaginate = require("mongoose-paginate-v2");
 const aggregatePaginate = require("mongoose-aggregate-paginate-v2");
 exports.routeCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    cylinderSize: String,
-    totalVolume: String,
+    cylinderSize: {
+        value: Number,
+        unit: String
+    },
+    totalVolume: {
+        value: Number,
+        unit: String
+    },
     totalQuantity: Number
 });
 const routeSupplier = new mongoose_1.Schema({
@@ -66,10 +72,22 @@ const routeSchema = new mongoose_1.Schema({
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' },
     dateCompleted: { type: Date },
     territory: { type: String },
-    mileageIn: { type: String },
-    mileageOut: { type: String },
-    fuelGiven: { type: String },
-    fuelsConsumed: { type: String },
+    mileageIn: {
+        value: Number,
+        unit: String
+    },
+    mileageOut: {
+        value: Number,
+        unit: String
+    },
+    fuelGiven: {
+        value: Number,
+        unit: String
+    },
+    fuelsConsumed: {
+        value: Number,
+        unit: String
+    },
     timeOut: { type: String },
     timeIn: { type: String },
     rppNo: String

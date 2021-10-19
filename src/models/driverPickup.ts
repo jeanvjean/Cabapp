@@ -12,8 +12,14 @@ import { SupplierTypes } from './supplier';
 
 export interface RouteCylinderInterface{
   cylinderNo:string
-  cylinderSize:string
-  totalVolume:string
+  cylinderSize:{
+    value:number,
+    unit:string
+  }
+  totalVolume:{
+    value:number,
+    unit:string
+  }
   totalQuantity:number
 }
 
@@ -75,10 +81,22 @@ export interface PickupInterface extends Document{
   dateCompleted:Date
   ocnNo:string
   territory:string
-  mileageIn:string
-  mileageOut:string
-  fuelGiven:string
-  fuelsConsumed:string
+  mileageIn:{
+    value:number,
+    unit:string
+  }
+  mileageOut:{
+    value:number,
+    unit:string
+  }
+  fuelGiven:{
+    value:number,
+    unit:string
+  }
+  fuelsConsumed:{
+    value:number,
+    unit:string
+  }
   timeOut:string
   timeIn:string
   rppNo:string
@@ -86,8 +104,14 @@ export interface PickupInterface extends Document{
 
 export const routeCylinderSchema = new Schema({
   cylinderNo:String,
-  cylinderSize:String,
-  totalVolume:String,
+  cylinderSize:{
+    value:Number,
+    unit:String
+  },
+  totalVolume:{
+    value:Number,
+    unit:String
+  },
   totalQuantity:Number
 });
 
@@ -147,10 +171,22 @@ const routeSchema = new Schema({
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   dateCompleted:{type:Date},
   territory:{type:String},
-  mileageIn:{type:String},
-  mileageOut:{type:String},
-  fuelGiven:{type:String},
-  fuelsConsumed:{type:String},
+  mileageIn:{
+    value:Number,
+    unit:String
+  },
+  mileageOut:{
+    value:Number,
+    unit:String
+  },
+  fuelGiven:{
+    value:Number,
+    unit:String
+  },
+  fuelsConsumed:{
+    value:Number,
+    unit:String
+  },
   timeOut:{type:String},
   timeIn:{type:String},
   rppNo:String

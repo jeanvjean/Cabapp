@@ -12,7 +12,10 @@ var purchaseType;
 })(purchaseType = exports.purchaseType || (exports.purchaseType = {}));
 exports.cylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    volume: String
+    volume: {
+        value: Number,
+        unit: String
+    }
 });
 const purchaseOrderSchema = new mongoose_1.Schema({
     date: Date,

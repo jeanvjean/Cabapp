@@ -14,8 +14,14 @@ exports.productSchema = new mongoose_1.Schema({
     partNumber: { type: String, lowercase: true },
     serialNumber: { type: Number },
     quantity: { type: Number },
-    unitCost: { type: Number },
-    totalCost: { type: Number },
+    unitCost: {
+        value: Number,
+        unit: String
+    },
+    totalCost: {
+        value: Number,
+        unit: String
+    },
     reorderLevel: { type: Number },
     location: { type: String, lowercase: true },
     referer: { type: String, lowercase: true },

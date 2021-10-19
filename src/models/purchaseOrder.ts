@@ -11,7 +11,10 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export type purchaseCylinderInterface = {
     cylinderNo:string
-    volume:string
+    volume:{
+        value:number,
+        unit:string
+      }
 }
 
 export enum purchaseType {
@@ -40,7 +43,10 @@ export interface PurchaseOrderInterface extends Document{
 
 export const cylinderSchema = new Schema({
     cylinderNo:String,
-    volume:String
+    volume:{
+        value:Number,
+        unit:String
+    }
 });
 
 const purchaseOrderSchema = new Schema({

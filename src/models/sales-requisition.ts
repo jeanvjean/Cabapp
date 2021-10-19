@@ -12,7 +12,10 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 export interface saleCylinder{
   noOfCylinders?:number
   cylinderNumber?:string
-  volume?:string
+  volume?:{
+    value:number,
+    unit:string
+  }
   unitPrice?:number
   amount?:number,
   cyliderType?:string
@@ -39,7 +42,10 @@ export interface SalesRequisitionInterface extends Document{
 export const saleCylinderSchema = new Schema({
   noOfCylinders:Number,
   cylinderNumber:String,
-  volume:String,
+  volume:{
+    value:Number,
+    unit:String
+  },
   unitPrice:Number,
   amount:Number,
   cylinderType:String

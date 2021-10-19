@@ -12,15 +12,27 @@ var complaintStatus;
 })(complaintStatus = exports.complaintStatus || (exports.complaintStatus = {}));
 const complaintCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    cylinderSize: String,
+    cylinderSize: {
+        value: Number,
+        unit: String
+    },
     dateSupplied: Date,
     waybillNo: String,
-    totalVolume: String
+    totalVolume: {
+        value: Number,
+        unit: String
+    }
 });
 const cylinderReplaceSchema = new mongoose_1.Schema({
     cylinderNo: String,
-    cylinderSize: String,
-    totalVolume: String
+    cylinderSize: {
+        value: Number,
+        unit: String
+    },
+    totalVolume: {
+        value: Number,
+        unit: String
+    }
 });
 exports.complaintSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },

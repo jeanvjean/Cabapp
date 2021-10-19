@@ -11,16 +11,28 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 interface complaintCylinder {
   cylinderNo:string
-  cylinderSize:string,
+  cylinderSize:{
+    value:string,
+    unit:number
+  },
   dateSupplied:Date
   waybillNo:string
-  totalVolume:string
+  totalVolume:{
+    value:number,
+    unit:string
+  }
 }
 
 interface cylinderReplace{
   cylinderNo:string
-  cylinderSize:string
-  totalVolume:string
+  cylinderSize:{
+    value:number,
+    unit:string
+  }
+  totalVolume:{
+    value:number,
+    unit:string
+  }
 }
 
 export enum complaintStatus {
@@ -57,16 +69,28 @@ export interface ComplaintInterface extends Document{
 
 const complaintCylinderSchema = new Schema({
   cylinderNo:String,
-  cylinderSize:String,
+  cylinderSize:{
+    value:Number,
+    unit:String
+  },
   dateSupplied:Date,
   waybillNo:String,
-  totalVolume:String
+  totalVolume:{
+    value:Number,
+    unit:String
+  }
 });
 
 const cylinderReplaceSchema = new Schema({
   cylinderNo:String,
-  cylinderSize:String,
-  totalVolume:String
+  cylinderSize:{
+    value:Number,
+    unit:String
+  },
+  totalVolume:{
+    value:Number,
+    unit:String
+  }
 });
 
 export const complaintSchema = new Schema({

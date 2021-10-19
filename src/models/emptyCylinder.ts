@@ -55,7 +55,10 @@ export interface EmptyCylinderInterface extends Document {
     reason?:string,
     driverStatus?:EcrApproval
     otp?:string,
-    totalVolume?:string
+    totalVolume?:{
+        value:number,
+        unit:string
+    }
     totalQuantity?:string
 };
 
@@ -79,7 +82,10 @@ const ecrSchema = new Schema({
     reason:String,
     driverStatus:{type:String, enum:Object.values(EcrApproval), default:EcrApproval.PENDING},
     otp:String,
-    totalVolume:String,
+    totalVolume:{
+        value:Number,
+        unit:String
+    },
     totalQuantity:String
 },{
     timestamps:true

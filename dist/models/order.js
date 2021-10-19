@@ -32,7 +32,10 @@ const OrderSchema = new mongoose_1.Schema({
     customer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'customer' },
     supplier: { type: mongoose_1.Schema.Types.ObjectId, ref: 'supplier' },
     vehicle: { type: mongoose_1.Schema.Types.ObjectId, ref: 'vehicle' },
-    cylinderSize: { type: String },
+    cylinderSize: {
+        value: Number,
+        unit: String
+    },
     gasType: { type: mongoose_1.Schema.Types.ObjectId, ref: 'cylinder' },
     gasColor: { type: String },
     tracking: [trackingSchema],

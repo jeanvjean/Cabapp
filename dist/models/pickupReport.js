@@ -12,8 +12,14 @@ const performanceSchema = new mongoose_1.Schema({
     destination: { type: String },
     driver: String,
     routeInfo: { type: mongoose_1.Schema.Types.ObjectId, ref: "pickup-routes" },
-    mileageIn: String,
-    mileageOut: String,
+    mileageIn: {
+        value: Number,
+        unit: String
+    },
+    mileageOut: {
+        value: Number,
+        unit: String
+    },
     timeOut: Date,
     timeIn: Date
 }, {

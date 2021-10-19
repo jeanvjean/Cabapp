@@ -28,10 +28,11 @@ export enum statuses {
     PENDING="pending"
 }
 
-export enum noteIcnType{
+export enum noteIcnType {
     CUSTOMER="customer",
     SUPPLIER="supplier",
-    WALKIN="walk-in"
+    WALKIN="walk-in",
+    COMPLAINT="complaint"
 }
 
 export interface OutgoingCylinderInterface extends Document {

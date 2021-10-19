@@ -20,7 +20,8 @@ interface complaintCylinder {
   totalVolume:{
     value:number,
     unit:string
-  }
+  },
+  comment:string
 }
 
 interface cylinderReplace{
@@ -78,7 +79,8 @@ const complaintCylinderSchema = new Schema({
   totalVolume:{
     value:Number,
     unit:String
-  }
+  },
+  comment:String
 });
 
 const cylinderReplaceSchema = new Schema({

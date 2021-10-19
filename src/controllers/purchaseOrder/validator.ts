@@ -49,9 +49,6 @@ class validatePurchaseOrder extends Ctrl{
             check('password')
                 .exists()
                 .withMessage('passeord is required'),
-            check('productionId')
-                .exists()
-                .withMessage('Production id is required'),
             check('comment')
         ]
         return rules;

@@ -46,7 +46,7 @@ export interface RegisteredCylinderInterface extends Document{
    * @param waterCapacity cylinder water capacity
    */
   waterCapacity:{
-    volume:number,
+    value:number,
     unit:string
   }
 
@@ -99,7 +99,7 @@ export interface RegisteredCylinderInterface extends Document{
    */
 
   gasVolumeContent:{
-    volume:number
+    value:number
     unit:string
   }
   /**
@@ -170,7 +170,7 @@ export const registerCylinderSchema = new Schema({
   cylinderType:{type:String, enum:Object.values(TypesOfCylinders), default:TypesOfCylinders.BUFFER},
 
   waterCapacity:{
-    volume:Number,
+    value:Number,
     unit:String
   },
 
@@ -191,7 +191,7 @@ export const registerCylinderSchema = new Schema({
   fillingPreasure:{type:String},
 
   gasVolumeContent:{
-    volume:Number,
+    value:Number,
     unit:String
   },
 

@@ -28,9 +28,7 @@ class ProductionValidator extends Ctrl{
       check('customer')
         .exists()
         .withMessage('customer is required'),
-      check('productionNo')
-        .exists()
-        .withMessage('production number is required'),
+      check('productionNo'),
       check('ecrNo')
         .exists()
         .withMessage('provide the ECR number'),

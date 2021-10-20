@@ -30,9 +30,7 @@ class ProductionValidator extends ctrl_1.default {
             express_validator_1.check('customer')
                 .exists()
                 .withMessage('customer is required'),
-            express_validator_1.check('productionNo')
-                .exists()
-                .withMessage('production number is required'),
+            express_validator_1.check('productionNo'),
             express_validator_1.check('ecrNo')
                 .exists()
                 .withMessage('provide the ECR number'),

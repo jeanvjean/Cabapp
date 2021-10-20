@@ -57,6 +57,8 @@ export interface QueryInterface {
   complaintStatus?:string
   cylinderStatus?:string
   noteType?:string
+  status?:string
+  barcode?:string
 }
 
 /**

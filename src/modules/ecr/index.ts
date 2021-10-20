@@ -38,7 +38,8 @@ export interface newEcrInterface {
     customer:EmptyCylinderInterface['customer']
     cylinders?:EmptyCylinderInterface['cylinders']
     fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
-    priority?:EmptyCylinderInterface['priority']
+    priority?:EmptyCylinderInterface['priority'],
+    type:EmptyCylinderInterface['type']
 }
 
 
@@ -65,8 +66,7 @@ class EmptyCylinderModule extends Module {
         try {
             const ecr = new this.emptyCylinder({
                 ...data,
-                branch:user.branch,
-                type:EcrType.SALES
+                branch:user.branch
             });
             let aprvO = await this.user.findOne({role:user.role, subrole:"head of department", branch:user.branch});
             if(!aprvO) {
@@ -129,6 +129,7 @@ class EmptyCylinderModule extends Module {
             const options = {
                 page:page || 1,
                 limit:limit || 10,
+                sort:{priority: 1},
                 populate:[
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'customer', model:'customer'},
@@ -140,6 +141,47 @@ class EmptyCylinderModule extends Module {
             let q = {
                 branch:user.branch,
                 type:EcrType.SALES
+            }
+            let or =[]
+            if(search) {
+                or.push({status:new RegExp(search, 'gi')});
+                or.push({ecrNo: new RegExp(search, 'gi')})
+            }
+            if(type) {
+                //@ts-ignore
+                q = {...q, type:new RegExp(type, 'gi')}
+            }
+            if(or.length > 0) {
+                //@ts-ignore
+                q = {...q, $or:or}
+            }
+            //@ts-ignore
+            const ecr = await this.emptyCylinder.paginate(q, options);
+            return Promise.resolve(ecr);
+        } catch (e) {
+            this.handleException(e)
+        }
+    }
+
+    public async complaintEcr(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
+        try {
+            const { search, type, page, limit } = query;
+            const ObjectId = mongoose.Types.ObjectId;
+            const options = {
+                page:page || 1,
+                limit:limit || 10,
+                populate:[
+                    {path:'cylinders', model:'registered-cylinders'},
+                    {path:'customer', model:'customer'},
+                    {path:'nextApprovalOfficer', model:'User'},
+                    {path:'initiator', model:'User'},
+                    {path:'branch', model:'branches'}
+                ],
+                sort:{priority: 1}
+            }
+            let q = {
+                branch:user.branch,
+                type:EcrType.COMPLAINT
             }
             let or =[]
             if(search) {
@@ -193,7 +235,8 @@ class EmptyCylinderModule extends Module {
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
                     {path:'initiator', model:'User'}
-                ]
+                ],
+                sort:{priority: 1}
             }
             let or = []
 

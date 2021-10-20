@@ -437,6 +437,18 @@ class CylinderController extends Ctrl{
     }
   }
 
+  fetchCylinderWithScan():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchCylinderWithScan(req.query, req.user);
+        this.ok(res, 'fetched', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

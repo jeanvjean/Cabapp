@@ -130,6 +130,8 @@ export interface RegisteredCylinderInterface extends Document{
 
   cylNo:number
 
+  barcode:string
+
   available:boolean
 
   purchaseCost:{
@@ -212,6 +214,8 @@ export const registerCylinderSchema = new Schema({
   cylinderStatus:{type:String, enum:Object.values(WalkinCustomerStatus), default:WalkinCustomerStatus.EMPTY},
 
   cylNo:{type:Number},
+
+  barcode:String,
 
   available:{type:Boolean, default:true},
 

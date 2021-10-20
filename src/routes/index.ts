@@ -14,6 +14,7 @@ import purchaseRouter from './purchase';
 import accountRouter from './account';
 import ocnRouter from './ocn';
 import ecrRouter from './ecr';
+import ScanRouter from './scan';
 const uploader = new Uploader();
 
 const router: expressRouter = expressRouter();
@@ -35,6 +36,7 @@ router.use('/purchase', purchaseRouter);
 router.use('/account', accountRouter);
 router.use('/ocn', ocnRouter);
 router.use('/ecr', ecrRouter);
+router.use('/scan', ScanRouter);
 
 router.post('/upload', uploader.fileUpload());
 

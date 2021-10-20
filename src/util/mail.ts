@@ -6,6 +6,7 @@ import {join} from 'path'
 import {post} from 'request-promise'
 import { getTemplate } from "./resolve-template";
 import SecretKeys from '../configs/static';
+import { ScanInterface } from '../models/scan';
 
 const serviceAccount = require(join(
 	__dirname,
@@ -51,6 +52,12 @@ export interface SendMailOption {
 interface NotificationPersistOption {
 	user_id: number
 	message: string
+}
+
+interface FormData {
+  formId:ScanInterface['formId'],
+  cylinders:ScanInterface['cylinders'],
+  status: ScanInterface['status']
 }
 
 /**
@@ -187,22 +194,32 @@ class NotificationModule extends Module {
 	}
 
     public async saveMessageToFirebase(payload: WebPush) {
-
 		if (payload.user) {
             try {
                 const dbRef = firebase.database().ref(payload.user._id.toString())
                 const time = Date.now()
-                let rad = await dbRef
-				.child("notifications")
-				.push({
-					title: payload.subject,
-					body: payload.content,
-					date: time
+                let rad = await dbRef.child("notifications").push({
+                    title: payload.subject,
+                    body: payload.content,
+                    date: time
                 })
-			let red = await dbRef
-				.child('newNotifications')
-                .transaction((counter: number) => (counter || 0) + 1)
+		    	    let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
+            } catch (error) {
+                console.log(error)
+            }
+		}
+	}
 
+  public async saveFormToFirebase(payload: FormData) {
+		if (payload.formId) {
+            try {
+                const dbRef = firebase.database().ref(payload.formId)
+                const formRef = dbRef.child('form');
+                // const time = Date.now()
+                let rad = await formRef.push().set({
+                    ...payload
+                });
+		    	    // let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
             } catch (error) {
                 console.log(error)
             }

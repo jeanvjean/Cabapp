@@ -29,7 +29,8 @@ import {
   DeletedUsers,
   DeletedCustomers,
   EmptyCylinder,
-  Waybill
+  Waybill,
+  ScanModel
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -45,6 +46,7 @@ import PurchaseOrderModule from './purchaseOrder';
 import OcnModule from './ocn';
 import AccountModule from './account';
 import EmptyCylinderModule from "./ecr";
+import Scan from './scan';
 
 /**
  * @category Modules
@@ -69,7 +71,8 @@ export const cylinder = new CylinderModule({
   change_gas:ChangeCylinder,
   customer:Customer,
   branch:Branch,
-  supplier:Supplier
+  supplier:Supplier,
+  ocn:OCN
 });
 
 export const product = new ProductModule({
@@ -151,4 +154,9 @@ export const emptyCylinder = new EmptyCylinderModule({
   customer:Customer,
   ocn:OCN,
   branch:Branch
+});
+
+export const scan = new Scan({
+  scan:ScanModel,
+  cylinder:RegisteredCylinder
 });

@@ -20,6 +20,7 @@ var noteIcnType;
     noteIcnType["CUSTOMER"] = "customer";
     noteIcnType["SUPPLIER"] = "supplier";
     noteIcnType["WALKIN"] = "walk-in";
+    noteIcnType["COMPLAINT"] = "complaint";
 })(noteIcnType = exports.noteIcnType || (exports.noteIcnType = {}));
 const ocnCylinderSchema = new mongoose_1.Schema({
     cylinderNo: String,

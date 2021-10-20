@@ -54,6 +54,7 @@ exports.registerCylinderSchema = new mongoose_1.Schema({
     holder: { type: String, enum: Object.values(cylinderHolder), default: cylinderHolder.ASNL },
     cylinderStatus: { type: String, enum: Object.values(walk_in_customers_1.WalkinCustomerStatus), default: walk_in_customers_1.WalkinCustomerStatus.EMPTY },
     cylNo: { type: Number },
+    barcode: String,
     available: { type: Boolean, default: true },
     purchaseCost: {
         cost: Number,

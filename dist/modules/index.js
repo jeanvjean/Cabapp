@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.emptyCylinder = exports.account = exports.ocn = exports.purchase = exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
+exports.scan = exports.emptyCylinder = exports.account = exports.ocn = exports.purchase = exports.production = exports.sales = exports.customer = exports.driver = exports.vehicle = exports.product = exports.cylinder = exports.user = exports.person = void 0;
 const index_1 = require("../models/index");
 const person_1 = require("./person");
 const user_1 = require("./user");
@@ -15,6 +15,7 @@ const purchaseOrder_1 = require("./purchaseOrder");
 const ocn_1 = require("./ocn");
 const account_1 = require("./account");
 const ecr_1 = require("./ecr");
+const scan_1 = require("./scan");
 /**
  * @category Modules
  * @param {person} Instance of Person module
@@ -36,7 +37,8 @@ exports.cylinder = new cylinder_1.default({
     change_gas: index_1.ChangeCylinder,
     customer: index_1.Customer,
     branch: index_1.Branch,
-    supplier: index_1.Supplier
+    supplier: index_1.Supplier,
+    ocn: index_1.OCN
 });
 exports.product = new inventory_1.default({
     product: index_1.Product,
@@ -108,5 +110,9 @@ exports.emptyCylinder = new ecr_1.default({
     customer: index_1.Customer,
     ocn: index_1.OCN,
     branch: index_1.Branch
+});
+exports.scan = new scan_1.default({
+    scan: index_1.ScanModel,
+    cylinder: index_1.RegisteredCylinder
 });
 //# sourceMappingURL=index.js.map

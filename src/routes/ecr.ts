@@ -46,6 +46,12 @@ router.get(
     auth.verify(),
     ecrCtrl.fetchEcrs()
 )
+//Route not recorded
+router.get(
+    '/fetch-complaint-ecr',
+    auth.verify(),
+    ecrCtrl.complaintEcr()
+);
 
 router.get(
     '/tecr-details/:ecrNo',

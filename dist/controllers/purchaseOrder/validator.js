@@ -51,9 +51,6 @@ class validatePurchaseOrder extends ctrl_1.default {
             express_validator_1.check('password')
                 .exists()
                 .withMessage('passeord is required'),
-            express_validator_1.check('productionId')
-                .exists()
-                .withMessage('Production id is required'),
             express_validator_1.check('comment')
         ];
         return rules;

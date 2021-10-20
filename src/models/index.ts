@@ -35,6 +35,7 @@ import pickUpReportFactory, { vehiclePerformance } from './pickupReport';
 import deleteCustomerFactory, { DeletedCustomer } from './deletedCustomers';
 import ecrFactory, { EmptyCylinderInterface } from "./emptyCylinder";
 import waybill, { WayBillInterface } from './waybill';
+import scanFactory, { ScanInterface } from "./scan";
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -99,5 +100,7 @@ export const DeletedCustomers:Model<DeletedCustomer> = deleteCustomerFactory(con
 export const EmptyCylinder:Model<EmptyCylinderInterface> = ecrFactory(conn);
 
 export const Waybill:Model<WayBillInterface> = waybill(conn);
+
+export const ScanModel:Model<ScanInterface> = scanFactory(conn);
 
 conn.once('open', (): void => console.log('db connection open'));

@@ -31,7 +31,7 @@ class EmptyCylinderModule extends module_1.default {
     createECR(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const ecr = new this.emptyCylinder(Object.assign(Object.assign({}, data), { branch: user.branch, type: emptyCylinder_1.EcrType.SALES }));
+                const ecr = new this.emptyCylinder(Object.assign(Object.assign({}, data), { branch: user.branch }));
                 let aprvO = yield this.user.findOne({ role: user.role, subrole: "head of department", branch: user.branch });
                 if (!aprvO) {
                     throw new exceptions_1.BadInputFormatException('can\'t find the HOD cannot create without one');
@@ -96,6 +96,7 @@ class EmptyCylinderModule extends module_1.default {
                 const options = {
                     page: page || 1,
                     limit: limit || 10,
+                    sort: { priority: 1 },
                     populate: [
                         { path: 'cylinders', model: 'registered-cylinders' },
                         { path: 'customer', model: 'customer' },
@@ -107,6 +108,49 @@ class EmptyCylinderModule extends module_1.default {
                 let q = {
                     branch: user.branch,
                     type: emptyCylinder_1.EcrType.SALES
+                };
+                let or = [];
+                if (search) {
+                    or.push({ status: new RegExp(search, 'gi') });
+                    or.push({ ecrNo: new RegExp(search, 'gi') });
+                }
+                if (type) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { type: new RegExp(type, 'gi') });
+                }
+                if (or.length > 0) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { $or: or });
+                }
+                //@ts-ignore
+                const ecr = yield this.emptyCylinder.paginate(q, options);
+                return Promise.resolve(ecr);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    complaintEcr(query, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { search, type, page, limit } = query;
+                const ObjectId = cylinder_1.mongoose.Types.ObjectId;
+                const options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
+                        { path: 'cylinders', model: 'registered-cylinders' },
+                        { path: 'customer', model: 'customer' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'branch', model: 'branches' }
+                    ],
+                    sort: { priority: 1 }
+                };
+                let q = {
+                    branch: user.branch,
+                    type: emptyCylinder_1.EcrType.COMPLAINT
                 };
                 let or = [];
                 if (search) {
@@ -164,7 +208,8 @@ class EmptyCylinderModule extends module_1.default {
                         { path: 'nextApprovalOfficer', model: 'User' },
                         { path: 'branch', model: 'branches' },
                         { path: 'initiator', model: 'User' }
-                    ]
+                    ],
+                    sort: { priority: 1 }
                 };
                 let or = [];
                 if (ecr) {

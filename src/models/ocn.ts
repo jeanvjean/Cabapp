@@ -41,7 +41,7 @@ export interface OutgoingCylinderInterface extends Document {
     cylinderType:string
     date:Date
     cylinders:Schema.Types.ObjectId[]
-    otherCylinders:ocnCylinders[]
+    otherCylinders?:ocnCylinders[]
     totalQty:number
     totalVol:{
         value:number,

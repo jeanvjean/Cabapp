@@ -218,6 +218,12 @@ router.get(
   cylinderCtrl.changeCylinderDetails()
 );
 
+router.get(
+  '/check-cylinder',
+  auth.verify(),
+  cylinderCtrl.fetchCylinderWithScan()
+);
+
 
 
 export default router;

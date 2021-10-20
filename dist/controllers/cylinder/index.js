@@ -438,6 +438,18 @@ class CylinderController extends ctrl_1.default {
             }
         });
     }
+    fetchCylinderWithScan() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.fetchCylinderWithScan(req.query, req.user);
+                this.ok(res, 'fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = CylinderController;
 //# sourceMappingURL=index.js.map

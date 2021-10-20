@@ -42,5 +42,6 @@ router.get('/fetch-change-requests', auth.verify(), controllers_1.cylinderCtrl.f
 router.post('/approve-change-request', auth.verify(), cylinder_1.Validator.validateApproval(), val.validate(), controllers_1.cylinderCtrl.approveChangeCylinder());
 router.get('/fetch-pending-cylinder_change', auth.verify(), controllers_1.cylinderCtrl.fetchPendingChangeCylinder());
 router.get('/view-cylinder_change/:cylinderId', auth.verify(), controllers_1.cylinderCtrl.changeCylinderDetails());
+router.get('/check-cylinder', auth.verify(), controllers_1.cylinderCtrl.fetchCylinderWithScan());
 exports.default = router;
 //# sourceMappingURL=cylinder.js.map

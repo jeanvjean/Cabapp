@@ -13,13 +13,14 @@ import { RouteCylinderInterface, routeCylinderSchema } from './driverPickup';
 export enum Priority {
     URGENT=1,
     REGULAR=2,
-    TRUCK=3
-
+    TRUCK=3,
+    COMPLAINT=4
 }
 
 export enum EcrType {
     TRUCK="truck",
-    SALES="sales"
+    SALES="sales",
+    COMPLAINT="complaint"
 }
 
 export enum EcrApproval{
@@ -41,7 +42,8 @@ export interface EmptyCylinderInterface extends Document {
     cylinders:Schema.Types.ObjectId[],
     fringeCylinders:RouteCylinderInterface[]
     priority?:Priority
-    type?:EcrType
+    type?:EcrType,
+    icnNo?:string
     approvalOfficers?:ApprovalOfficers[]
     nextApprovalOfficer?:Schema.Types.ObjectId
     status?:EcrApproval
@@ -68,6 +70,7 @@ const ecrSchema = new Schema({
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
     fringeCylinders:[routeCylinderSchema],
     type:{type:String, enum:Object.values(EcrType)},
+    icnNo:String,
     priority:{type:Number, enum:Object.values(Priority), default:Priority.REGULAR},
     ApprovalOfficers:[ApprovalOfficerSchema],
     nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:"User"},

@@ -11,11 +11,13 @@ var Priority;
     Priority[Priority["URGENT"] = 1] = "URGENT";
     Priority[Priority["REGULAR"] = 2] = "REGULAR";
     Priority[Priority["TRUCK"] = 3] = "TRUCK";
+    Priority[Priority["COMPLAINT"] = 4] = "COMPLAINT";
 })(Priority = exports.Priority || (exports.Priority = {}));
 var EcrType;
 (function (EcrType) {
     EcrType["TRUCK"] = "truck";
     EcrType["SALES"] = "sales";
+    EcrType["COMPLAINT"] = "complaint";
 })(EcrType = exports.EcrType || (exports.EcrType = {}));
 var EcrApproval;
 (function (EcrApproval) {
@@ -37,6 +39,7 @@ const ecrSchema = new mongoose_1.Schema({
     cylinders: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "registered-cylinders" }],
     fringeCylinders: [driverPickup_1.routeCylinderSchema],
     type: { type: String, enum: Object.values(EcrType) },
+    icnNo: String,
     priority: { type: Number, enum: Object.values(Priority), default: Priority.REGULAR },
     ApprovalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },

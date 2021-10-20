@@ -22,6 +22,7 @@ import { BranchInterface } from "../../models/branch";
 import { schedule } from "../vehicle";
 export { mongoose };
 import { RegisteredCylinder } from '../../models';
+import { note, noteIcnType, OutgoingCylinderInterface } from "../../models/ocn";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -34,6 +35,7 @@ type CylinderProps = {
   customer:Model<CustomerInterface>
   supplier:Model<SupplierInterface>
   branch:Model<BranchInterface>
+  ocn:Model<OutgoingCylinderInterface>
 }
 
 interface NewCylinderInterface{
@@ -84,6 +86,12 @@ interface CylinderCountInterface{
   totalCylinders:number,
   totalBufferCylinders:number,
   totalAssignedCylinders:number
+}
+
+interface CylinderDetailsInterface {
+  barcode?:string,
+  cylinderNumber?:string,
+  assignedNumber?:string
 }
 
 interface FetchCylinderInterface {
@@ -204,6 +212,7 @@ class Cylinder extends Module {
   private customer:Model<CustomerInterface>
   private branch:Model<BranchInterface>
   private supplier:Model<SupplierInterface>
+  private ocn:Model<OutgoingCylinderInterface>
 
   constructor(props:CylinderProps) {
     super()
@@ -217,6 +226,7 @@ class Cylinder extends Module {
     this.customer = props.customer
     this.branch = props.branch
     this.supplier = props.supplier
+    this.ocn = props.ocn
   }
 
   public async createCylinder(data:NewCylinderInterface, user:UserInterface): Promise<CylinderInterface|undefined> {
@@ -287,12 +297,22 @@ class Cylinder extends Module {
         throw new BadInputFormatException('select a valid gasType')
       }
       // console.log(gName, data);
+      let cylCount = await this.registerCylinder.find({}).sort({cylNo:-1}).limit(1);
+      let barcode;
+      if(cylCount[0]) {
+        barcode = cylCount[0].cylNo + 1;
+      }else {
+        barcode = 1
+      }
+
       let payload = {
         ...data,
         purchaseDate:new Date(data.purchaseDate).toISOString(),
         dateManufactured:new Date(data.dateManufactured).toISOString(),
         branch:user.branch,
-        gasName:gName.gasName
+        gasName:gName.gasName,
+        barcode: "REG-CYL"+ barcode,
+        cylNo: barcode
       }
       let newRegistration = await this.registerCylinder.create(payload);
       await createLog({
@@ -780,6 +800,7 @@ class Cylinder extends Module {
       if(cylinderNumber) {
         or.push({cylinderNumber: new RegExp(cylinderNumber, 'gi')})
         or.push({assignedNumber: new RegExp(cylinderNumber, 'gi')})
+        or.push({barcode: new RegExp(cylinderNumber, 'gi')});
       }
       if(owner) {
         //@ts-ignore
@@ -872,6 +893,48 @@ class Cylinder extends Module {
         {path:'gasType', model:'cylinder'},
         {path:'toBranch', model:'branches'}
       ]);
+      return Promise.resolve(cylinder as RegisteredCylinderInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async fetchCylinderWithScan(data:CylinderDetailsInterface,user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
+    try {
+      let { barcode, cylinderNumber, assignedNumber } = data;
+
+      let q = {}
+      if(barcode) {
+        //@ts-ignore
+        q = {...q, barcode:barcode}
+      }
+      if(cylinderNumber) {
+        //@ts-ignore
+        q = {...q, cylinderNumber:cylinderNumber}
+      }
+      if(assignedNumber) {
+        //@ts-ignore
+        q = {...q, assignedNumber:assignedNumber}
+      }
+      let cylinder =  await this.registerCylinder.findOne(q).populate([
+        {path:'assignedTo', model:'customer'},
+        {path:'branch', model:'branches'},
+        {path:'gasType', model:'cylinder'},
+        {path:'toBranch', model:'branches'}
+      ]);
+
+      if(!cylinder) {
+        throw new BadInputFormatException('cylinder information not found')
+      }
+
+      let lastOcn = await this.ocn.find({
+        cylinders: cylinder._id, 
+        noteType: note.OUT,
+        type:noteIcnType.CUSTOMER
+      }).sort({date:-1}).limit(1).populate('customer');
+      let lastsupplydate = lastOcn[0].date
+      //@ts-ignore
+      let customerName = lastOcn[0].customer?.name
       return Promise.resolve(cylinder as RegisteredCylinderInterface);
     } catch (e) {
       this.handleException(e);

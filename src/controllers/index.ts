@@ -1,4 +1,4 @@
-import {customer, cylinder, driver, person, product, user, vehicle, sales, production, purchase, ocn, account, emptyCylinder} from '../modules';
+import {customer, cylinder, driver, person, product, user, vehicle, sales, production, purchase, ocn, account, emptyCylinder, scan} from '../modules';
 import CylinderCtrl from './cylinder';
 import Ctrl from "./ctrl";
 import PersonCtrl from './person';
@@ -13,6 +13,7 @@ import PurchaseOrder from './purchaseOrder';
 import OcnController from './ocn';
 import AccountCtrl from './account'
 import EcrController from './ecr';
+import ScanController from './scan';
 
 export const personCtrl = new PersonCtrl(person);
 export const userCtrl = new UserCtrl(user);
@@ -27,5 +28,6 @@ export const purchaseCtrl = new PurchaseOrder(purchase)
 export const ocnController = new OcnController(ocn);
 export const accountCtrl = new AccountCtrl(account);
 export const ecrCtrl = new EcrController(emptyCylinder);
+export const scanCtrl = new ScanController(scan)
 export const ctrl = new Ctrl();
 

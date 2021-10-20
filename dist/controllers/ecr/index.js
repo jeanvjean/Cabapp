@@ -113,6 +113,18 @@ class EcrController extends ctrl_1.default {
             }
         });
     }
+    complaintEcr() {
+        return (req, res) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                //@ts-ignore
+                const data = yield this.module.complaintEcr(req.query, req.user);
+                this.ok(res, 'fetched', data);
+            }
+            catch (e) {
+                this.handleError(e, req, res);
+            }
+        });
+    }
 }
 exports.default = EcrController;
 //# sourceMappingURL=index.js.map

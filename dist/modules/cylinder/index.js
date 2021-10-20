@@ -25,6 +25,7 @@ const mongoose = require("mongoose");
 exports.mongoose = mongoose;
 const vehicle_1 = require("../vehicle");
 const models_1 = require("../../models");
+const ocn_1 = require("../../models/ocn");
 class Cylinder extends module_1.default {
     constructor(props) {
         super();
@@ -38,6 +39,7 @@ class Cylinder extends module_1.default {
         this.customer = props.customer;
         this.branch = props.branch;
         this.supplier = props.supplier;
+        this.ocn = props.ocn;
     }
     createCylinder(data, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -111,7 +113,15 @@ class Cylinder extends module_1.default {
                     throw new exceptions_1.BadInputFormatException('select a valid gasType');
                 }
                 // console.log(gName, data);
-                let payload = Object.assign(Object.assign({}, data), { purchaseDate: new Date(data.purchaseDate).toISOString(), dateManufactured: new Date(data.dateManufactured).toISOString(), branch: user.branch, gasName: gName.gasName });
+                let cylCount = yield this.registerCylinder.find({}).sort({ cylNo: -1 }).limit(1);
+                let barcode;
+                if (cylCount[0]) {
+                    barcode = cylCount[0].cylNo + 1;
+                }
+                else {
+                    barcode = 1;
+                }
+                let payload = Object.assign(Object.assign({}, data), { purchaseDate: new Date(data.purchaseDate).toISOString(), dateManufactured: new Date(data.dateManufactured).toISOString(), branch: user.branch, gasName: gName.gasName, barcode: "REG-CYL" + barcode, cylNo: barcode });
                 let newRegistration = yield this.registerCylinder.create(payload);
                 yield logs_1.createLog({
                     user: user._id,
@@ -601,6 +611,7 @@ class Cylinder extends module_1.default {
                 if (cylinderNumber) {
                     or.push({ cylinderNumber: new RegExp(cylinderNumber, 'gi') });
                     or.push({ assignedNumber: new RegExp(cylinderNumber, 'gi') });
+                    or.push({ barcode: new RegExp(cylinderNumber, 'gi') });
                 }
                 if (owner) {
                     //@ts-ignore
@@ -693,6 +704,48 @@ class Cylinder extends module_1.default {
                     { path: 'gasType', model: 'cylinder' },
                     { path: 'toBranch', model: 'branches' }
                 ]);
+                return Promise.resolve(cylinder);
+            }
+            catch (e) {
+                this.handleException(e);
+            }
+        });
+    }
+    fetchCylinderWithScan(data, user) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { barcode, cylinderNumber, assignedNumber } = data;
+                let q = {};
+                if (barcode) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { barcode: barcode });
+                }
+                if (cylinderNumber) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { cylinderNumber: cylinderNumber });
+                }
+                if (assignedNumber) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { assignedNumber: assignedNumber });
+                }
+                let cylinder = yield this.registerCylinder.findOne(q).populate([
+                    { path: 'assignedTo', model: 'customer' },
+                    { path: 'branch', model: 'branches' },
+                    { path: 'gasType', model: 'cylinder' },
+                    { path: 'toBranch', model: 'branches' }
+                ]);
+                if (!cylinder) {
+                    throw new exceptions_1.BadInputFormatException('cylinder information not found');
+                }
+                let lastOcn = yield this.ocn.find({
+                    cylinders: cylinder._id,
+                    noteType: ocn_1.note.OUT,
+                    type: ocn_1.noteIcnType.CUSTOMER
+                }).sort({ date: -1 }).limit(1).populate('customer');
+                let lastsupplydate = lastOcn[0].date;
+                //@ts-ignore
+                let customerName = (_a = lastOcn[0].customer) === null || _a === void 0 ? void 0 : _a.name;
                 return Promise.resolve(cylinder);
             }
             catch (e) {

@@ -21,7 +21,8 @@ const complaintCylinderSchema = new mongoose_1.Schema({
     totalVolume: {
         value: Number,
         unit: String
-    }
+    },
+    comment: String
 });
 const cylinderReplaceSchema = new mongoose_1.Schema({
     cylinderNo: String,

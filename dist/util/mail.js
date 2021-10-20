@@ -156,16 +156,28 @@ class NotificationModule extends module_1.default {
                 try {
                     const dbRef = firebase.database().ref(payload.user._id.toString());
                     const time = Date.now();
-                    let rad = yield dbRef
-                        .child("notifications")
-                        .push({
+                    let rad = yield dbRef.child("notifications").push({
                         title: payload.subject,
                         body: payload.content,
                         date: time
                     });
-                    let red = yield dbRef
-                        .child('newNotifications')
-                        .transaction((counter) => (counter || 0) + 1);
+                    let red = yield dbRef.child('newNotifications').transaction((counter) => (counter || 0) + 1);
+                }
+                catch (error) {
+                    console.log(error);
+                }
+            }
+        });
+    }
+    saveFormToFirebase(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (payload.formId) {
+                try {
+                    const dbRef = firebase.database().ref(payload.formId);
+                    const formRef = dbRef.child('form');
+                    // const time = Date.now()
+                    let rad = yield formRef.push().set(Object.assign({}, payload));
+                    // let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
                 }
                 catch (error) {
                     console.log(error);

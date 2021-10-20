@@ -13,6 +13,8 @@ router.post('/approve-ecr', auth.verify(), ecr_1.Validator.approveEcr(), val.val
 router.get('/ecr-details/:ecrId', auth.verify(), controllers_1.ecrCtrl.ecrDetails());
 router.get('/fetch-ecr-approvals', auth.verify(), controllers_1.ecrCtrl.fetchPendingApprovals());
 router.get('/fetch-tecr', auth.verify(), controllers_1.ecrCtrl.fetchEcrs());
+//Route not recorded
+router.get('/fetch-complaint-ecr', auth.verify(), controllers_1.ecrCtrl.complaintEcr());
 router.get('/tecr-details/:ecrNo', auth.verify(), controllers_1.ecrCtrl.fetchTEcrDetails());
 router.get('/submit-otp/:tecrId/:otp', auth.verify(), controllers_1.ecrCtrl.completeTecr());
 exports.default = router;

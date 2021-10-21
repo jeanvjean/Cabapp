@@ -65,7 +65,7 @@ export interface ComplaintInterface extends Document{
   createdAt:Date
   updatedAt:Date
   deliveryNo?:string
-  supplyDate:Date
+  supplyDate?:Date
 }
 
 const complaintCylinderSchema = new Schema({

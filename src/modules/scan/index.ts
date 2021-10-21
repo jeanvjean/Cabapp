@@ -57,7 +57,7 @@ class Scan extends Module {
                 // }
                 found.cylinders.push({
                     cylinderNumber: cyl.cylinderNumber,
-                    assignedNumer:cyl.assignedNumber,
+                    assignedNumber:cyl.assignedNumber,
                     barcode:cyl.barcode
                 });
                 await found.save();
@@ -104,7 +104,8 @@ class Scan extends Module {
                 //@ts-ignore
                 q = {...q, $or:or}
             }
-            let scan = await this.scan.find(q, options);
+            //@ts-ignore
+            let scan = await this.scan.paginate(q, options);
             return Promise.resolve(scan)
         } catch (e) {
             this.handleException(e)
@@ -113,7 +114,7 @@ class Scan extends Module {
 
     public async scanInfo(formId:string):Promise<ScanInterface|undefined>{
         try {
-            const scan = await this.scan.findOne({formId});
+            const scan = await this.scan.findOne({formId: formId});
             if(!scan) {
                 throw new BadInputFormatException('scan information not found')
             }

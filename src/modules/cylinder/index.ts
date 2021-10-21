@@ -899,7 +899,7 @@ class Cylinder extends Module {
     }
   }
 
-  public async fetchCylinderWithScan(data:CylinderDetailsInterface,user:UserInterface):Promise<RegisteredCylinderInterface|undefined>{
+  public async fetchCylinderWithScan(data:CylinderDetailsInterface,user:UserInterface):Promise<any>{
     try {
       let { barcode, cylinderNumber, assignedNumber } = data;
 
@@ -932,10 +932,19 @@ class Cylinder extends Module {
         noteType: note.OUT,
         type:noteIcnType.CUSTOMER
       }).sort({date:-1}).limit(1).populate('customer');
-      let lastsupplydate = lastOcn[0].date
-      //@ts-ignore
-      let customerName = lastOcn[0].customer?.name
-      return Promise.resolve(cylinder as RegisteredCylinderInterface);
+      // console.log(lastOcn);
+      let lastsupplydate;
+      let customerName;
+      if(lastOcn[0]) {
+        lastsupplydate = lastOcn[0].date
+        //@ts-ignore
+        customerName = lastOcn[0].customer?.name
+      }
+      return Promise.resolve({
+        cylinder,
+        lastsupplydate,
+        lastCustomer:customerName
+      });
     } catch (e) {
       this.handleException(e);
     }

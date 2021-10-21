@@ -743,10 +743,19 @@ class Cylinder extends module_1.default {
                     noteType: ocn_1.note.OUT,
                     type: ocn_1.noteIcnType.CUSTOMER
                 }).sort({ date: -1 }).limit(1).populate('customer');
-                let lastsupplydate = lastOcn[0].date;
-                //@ts-ignore
-                let customerName = (_a = lastOcn[0].customer) === null || _a === void 0 ? void 0 : _a.name;
-                return Promise.resolve(cylinder);
+                // console.log(lastOcn);
+                let lastsupplydate;
+                let customerName;
+                if (lastOcn[0]) {
+                    lastsupplydate = lastOcn[0].date;
+                    //@ts-ignore
+                    customerName = (_a = lastOcn[0].customer) === null || _a === void 0 ? void 0 : _a.name;
+                }
+                return Promise.resolve({
+                    cylinder,
+                    lastsupplydate,
+                    lastCustomer: customerName
+                });
             }
             catch (e) {
                 this.handleException(e);

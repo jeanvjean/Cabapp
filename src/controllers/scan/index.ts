@@ -50,7 +50,7 @@ class ScanController extends Ctrl{
     scanInfo():RequestHandler{
         return async(req:Request, res:Response)=>{
             try {
-                const data = await this.module.scanInfo(req.params.fromId);
+                const data = await this.module.scanInfo(req.params.formId);
                 this.ok(res, 'scan info', data);
             } catch (e) {
                 this.handleError(e, req, res);

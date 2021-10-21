@@ -9,7 +9,7 @@ import * as mongoosPaginate from 'mongoose-paginate-v2';
 
 interface cylinderInterface {
     cylinderNumber:string,
-    assignedNumer:string
+    assignedNumber:string
     barcode:string
 }
 
@@ -27,7 +27,7 @@ export interface ScanInterface extends Document {
 
 const scanCylinderSchema = new Schema({
     cylinderNumber:String,
-    assignedNumer:String,
+    assignedNumber:String,
     barcode:String
 })
 

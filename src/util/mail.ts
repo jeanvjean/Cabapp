@@ -196,14 +196,16 @@ class NotificationModule extends Module {
     public async saveMessageToFirebase(payload: WebPush) {
 		if (payload.user) {
             try {
-                const dbRef = firebase.database().ref(payload.user._id.toString())
+                const dbRef = firebase.database().ref('messaging')
                 const time = Date.now()
-                let rad = await dbRef.child("notifications").push({
+                let rad = await dbRef.child(payload.user._id.toString())
+                let notRef = await rad.child('notification')
+                .push({
                     title: payload.subject,
                     body: payload.content,
                     date: time
                 })
-		    	    let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
+		    	    let red = await rad.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
             } catch (error) {
                 console.log(error)
             }
@@ -213,11 +215,14 @@ class NotificationModule extends Module {
   public async saveFormToFirebase(payload: FormData) {
 		if (payload.formId) {
             try {
-                const dbRef = firebase.database().ref(payload.formId)
-                const formRef = dbRef.child('form');
+                const dbRef = firebase.database().ref('forms')
+                const formRef = await dbRef.child(payload.formId.toString());
                 // const time = Date.now()
-                let rad = await formRef.push().set({
-                    ...payload
+                let rad = await formRef.child('form')
+                .set({
+                    form_id: payload.formId,
+                    cylinders:JSON.stringify(payload.cylinders),
+                    status:payload.status
                 });
 		    	    // let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
             } catch (error) {

@@ -154,14 +154,16 @@ class NotificationModule extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             if (payload.user) {
                 try {
-                    const dbRef = firebase.database().ref(payload.user._id.toString());
+                    const dbRef = firebase.database().ref('messaging');
                     const time = Date.now();
-                    let rad = yield dbRef.child("notifications").push({
+                    let rad = yield dbRef.child(payload.user._id.toString());
+                    let notRef = yield rad.child('notification')
+                        .push({
                         title: payload.subject,
                         body: payload.content,
                         date: time
                     });
-                    let red = yield dbRef.child('newNotifications').transaction((counter) => (counter || 0) + 1);
+                    let red = yield rad.child('newNotifications').transaction((counter) => (counter || 0) + 1);
                 }
                 catch (error) {
                     console.log(error);
@@ -173,10 +175,15 @@ class NotificationModule extends module_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             if (payload.formId) {
                 try {
-                    const dbRef = firebase.database().ref(payload.formId);
-                    const formRef = dbRef.child('form');
+                    const dbRef = firebase.database().ref('forms');
+                    const formRef = yield dbRef.child(payload.formId.toString());
                     // const time = Date.now()
-                    let rad = yield formRef.push().set(Object.assign({}, payload));
+                    let rad = yield formRef.child('form')
+                        .set({
+                        form_id: payload.formId,
+                        cylinders: JSON.stringify(payload.cylinders),
+                        status: payload.status
+                    });
                     // let red = await dbRef.child('newNotifications').transaction((counter: number) => (counter || 0) + 1)
                 }
                 catch (error) {

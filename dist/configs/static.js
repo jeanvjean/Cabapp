@@ -15,7 +15,7 @@ let Secret = /** @class */ (() => {
     Secret.CLOUDINARY_SECRET = "iMeFPISULshzgunCBP-cpdOO6kk";
     Secret.CLOUDINARY_NAME = "dorz7hgqx";
     Secret.FCM_SERVER_KEY = '';
-    Secret.FRONTEND_URL = `https://asnl-web.netlify.app/`;
+    Secret.FRONTEND_URL = `https://asnl-web.netlify.app`;
     return Secret;
 })();
 exports.default = Secret;

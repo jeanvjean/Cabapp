@@ -39,12 +39,13 @@ const productionSchema = new mongoose_1.Schema({
     initiator: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
     approvalOfficers: [transferCylinder_1.ApprovalOfficerSchema],
     nextApprovalOfficer: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
-    status: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), derfault: transferCylinder_1.TransferStatus.PENDING },
+    status: { type: String, enum: Object.values(transferCylinder_1.TransferStatus), default: transferCylinder_1.TransferStatus.PENDING },
     approvalStage: { type: String },
     comments: { type: [transferCylinder_1.commentSchema] },
     produced: { type: Boolean, default: false },
     priority: { type: String, enum: Object.values(emptyCylinder_1.Priority), default: emptyCylinder_1.Priority.REGULAR },
-    initNum: Number
+    initNum: Number,
+    branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'branches' }
 });
 productionSchema.plugin(mongoosePaginate);
 productionSchema.plugin(aggregatePaginate);

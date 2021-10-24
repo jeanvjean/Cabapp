@@ -40,7 +40,7 @@ class ProductionSchedule extends module_1.default {
                     department: user.role,
                     stageOfApproval: transferCylinder_1.stagesOfApproval.STAGE1
                 });
-                let sche = yield this.production.find({}).sort({ init: -1 }).limit(1);
+                let sche = yield this.production.find({}).sort({ initNum: -1 }).limit(1);
                 let sn;
                 if (sche[0]) {
                     sn = sche[0].initNum + 1;
@@ -362,8 +362,42 @@ class ProductionSchedule extends module_1.default {
     fetchApprovedSchedules(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let { page, limit, search, approvalStatus, ecr, fromDate } = query;
+                let options = {
+                    page: page || 1,
+                    limit: limit || 10,
+                    populate: [
+                        { path: 'customer', model: 'customer' },
+                        { path: 'initiator', model: 'User' },
+                        { path: 'nextApprovalOfficer', model: 'User' },
+                        { path: "cylinders", model: "registered-cylinders" }
+                    ]
+                };
+                let q = {
+                    branch: user.branch
+                };
+                let or = [];
+                if (approvalStatus) {
+                    or.push({ status: new RegExp(approvalStatus, 'gi') });
+                }
+                if (ecr) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { ecrNo: ecr });
+                }
+                if (fromDate) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { date: { '$eq': new Date(fromDate) } });
+                }
+                if (search) {
+                    or.push({ productionNo: new RegExp(search, 'gi') });
+                    or.push({ shift: new RegExp(search, 'gi') });
+                    or.push({ quantityToFill: new RegExp(search, 'gi') });
+                    or.push({ 'volumeToFill.value': new RegExp(search, 'gi') });
+                    or.push({ 'priority': new RegExp(search, 'gi') });
+                }
                 //@ts-ignore
-                const productions = yield this.production.paginate({ branch: user.branch }, Object.assign({}, query));
+                const productions = yield this.production.paginate(q, options);
+                // console.log(productions)
                 return Promise.resolve(productions);
             }
             catch (e) {

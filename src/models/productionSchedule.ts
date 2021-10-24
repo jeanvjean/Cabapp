@@ -84,12 +84,13 @@ const productionSchema = new Schema({
   initiator:{type:Schema.Types.ObjectId, ref:'User'},
   approvalOfficers:[ApprovalOfficerSchema],
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
-  status:{type:String, enum:Object.values(TransferStatus), derfault:TransferStatus.PENDING},
+  status:{type:String, enum:Object.values(TransferStatus), default:TransferStatus.PENDING},
   approvalStage:{type:String},
   comments:{type:[commentSchema]},
   produced:{type:Boolean, default:false},
   priority:{type:String, enum:Object.values(Priority), default:Priority.REGULAR},
-  initNum:Number
+  initNum:Number,
+  branch:{type:Schema.Types.ObjectId, ref: 'branches'}
 });
 
 productionSchema.plugin(mongoosePaginate)

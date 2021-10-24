@@ -74,7 +74,7 @@ class ProductionSchedule extends Module{
         stageOfApproval:stagesOfApproval.STAGE1
       });
 
-      let sche = await this.production.find({}).sort({init:-1}).limit(1);
+      let sche = await this.production.find({}).sort({initNum:-1}).limit(1);
       let sn;
       if(sche[0]) {
         sn = sche[0].initNum + 1
@@ -385,8 +385,44 @@ class ProductionSchedule extends Module{
 
   public async fetchApprovedSchedules(query:QueryInterface, user:UserInterface):Promise<ProductionScheduleInterface[]|undefined>{
     try {
+      let { page, limit, search, approvalStatus, ecr, fromDate } = query;
+      let options = {
+        page:page || 1,
+        limit:limit || 10,
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:"cylinders", model:"registered-cylinders"}
+        ]
+      }
+      let q = {
+        branch:user.branch
+      }
+      let or = [];
+      if(approvalStatus) {
+        or.push({status: new RegExp(approvalStatus, 'gi')})
+      }
+
+      if(ecr) {
+        //@ts-ignore
+        q = {...q, ecrNo:ecr}
+      }
+
+      if(fromDate) {
+        //@ts-ignore
+        q = {...q, date:{'$eq': new Date(fromDate)}}
+      }
+      if(search) {
+        or.push({productionNo: new RegExp(search, 'gi')})
+        or.push({shift: new RegExp(search, 'gi')})
+        or.push({quantityToFill: new RegExp(search, 'gi')})
+        or.push({'volumeToFill.value': new RegExp(search, 'gi')})
+        or.push({'priority': new RegExp(search, 'gi')})
+      }
       //@ts-ignore
-      const productions = await this.production.paginate({branch:user.branch},{...query});
+      const productions = await this.production.paginate(q,options);
+      // console.log(productions)
       return Promise.resolve(productions);
     } catch (e) {
       this.handleException(e);

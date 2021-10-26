@@ -20,7 +20,6 @@ interface newRecieptInterface {
     amountPaid:RecieptInterface['amountPaid']
     date:RecieptInterface['date']
     amountInWords:RecieptInterface['amountInWords']
-    ocnNo?:RecieptInterface['ocnNo']
     salesReq?:RecieptInterface['salesReq']
 }
 

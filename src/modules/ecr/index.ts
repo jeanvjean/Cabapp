@@ -385,7 +385,7 @@ class EmptyCylinderModule extends Module {
                 q = {...q, $or:or}
             }            
             //@ts-ignore
-            const request = await this.emptyCylinder.aggregatePaginate(q, options);
+            const request = await this.emptyCylinder.paginate(q, options);
             return Promise.resolve(request);
         } catch (e) {
             this.handleException(e)

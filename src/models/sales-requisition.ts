@@ -8,6 +8,7 @@ import { ApprovalOfficers, ApprovalOfficerSchema, ApprovalStage, approvalStageSh
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import { CustomerType } from './customer';
 
 export interface saleCylinder{
   noOfCylinders?:number
@@ -36,7 +37,8 @@ export interface SalesRequisitionInterface extends Document{
   preparedBy:Schema.Types.ObjectId
   initiated:boolean
   nextApprovalOfficer:Schema.Types.ObjectId
-  cyliderType:string
+  cyliderType:string,
+  type: CustomerType
 }
 
 export const saleCylinderSchema = new Schema({
@@ -65,7 +67,8 @@ const salesReqSchema = new Schema({
   preparedBy:{type:Schema.Types.ObjectId, ref:'User'},
   initiated:{type:Boolean, default:false},
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
-  cyliderType:String
+  cyliderType:String,
+  type:{type:String, enum:Object.values(CustomerType)}
 },{
   timestamps:true
 });

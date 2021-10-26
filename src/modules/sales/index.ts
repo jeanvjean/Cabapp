@@ -29,6 +29,7 @@ interface newSaleRequisition{
   branch:SalesRequisitionInterface['branch']
   status:SalesRequisitionInterface['status'],
   cylinderType:SalesRequisitionInterface['cyliderType']
+  type: SalesRequisitionInterface['type']
 }
 
 type SalesApproval = {
@@ -89,7 +90,7 @@ class Sale extends Module{
 
   public async fetchSalesRequisition(query:QueryInterface, user:UserInterface):Promise<SalesRequisitionInterface[]|undefined>{
     try {
-      let { customer, fromDate, toDate, gasVolume, search  } = query;
+      let { customer, fromDate, toDate, gasVolume, search, type  } = query;
        let options = {
         page: query.page || 1,
         limit:query.limit || 10,
@@ -119,6 +120,11 @@ class Sale extends Module{
       if(gasVolume) {
         //@ts-ignore
         q = {...q, 'cylinders.volume': gasVolume}
+      }
+
+      if(type) {
+        //@ts-ignore
+        q = {...q, type: type}
       }
 
       if(search) {

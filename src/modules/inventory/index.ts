@@ -178,7 +178,7 @@ class Product extends Module{
         });
         let mailLoad = {
           content:html,
-          subject:'New User registeration',
+          subject:'New Branch Created',
           email:newUser.email,
         }
         new Notify().sendMail(mailLoad)

@@ -72,6 +72,12 @@ class EmptyCylinderModule extends Module {
             if(!aprvO) {
                 throw new BadInputFormatException('can\'t find the HOD cannot create without one');
             }
+            if(data.customer) {
+                let cust = await this.customer.findById(data.customer);
+                if(!cust) {
+                    throw new BadInputFormatException('no customer found with this id. pass a valid customer id')
+                }
+            }
             ecr.nextApprovalOfficer = aprvO?._id;
             if(ecr.priority == Priority.URGENT) {
                 new Notify().push({

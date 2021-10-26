@@ -85,6 +85,7 @@ const ocnSchema = new Schema({
     date:{type:Date},
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
     otherCylinders:[ocnCylinderSchema],
+    invoice:{type:Schema.Types.ObjectId, ref:'reciept'},
     totalQty:Number,
     totalVol:{
         value:Number,

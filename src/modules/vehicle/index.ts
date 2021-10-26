@@ -151,7 +151,8 @@ interface newWaybillInterface {
   cylinders: WayBillInterface['cylinders']
   invoiceNo: WayBillInterface['invoiceNo']
   lpoNo:WayBillInterface['lpoNo']
-  deliveryType:WayBillInterface['deliveryType']
+  deliveryType:WayBillInterface['deliveryType'],
+  ocn:WayBillInterface['ocn']
 }
 
 type Parameters = {
@@ -1277,9 +1278,10 @@ class Vehicle extends Module{
       let options = {
         page: page||1,
         limit: limit||10,
-        populate:{
-          path:'branch', model:'branches'
-        }
+        populate:[
+          {path:'branch', model:'branches'},
+          {path:'ocn', model:'out-going-cylinders'}
+        ]
       }
       let q = {
         branch:user.branch

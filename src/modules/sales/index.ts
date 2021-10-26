@@ -10,6 +10,8 @@ import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { passWdCheck } from "../../util/token";
+import { WalkinCustomerStatus } from "../../models/walk-in-customers";
+import { mongoose } from "../cylinder";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -19,7 +21,7 @@ interface salesRequisitionProps {
 }
 
 interface newSaleRequisition{
-  customerName:SalesRequisitionInterface['customerName']
+  customer:SalesRequisitionInterface['customer']
   ecrNo:SalesRequisitionInterface['ecrNo']
   date:SalesRequisitionInterface['date']
   cylinders:SalesRequisitionInterface['cylinders']
@@ -85,6 +87,20 @@ class Sale extends Module{
       return Promise.resolve(sales);
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async fetchCustomerFilledCylinders(customerId:string, user:UserInterface):Promise<RegisteredCylinderInterface[] | undefined>{
+    try {
+      let objectId = mongoose.Types.ObjectId;
+      let user_cylinders = await this.cylinder.find({
+        //@ts-ignore
+        assignedTo:customerId,
+        cylinderStatus:WalkinCustomerStatus.FILLED
+      });
+      return Promise.resolve(user_cylinders);
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

@@ -27,7 +27,11 @@ export enum paymentMode {
 }
 
 export interface RecieptInterface extends Document{
-    customer:string
+    customer:{
+      name:string,
+      email:string,
+      id:Schema.Types.ObjectId
+    }
     recieptType:receiptType
     cylinders?:saleCylinder[],
     products?:ReceivedProduct[]
@@ -45,7 +49,11 @@ export interface RecieptInterface extends Document{
 }
 
 const recieptSchema = new Schema({
-    customer:{type:String},
+    customer:{
+      name:String,
+      email:String,
+      id:Schema.Types.ObjectId
+    },
     recieptType:{type:String, enum:Object.values(receiptType)},
     customerType:{type:String, enum:Object.values(CustomerType)},
     cylinders:[{type:saleCylinderSchema}],

@@ -11,8 +11,14 @@ import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export interface WayBillInterface extends Document{
-    customer:string
-    cylinders: purchaseCylinderInterface[]
+    customer:{
+        name:string,
+        email:string,
+        id:Schema.Types.ObjectId,
+    }
+    // cylinders: purchaseCylinderInterface[]
+    cylinders: Schema.Types.ObjectId[]
+    ocn:Schema.Types.ObjectId
     invoiceNo: string
     lpoNo:string
     deliveryType:pickupType,
@@ -22,8 +28,13 @@ export interface WayBillInterface extends Document{
 }
 
 const waybillSchema = new Schema({
-    customer:{type:String, required:true},
-    cylinders: [cylinderSchema],
+    customer:{
+        name:String,
+        id:Schema.Types.ObjectId,
+        email:String
+    },
+    ocn:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"},
+    cylinders: [{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
     invoiceNo: {type:String},
     lpoNo:{type:String},
     deliveryType:{type: String, enum:Object.values(pickupType)},

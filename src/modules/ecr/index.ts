@@ -39,9 +39,21 @@ export interface newEcrInterface {
     cylinders?:EmptyCylinderInterface['cylinders']
     fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
     priority?:EmptyCylinderInterface['priority'],
-    type:EmptyCylinderInterface['type']
+    type:EmptyCylinderInterface['type'],
+    gasType:EmptyCylinderInterface['gasType']
 }
 
+type skipped = {
+    cyliderNumebr: string,
+    assignedNumber:string,
+    barcode:string
+}
+
+type createEcrResponse = {
+    ecr: EmptyCylinderInterface,
+    missed_cyinders:skipped[],
+    message:string
+}
 
 class EmptyCylinderModule extends Module {
     private emptyCylinder:Model<EmptyCylinderInterface>
@@ -62,8 +74,9 @@ class EmptyCylinderModule extends Module {
         this.branch = props.branch
     }
 
-    public async createECR(data:newEcrInterface, user:UserInterface):Promise<EmptyCylinderInterface|undefined>{
+    public async createECR(data:newEcrInterface, user:UserInterface):Promise<createEcrResponse|undefined>{
         try {
+            let not_same = []
             const ecr = new this.emptyCylinder({
                 ...data,
                 branch:user.branch
@@ -93,14 +106,29 @@ class EmptyCylinderModule extends Module {
                     user: aprvO
                 });
             }
+            let added = []
             if(ecr.cylinders.length > 0) {
                 for(let cyl of ecr.cylinders) {
                     let c = await this.cylinder.findById(cyl);
-                    //@ts-ignore
-                    c?.cylinderStatus = WalkinCustomerStatus.EMPTY;
-                    await c?.save();
+                    if(c) {
+                        if(c.gasType == data.gasType) {
+                            //@ts-ignore
+                            c.cylinderStatus = WalkinCustomerStatus.EMPTY;
+                            c.assignedTo = data.customer;
+                            added.push(cyl);
+                            await c.save();
+                        }else {
+                            not_same.push({
+                                cyliderNumebr: c.cylinderNumber,
+                                assignedNumber:c.assignedNumber,
+                                barcode:c.barcode
+                            });
+                        }
+                    }
+                    
                 }
             }
+            ecr.cylinders = added;
             let avEcr = await this.emptyCylinder.find({}).sort({initNum:-1}).limit(1);
             let init = "SECR"
             let num;
@@ -121,8 +149,13 @@ class EmptyCylinderModule extends Module {
                   time: new Date().toISOString()
                 }
             });
+            let message = not_same.length > 0 ? 'ecr created !! some cylinders do not match the gas type' : 'ecr created'
             await ecr.save();
-            return Promise.resolve(ecr);
+            return Promise.resolve({
+                ecr,
+                missed_cyinders:not_same,
+                message
+            });
         } catch (e) {
             this.handleException(e)
         }
@@ -141,7 +174,8 @@ class EmptyCylinderModule extends Module {
                     {path:'customer', model:'customer'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
-                    {path:'branch', model:'branches'}
+                    {path:'branch', model:'branches'},
+                    {path:"gasType", model:"cylinder"}
                 ]
             }
             let q = {
@@ -181,7 +215,8 @@ class EmptyCylinderModule extends Module {
                     {path:'customer', model:'customer'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
-                    {path:'branch', model:'branches'}
+                    {path:'branch', model:'branches'},
+                    {path:"gasType", model:"cylinder"}
                 ],
                 sort:{priority: 1}
             }
@@ -217,7 +252,8 @@ class EmptyCylinderModule extends Module {
                 {path:'customer', model:'customer'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
-                {path:'branch', model:'branches'}
+                {path:'branch', model:'branches'},
+                {path:"gasType", model:"cylinder"}
             ]);
             return Promise.resolve(ecr as EmptyCylinderInterface);
         } catch (e) {
@@ -240,7 +276,8 @@ class EmptyCylinderModule extends Module {
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
-                    {path:'initiator', model:'User'}
+                    {path:'initiator', model:'User'},
+                    {path:"gasType", model:"cylinder"}
                 ],
                 sort:{priority: 1}
             }
@@ -291,7 +328,8 @@ class EmptyCylinderModule extends Module {
                 {path:'customer', model:'customer'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
-                {path:'branch', model:'branches'}
+                {path:'branch', model:'branches'},
+                {path:"gasType", model:"cylinder"}
             ]);
             return Promise.resolve(data as EmptyCylinderInterface);
         } catch (e) {

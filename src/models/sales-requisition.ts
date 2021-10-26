@@ -24,7 +24,11 @@ export interface saleCylinder{
 
 
 export interface SalesRequisitionInterface extends Document{
-  customerName:string
+  customer:{
+    name:string,
+    email:string,
+    id:Schema.Types.ObjectId
+  }
   ecrNo:string
   date:Date
   cylinders:saleCylinder[]
@@ -54,7 +58,11 @@ export const saleCylinderSchema = new Schema({
 });
 
 const salesReqSchema = new Schema({
-  customerName:{type:String},
+  customer:{
+    name:String,
+    email:String,
+    id:Schema.Types.ObjectId
+  },
   ecrNo:{type:String},
   date:{type:Date},
   cylinders:[saleCylinderSchema],

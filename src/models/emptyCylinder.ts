@@ -40,7 +40,8 @@ export enum ProductionSchedule {
 export interface EmptyCylinderInterface extends Document {
     customer:Schema.Types.ObjectId
     cylinders:Schema.Types.ObjectId[],
-    fringeCylinders:RouteCylinderInterface[]
+    fringeCylinders?:RouteCylinderInterface[]
+    gasType:Schema.Types.ObjectId
     priority?:Priority
     type?:EcrType,
     icnNo?:string
@@ -70,6 +71,7 @@ const ecrSchema = new Schema({
     cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],
     fringeCylinders:[routeCylinderSchema],
     type:{type:String, enum:Object.values(EcrType)},
+    gasType:{type:Schema.Types.ObjectId, ref:"cylinder"},
     icnNo:String,
     priority:{type:Number, enum:Object.values(Priority), default:Priority.REGULAR},
     ApprovalOfficers:[ApprovalOfficerSchema],

@@ -350,7 +350,8 @@ class OutGoingCylinder extends Module{
               {path:'approvalOfficers', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},
-              {path:"cylinders", model:"registered-cylinders"}
+              {path:"cylinders", model:"registered-cylinders"},
+              {path:"invoice", model:'reciept'}
             ]
           }
           let q = {
@@ -386,7 +387,8 @@ class OutGoingCylinder extends Module{
               {path:'approvalOfficers', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},
-              {path:"cylinders", model:"registered-cylinders"}
+              {path:"cylinders", model:"registered-cylinders"},
+              {path:"invoice", model:'reciept'}
             ]
           }
           let q = {
@@ -431,7 +433,8 @@ class OutGoingCylinder extends Module{
                 {path:'approvalOfficers', model:'User'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'branch', model:'branches'},
-                {path:"cylinders", model:"registered-cylinders"}
+                {path:"cylinders", model:"registered-cylinders"},
+                {path:"invoice", model:'reciept'}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

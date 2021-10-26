@@ -52,6 +52,7 @@ export interface ProductionScheduleInterface extends Document{
   produced?:boolean
   priority?:Priority
   initNum:number
+  ecr?:Schema.Types.ObjectId
 }
 
 const productionCylinderSchema = new Schema({
@@ -68,6 +69,7 @@ const productionSchema = new Schema({
   customer:{type:Schema.Types.ObjectId, ref:'customer'},
   productionNo:{type:String},
   ecrNo:{type:String},
+  ecr:{type:Schema.Types.ObjectId, ref:'empty-cylinders'},
   shift:{type:String},
   date:{type:Date},
   cylinders:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}],

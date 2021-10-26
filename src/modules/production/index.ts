@@ -30,6 +30,7 @@ interface newProductionInterface{
   totalQuantity:ProductionScheduleInterface['totalQuantity']
   totalVolume:ProductionScheduleInterface['totalQuantity']
   comment:string
+  ecr?:ProductionScheduleInterface['ecr']
 }
 
 interface ProductionApprovalInput{
@@ -113,9 +114,9 @@ class ProductionSchedule extends Module{
   public async approveProductionSchedule(data:ProductionApprovalInput, user:UserInterface):Promise<ProductionScheduleInterface|undefined>{
     try {
       await passWdCheck(user, data.password)
-      const production = await this.production.findById(data.productionId).populate({
-        path:'initiator', model:'User'
-      });
+      const production = await this.production.findById(data.productionId).populate([
+        {path:'initiator', model:'User'}
+      ]);
       if(!production) {
         throw new BadInputFormatException('production schedule not found');
       }
@@ -331,7 +332,15 @@ class ProductionSchedule extends Module{
       let options = {
         page:page||1,
         limit:limit||10,
-        sort:{priority:1}
+        sort:{priority:1},
+        populate:[
+          {path:'customer', model:'customer'},
+          {path:'initiator', model:'User'},
+          {path:'nextApprovalOfficer', model:'User'},
+          {path:"cylinders", model:"registered-cylinders"},        
+          {path:'ecr', model:'empty-cylinders'},
+          {path:'branch', model:'branches'}
+        ]
       }
       let q = {
         branch:user.branch,
@@ -372,7 +381,9 @@ class ProductionSchedule extends Module{
         {path:'customer', model:'customer'},
         {path:'initiator', model:'User'},
         {path:'nextApprovalOfficer', model:'User'},
-        {path:"cylinders", model:"registered-cylinders"}
+        {path:"cylinders", model:"registered-cylinders"},        
+        {path:'ecr', model:'empty-cylinders'},
+        {path:'branch', model:'branches'}
       ]);
       if(!production) {
         throw new BadInputFormatException('Production schedule not found');
@@ -393,7 +404,9 @@ class ProductionSchedule extends Module{
           {path:'customer', model:'customer'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:"cylinders", model:"registered-cylinders"}
+          {path:"cylinders", model:"registered-cylinders"},        
+          {path:'ecr', model:'empty-cylinders'},
+          {path:'branch', model:'branches'}
         ]
       }
       let q = {
@@ -460,9 +473,11 @@ class ProductionSchedule extends Module{
       for(let cyl of cylinders) {
         if(production.cylinders.includes(cyl)) {
           let c = await this.regCylinder.findById(cyl);
-          //@ts-ignore
-          c?.cylinderStatus = WalkinCustomerStatus.FILLED;
-          await c?.save();
+          if(c) {
+            //@ts-ignore
+            c.cylinderStatus = WalkinCustomerStatus.FILLED;
+            await c.save();
+          }
         }else {
           notFound.push(cyl);
         }

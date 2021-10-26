@@ -20,6 +20,8 @@ interface newRecieptInterface {
     amountPaid:RecieptInterface['amountPaid']
     date:RecieptInterface['date']
     amountInWords:RecieptInterface['amountInWords']
+    ocnNo?:RecieptInterface['ocnNo']
+    salesReq?:RecieptInterface['salesReq']
 }
 
 interface invoiceUpdateInput {
@@ -98,9 +100,10 @@ class Account extends Module{
           const options = {
             page:query.page,
             limit:query.limit,
-            populate:{
-              path:'preparedBy', model:'User'
-            }
+            populate:[
+                { path:'preparedBy', model:'User'},
+                {path:'salesReq', model:"sales-requisition"}
+                ]
           }
           let q = {
             branch:user.branch
@@ -123,9 +126,10 @@ class Account extends Module{
 
     public async viewInvoiceDetails(invoiceId:string):Promise<RecieptInterface|undefined>{
         try{
-            const invoice = await this.account.findById(invoiceId).populate({
-                path:'preparedBy', model:'User'
-            });
+            const invoice = await this.account.findById(invoiceId).populate([
+                { path:'preparedBy', model:'User'},
+                {path:'salesReq', model:"sales-requisition"}
+                ]);
             return Promise.resolve(invoice as RecieptInterface);
         }catch(e){
             this.handleException(e)

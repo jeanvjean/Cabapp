@@ -27,7 +27,8 @@ interface newSaleRequisition{
   approvalStage:SalesRequisitionInterface['approvalStage']
   approvalOfficers:SalesRequisitionInterface['approvalOfficers']
   branch:SalesRequisitionInterface['branch']
-  status:SalesRequisitionInterface['status']
+  status:SalesRequisitionInterface['status'],
+  cylinderType:SalesRequisitionInterface['cyliderType']
 }
 
 type SalesApproval = {

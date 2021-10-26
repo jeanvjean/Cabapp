@@ -140,7 +140,7 @@ class EmptyCylinderModule extends Module {
             }
             let q = {
                 branch:user.branch,
-                type:EcrType.SALES
+                type: EcrType.SALES
             }
             let or =[]
             if(search) {
@@ -149,7 +149,7 @@ class EmptyCylinderModule extends Module {
             }
             if(type) {
                 //@ts-ignore
-                q = {...q, type:new RegExp(type, 'gi')}
+                q = {...q, type:type}
             }
             if(or.length > 0) {
                 //@ts-ignore
@@ -190,7 +190,7 @@ class EmptyCylinderModule extends Module {
             }
             if(type) {
                 //@ts-ignore
-                q = {...q, type:new RegExp(type, 'gi')}
+                q = {...q, type:type}
             }
             if(or.length > 0) {
                 //@ts-ignore
@@ -355,7 +355,7 @@ class EmptyCylinderModule extends Module {
 
     public async fetchPendingApprovals(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const { search,page,limit } = query;
+            const { search,page,limit, type } = query;
             const ObjectId = mongoose.Types.ObjectId;
             const options = {
                 page:page||1,
@@ -364,11 +364,15 @@ class EmptyCylinderModule extends Module {
             }
             let q = {
                 branch:user.branch,
-                status: EcrApproval.PENDING
+                status: EcrApproval.PENDING,
             }
             let or = []
             if(search){
                 or.push({ecrNo: new RegExp(search, 'gi')})
+            }
+            if(type) {
+                //@ts-ignore
+                q = {...q, type:type}
             }
             if(or.length>0){
                 //@ts-ignore

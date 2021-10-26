@@ -116,7 +116,7 @@ class EmptyCylinderModule extends module_1.default {
                 }
                 if (type) {
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { type: new RegExp(type, 'gi') });
+                    q = Object.assign(Object.assign({}, q), { type: type });
                 }
                 if (or.length > 0) {
                     //@ts-ignore
@@ -159,7 +159,7 @@ class EmptyCylinderModule extends module_1.default {
                 }
                 if (type) {
                     //@ts-ignore
-                    q = Object.assign(Object.assign({}, q), { type: new RegExp(type, 'gi') });
+                    q = Object.assign(Object.assign({}, q), { type: type });
                 }
                 if (or.length > 0) {
                     //@ts-ignore
@@ -335,7 +335,7 @@ class EmptyCylinderModule extends module_1.default {
     fetchPendingApprovals(query, user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { search, page, limit } = query;
+                const { search, page, limit, type } = query;
                 const ObjectId = cylinder_1.mongoose.Types.ObjectId;
                 const options = {
                     page: page || 1,
@@ -344,11 +344,15 @@ class EmptyCylinderModule extends module_1.default {
                 };
                 let q = {
                     branch: user.branch,
-                    status: emptyCylinder_1.EcrApproval.PENDING
+                    status: emptyCylinder_1.EcrApproval.PENDING,
                 };
                 let or = [];
                 if (search) {
                     or.push({ ecrNo: new RegExp(search, 'gi') });
+                }
+                if (type) {
+                    //@ts-ignore
+                    q = Object.assign(Object.assign({}, q), { type: type });
                 }
                 if (or.length > 0) {
                     //@ts-ignore

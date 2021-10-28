@@ -15,6 +15,11 @@ interface ScanInput {
     formId:string
 }
 
+interface UpdateScan {
+    formId:string,
+    cylinders:ScanInterface['cylinders']
+}
+
 class Scan extends Module {
     private scan:Model<ScanInterface>
     private cylinder:Model<RegisteredCylinderInterface>
@@ -69,6 +74,34 @@ class Scan extends Module {
                 return Promise.resolve(found);
         } catch (e) {
             this.handleException(e);
+        }
+    }
+
+    public async updateCyliderScan(data:UpdateScan):Promise<ScanInterface|undefined>{
+        try {
+            let {cylinders, formId } = data;
+            let scan = await this.scan.findOne({formId});
+            if(!scan) {
+                throw new BadInputFormatException('form not found');
+            }
+            let saveCyl = scan.cylinders;
+            for(let cylinder of cylinders) {
+                let m = scan.cylinders.map(doc=> doc.barcode)
+                if(!m.includes(cylinder.barcode)) {
+                    saveCyl.push(cylinder)
+                }
+            }
+            // let updated = await scan.update({cylinders:saveCyl});
+            scan.cylinders = saveCyl;
+            await new Notify().saveFormToFirebase({
+                formId:scan.formId,
+                cylinders:scan.cylinders,
+                status: scan.status
+            });
+            await scan.save()
+            return Promise.resolve(scan);
+        } catch (e) {
+            this.handleException(e)
         }
     }
 

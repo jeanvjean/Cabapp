@@ -2315,7 +2315,7 @@ class Cylinder extends Module {
 
   public async fetchCustomerCylinders(query:QueryInterface, customerId:string):Promise<RegisteredCylinderInterface[]|undefined>{
     try {
-      const { search, cylinderNumber } = query;
+      const { search, cylinderNumber, status } = query;
       let options = {
         ...query,
         populate:[
@@ -2333,6 +2333,10 @@ class Cylinder extends Module {
       }
       if(search) {
         or.push({type: new RegExp(search, 'gi')})
+      }
+      if(status) {
+        //@ts-ignore
+        q = {...q, cyliderStatus: status}
       }
       if(or.length > 0) {
         //@ts-ignore

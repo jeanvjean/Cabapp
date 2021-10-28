@@ -40,6 +40,20 @@ class ScanValidator extends Ctrl{
         ]
         return rules;
     }
+
+    static updateScan():ValidationChain[]{
+        const rules = [
+            check('formId')
+                .exists()
+                .withMessage('cylinder is required'),
+            check('cylinders')
+                .exists()
+                .withMessage('pass cylinders to update scan')
+                .isArray()
+                .withMessage('cylinders has to be an array')
+        ]
+        return rules;
+    }
 }
 
 export default ScanValidator;

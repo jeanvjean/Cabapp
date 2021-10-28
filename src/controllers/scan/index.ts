@@ -68,6 +68,17 @@ class ScanController extends Ctrl{
             }
         }
     }
+
+    update():RequestHandler{
+        return async(req:Request, res:Response)=> {
+            try {
+                const data =  await this.module.updateCyliderScan(req.body);
+                this.ok(res, 'update', data);
+            } catch (e) {
+                this.handleError(e, req, res);
+            }
+        }
+    }
 }
 
 export { Validator }

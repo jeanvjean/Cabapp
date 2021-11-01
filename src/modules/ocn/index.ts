@@ -33,7 +33,8 @@ interface newOcnInterface {
     totalAsnlCylinders?:OutgoingCylinderInterface['totalAsnlCylinders']
     totalCustomerCylinders?:OutgoingCylinderInterface['totalCustomerCylinders']
     vehicle?:OutgoingCylinderInterface['vehicle'],
-    type?:OutgoingCylinderInterface['type']
+    type?:OutgoingCylinderInterface['type'],
+    routePlan?:OutgoingCylinderInterface['routePlan']
 }
 
 type ocnApproval = {
@@ -351,7 +352,8 @@ class OutGoingCylinder extends Module{
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},
               {path:"cylinders", model:"registered-cylinders"},
-              {path:"invoice", model:'reciept'}
+              {path:"invoice", model:'reciept'},
+              {path:"routePlan", model:"pickup-routes"}
             ]
           }
           let q = {
@@ -388,7 +390,8 @@ class OutGoingCylinder extends Module{
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},
               {path:"cylinders", model:"registered-cylinders"},
-              {path:"invoice", model:'reciept'}
+              {path:"invoice", model:'reciept'},
+              {path:"routePlan", model:"pickup-routes"}
             ]
           }
           let q = {
@@ -434,7 +437,8 @@ class OutGoingCylinder extends Module{
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'branch', model:'branches'},
                 {path:"cylinders", model:"registered-cylinders"},
-                {path:"invoice", model:'reciept'}
+                {path:"invoice", model:'reciept'},
+                {path:"routePlan", model:"pickup-routes"}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

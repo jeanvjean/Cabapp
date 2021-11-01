@@ -40,7 +40,8 @@ export interface newEcrInterface {
     fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
     priority?:EmptyCylinderInterface['priority'],
     type:EmptyCylinderInterface['type'],
-    gasType:EmptyCylinderInterface['gasType']
+    gasType:EmptyCylinderInterface['gasType'],
+    icn?:EmptyCylinderInterface['icn']
 }
 
 type skipped = {

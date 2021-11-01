@@ -66,6 +66,8 @@ export interface ComplaintInterface extends Document{
   updatedAt:Date
   deliveryNo?:string
   supplyDate?:Date
+  icn:Schema.Types.ObjectId
+  ecr:Schema.Types.ObjectId
 }
 
 const complaintCylinderSchema = new Schema({
@@ -114,7 +116,9 @@ export const complaintSchema = new Schema({
   icnNo:String,
   ecrNo:String,
   deliveryNo:String,
-  supplyDate:Date
+  supplyDate:Date,
+  icn:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"},
+  ecr:{type:Schema.Types.ObjectId, ref:"empty-cylinders"}
 },{
   timestamps:true
 });

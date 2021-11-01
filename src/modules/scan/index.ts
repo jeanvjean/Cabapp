@@ -53,13 +53,6 @@ class Scan extends Module {
                 if(m.includes(data.barcode)) {
                     throw new BadInputFormatException('this cylinder has been scanned')
                 }
-                // if(found.cylinders.includes({
-                //     cylinderNumber: cyl.cylinderNumber,
-                //     assignedNumer:cyl.assignedNumber,
-                //     barcode:cyl.barcode
-                // })) {
-                    
-                // }
                 found.cylinders.push({
                     cylinderNumber: cyl.cylinderNumber,
                     assignedNumber:cyl.assignedNumber,

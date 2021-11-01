@@ -40,6 +40,7 @@ export interface OutgoingCylinderInterface extends Document {
     supplier?:Schema.Types.ObjectId
     cylinderType:string
     date:Date
+    invoice?:Schema.Types.ObjectId
     cylinders:Schema.Types.ObjectId[]
     otherCylinders?:ocnCylinders[]
     totalQty:number
@@ -65,6 +66,7 @@ export interface OutgoingCylinderInterface extends Document {
     icnNo:string
     invoiceNo:string
     type:noteIcnType
+    routePlan?:Schema.Types.ObjectId
 }
 
 const ocnCylinderSchema = new Schema({
@@ -109,7 +111,8 @@ const ocnSchema = new Schema({
     totalCustomerCylinders:Number,
     vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"},
     invoiceNo:String,
-    type:{type:String, enum:Object.values(noteIcnType)}
+    type:{type:String, enum:Object.values(noteIcnType)},
+    routePlan:{type:Schema.Types.ObjectId, ref:"pickup-routes"}
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

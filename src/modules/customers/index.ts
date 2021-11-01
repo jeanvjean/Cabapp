@@ -832,7 +832,9 @@ class Customer extends Module{
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'customer', model:'customer'}
+          {path:'customer', model:'customer'},
+          {path:"icn", model:"out-going-cylinders"},
+          {path:"ecr", model:"empty-cylinders"}
         ]
       }
       // console.log(user);
@@ -873,7 +875,9 @@ class Customer extends Module{
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'customer', model:'customer'}
+          {path:'customer', model:'customer'},
+          {path:"icn", model:"out-going-cylinders"},
+          {path:"ecr", model:"empty-cylinders"}
         ]
       }
       let q = {
@@ -936,7 +940,9 @@ class Customer extends Module{
           {path:'branch', model:'branches'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'customer', model:'customer'}
+          {path:'customer', model:'customer'},
+          {path:"icn", model:"out-going-cylinders"},
+          {path:"ecr", model:"empty-cylinders"}
         ]
       }
       let q = {
@@ -989,7 +995,9 @@ class Customer extends Module{
           {path:'customer', model:'customer'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'branch', model:'branches'}
+          {path:'branch', model:'branches'},
+          {path:"icn", model:"out-going-cylinders"},
+          {path:"ecr", model:"empty-cylinders"}
       ]);
       return Promise.resolve(complaint as ComplaintInterface);
     } catch (e) {
@@ -1003,7 +1011,9 @@ class Customer extends Module{
           {path:'customer', model:'customer'},
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'branch', model:'branches'}
+          {path:'branch', model:'branches'},
+          {path:"icn", model:"out-going-cylinders"},
+          {path:"ecr", model:"empty-cylinders"}
       ]);
       if(!complaint) {
         throw new BadInputFormatException('complaint not found');

@@ -72,7 +72,8 @@ export const cylinder = new CylinderModule({
   customer:Customer,
   branch:Branch,
   supplier:Supplier,
-  ocn:OCN
+  ocn:OCN,
+  waybill:Waybill
 });
 
 export const product = new ProductModule({

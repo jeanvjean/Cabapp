@@ -66,7 +66,7 @@ export interface OutgoingCylinderInterface extends Document {
     icnNo:string
     invoiceNo:string
     type:noteIcnType
-    routePlan?:Schema.Types.ObjectId
+    routePlan?:Schema.Types.ObjectId //only for delivery ocn
 }
 
 const ocnCylinderSchema = new Schema({

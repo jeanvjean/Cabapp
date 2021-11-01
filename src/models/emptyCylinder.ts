@@ -53,6 +53,7 @@ export interface EmptyCylinderInterface extends Document {
     branch?:Schema.Types.ObjectId
     initNum?:number
     tecrNo?:string
+    waybillNo?:string
     ecrNo?:string
     initiator?:Schema.Types.ObjectId,
     reason?:string,
@@ -87,6 +88,7 @@ const ecrSchema = new Schema({
     initiator:{type:Schema.Types.ObjectId, ref:"User"},
     reason:String,
     driverStatus:{type:String, enum:Object.values(EcrApproval), default:EcrApproval.PENDING},
+    waybillNo:String, //if its a complaint
     otp:String,
     totalVolume:{
         value:Number,

@@ -23,6 +23,7 @@ import { schedule } from "../vehicle";
 export { mongoose };
 import { RegisteredCylinder } from '../../models';
 import { note, noteIcnType, OutgoingCylinderInterface } from "../../models/ocn";
+import { WayBillInterface } from "../../models/waybill";
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -36,6 +37,7 @@ type CylinderProps = {
   supplier:Model<SupplierInterface>
   branch:Model<BranchInterface>
   ocn:Model<OutgoingCylinderInterface>
+  waybill:Model<WayBillInterface>
 }
 
 interface NewCylinderInterface{
@@ -213,6 +215,7 @@ class Cylinder extends Module {
   private branch:Model<BranchInterface>
   private supplier:Model<SupplierInterface>
   private ocn:Model<OutgoingCylinderInterface>
+  private waybill:Model<WayBillInterface>
 
   constructor(props:CylinderProps) {
     super()
@@ -227,6 +230,7 @@ class Cylinder extends Module {
     this.branch = props.branch
     this.supplier = props.supplier
     this.ocn = props.ocn
+    this.waybill = props.waybill
   }
 
   public async createCylinder(data:NewCylinderInterface, user:UserInterface): Promise<CylinderInterface|undefined> {
@@ -935,14 +939,20 @@ class Cylinder extends Module {
       // console.log(lastOcn);
       let lastsupplydate;
       let customerName;
+      let deliveryNo;
       if(lastOcn[0]) {
         lastsupplydate = lastOcn[0].date
         //@ts-ignore
         customerName = lastOcn[0].customer?.name
+        let lastDn = await this.waybill.findOne({
+          ocn: lastOcn[0]._id
+        });
+        deliveryNo = lastDn? lastDn.deliveryNo : null;
       }
       return Promise.resolve({
         cylinder,
         lastsupplydate,
+        deliveryNo,
         lastCustomer:customerName
       });
     } catch (e) {

@@ -176,7 +176,8 @@ class EmptyCylinderModule extends Module {
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
                     {path:'branch', model:'branches'},
-                    {path:"gasType", model:"cylinder"}
+                    {path:"gasType", model:"cylinder"},
+                    {path:"icn", model:"out-going-cylinders"}
                 ]
             }
             let q = {
@@ -217,7 +218,8 @@ class EmptyCylinderModule extends Module {
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
                     {path:'branch', model:'branches'},
-                    {path:"gasType", model:"cylinder"}
+                    {path:"gasType", model:"cylinder"},
+                    {path:"icn", model:"out-going-cylinders"}
                 ],
                 sort:{priority: 1}
             }
@@ -254,7 +256,8 @@ class EmptyCylinderModule extends Module {
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
                 {path:'branch', model:'branches'},
-                {path:"gasType", model:"cylinder"}
+                {path:"gasType", model:"cylinder"},
+                {path:"icn", model:"out-going-cylinders"}
             ]);
             return Promise.resolve(ecr as EmptyCylinderInterface);
         } catch (e) {
@@ -278,7 +281,8 @@ class EmptyCylinderModule extends Module {
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
                     {path:'initiator', model:'User'},
-                    {path:"gasType", model:"cylinder"}
+                    {path:"gasType", model:"cylinder"},
+                    {path:"icn", model:"out-going-cylinders"}
                 ],
                 sort:{priority: 1}
             }
@@ -330,7 +334,8 @@ class EmptyCylinderModule extends Module {
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
                 {path:'branch', model:'branches'},
-                {path:"gasType", model:"cylinder"}
+                {path:"gasType", model:"cylinder"},
+                {path:"icn", model:"out-going-cylinders"}
             ]);
             return Promise.resolve(data as EmptyCylinderInterface);
         } catch (e) {

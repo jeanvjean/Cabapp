@@ -41,16 +41,13 @@ class ocnValidator extends Ctrl{
                 .withMessage('cylinders must be an array'),
             check('totalQty')
                 .exists()
-                .withMessage('provide total quantity')
-                .withMessage('Total amount must be a numeric value'),
+                .withMessage('provide total quantity'),
             check('totalVol')
                 .exists()
                 .withMessage('total volume is required'),
             check('totalAmount')
                 .exists()
-                .withMessage('provide total amount')
-                .isNumeric()
-                .withMessage('Total amount must be a numeric value'),
+                .withMessage('provide total amount'),
             check('type')
                 .exists()
                 .withMessage('please pass cn type (customer, supplier, or walk-in)')

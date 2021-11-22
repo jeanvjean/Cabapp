@@ -10,11 +10,13 @@ import { createLog } from "../../util/logs";
 import { padLeft, passWdCheck } from "../../util/token";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
+import { EmptyCylinderInterface } from "../../models/emptyCylinder";
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
   user:Model<UserInterface>
   regCylinder:Model<RegisteredCylinderInterface>
+  ecr:Model<EmptyCylinderInterface>
 }
 
 interface newProductionInterface{
@@ -51,12 +53,14 @@ class ProductionSchedule extends Module{
   private production:Model<ProductionScheduleInterface>
   private user:Model<UserInterface>
   private regCylinder:Model<RegisteredCylinderInterface>
+  private ecr:Model<EmptyCylinderInterface>
 
   constructor(props:productionModuleProps){
     super()
     this.production = props.production
     this.user = props.user
     this.regCylinder = props.regCylinder
+    this.ecr = props.ecr
   }
 
   public async createProductionSchedule(data:newProductionInterface, user:UserInterface):Promise<ProductionScheduleInterface|undefined>{
@@ -89,6 +93,39 @@ class ProductionSchedule extends Module{
         comment:data.comment,
         commentBy:user._id
       });
+
+      /**remove cylinders from ecr */
+      let fEcr = await this.ecr.findById(production.ecr);
+      if(!fEcr) {
+        throw new BadInputFormatException('ecr id not found');
+      }
+      let removeArr = [];
+      let remain = []
+      for(let cyl of production.cylinders){
+        let cylinder = await this.regCylinder.findById(cyl)
+        if(!cylinder) {
+          throw new BadInputFormatException(`cylinder with this id does not seem to be found`)
+        }
+        if(!fEcr.cylinders.includes(cylinder._id)) {
+          throw new BadInputFormatException(`cylinder with this id does not seem to be found on the ECR`)
+        }
+        if(fEcr.cylinders.includes(cylinder._id)){
+          removeArr.push(cylinder._id)
+        }
+      }
+      for(let cyl of fEcr.cylinders) {
+        if(!removeArr.includes(cyl)){
+          remain.push(cyl)
+        }
+      }
+      if(fEcr.cylinders.length <= 0) {
+        fEcr.closed = true
+      }
+
+      fEcr.cylinders = remain;
+      await fEcr.save();
+
+      /** remove cylinders from ecr*/
       await production.save();
       await createLog({
         user:user._id,

@@ -129,12 +129,15 @@ export const sales = new SalesModule({
 export const production = new ProductionModule ({
   production:Production,
   user:User,
-  regCylinder:RegisteredCylinder
+  regCylinder:RegisteredCylinder,
+  ecr:EmptyCylinder
 });
 
 export const purchase = new PurchaseOrderModule({
   purchase:PurchaseOrder,
-  user:User
+  user:User,
+  ecr:EmptyCylinder,
+  cylinder:RegisteredCylinder
 });
 
 export const ocn = new OcnModule({

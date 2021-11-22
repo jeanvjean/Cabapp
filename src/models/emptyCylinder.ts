@@ -20,7 +20,8 @@ export enum Priority {
 export enum EcrType {
     TRUCK="truck",
     SALES="sales",
-    COMPLAINT="complaint"
+    COMPLAINT="complaint",
+    FILLED="filled"
 }
 
 export enum EcrApproval{
@@ -53,12 +54,15 @@ export interface EmptyCylinderInterface extends Document {
     branch?:Schema.Types.ObjectId
     initNum?:number
     tecrNo?:string
+    fcrNo:string,
+    tfcrNo:string,
     waybillNo?:string
     ecrNo?:string
     initiator?:Schema.Types.ObjectId,
     reason?:string,
     driverStatus?:EcrApproval
     otp?:string,
+    closed:boolean
     totalVolume?:{
         value:number,
         unit:string
@@ -84,12 +88,15 @@ const ecrSchema = new Schema({
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
     initNum:Number,
     ecrNo:String,
+    fcrNo:String,
+    tfcrNo:String,
     tecrNo:String,
     initiator:{type:Schema.Types.ObjectId, ref:"User"},
     reason:String,
     driverStatus:{type:String, enum:Object.values(EcrApproval), default:EcrApproval.PENDING},
     waybillNo:String, //if its a complaint
     otp:String,
+    closed:{type:Boolean, default:false},
     totalVolume:{
         value:Number,
         unit:String

@@ -9,11 +9,15 @@ import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { padLeft, passWdCheck } from "../../util/token";
+import { EmptyCylinderInterface } from "../../models/emptyCylinder";
+import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 
 
 interface purchaseOrderProps{
     purchase:Model<PurchaseOrderInterface>
-    user:Model<UserInterface>
+    user:Model<UserInterface>,
+    ecr:Model<EmptyCylinderInterface>
+    cylinder:Model<RegisteredCylinderInterface>
 }
 
 interface newPurchaseOrder {
@@ -22,7 +26,8 @@ interface newPurchaseOrder {
     comment:string
     gasType:PurchaseOrderInterface['gasType']
     supplier?:PurchaseOrderInterface['supplier']
-    fromBranch:PurchaseOrderInterface['fromBranch']
+    fromBranch:PurchaseOrderInterface['fromBranch'],
+    ecr: PurchaseOrderInterface['ecr']
 }
 
 interface purchaseOrderPool {
@@ -41,11 +46,15 @@ type ApprovePurchase = {
 class PurchaseOrder extends Module{
     private purchase:Model<PurchaseOrderInterface>
     private user:Model<UserInterface>
+    private ecr: Model<EmptyCylinderInterface>
+    private cylinder: Model<RegisteredCylinderInterface>
 
     constructor(props:purchaseOrderProps) {
         super()
         this.purchase = props.purchase
         this.user = props.user
+        this.ecr = props.ecr
+        this.cylinder = props.cylinder
     }
 
     public async createPurchaseOrder(data:newPurchaseOrder, user:UserInterface):Promise<PurchaseOrderInterface|undefined>{
@@ -78,6 +87,38 @@ class PurchaseOrder extends Module{
             });
             let hod = await this.user.findOne({role:user.role, subrole:'head of department', branch:user.branch});
             purchase.nextApprovalOfficer = hod?._id
+            /**remove cylinders from ecr */
+            let fEcr = await this.ecr.findById(purchase.ecr);
+            if(!fEcr) {
+              throw new BadInputFormatException('ecr id not found');
+            }
+            let removeArr = [];
+            let remain = []
+            for(let cyl of purchase.cylinders){
+              let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNo})
+              if(!cylinder) {
+                throw new BadInputFormatException(`cylinder with number ${cyl.cylinderNo} does not seem to be found`)
+              }
+              if(!fEcr.cylinders.includes(cylinder._id)) {
+                throw new BadInputFormatException(`cylinder with number ${cyl.cylinderNo} does not seem to be found on the ECR`)
+              }
+              if(fEcr.cylinders.includes(cylinder._id)){
+                removeArr.push(cylinder._id)
+              }
+            }
+            for(let cyl of fEcr.cylinders) {
+              if(!removeArr.includes(cyl)){
+                remain.push(cyl)
+              }
+            }
+            if(fEcr.cylinders.length <= 0) {
+              fEcr.closed = true
+            }
+
+            fEcr.cylinders = remain;
+            await fEcr.save();
+            /** remove cylinders from ecr*/
+            
             await purchase.save();
             await createLog({
               user:user._id,
@@ -88,6 +129,7 @@ class PurchaseOrder extends Module{
                 time: new Date().toISOString()
               }
             });
+            
             let approvalUser = await this.user.findById(purchase.nextApprovalOfficer);
             await new Notify().push({
               subject: "Purchase Order",

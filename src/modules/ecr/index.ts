@@ -182,7 +182,8 @@ class EmptyCylinderModule extends Module {
             }
             let q = {
                 branch:user.branch,
-                type: EcrType.SALES
+                type: EcrType.SALES,
+                closed:false
             }
             let or =[]
             if(search) {
@@ -225,7 +226,8 @@ class EmptyCylinderModule extends Module {
             }
             let q = {
                 branch:user.branch,
-                type:EcrType.COMPLAINT
+                type:EcrType.COMPLAINT,
+                closed:false
             }
             let or =[]
             if(search) {
@@ -271,6 +273,68 @@ class EmptyCylinderModule extends Module {
             let q = {
                 branch:user.branch,
                 type:EcrType.TRUCK
+            }
+            let options = {
+                page:query.page || 1,
+                limit:query.limit || 10,
+                populate:[
+                    {path:'customer', model:'customer'},
+                    {path:'cylinders', model:'registered-cylinders'},
+                    {path:'nextApprovalOfficer', model:'User'},
+                    {path:'branch', model:'branches'},
+                    {path:'initiator', model:'User'},
+                    {path:"gasType", model:"cylinder"},
+                    {path:"icn", model:"out-going-cylinders"}
+                ],
+                sort:{priority: 1}
+            }
+            let or = []
+
+            if(ecr) {
+                // or.push({tecrNo: new RegExp(tecr, 'gi')})
+                //@ts-ignore
+                q = {...q, tecrNo: new RegExp(ecr, 'gi')}
+            }
+            if(customer) {
+                // or.push({"customer.name": new RegExp(customer, 'gi')})
+                //@ts-ignore
+                q = {...q, "customer.name": new RegExp(customer, 'gi')}
+            }
+
+            if(type) {
+                //@ts-ignore
+                q = {...q, type:new RegExp(type, 'gi')}
+            }
+            if(driverStatus) {
+                //@ts-ignore
+                q = {...q, driverStatus:new RegExp(driverStatus, 'gi')}
+            }
+            if(salesStatus) {
+                //@ts-ignore
+                q = {...q, status:new RegExp(salesStatus, 'gi')}
+            }
+            if(search) {
+                or.push({tecrNo: new RegExp(search, 'gi')})
+            }
+            if(or.length > 0) {
+                //@ts-ignore
+                q = {...q, $or:or}
+            }
+            //@ts-ignore
+            const empty = await this.emptyCylinder.paginate(q, options);
+            return Promise.resolve(empty);
+        } catch (e) {
+            this.handleException(e)
+        }
+    }
+
+    public async fetchFCR(query:QueryInterface, user:UserInterface):Promise<EmptyCylinderInterface[]|undefined>{
+        try {
+            let { ecr, customer, type, driverStatus, salesStatus, search } = query;
+            let q = {
+                branch:user.branch,
+                type:EcrType.FILLED,
+                closed:false
             }
             let options = {
                 page:query.page || 1,

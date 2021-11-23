@@ -62,6 +62,7 @@ export interface OutgoingCylinderInterface extends Document {
     noteType:note
     totalAsnlCylinders:number
     totalCustomerCylinders:number
+    totalCylinders:number
     vehicle?:Schema.Types.ObjectId
     icnNo:string
     invoiceNo:string
@@ -109,6 +110,7 @@ const ocnSchema = new Schema({
     ocnInit:Number,
     totalAsnlCylinders:Number,
     totalCustomerCylinders:Number,
+    totalCylinders:Number,
     vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"},
     invoiceNo:String,
     type:{type:String, enum:Object.values(noteIcnType)},

@@ -151,6 +151,15 @@ class EmptyCylinderModule extends Module {
                 }
             });
             let message = not_same.length > 0 ? 'ecr created !! some cylinders do not match the gas type' : 'ecr created'
+            let fIcn = await this.ocn.findById(ecr.icn);
+            if(!fIcn) {
+                throw new BadInputFormatException('an icn with this id was not found')
+            }
+            let totalIcnCylinders = fIcn.totalCylinders;
+            let ecrtotalcyl = ecr.cylinders.length;
+            fIcn.totalCylinders = totalIcnCylinders - +ecrtotalcyl
+
+            await fIcn.save()
             await ecr.save();
             return Promise.resolve({
                 ecr,

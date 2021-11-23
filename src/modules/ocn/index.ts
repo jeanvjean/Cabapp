@@ -86,6 +86,7 @@ class OutGoingCylinder extends Module{
             let grnNo = init+num;
             if(init == "ICN") {
               ocn.icnNo = grnNo
+              ocn.totalCylinders = ocn.totalAsnlCylinders + ocn.totalCustomerCylinders;
             }else if(init == "OCN") {
               ocn.ocnNo = grnNo
             }

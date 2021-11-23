@@ -387,6 +387,7 @@ class OutGoingCylinder extends Module{
             limit:limit||10,
             populate:[
               {path:'customer', model:'customer' },
+              {path:'supplier', model:'supplier' },
               {path:'approvalOfficers', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},

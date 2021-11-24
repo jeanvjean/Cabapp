@@ -23,21 +23,16 @@ class EcrValidator extends Ctrl{
 
   static createEcr():ValidationChain[]{
     const rules = [
-      check('customer')
-        .exists()
-        .withMessage('pass a customer'),
-      check('priority')
-        .exists()
-        .withMessage('indicate the priority(1=urgent, 2=regular)'),
+      check('customer'),
+      check('supplier'),
+      check('priority'),
+      //   .exists()
+      //   .withMessage('indicate the priority(1=urgent, 2=regular)'),
       check('cylinders')
         .exists({checkFalsy:true})
         .withMessage('cylinders is required')
         .isArray()
-        .withMessage('cylinders must be an array'),
-      check('fringeCylinders')
-        .optional({checkFalsy:true})
-        .isArray()
-        .withMessage('fringe cylinders must be an array')
+        .withMessage('cylinders must be an array')
     ]
     return rules;
   }

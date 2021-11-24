@@ -140,6 +140,9 @@ class EmptyCylinderModule extends Module {
                 num = avEcr[0].initNum +1;
             }
             let inNum =  padLeft(num, 6, "");
+            if(ecr.type == EcrType.FILLED){
+                init = 'SFCR'
+            }
             ecr.ecrNo = init+inNum;
             ecr.initNum = num;
             await createLog({

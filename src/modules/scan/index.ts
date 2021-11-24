@@ -185,6 +185,11 @@ class Scan extends Module {
             form.formId = formId.toString();
             form.initNum = formId;
             await form.save();
+            await new Notify().saveFormToFirebase({
+                formId:form.formId,
+                cylinders:form.cylinders,
+                status: form.status
+            });
             return Promise.resolve(form);
         } catch (e) {
             this.handleException(e);

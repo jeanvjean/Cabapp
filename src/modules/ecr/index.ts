@@ -158,7 +158,9 @@ class EmptyCylinderModule extends Module {
             let totalIcnCylinders = fIcn.totalCylinders;
             let ecrtotalcyl = ecr.cylinders.length;
             fIcn.totalCylinders = totalIcnCylinders - +ecrtotalcyl
-
+            if(fIcn.totalCylinders == 0) {
+                fIcn.closed = true;
+            }
             await fIcn.save()
             await ecr.save();
             return Promise.resolve({

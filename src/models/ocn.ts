@@ -68,6 +68,7 @@ export interface OutgoingCylinderInterface extends Document {
     invoiceNo:string
     type:noteIcnType
     routePlan?:Schema.Types.ObjectId //only for delivery ocn
+    closed?:boolean
 }
 
 const ocnCylinderSchema = new Schema({
@@ -114,7 +115,8 @@ const ocnSchema = new Schema({
     vehicle:{type:Schema.Types.ObjectId, ref:"vehicle"},
     invoiceNo:String,
     type:{type:String, enum:Object.values(noteIcnType)},
-    routePlan:{type:Schema.Types.ObjectId, ref:"pickup-routes"}
+    routePlan:{type:Schema.Types.ObjectId, ref:"pickup-routes"},
+    closed:{type:Boolean, default:false}
 });
 ocnSchema.plugin(mongoosePaginate);
 ocnSchema.plugin(aggregatePaginate);

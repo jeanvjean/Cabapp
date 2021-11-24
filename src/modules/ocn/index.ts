@@ -348,7 +348,8 @@ class OutGoingCylinder extends Module{
             page: page||1,
             limit:limit||1,
             populate:[
-              {path:'customer', model:'customer' },
+              {path:'customer', model:'customer' },              
+              {path:'supplier', model:'supplier' },
               {path:'approvalOfficers', model:'User'},
               {path:'nextApprovalOfficer', model:'User'},
               {path:'branch', model:'branches'},
@@ -434,7 +435,8 @@ class OutGoingCylinder extends Module{
     public async viewOcnDetails(ocnId:string):Promise<OutgoingCylinderInterface|undefined>{
         try {
             const outgoing = await this.ocn.findById(ocnId).populate([
-                {path:'customer', model:'customer' },
+                {path:'customer', model:'customer' },                
+                {path:'supplier', model:'supplier' },
                 {path:'approvalOfficers', model:'User'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'branch', model:'branches'},

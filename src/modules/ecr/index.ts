@@ -187,6 +187,7 @@ class EmptyCylinderModule extends Module {
                 populate:[
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'customer', model:'customer'},
+                    {path:'supplier', model:'supplier'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
                     {path:'branch', model:'branches'},
@@ -229,7 +230,8 @@ class EmptyCylinderModule extends Module {
                 limit:limit || 10,
                 populate:[
                     {path:'cylinders', model:'registered-cylinders'},
-                    {path:'customer', model:'customer'},
+                    {path:'customer', model:'customer'},                    
+                    {path:'supplier', model:'supplier'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'initiator', model:'User'},
                     {path:'branch', model:'branches'},
@@ -269,6 +271,7 @@ class EmptyCylinderModule extends Module {
             const ecr = await this.emptyCylinder.findById(ecrId).populate([
                 {path:'cylinders', model:'registered-cylinders'},
                 {path:'customer', model:'customer'},
+                {path:'supplier', model:'supplier'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
                 {path:'branch', model:'branches'},
@@ -293,6 +296,7 @@ class EmptyCylinderModule extends Module {
                 limit:query.limit || 10,
                 populate:[
                     {path:'customer', model:'customer'},
+                    {path:'supplier', model:'supplier'},
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
@@ -355,6 +359,7 @@ class EmptyCylinderModule extends Module {
                 limit:query.limit || 10,
                 populate:[
                     {path:'customer', model:'customer'},
+                    {path:'supplier', model:'supplier'},
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
@@ -409,6 +414,7 @@ class EmptyCylinderModule extends Module {
             const data = await this.emptyCylinder.findOne({tecrNo:tecrNo}).populate([
                 {path:'cylinders', model:'registered-cylinders'},
                 {path:'customer', model:'customer'},
+                {path:'supplier', model:'supplier'},
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User'},
                 {path:'branch', model:'branches'},

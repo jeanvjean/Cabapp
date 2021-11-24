@@ -12,9 +12,6 @@ const router:expressRouter = expressRouter();
 
 router.get(
     '/scan-cylinder',
-    auth.verify(),
-    Validator.validateScan(),
-    val.validate(),
     scanCtrl.startScan()
 );
 
@@ -32,21 +29,16 @@ router.get(
 
 router.get(
     '/complete-scan/:formId',
-    auth.verify(),
     scanCtrl.complete()
 );
 
 router.get(
     '/initiate-scan',
-    auth.verify(),
     scanCtrl.initiateScan()
 );
 
 router.post(
     '/update-scan',
-    auth.verify(),
-    Validator.updateScan(),
-    val.validate(),
     scanCtrl.update()
 );
 

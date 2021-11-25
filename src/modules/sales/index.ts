@@ -12,12 +12,14 @@ import { createLog } from "../../util/logs";
 import { passWdCheck } from "../../util/token";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { mongoose } from "../cylinder";
+import { EmptyCylinderInterface } from "../../models/emptyCylinder";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
   user:Model<UserInterface>
   cylinder:Model<RegisteredCylinderInterface>
   purchase:Model<PurchaseOrderInterface>
+  ecr:Model<EmptyCylinderInterface>
 }
 
 interface newSaleRequisition{
@@ -60,6 +62,7 @@ class Sale extends Module{
   private user:Model<UserInterface>
   private cylinder:Model<RegisteredCylinderInterface>
   private purchase:Model<PurchaseOrderInterface>
+  private ecr:Model<EmptyCylinderInterface>
 
   constructor(props:salesRequisitionProps){
     super()
@@ -67,6 +70,7 @@ class Sale extends Module{
     this.user = props.user
     this.cylinder = props.cylinder
     this.purchase = props.purchase
+    this.ecr = props.ecr;
   }
 
   public async createSalesRequisition(data:newSaleRequisition, user:UserInterface):Promise<SalesRequisitionInterface|undefined>{
@@ -75,6 +79,26 @@ class Sale extends Module{
       sales.branch = user.branch;
       sales.status = TransferStatus.PENDING;
       sales.preparedBy = user._id;
+
+      let fEcr = await this.ecr.findOne({ecrNo:sales.ecrNo});
+      if(!fEcr) {
+        throw new BadInputFormatException('No ecr witht this number found');
+      }
+      for(let cyl of sales.cylinders) {
+        let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
+        if(cylinder) {
+          if(!fEcr.cylinders.includes(cylinder._id)) {
+            throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is notin this ECR`)
+          }
+          cylinder.tracking.push({
+            heldBy:"asnl",
+            name:"Sales",
+            location:'Sales department (sales requisition)',
+            date:new Date().toISOString()
+          });
+          await cylinder.save()
+        }
+      }
       await sales.save();
       await createLog({
         user:user._id,

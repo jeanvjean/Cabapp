@@ -92,7 +92,7 @@ class PurchaseOrder extends Module{
             if(!fEcr) {
               throw new BadInputFormatException('ecr id not found');
             }
-            let removeArr = [];
+            
             let remain = []
             for(let cyl of purchase.cylinders){
               let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNo})
@@ -103,11 +103,18 @@ class PurchaseOrder extends Module{
                 throw new BadInputFormatException(`cylinder with number ${cyl.cylinderNo} does not seem to be found on the ECR`)
               }
               if(fEcr.cylinders.includes(cylinder._id)){
-                removeArr.push(cylinder._id)
+                fEcr.removeArr.push(cylinder._id)
               }
+              cylinder.tracking.push({
+                heldBy:"asnl",
+                name:"Production",
+                location:'Production Department',
+                date:new Date().toISOString()
+              })
+              await cylinder.save()
             }
             for(let cyl of fEcr.cylinders) {
-              if(!removeArr.includes(cyl)){
+              if(!fEcr.removeArr.includes(cyl)){
                 remain.push(cyl)
               }
             }

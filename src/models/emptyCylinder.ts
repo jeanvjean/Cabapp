@@ -70,6 +70,7 @@ export interface EmptyCylinderInterface extends Document {
     }
     totalQuantity?:string
     icn_id?:Schema.Types.ObjectId
+    removeArr:Schema.Types.ObjectId[]
 };
 
 
@@ -104,7 +105,8 @@ const ecrSchema = new Schema({
         unit:String
     },
     totalQuantity:String,
-    icn_id:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"}
+    icn_id:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"},
+    removeArr:[{type:Schema.Types.ObjectId, ref:"registered-cylinders"}]
 },{
     timestamps:true
 });

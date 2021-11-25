@@ -99,7 +99,6 @@ class ProductionSchedule extends Module{
       if(!fEcr) {
         throw new BadInputFormatException('ecr id not found');
       }
-      let removeArr = [];
       let remain = []
       for(let cyl of production.cylinders){
         let cylinder = await this.regCylinder.findById(cyl)
@@ -110,22 +109,28 @@ class ProductionSchedule extends Module{
           throw new BadInputFormatException(`cylinder with this id does not seem to be found on the ECR`)
         }
         if(fEcr.cylinders.includes(cylinder._id)){
-          removeArr.push(cylinder._id)
+          fEcr.removeArr.push(cylinder._id)
         }
+        cylinder.tracking.push({
+          heldBy:"asnl",
+          name:"Production",
+          location:'Production Department',
+          date:new Date().toISOString()
+        })
+        await cylinder.save()
       }
       for(let cyl of fEcr.cylinders) {
-        if(!removeArr.includes(cyl)){
+        if(!fEcr.removeArr.includes(cyl)){
           remain.push(cyl)
         }
       }
       if(fEcr.cylinders.length <= 0) {
         fEcr.closed = true
       }
-
       fEcr.cylinders = remain;
       await fEcr.save();
-
       /** remove cylinders from ecr*/
+
       await production.save();
       await createLog({
         user:user._id,

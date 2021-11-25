@@ -123,7 +123,8 @@ export const sales = new SalesModule({
   sales:SalesReq,
   user:User,
   cylinder:RegisteredCylinder,
-  purchase:PurchaseOrder
+  purchase:PurchaseOrder,
+  ecr:EmptyCylinder
 });
 
 export const production = new ProductionModule ({

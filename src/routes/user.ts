@@ -117,4 +117,9 @@ const router: expressRouter = expressRouter();
     userCtrl.userStatistics()
   );
 
+  router.get(
+    '/get-user-profile/:email',
+    userCtrl.fetchUserByEmail()
+  );
+
 export default router;

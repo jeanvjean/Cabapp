@@ -105,6 +105,13 @@ class UserController extends Ctrl{
     }
   }
 
+  fetchUserByEmail():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      const data = await this.module.fetchUserByEmail(req.params.email)
+      this.ok(res, 'user details', data);
+    }
+  }
+
   login():RequestHandler {
     return async (req:Request, res:Response)=> {
       try {

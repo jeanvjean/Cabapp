@@ -547,6 +547,17 @@ class User extends Module {
       return Promise.resolve(user);
   }
 
+  public async fetchUserByEmail(email:string): Promise<UserInterface>{
+
+    const user = await this.user.findOne({
+      email: data.email
+    });
+      if(!user) {
+        throw new BadInputFormatException('No User found');
+      }
+      return Promise.resolve(user);
+  }
+
   public async updateUser (data:UpdateUserInterface, user:UserInterface) : Promise<UserInterface|undefined>{
     //Todo implement user update
     try {

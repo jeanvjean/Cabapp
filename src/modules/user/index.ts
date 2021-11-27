@@ -511,8 +511,8 @@ class User extends Module {
         id: user._id.toString(),
         email:user.email.toString()
       }
-      let expiresIn = 1000 * 60 * 60 * 24
-      let token = sign(payload, signTokenKey, {expiresIn});
+      let expiresIn = 180//1000 * 60 * 60 * 24
+      let token = sign(payload, signTokenKey, {expiresIn:"180d"});
       await createLog({
         user:user._id,
         activities:{
@@ -522,7 +522,7 @@ class User extends Module {
         }
       });
       let date = new Date();
-      date.setDate(date.getDate() + expiresIn);
+      date.setDate(date.getDate() + 180);
       return Promise.resolve({
         user,
         accessToken:{

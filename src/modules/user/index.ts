@@ -52,7 +52,7 @@ interface RoleUpdateInterface {
 
 export interface TokenInterface {
   token:string,
-  expires:number
+  expires:string
 }
 
 export interface idInterface {
@@ -511,7 +511,7 @@ class User extends Module {
         id: user._id.toString(),
         email:user.email.toString()
       }
-      let expiresIn = 1000 * 60 * 60 * 24
+      let expiresIn = 180 //1000 * 60 * 60 * 24
       let token = sign(payload, signTokenKey, {expiresIn});
       await createLog({
         user:user._id,
@@ -521,11 +521,13 @@ class User extends Module {
           time: new Date().toISOString()
         }
       });
+      let date = new Date();
+      date.setDate(date.getDate() + expiresIn);
       return Promise.resolve({
         user,
         accessToken:{
           token,
-          expires:expiresIn
+          expires: date.toISOString()
         }
       });
     } catch (error) {

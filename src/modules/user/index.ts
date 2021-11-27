@@ -511,7 +511,7 @@ class User extends Module {
         id: user._id.toString(),
         email:user.email.toString()
       }
-      let expiresIn = 180 //1000 * 60 * 60 * 24
+      let expiresIn = 1000 * 60 * 60 * 24
       let token = sign(payload, signTokenKey, {expiresIn});
       await createLog({
         user:user._id,

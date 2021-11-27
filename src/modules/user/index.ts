@@ -550,7 +550,7 @@ class User extends Module {
   public async fetchUserByEmail(email:string): Promise<UserInterface>{
 
     const user = await this.user.findOne({
-      email: data.email
+      email: email
     });
       if(!user) {
         throw new BadInputFormatException('No User found');

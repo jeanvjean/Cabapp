@@ -201,15 +201,15 @@ class Customer extends Module{
       const { search, filter,name, email, phone } = query;
      if(name) {
        //@ts-ignore
-       q = {...q, name:new Regex(name, 'gi')}
+       or.push({name:new RegExp(name, 'gi')})
      }
      if(email) {
        //@ts-ignore
-       q = {...q, email:new Regex(email, 'gi')}
+       or.push({email:new RegExp(email, 'gi')})
      }
      if(phone) {
       //@ts-ignore
-      q = {...q, phoneNumber:new Regex(phone, 'gi')}
+      or.push({phoneNumber:new RegExp(phone, 'gi')})
     }
 
     if(search) {

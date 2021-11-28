@@ -23,7 +23,7 @@ export interface SupplierInterface extends Document {
   name:string
   location:string
   contactPerson:string
-  emailAddress:string
+  email:string
   phoneNumber:number
   supplierType:SupplierTypes
   branch:Schema.Types.ObjectId,

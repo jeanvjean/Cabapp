@@ -1116,48 +1116,11 @@ class Vehicle extends Module{
               routeReport?.mileageOut = data.mileageOut;
               //@ts-ignore
               routeReport?.timeOut = new Date().getTime();
-
-              let cust = await this.customer.findOne({email:customer.email});
-            let ecr = new this.ecr({
-              ...ecrData
-            });
-            let available = await this.ecr.find({}).sort({initNum:-1}).limit(1);
-            if(available[0]) {
-              //@ts-ignore
-              ecr.initNum = available[0].initNum+1;
-            }else {
-              ecr.initNum = 1;
-            }
-            if(cust) {
-              ecr.customer = cust._id
-            }            
-            ecr.priority = Priority.TRUCK
-            ecr.type = EcrType.TRUCK
-            ecr.status = EcrApproval.TRUCK
-            ecr.position = ProductionSchedule.TRUCK
-            ecr.branch = user.branch
-            ecr.initiator= user._id
-
-            let num = padLeft(ecr.initNum , 6, "");
-            const ecrN = "TECR"+num;
-            let otp = Math.floor(1000 + Math.random() * 9000);
-            ecr.otp = otp.toString();
-            ecr.ecrNo = ecrN;
-            await ecr.save();
-
-            const html = await getTemplate('OTP', {//8639
-              name:cust?.name,
-              email:cust?.email,
-              otp:`${otp}`,
-              driver:user.name,
-              ref:ecr.ecrNo
-            });
-            let mailLoad = {
-              content:html,
-              subject:'Complete TECR',
-              email:cust?.email,
-            }//@ts-ignore
-            new Notify().sendMail(mailLoad);
+              //TO-DO create tecr
+              await this.createTecr({
+                customer,
+                ecrData
+              }, user)
             }
           }
         }
@@ -1190,6 +1153,10 @@ class Vehicle extends Module{
               routeReport?.mileageOut = data.mileageOut;
               //@ts-ignore
               routeReport?.timeOut = new Date().getTime();
+              await this.createTecr({
+                supplier,
+                ecrData
+              }, user)
             }
           }
         }
@@ -1197,6 +1164,100 @@ class Vehicle extends Module{
       await pickup?.save();
       await routeReport.save();
       return Promise.resolve(pickup as PickupInterface);
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async createTecr(data:any, user:UserInterface):Promise<any>{
+    try {
+      let { customer, supplier, ecrData } = data
+      if(customer) {
+        let cust = await this.customer.findOne({email:customer.email});
+        let ecr = new this.ecr({
+          ...ecrData
+        });
+        let available = await this.ecr.find({}).sort({initNum:-1}).limit(1);
+        if(available[0]) {
+          //@ts-ignore
+          ecr.initNum = available[0].initNum+1;
+        }else {
+          ecr.initNum = 1;
+        }
+        if(cust) {
+          ecr.customer = cust._id
+        }            
+        ecr.priority = Priority.TRUCK
+        ecr.type = EcrType.TRUCK
+        ecr.status = EcrApproval.TRUCK
+        ecr.position = ProductionSchedule.TRUCK
+        ecr.branch = user.branch
+        ecr.initiator= user._id
+
+        let num = padLeft(ecr.initNum , 6, "");
+        const ecrN = "TECR"+num;
+        let otp = Math.floor(1000 + Math.random() * 9000);
+        ecr.otp = otp.toString();
+        ecr.ecrNo = ecrN;
+        await ecr.save();
+
+        const html = await getTemplate('OTP', {//8639
+          name:cust?.name,
+          email:cust?.email,
+          otp:`${otp}`,
+          driver:user.name,
+          ref:ecr.ecrNo
+        });
+        let mailLoad = {
+          content:html,
+          subject:'Complete TECR',
+          email:cust?.email,
+        }//@ts-ignore
+        new Notify().sendMail(mailLoad);
+      }else if(supplier) {
+        let suppl = await this.supplier.findOne({email:supplier.email});
+            let ecr = new this.ecr({
+              ...ecrData
+            });
+            let available = await this.ecr.find({}).sort({initNum:-1}).limit(1);
+            if(available[0]) {
+              //@ts-ignore
+              ecr.initNum = available[0].initNum+1;
+            }else {
+              ecr.initNum = 1;
+            }
+            if(suppl) {
+              ecr.supplier = suppl._id
+            }            
+            ecr.priority = Priority.TRUCK
+            ecr.type = EcrType.TRUCK
+            ecr.status = EcrApproval.TRUCK
+            ecr.position = ProductionSchedule.TRUCK
+            ecr.branch = user.branch
+            ecr.initiator= user._id
+
+            let num = padLeft(ecr.initNum , 6, "");
+            const ecrN = "TFCR"+num;
+            let otp = Math.floor(1000 + Math.random() * 9000);
+            ecr.otp = otp.toString();
+            ecr.ecrNo = ecrN;
+            await ecr.save();
+
+            const html = await getTemplate('OTP', {//8639
+              name:suppl?.name,
+              email:suppl?.email,
+              otp:`${otp}`,
+              driver:user.name,
+              ref:ecr.ecrNo
+            });
+            let mailLoad = {
+              content:html,
+              subject:'Complete TFCR',
+              email:suppl?.email,
+            }//@ts-ignore
+            new Notify().sendMail(mailLoad);
+      }
+            return;
     } catch (e) {
       this.handleException(e);
     }

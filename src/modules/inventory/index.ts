@@ -75,7 +75,7 @@ type NewSupplierInterface = {
   name:SupplierInterface['name']
   location:SupplierInterface['location']
   contactPerson:SupplierInterface['contactPerson']
-  emailAddress:SupplierInterface['emailAddress']
+  emailAddress:SupplierInterface['email']
   phoneNumber:SupplierInterface['phoneNumber']
   supplierType:SupplierInterface['supplierType']
 }
@@ -414,7 +414,12 @@ class Product extends Module{
 
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
-      const supplier = await this.supplier.create({...data,branch:user.branch});
+      const supplier = await this.supplier.create({
+        ...data, 
+        email: 
+        data.emailAddress,
+        branch:user.branch
+      });
       return Promise.resolve(supplier);
     } catch (e) {
       this.handleException(e);

@@ -235,6 +235,17 @@ class CylinderController extends Ctrl{
     }
   }
 
+  downloadCylinderCsv():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.downloadCylinderCsv();
+        this.ok(res, 'downloaded', data);
+      } catch (error) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
   fetchCompletedTransfers():RequestHandler{
     return async(req:Request, res:Response)=>{
       try {

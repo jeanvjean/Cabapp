@@ -12,7 +12,7 @@ import Notify from '../../util/mail';
 import env from '../../configs/static';
 import { createLog } from "../../util/logs";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
-import { generateToken, padLeft, passWdCheck } from "../../util/token";
+import { generateToken, padLeft, passWdCheck, toCSV } from "../../util/token";
 import { CondemnCylinderInterface } from "../../models/condemnCylinder";
 import { ChangeCylinderInterface } from "../../models/change-cylinder";
 import { SupplierInterface, SupplierTypes } from "../../models/supplier";
@@ -256,6 +256,33 @@ class Cylinder extends Module {
       return Promise.resolve(newGas);
     } catch (e) {
       this.handleException(e)
+    }
+  }
+
+  public async downloadCylinderCsv():Promise<any>{
+    try {
+      const fields = [
+        'cylinderType',
+        'waterCapacity',
+        'dateManufactured',
+        'assignedTo',
+        'gasType',
+        'standardColor',
+        'assignedNumber',
+        'testingPresure',
+        'fillingPreasure',
+        'gasVolumeContent',
+        'cylinderNumber',
+        'purchaseDate',
+        'purchaseCost'
+      ];
+
+      let data:any = [];
+
+      let form = toCSV({fields, data})
+      return form;
+    } catch (error) {
+      this.handleException(error)
     }
   }
 

@@ -224,6 +224,11 @@ router.get(
   cylinderCtrl.fetchCylinderWithScan()
 );
 
+router.get(
+  '/download-cylinder-form',
+  cylinderCtrl.downloadCylinderCsv()
+);
+
 
 
 export default router;

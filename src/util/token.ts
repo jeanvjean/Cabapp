@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { BadInputFormatException } from '../exceptions';
 import { User } from '../models';
 import { UserInterface } from '../models/user';
+import { Parser } from 'json2csv';
 
 
 export const generateToken = (num:number) =>
@@ -44,6 +45,11 @@ export const passWdCheck = async (user:UserInterface, pwd:string)=>{
           throw new BadInputFormatException('Incorrect password... please check the password');
         }
         return true;
+}
+//@ts-ignore
+export const toCSV = ({ fields, data })=> {
+  const parser = new Parser({ fields });
+  return parser.parse(data);
 }
 
 //  function(s){

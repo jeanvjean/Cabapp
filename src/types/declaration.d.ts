@@ -11,4 +11,5 @@ declare module 'mongoose-auto-increment'
 declare module 'mongoose-paginate-v2';
 declare module 'mongoose-aggregate-paginate-v2';
 declare module 'node-schedule';
+declare module 'json2csv';
 

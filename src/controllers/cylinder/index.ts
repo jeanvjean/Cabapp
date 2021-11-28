@@ -240,7 +240,15 @@ class CylinderController extends Ctrl{
     return async(req:Request, res:Response)=>{
       try {
         const data = await this.module.downloadCylinderCsv();
-        this.ok(res, 'downloaded', data);
+        res.header('Content-Type', 'text/csv');
+        res.attachment(
+          `${formatDate(new Date().toISOString())
+            .split('/')
+            .join('.')}.cylinders.csv`
+        );
+        console.log(data);
+        res.send(data);
+        // this.ok(res, 'downloaded', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
@@ -252,14 +260,7 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchTransferReport(req.query, req.user);
-        res.header('Content-Type', 'text/csv');
-        res.attachment(
-          `${formatDate(new Date().toISOString())
-            .split('/')
-            .join('.')}.applicants.csv`
-        );
-        res.send(data);
-        // this.ok(res, 'transfer report fetched', data);
+        this.ok(res, 'transfer report fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

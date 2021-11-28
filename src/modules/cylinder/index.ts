@@ -263,6 +263,7 @@ class Cylinder extends Module {
   public async downloadCylinderCsv():Promise<any>{
     try {
       const fields = [
+        'S/N',
         'cylinderType',
         'waterCapacity',
         'dateManufactured',

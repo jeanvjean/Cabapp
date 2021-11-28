@@ -4,7 +4,7 @@ import {
   Schema,
   Connection
 } from 'mongoose';
-import { CylinderCondition } from './cylinder';
+import { CylinderCondition, cylinderTypes } from './cylinder';
 
 import * as mongoosePaginate from 'mongoose-paginate-v2';
 import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
@@ -41,7 +41,7 @@ export interface RegisteredCylinderInterface extends Document{
   /**
    * @param cylinderType type of cylinder being registered
    */
-  cylinderType:string,
+  cylinderType:cylinderTypes,
   /**
    * @param waterCapacity cylinder water capacity
    */

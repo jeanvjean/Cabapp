@@ -13,6 +13,7 @@ import { passWdCheck } from "../../util/token";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { mongoose } from "../cylinder";
 import { EmptyCylinderInterface } from "../../models/emptyCylinder";
+import { cylinderTypes } from "../../models/cylinder";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -517,7 +518,7 @@ class Sale extends Module{
       if(!cylinder) {
         throw new BadInputFormatException('cylinder not found');
       }
-      cylinder.cylinderType = TypesOfCylinders.BUFFER
+      cylinder.cylinderType = cylinderTypes.BUFFER
       await cylinder.save();
       return Promise.resolve(cylinder);
     } catch (e) {
@@ -534,7 +535,7 @@ class Sale extends Module{
         ]
       }
       //@ts-ignore
-      const cylinders = await this.cylinder.paginate({branch:user.branch, cylinderType:TypesOfCylinders.ASSIGNED}, options);
+      const cylinders = await this.cylinder.paginate({branch:user.branch, cylinderType:cylinderTypes.ASSIGNED}, options);
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e);
@@ -550,7 +551,7 @@ class Sale extends Module{
       //   ]
       // }
       //@ts-ignore
-      const cylinders = await this.cylinder.find({branch:user.branch, cylinderType:TypesOfCylinders.ASSIGNED});
+      const cylinders = await this.cylinder.find({branch:user.branch, cylinderType:cylinderTypes.ASSIGNED});
       return Promise.resolve(cylinders);
     } catch (e) {
       this.handleException(e);

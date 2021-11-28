@@ -229,6 +229,12 @@ router.get(
   cylinderCtrl.downloadCylinderCsv()
 );
 
+router.post(
+  '/register-multiple-cylinders',
+  auth.verify(),
+  cylinderCtrl.registerMultipleCylinders()
+)
+
 
 
 export default router;

@@ -1,4 +1,4 @@
-import { compareSync } from "bcryptjs";
+import { existsSync, mkdirSync,  } from 'fs';
 import { Model, Schema, Types } from "mongoose";
 import { BadInputFormatException } from "../../exceptions";
 import { ArchivedCylinder } from "../../models/archiveCylinder";
@@ -24,6 +24,7 @@ export { mongoose };
 import { RegisteredCylinder } from '../../models';
 import { note, noteIcnType, OutgoingCylinderInterface } from "../../models/ocn";
 import { WayBillInterface } from "../../models/waybill";
+const csv = require('json2csv');
 
 type CylinderProps = {
   cylinder: Model<CylinderInterface>
@@ -281,6 +282,36 @@ class Cylinder extends Module {
 
       let form = toCSV({fields, data})
       return form;
+    } catch (error) {
+      this.handleException(error)
+    }
+  }
+
+  public async registerMultipleCylinders(file:object, user:UserInterface):Promise<any>{
+    try {
+      const files = file
+      let path = './temp'
+      if (!existsSync(path)) {
+        mkdirSync(path)
+      }
+      //@ts-ignore
+      let filepath = await files.mv(path + '/' + files.name)
+      const cylinders = await csv().fromFile(filepath);
+      //@ts-ignore
+      unlinkSync(path + '/' + files.name)
+      for(let cyl of cylinders) {
+        let customer;
+        if(cyl.cylinderType == cylinderTypes.ASSIGNED) {
+          customer = await this.customer.findOne({email:cyl.assignedTo});
+        }
+        await this.regCylinder({
+          ...cyl,
+          assignedTo: customer?._id
+        }, user)
+      }
+      return Promise.resolve({
+        message:'done'
+      })      
     } catch (error) {
       this.handleException(error)
     }
@@ -690,7 +721,7 @@ class Cylinder extends Module {
             changeCyl?.gasName = ngName?.gasName;
             //@ts-ignore
             changeCyl?.cylinderType = change.cylinderType;
-            if(changeCyl?.cylinderType == TypesOfCylinders.ASSIGNED) {
+            if(changeCyl?.cylinderType == cylinderTypes.ASSIGNED) {
               changeCyl.assignedTo = change.assignedTo
             }
             await changeCyl?.save();
@@ -992,21 +1023,21 @@ class Cylinder extends Module {
       const cylinders = await this.registerCylinder.find({branch:user.branch}).populate([
         {path:'supplier', model:'supplier'}
       ]);
-      const bufferCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
-      const assignedCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+      const bufferCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.BUFFER).length;
+      const assignedCylinder = cylinders.filter(cylinder=> cylinder.cylinderType == cylinderTypes.ASSIGNED).length;
       const withCustomer = cylinders.filter(cylinder=> cylinder.holder == cylinderHolder.CUSTOMER).length;
       const withAsnl = cylinders.filter(cylinder=> cylinder.holder == cylinderHolder.ASNL).length;
 
       const customerBufferCylinders = cylinders.filter(cylinder=>
-          cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+          cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == cylinderTypes.BUFFER).length;
       const customerAssignedCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderType == cylinderTypes.ASSIGNED).length;
 
       const asnlBufferCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.BUFFER).length;
 
       const asnlAssignedCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.ASSIGNED).length;
 
       const asnlFilledCylinders = cylinders.filter(cylinder=>
         cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED).length;
@@ -1015,40 +1046,40 @@ class Cylinder extends Module {
         cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY).length;
 
       const filledBufferCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.BUFFER).length;
 
       const filledAssignedCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.ASSIGNED).length;
 
       const emptyBufferCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.BUFFER).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.BUFFER).length;
 
       const emptyAssignedCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.ASSIGNED).length;
 
       const faultyFilledCustomerCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
 
       const faultyEmptyCustomerCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length
 
       const goodFilledCustomerCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.FILLED && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
 
       const goodEmptyCustomerCylinders = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
+        cylinder.holder == cylinderHolder.CUSTOMER && cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length
 
       const asnlTotalGoodBuffer = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER && cylinder.condition == CylinderCondition.GOOD).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.BUFFER && cylinder.condition == CylinderCondition.GOOD).length;
 
       const asnlTotalBadBuffer = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.BUFFER && cylinder.condition == CylinderCondition.FAULTY).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.BUFFER && cylinder.condition == CylinderCondition.FAULTY).length;
 
       const asnlTotalGoodAssigned = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.GOOD).length;
 
       const asnlTotalBadAssigned = cylinders.filter(cylinder=>
-        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == TypesOfCylinders.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length;
+        cylinder.holder == cylinderHolder.ASNL && cylinder.cylinderType == cylinderTypes.ASSIGNED && cylinder.condition == CylinderCondition.FAULTY).length;
 
         const externalSupplier = cylinders.filter(cylinder=>
           //@ts-ignore
@@ -2018,7 +2049,7 @@ class Cylinder extends Module {
                 //@ts-ignore
                 cyl?.holder = cylinderHolder.CUSTOMER
                 //@ts-ignore
-                cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
+                cyl?.cylinderType = cylinderTypes.ASSIGNED;
                 //@ts-ignore
                 cyl?.holdingTime = transfer.holdingTime;
 
@@ -2050,7 +2081,7 @@ class Cylinder extends Module {
               //@ts-ignore
               cyl?.holder = cylinderHolder.CUSTOMER
               //@ts-ignore
-              cyl?.cylinderType = TypesOfCylinders.ASSIGNED;
+              cyl?.cylinderType = cylinderTypes.ASSIGNED;
               await cyl?.save()
             };
           }else if(transfer.type == TransferType.DIVISION){

@@ -3,6 +3,7 @@ import {
   Response,
   RequestHandler
 } from 'express';
+import { BadInputFormatException } from '../../exceptions';
 import Cylinder from '../../modules/cylinder';
 import { formatDate } from '../../util/token';
 import Ctrl from '../ctrl';
@@ -249,6 +250,21 @@ class CylinderController extends Ctrl{
         console.log(data);
         res.send(data);
         // this.ok(res, 'downloaded', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
+  registerMultipleCylinders():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        if(!req.files) {
+          throw new BadInputFormatException('file is required')
+        }
+        //@ts-ignore
+        const data = await this.module.registerMultipleCylinders(req.files.file, req.user);
+        this.ok(res, 'done', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

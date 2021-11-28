@@ -442,11 +442,11 @@ class Product extends Module{
       let or =[]
       if(name) {
         //@ts-ignore
-        q = {...q, name: name}
+        q = {...q, name: new Regex(name, 'gi')}
       }
       if(email) {
         //@ts-ignore
-        q = {...q, email: email}
+        q = {...q, email: new Regex(email, 'gi')}
       }
       if(search) {
         or.push({supplierType:new RegExp(search, 'gi')})

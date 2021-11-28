@@ -240,7 +240,7 @@ class CylinderController extends Ctrl{
       try {
         const data = await this.module.downloadCylinderCsv();
         this.ok(res, 'downloaded', data);
-      } catch (error) {
+      } catch (e) {
         this.handleError(e, req, res);
       }
     }

@@ -124,7 +124,8 @@ const routeSupplier = new Schema({
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   fringeCylinders:[routeCylinderSchema],
   status:String,  
-  reportId:String
+  reportId:String,
+  deliveryNo:String
 },{
   timestamps:true
 });
@@ -138,7 +139,8 @@ const routeCustomer = new Schema({
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   fringeCylinders:[routeCylinderSchema],
   status:String,
-  reportId:String
+  reportId:String,
+  deliveryNo:String
 },{
   timestamps:true
 });

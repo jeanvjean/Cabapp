@@ -4,6 +4,7 @@ import {
   RequestHandler
 } from 'express';
 import Cylinder from '../../modules/cylinder';
+import { formatDate } from '../../util/token';
 import Ctrl from '../ctrl';
 import Validator from './validator';
 
@@ -251,7 +252,14 @@ class CylinderController extends Ctrl{
       try {
         //@ts-ignore
         const data = await this.module.fetchTransferReport(req.query, req.user);
-        this.ok(res, 'transfer report fetched', data);
+        res.header('Content-Type', 'text/csv');
+        res.attachment(
+          `${formatDate(new Date().toISOString())
+            .split('/')
+            .join('.')}.applicants.csv`
+        );
+        res.send(data);
+        // this.ok(res, 'transfer report fetched', data);
       } catch (e) {
         this.handleError(e, req, res);
       }

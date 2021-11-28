@@ -52,6 +52,20 @@ export const toCSV = ({ fields, data })=> {
   return parser.parse(data);
 }
 
+const toTwoValue = (value:any)=> {
+  if (String(value).length === 1) {
+    return `0${value}`;
+  }
+  return value;
+}
+
+export const formatDate = (dateValue:any)=> {
+  const date = new Date(dateValue);
+  return `${date.getFullYear()}/${toTwoValue(
+    date.getMonth() + 1
+  )}/${toTwoValue(date.getDate())}`;
+}
+
 //  function(s){
    // let AMPM = s.slice(-2);
   // let timeArr = s.slice(0, -2).split(":");

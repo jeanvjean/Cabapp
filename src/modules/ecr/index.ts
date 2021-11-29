@@ -411,7 +411,7 @@ class EmptyCylinderModule extends Module {
 
     public async fetchTEcrDetails(tecrNo:string):Promise<EmptyCylinderInterface|undefined>{
         try {
-            const data = await this.emptyCylinder.findOne({tecrNo:tecrNo}).populate([
+            const data = await this.emptyCylinder.findOne({ecrNo:tecrNo}).populate([
                 {path:'cylinders', model:'registered-cylinders'},
                 {path:'customer', model:'customer'},
                 {path:'supplier', model:'supplier'},

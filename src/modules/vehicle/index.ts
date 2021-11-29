@@ -782,6 +782,9 @@ class Vehicle extends Module{
           {path:'recievedBy', model:'User'}
         ]
       );
+      if(!routePlan) {
+        throw new BadInputFormatException('Not found')
+      }
       return Promise.resolve(routePlan as PickupInterface);
     } catch (e) {
       this.handleException(e);
@@ -947,6 +950,7 @@ class Vehicle extends Module{
 
   public async startRoute(routeId:string, data:startRouteInput):Promise<PickupInterface|undefined>{
     try {
+      console.log(data, routeId);
       const plan = await this.pickup.findById(routeId).populate({
         path:'vehicle', model:'vehicle',populate:{
           path:'assignedTo', model:'User'

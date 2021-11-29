@@ -311,7 +311,7 @@ class EmptyCylinderModule extends Module {
             if(ecr) {
                 // or.push({tecrNo: new RegExp(tecr, 'gi')})
                 //@ts-ignore
-                q = {...q, tecrNo: new RegExp(ecr, 'gi')}
+                q = {...q, ecrNo: new RegExp(ecr, 'gi')}
             }
             if(customer) {
                 // or.push({"customer.name": new RegExp(customer, 'gi')})
@@ -332,7 +332,7 @@ class EmptyCylinderModule extends Module {
                 q = {...q, status:new RegExp(salesStatus, 'gi')}
             }
             if(search) {
-                or.push({tecrNo: new RegExp(search, 'gi')})
+                or.push({ecrNo: new RegExp(search, 'gi')})
             }
             if(or.length > 0) {
                 //@ts-ignore

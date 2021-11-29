@@ -67,8 +67,8 @@ class Driver extends Module{
     try {
       let { search, name, email } = query;
       const options = {
-        page:query.page,
-        limit:query.limit,
+        page:query.page || 1,
+        limit:query.limit || 10,
         populate:[
           {path:'vehicle', model:'vehicle'}
         ]

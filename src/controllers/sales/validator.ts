@@ -25,9 +25,9 @@ class SalesValidator extends Ctrl{
 
   static validateSales():ValidationChain[]{
     const rules = [
-      check('customerName')
+      check('customer')
         .exists()
-        .withMessage('customer name is required'),
+        .withMessage('please pass customer'),
       check('ecrNo')
         .exists()
         .withMessage('ERC number is required'),

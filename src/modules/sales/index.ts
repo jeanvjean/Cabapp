@@ -105,7 +105,7 @@ class Sale extends Module{
         user:user._id,
         activities:{
           title:'Sales requisition',
-          activity:'Created asales requisition awaiting approval',
+          activity:'Created a sales requisition awaiting approval',
           time: new Date().toISOString()
         }
       });

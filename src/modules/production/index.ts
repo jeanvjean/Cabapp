@@ -11,6 +11,7 @@ import { padLeft, passWdCheck } from "../../util/token";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { EmptyCylinderInterface } from "../../models/emptyCylinder";
+import { Schema } from 'mongoose';
 
 interface productionModuleProps {
   production:Model<ProductionScheduleInterface>,
@@ -41,6 +42,11 @@ interface ProductionApprovalInput{
   productionId:string,
   nextApprovalOfficer?:string,
   password:string
+}
+
+interface FilledCylinderInterface {
+  cylinder_ids:Schema.Types.ObjectId[],
+  status:string
 }
 
 interface UpdateProduction {
@@ -529,6 +535,34 @@ class ProductionSchedule extends Module{
       return Promise.resolve({
         message,
         production,
+        not_found:notFound
+      });
+    } catch (e) {
+      this.handleException(e);
+    }
+  }
+
+  public async markFilledCylinders(data:FilledCylinderInterface):Promise<any>{
+    try {
+      const { cylinder_ids, status } = data;
+      let notFound = []
+      for(let cyl of cylinder_ids) {
+          let c = await this.regCylinder.findById(cyl);
+          if(c) {
+            //@ts-ignore
+            if(status == WalkinCustomerStatus.EMPTY) {
+              c.cylinderStatus = WalkinCustomerStatus.EMPTY;
+            }else if(status == WalkinCustomerStatus.FILLED) {
+              c.cylinderStatus = WalkinCustomerStatus.FILLED;
+            }
+            await c.save();
+        }else {
+          notFound.push(cyl);
+        }
+      }
+      let message = notFound.length > 0? "Some cylinders were not found in this " : "cylinders have been set to filled"
+      return Promise.resolve({
+        message,
         not_found:notFound
       });
     } catch (e) {

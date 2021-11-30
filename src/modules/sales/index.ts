@@ -91,6 +91,9 @@ class Sale extends Module{
           if(!fEcr.removeArr.includes(cylinder._id)) {
             throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
           }
+          if(cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY) {
+            throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is empty`)
+          }
           cylinder.tracking.push({
             heldBy:"asnl",
             name:"Sales",

@@ -2,6 +2,7 @@ import { Router as expressRouter } from 'express';
 import { Validator } from '../controllers/production';
 import Auth from '../middlewares/authentication';
 import { productionCtrl } from '../controllers';
+import { production } from '../modules';
 
 const auth = new Auth;
 const val = new Validator();
@@ -53,6 +54,14 @@ router.get(
   '/mark-completed-production/:productionId',
   auth.verify(),
   productionCtrl.markCompletedProduction()
+);
+
+router.get(
+  '/change-cylinders-status',
+  auth.verify(),
+  Validator.cylindersStatusChange(),
+  val.validate(),
+  productionCtrl.markFilledCylinders()
 );
 
 

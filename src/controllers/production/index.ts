@@ -93,6 +93,17 @@ class ProductionController extends Ctrl {
     }
   }
 
+  markFilledCylinders():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        const data = await this.module.markFilledCylinders(req.body)
+        this.ok(res, 'marked as filled', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator };

@@ -87,6 +87,20 @@ class ProductionValidator extends Ctrl{
     ]
     return rules;
   }
+
+  static cylindersStatusChange():ValidationChain[]{
+    const rules = [
+      check('status')
+        .exists()
+        .withMessage('status is needed'),
+      check('cylinder_ids')
+        .exists()
+        .withMessage('pass the _id of cylinders')
+        .isArray()
+        .withMessage('cylinder_ids must be an array')
+    ]
+    return rules;
+  }
 }
 
 export default ProductionValidator;

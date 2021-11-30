@@ -190,8 +190,18 @@ class Product extends Module{
 
   public async fetchBranches(query:QueryInterface):Promise<BranchInterface[]|undefined>{
     try {
+      let {search} = query;
+      let q = {}
+      let or = []
+      if(search) {
+        or.push({name: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
       //@ts-ignore
-      const branches = await this.branch.find({});
+      const branches = await this.branch.find(q);
       return Promise.resolve(branches);
     } catch (e) {
       this.handleException(e)

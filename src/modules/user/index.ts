@@ -362,13 +362,13 @@ class User extends Module {
       }
       if(email) {
         //@ts-ignore
-        // q.$or.push({email: new RegExp(email, "gi")});
-        q = {...q, email: new RegExp(email, 'gi')};
+        or.push({email: new RegExp(email, "gi")});
+        // q = {...q, email: new RegExp(email, 'gi')};
       }
       if(subrole) {
         //@ts-ignore
-        // q.$or.push({subrole: new RegExp(subrole, "gi")});
-        q = {...q, subrole: new RegExp(subrole, "gi")};
+        or.push({subrole: new RegExp(subrole, "gi")});
+        // q = {...q, subrole: new RegExp(subrole, "gi")};
       }
       if(departments) {
           //@ts-ignore
@@ -387,18 +387,14 @@ class User extends Module {
           q = {...q, createdAt: { $lte: new Date(toDate) }};
       }
       if(name) {
-        // q.$or.push({"name": new RegExp(name || "", "gi")})
+        or.push({"name": new RegExp(name, "gi")})
         //@ts-ignore
-        // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
-        //@ts-ignore
-        q = {...q, name: new RegExp(name, 'gi')};
+        // q = {...q, name: new RegExp(name, 'gi')};
       }
       if(or.length > 0) {
         //@ts-ignore
         q = {...q, $or:or}
-      }
-      // let aggregate;
-      // let aggregate = this.user.aggregate([q]);
+      };
 
       //@ts-ignore
       let users = await this.user.paginate(q, options);
@@ -449,13 +445,13 @@ class User extends Module {
       }
       if(email) {
         //@ts-ignore
-        // q.$or.push({email: new RegExp(email, "gi")});
-        q = {...q, email: new RegExp(email, 'gi')};
+        or.push({email: new RegExp(email, "gi")});
+        // q = {...q, email: new RegExp(email, 'gi')};
       }
       if(subrole) {
         //@ts-ignore
-        // q.$or.push({subrole: new RegExp(subrole, "gi")});
-        q = {...q, subrole: new RegExp(subrole, "gi")};
+        or.push({subrole: new RegExp(subrole, "gi")});
+        // q = {...q, subrole: new RegExp(subrole, "gi")};
       }
       if(departments) {
           //@ts-ignore
@@ -474,11 +470,11 @@ class User extends Module {
           q = {...q, createdAt: { $lte: new Date(toDate) }};
       }
       if(name) {
-        // q.$or.push({"name": new RegExp(name || "", "gi")})
+        or.push({"name": new RegExp(name || "", "gi")})
         //@ts-ignore
         // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
         //@ts-ignore
-        q = {...q, name: new RegExp(name, 'gi')};
+        // q = {...q, name: new RegExp(name, 'gi')};
       }
       if(or.length > 0) {
         //@ts-ignore

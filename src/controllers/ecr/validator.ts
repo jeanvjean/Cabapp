@@ -29,8 +29,8 @@ class EcrValidator extends Ctrl{
       //   .exists()
       //   .withMessage('indicate the priority(1=urgent, 2=regular)'),
       check('cylinders')
-        .exists({checkFalsy:true})
-        .withMessage('cylinders is required')
+        .exists()
+        .withMessage('cylinders array is required')
         .isArray()
         .withMessage('cylinders must be an array')
     ]

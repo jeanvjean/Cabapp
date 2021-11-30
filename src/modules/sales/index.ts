@@ -88,8 +88,8 @@ class Sale extends Module{
       for(let cyl of sales.cylinders) {
         let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
         if(cylinder) {
-          if(!fEcr.cylinders.includes(cylinder._id)) {
-            throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is notin this ECR`)
+          if(!fEcr.removeArr.includes(cylinder._id)) {
+            throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
           }
           cylinder.tracking.push({
             heldBy:"asnl",

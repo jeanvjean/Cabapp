@@ -496,6 +496,12 @@ class ProductionSchedule extends Module{
       if(!production){
         throw new BadInputFormatException('production schedule not found')
       }
+      for(let cyl of production.cylinders) {
+        let cylinder = await this.regCylinder.findById(cyl);
+        if(cylinder?.cylinderStatus !== WalkinCustomerStatus.FILLED) {
+          throw new BadInputFormatException(`cylinder number ${cylinder?.cylinderNumber}, has not been filled, mark all filled cylinders in this schedule to proceed`)
+        }
+      }
       production.produced = true;
       await production.save();
       let approvalUser = await this.user.findOne({role:'sales', subrole:'head of department', branch:production.branch});

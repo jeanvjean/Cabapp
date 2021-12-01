@@ -416,7 +416,9 @@ class EmptyCylinderModule extends Module {
                 {path:'customer', model:'customer'},
                 {path:'supplier', model:'supplier'},
                 {path:'nextApprovalOfficer', model:'User'},
-                {path:'initiator', model:'User'},
+                {path:'initiator', model:'User', populate:{
+                    path:'vehicle', model:"vehicle"
+                }},
                 {path:'branch', model:'branches'},
                 {path:"gasType", model:"cylinder"},
                 {path:"icn_id", model:"out-going-cylinders"}

@@ -11,12 +11,15 @@ import { generateToken, padLeft } from "../../util/token";
 import { mongoose } from "../cylinder";
 import { CustomerInterface } from "../../models/customer";
 import { BranchInterface } from "../../models/branch";
+import { saleCylinder } from "../../models/sales-requisition";
+import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
     user:Model<UserInterface>
     customer:Model<CustomerInterface>
     branch:Model<BranchInterface>
+    cylinder:Model<RegisteredCylinderInterface>
 }
 
 interface newOcnInterface {
@@ -25,7 +28,7 @@ interface newOcnInterface {
     cylinderType?:OutgoingCylinderInterface['cylinderType']
     otherCylinders?:OutgoingCylinderInterface['otherCylinders']
     date?:OutgoingCylinderInterface['date']
-    cylinders?:OutgoingCylinderInterface['cylinders']
+    cylinders?:saleCylinder[]
     totalQty?:OutgoingCylinderInterface['totalQty']
     totalVol?:OutgoingCylinderInterface['totalVol']
     totalAmount?:OutgoingCylinderInterface['totalAmount']
@@ -35,6 +38,24 @@ interface newOcnInterface {
     vehicle?:OutgoingCylinderInterface['vehicle'],
     type?:OutgoingCylinderInterface['type'],
     routePlan?:OutgoingCylinderInterface['routePlan']
+}
+
+interface updateOcnInterface {
+  customer?:OutgoingCylinderInterface['customer'],
+  supplier?:OutgoingCylinderInterface['supplier']
+  cylinderType?:OutgoingCylinderInterface['cylinderType']
+  otherCylinders?:OutgoingCylinderInterface['otherCylinders']
+  date?:OutgoingCylinderInterface['date']
+  cylinders?:OutgoingCylinderInterface['cylinders']
+  totalQty?:OutgoingCylinderInterface['totalQty']
+  totalVol?:OutgoingCylinderInterface['totalVol']
+  totalAmount?:OutgoingCylinderInterface['totalAmount']
+  noteType?:OutgoingCylinderInterface['noteType']
+  totalAsnlCylinders?:OutgoingCylinderInterface['totalAsnlCylinders']
+  totalCustomerCylinders?:OutgoingCylinderInterface['totalCustomerCylinders']
+  vehicle?:OutgoingCylinderInterface['vehicle'],
+  type?:OutgoingCylinderInterface['type'],
+  routePlan?:OutgoingCylinderInterface['routePlan']
 }
 
 type ocnApproval = {
@@ -49,6 +70,7 @@ class OutGoingCylinder extends Module{
     private user:Model<UserInterface>
     private branch:Model<BranchInterface>
     private customer:Model<CustomerInterface>
+    private cylinder:Model<RegisteredCylinderInterface>
 
     constructor(props:ocnPropsInterface){
         super()
@@ -56,6 +78,7 @@ class OutGoingCylinder extends Module{
         this.user = props.user;
         this.branch = props.branch
         this.customer = props.customer
+        this.cylinder = props.cylinder;
     }
 
     public async createOCNRecord(data:newOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined>{
@@ -64,6 +87,16 @@ class OutGoingCylinder extends Module{
             const hod = await this.user.findOne({branch:user.branch, role:user.role, subrole:'head of department'});
             ocn.branch = user.branch;
             ocn.nextApprovalOfficer = hod?._id
+            
+            if(data.cylinders) {
+              for(let cyl of data.cylinders) {
+                let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber})
+                if(cylinder) {
+                  ocn.cylinders.push(cylinder._id)
+                }
+              }
+            }
+
             ocn.approvalOfficers.push({
                 name:user.name,
                 id:user._id,
@@ -115,7 +148,7 @@ class OutGoingCylinder extends Module{
         }
     }
 
-    public async updateOcn(ocnId:string, data:newOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined> {
+    public async updateOcn(ocnId:string, data:updateOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined> {
       try {
         let ocn = await this.ocn.findById(ocnId);
         if(!ocn) {

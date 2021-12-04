@@ -26,6 +26,7 @@ export interface WayBillInterface extends Document{
     numInit:number
     deliveryNo:string
     route_plan_id:Schema.Types.ObjectId
+    invoice_id:Schema.Types.ObjectId
 }
 
 const waybillSchema = new Schema({
@@ -42,7 +43,8 @@ const waybillSchema = new Schema({
     branch:{type:Schema.Types.ObjectId, ref:'branches'},
     numInit:Number,
     deliveryNo:String,
-    route_plan_id:Schema.Types.ObjectId
+    route_plan_id:Schema.Types.ObjectId,
+    invoice_id:Schema.Types.ObjectId
 },{
     timestamps:true
 })

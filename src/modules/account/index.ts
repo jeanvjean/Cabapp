@@ -7,10 +7,12 @@ import { createLog } from "../../util/logs";
 import { padLeft } from "../../util/token";
 import { mongoose } from "../cylinder";
 import { SalesRequisitionInterface } from "../../models/sales-requisition";
+import { WayBillInterface } from "../../models/waybill";
 
 interface accountPropInterface {
     account:Model<RecieptInterface>,
     salesRequisition:Model<SalesRequisitionInterface>
+    deliveryNote:Model<WayBillInterface>
 }
 
 interface newRecieptInterface {
@@ -23,6 +25,7 @@ interface newRecieptInterface {
     date:RecieptInterface['date']
     amountInWords:RecieptInterface['amountInWords']
     salesReq?:RecieptInterface['salesReq'],
+    delivery_id?:RecieptInterface['delivery_id']
 }
 
 interface invoiceUpdateInput {
@@ -39,11 +42,13 @@ type invoiceResponse = {
 class Account extends Module{
     private account:Model<RecieptInterface>
     private salesRequisition:Model<SalesRequisitionInterface>
+    private deliveryNote: Model<WayBillInterface>
 
     constructor(props:accountPropInterface) {
         super()
         this.account = props.account
         this.salesRequisition = props.salesRequisition
+        this.deliveryNote = props.deliveryNote
     }
 
     public async createReciept(data:newRecieptInterface, user:UserInterface):Promise<RecieptInterface|undefined>{
@@ -80,10 +85,10 @@ class Account extends Module{
             let invoiceNumber = padLeft(sn, 6, "");
             reciept.invoiceNo = init+invoiceNumber;
             reciept.invInit = sn;
-            let sales = await this.salesRequisition.findById(reciept.salesReq)
-            if(sales){
-                sales.invoice_id = reciept._id;
-                await sales.save();
+            let delivery = await this.deliveryNote.findById(reciept.delivery_id)
+            if(delivery){
+                delivery.invoice_id = reciept._id;
+                await delivery.save();
             }
             await reciept.save();
             await createLog({

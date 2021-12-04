@@ -46,6 +46,7 @@ export interface RecieptInterface extends Document{
     amountInWords:string
     branch:Schema.Types.ObjectId,
     salesReq?:Schema.Types.ObjectId
+    delivery_id:Schema.Types.ObjectId
 }
 
 const recieptSchema = new Schema({
@@ -72,7 +73,8 @@ const recieptSchema = new Schema({
       orderId:{type:String},
       orderType:{type:String}
     },
-    salesReq:{type:Schema.Types.ObjectId, ref:'sales-requisition'}
+    salesReq:{type:Schema.Types.ObjectId, ref:'sales-requisition'},
+    delivery_id:Schema.Types.ObjectId
 },{
     timestamps:true
 });

@@ -54,6 +54,7 @@ export interface ProductionScheduleInterface extends Document{
   initNum:number
   ecr?:Schema.Types.ObjectId
   sales_req_id:Schema.Types.ObjectId
+  invoice_id:Schema.Types.ObjectId
 }
 
 const productionCylinderSchema = new Schema({
@@ -94,7 +95,8 @@ const productionSchema = new Schema({
   priority:{type:String, enum:Object.values(Priority), default:Priority.REGULAR},
   initNum:Number,
   branch:{type:Schema.Types.ObjectId, ref: 'branches'},  
-  sales_req_id:Schema.Types.ObjectId
+  sales_req_id:Schema.Types.ObjectId,
+  invoice_id:Schema.Types.ObjectId
 });
 
 productionSchema.plugin(mongoosePaginate)

@@ -839,25 +839,15 @@ class Vehicle extends Module{
         // q = {...q, 'customers.email': new RegExp(email, "gi")},
         or.push({'customers.email': new RegExp(email, "gi")})
       }
-      // if(email && customer) {
-      //   //@ts-ignore
-      //   q = {...q, 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi")}
-      // }
-      // if(email && supplier) {
-      //   //@ts-ignore
-      //   q = {...q, 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi")}
-      // }
       if(supplier) {
         //@ts-ignore
         // q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
         or.push({'suppliers.name': new RegExp(supplier, "gi")})
       }
-      if(orderType == pickupType.CUSTOMER && routeStatus) {
+      if(routeStatus) {
         //@ts-ignore
         // q ={...q,'customers.status': routeStatus}
         or.push({'customers.status': new RegExp(routeStatus,'gi')})
-      }
-      if(orderType == pickupType.SUPPLIER && routeStatus) {
         or.push({'suppliers.status': new RegExp(routeStatus,'gi')})
       }
       if(customer?.length) {

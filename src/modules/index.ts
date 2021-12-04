@@ -97,7 +97,8 @@ export const vehicle = new VehicleModule({
   customer:Customer,
   supplier:Supplier,
   ecr:EmptyCylinder,
-  waybill:Waybill
+  waybill:Waybill,
+  ocn:OCN
 });
 
 export const driver = new DriverModule({

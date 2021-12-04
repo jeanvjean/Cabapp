@@ -20,6 +20,8 @@ import { CustomerInterface } from "../../models/customer";
 import { SupplierInterface } from "../../models/supplier";
 import { EcrApproval, EcrType, EmptyCylinderInterface, Priority, ProductionSchedule } from "../../models/emptyCylinder";
 import { WayBillInterface } from "../../models/waybill";
+import OutGoingCylinder from "../ocn";
+import { OutgoingCylinderInterface } from "../../models/ocn";
 
 export { schedule };
 
@@ -35,6 +37,7 @@ interface vehicleProps{
   supplier:Model<SupplierInterface>
   ecr:Model<EmptyCylinderInterface>
   waybill:Model<WayBillInterface>
+  ocn:Model<OutgoingCylinderInterface>
 }
 
 type NewVehicle = {
@@ -195,6 +198,7 @@ class Vehicle extends Module{
   private supplier:Model<SupplierInterface>
   private ecr:Model<EmptyCylinderInterface>
   private waybill:Model<WayBillInterface>
+  private ocn:Model<OutgoingCylinderInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -209,6 +213,7 @@ class Vehicle extends Module{
     this.supplier = props.supplier
     this.ecr = props.ecr
     this.waybill = props.waybill
+    this.ocn = props.ocn
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -629,6 +634,25 @@ class Vehicle extends Module{
         }
         routePlan.suppliers = routePlanCust;
       }
+      if(routePlan.activity == RouteActivity.DELIVERY) {
+        if(routePlan.orderType == pickupType.CUSTOMER) {
+          for(let plan of routePlan.customers) {
+            let delivery = await this.waybill.findById(plan.deliveryNo);
+            if(delivery){
+              delivery.route_plan_id = routePlan._id
+              await delivery.save()
+            }
+          }
+        }else if(routePlan.orderType == pickupType.SUPPLIER) {
+          for(let plan of routePlan.suppliers) {
+            let delivery = await this.waybill.findById(plan.deliveryNo);
+            if(delivery){
+              delivery.route_plan_id = routePlan._id
+              await delivery.save();
+            }
+          }
+        }
+      }
       await routePlan.save();
       await createLog({
         user:user._id,
@@ -638,7 +662,7 @@ class Vehicle extends Module{
           time: new Date().toISOString()
         }
       });
-      let message = failed.length > 0 ? "some customers/suppliers were not registered" : "Route record successful";
+      let message = failed.length > 0 ? `some ${routePlan.orderType}'s were not registered` : "Route record successful";
       return Promise.resolve({
         route_plan: routePlan,
         failed,
@@ -1330,6 +1354,11 @@ class Vehicle extends Module{
       let deliveryNo = padLeft(wbNo, 6, '');
       delivery.deliveryNo = "D"+deliveryNo;
       delivery.numInit = wbNo;
+      let ocn = await this.ocn.findById(delivery.ocn)
+      if(ocn) {
+        ocn.delivery_id = ocn._id
+        await ocn.save()
+      }
       await delivery.save();
       return Promise.resolve(delivery);
     } catch (e) {

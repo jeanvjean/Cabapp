@@ -14,6 +14,7 @@ import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { mongoose } from "../cylinder";
 import { EmptyCylinderInterface } from "../../models/emptyCylinder";
 import { cylinderTypes } from "../../models/cylinder";
+import { ProductionScheduleInterface } from "../../models/productionSchedule";
 
 interface salesRequisitionProps {
   sales:Model<SalesRequisitionInterface>
@@ -21,6 +22,7 @@ interface salesRequisitionProps {
   cylinder:Model<RegisteredCylinderInterface>
   purchase:Model<PurchaseOrderInterface>
   ecr:Model<EmptyCylinderInterface>
+  productionSchedule:Model<ProductionScheduleInterface>
 }
 
 interface newSaleRequisition{
@@ -35,6 +37,8 @@ interface newSaleRequisition{
   status:SalesRequisitionInterface['status'],
   cylinderType:SalesRequisitionInterface['cyliderType']
   type: SalesRequisitionInterface['type']
+  production_id:SalesRequisitionInterface['production_id'],
+  purchase_id:SalesRequisitionInterface['purchase_id']
 }
 
 type SalesApproval = {
@@ -64,6 +68,7 @@ class Sale extends Module{
   private cylinder:Model<RegisteredCylinderInterface>
   private purchase:Model<PurchaseOrderInterface>
   private ecr:Model<EmptyCylinderInterface>
+  private productionSchedule:Model<ProductionScheduleInterface>
 
   constructor(props:salesRequisitionProps){
     super()
@@ -72,6 +77,7 @@ class Sale extends Module{
     this.cylinder = props.cylinder
     this.purchase = props.purchase
     this.ecr = props.ecr;
+    this.productionSchedule = props.productionSchedule
   }
 
   public async createSalesRequisition(data:newSaleRequisition, user:UserInterface):Promise<SalesRequisitionInterface|undefined>{
@@ -101,6 +107,20 @@ class Sale extends Module{
             date:new Date().toISOString()
           });
           await cylinder.save()
+        }
+      }
+      if(sales.production_id) {
+        let schedule = await this.productionSchedule.findById(sales.production_id);
+        if(schedule){
+          schedule.sales_req_id = sales._id
+          await schedule.save()
+        }
+      }
+      if(sales.purchase_id) {
+        let purchase = await this.purchase.findById(sales.purchase_id);
+        if(purchase) {
+          purchase.sales_req_id = sales._id
+          await purchase.save();
         }
       }
       await sales.save();

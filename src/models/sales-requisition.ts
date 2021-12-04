@@ -43,6 +43,9 @@ export interface SalesRequisitionInterface extends Document{
   nextApprovalOfficer:Schema.Types.ObjectId
   cyliderType:string,
   type: CustomerType
+  production_id:Schema.Types.ObjectId,
+  purchase_id:Schema.Types.ObjectId
+  invoice_id:Schema.Types.ObjectId
 }
 
 export const saleCylinderSchema = new Schema({
@@ -76,7 +79,10 @@ const salesReqSchema = new Schema({
   initiated:{type:Boolean, default:false},
   nextApprovalOfficer:{type:Schema.Types.ObjectId, ref:'User'},
   cyliderType:String,
-  type:{type:String, enum:Object.values(CustomerType)}
+  type:{type:String, enum:Object.values(CustomerType)},
+  production_id:Schema.Types.ObjectId,
+  purchase_id:Schema.Types.ObjectId,
+  invoice_id:Schema.Types.ObjectId
 },{
   timestamps:true
 });

@@ -51,7 +51,6 @@ interface newCustomerInterface {
   cylinderHoldingTime:number
   territory:CustomerInterface['territory']
   products:CustomerInterface['products']
-  unitPrice:CustomerInterface['unitPrice']
   CAC:CustomerInterface['CAC']
   validID:CustomerInterface['validID']
 }
@@ -270,8 +269,8 @@ class Customer extends Module{
     try {
       const { search, name, email } = query;
       let options = {
-        page:query.page,
-        limit:query.limit
+        page:query.page || 1,
+        limit:query.limit ||10
       }
       let q={
         branch:user.branch

@@ -6,9 +6,11 @@ import { BadInputFormatException } from "../../exceptions";
 import { createLog } from "../../util/logs";
 import { padLeft } from "../../util/token";
 import { mongoose } from "../cylinder";
+import { SalesRequisitionInterface } from "../../models/sales-requisition";
 
 interface accountPropInterface {
-    account:Model<RecieptInterface>
+    account:Model<RecieptInterface>,
+    salesRequisition:Model<SalesRequisitionInterface>
 }
 
 interface newRecieptInterface {
@@ -20,7 +22,7 @@ interface newRecieptInterface {
     amountPaid:RecieptInterface['amountPaid']
     date:RecieptInterface['date']
     amountInWords:RecieptInterface['amountInWords']
-    salesReq?:RecieptInterface['salesReq']
+    salesReq?:RecieptInterface['salesReq'],
 }
 
 interface invoiceUpdateInput {
@@ -36,10 +38,12 @@ type invoiceResponse = {
 
 class Account extends Module{
     private account:Model<RecieptInterface>
+    private salesRequisition:Model<SalesRequisitionInterface>
 
     constructor(props:accountPropInterface) {
         super()
         this.account = props.account
+        this.salesRequisition = props.salesRequisition
     }
 
     public async createReciept(data:newRecieptInterface, user:UserInterface):Promise<RecieptInterface|undefined>{
@@ -76,6 +80,11 @@ class Account extends Module{
             let invoiceNumber = padLeft(sn, 6, "");
             reciept.invoiceNo = init+invoiceNumber;
             reciept.invInit = sn;
+            let sales = await this.salesRequisition.findById(reciept.salesReq)
+            if(sales){
+                sales.invoice_id = reciept._id;
+                await sales.save();
+            }
             await reciept.save();
             await createLog({
               user:user._id,

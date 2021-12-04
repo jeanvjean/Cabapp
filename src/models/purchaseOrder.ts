@@ -40,6 +40,7 @@ export interface PurchaseOrderInterface extends Document{
     orderNumber:string
     fromBranch?:Schema.Types.ObjectId
     ecr?: Schema.Types.ObjectId
+    sales_req_id:Schema.Types.ObjectId
 }
 
 export const cylinderSchema = new Schema({
@@ -66,7 +67,8 @@ const purchaseOrderSchema = new Schema({
     initiator:{type:Schema.Types.ObjectId, ref:'User'},
     initNum:Number,
     orderNumber:String,
-    ecr:{type:Schema.Types.ObjectId, ref:"empty-cylinders"}
+    ecr:{type:Schema.Types.ObjectId, ref:"empty-cylinders"},
+    sales_req_id:Schema.Types.ObjectId
 },{
     timestamps:true
 });

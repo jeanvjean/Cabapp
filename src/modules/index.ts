@@ -124,7 +124,8 @@ export const sales = new SalesModule({
   user:User,
   cylinder:RegisteredCylinder,
   purchase:PurchaseOrder,
-  ecr:EmptyCylinder
+  ecr:EmptyCylinder,
+  productionSchedule:Production
 });
 
 export const production = new ProductionModule ({
@@ -150,7 +151,8 @@ export const ocn = new OcnModule({
 });
 
 export const account = new AccountModule({
-  account:Reciept
+  account:Reciept,
+  salesRequisition:SalesReq
 });
 
 export const emptyCylinder = new EmptyCylinderModule({

@@ -13,6 +13,22 @@ export enum CustomerType {
   REGULAR="regular"
 }
 
+interface customerProducts {
+  product:{
+    product_id:Schema.Types.ObjectId,
+    productName:String,
+    colorCode:String
+  },
+  unit_price:{
+    value:number,
+    unit:string
+  }
+  vat:{
+    value:number,
+    unit:string
+  }
+}
+
 export interface CustomerInterface extends Document{
   _id:Schema.Types.ObjectId
   name:string
@@ -27,12 +43,27 @@ export interface CustomerInterface extends Document{
   rcNumber:string
   cylinderHoldingTime:Date
   territory:string
-  products:Schema.Types.ObjectId[]
-  unitPrice:number
+  products:customerProducts[]
   CAC:string
   validID:string
   branch:Schema.Types.ObjectId
 }
+
+const customerProductSchema = new Schema({
+  product:{
+    product_id:Schema.Types.ObjectId,
+    productName:String,
+    colorCode:String
+  },
+  unit_price:{
+    value:Number,
+    unit:String
+  },
+  vat:{
+    value:Number,
+    unit:String
+  }
+});
 
 export const customerSchema = new Schema({
   name:{type:String, lowercase:true},
@@ -47,8 +78,7 @@ export const customerSchema = new Schema({
   rcNumber:String,
   cylinderHoldingTime:Date,
   territory:String,
-  products:[{type:Schema.Types.ObjectId, ref:'products'}],
-  unitPrice:Number,
+  products:[customerProductSchema],
   CAC:String,
   validID:String,
   branch:{type:Schema.Types.ObjectId, ref:'branches'}

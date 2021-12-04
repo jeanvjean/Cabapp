@@ -153,7 +153,8 @@ export const ocn = new OcnModule({
 
 export const account = new AccountModule({
   account:Reciept,
-  salesRequisition:SalesReq
+  salesRequisition:SalesReq,
+  deliveryNote:Waybill
 });
 
 export const emptyCylinder = new EmptyCylinderModule({

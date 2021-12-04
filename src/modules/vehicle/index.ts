@@ -9,7 +9,7 @@ import env from '../../configs/static';
 import Notify from '../../util/mail';
 import { createLog } from "../../util/logs";
 import { ActivityLogInterface } from "../../models/logs";
-import { pickupType } from "../../models/order";
+import { orderType, pickupType } from "../../models/order";
 import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
 import { generateToken, padLeft } from "../../util/token";
 import * as schedule from 'node-schedule'
@@ -819,47 +819,61 @@ class Vehicle extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       
-      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType, routeStatus } = query;
-
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, orderType, routeStatus } = query;
+      // console.log(orderType, routeStatus)
       let q = {
         vehicle:`${vehicleId}`,
         branch:user.branch
       }
       let or = [];
       if(search) {
-        or.push({modeOfService: new RegExp(search || "", "gi")})
+        or.push({modeOfService: new RegExp(search, "gi")})
       }
-      if(email) {
+      if(orderType == pickupType.SUPPLIER && email) {
         //@ts-ignore
-        q = {...q, 'customers.email': new RegExp(email, "gi")}
+        // q = {...q, 'customers.email': new RegExp(email, "gi")},
+        or.push({'suppliers.email':new RegExp(email,'gi')})
       }
-      if(email && customer) {
+      if(orderType == pickupType.CUSTOMER && email) {
         //@ts-ignore
-        q = {...q, 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi")}
+        // q = {...q, 'customers.email': new RegExp(email, "gi")},
+        or.push({'customers.email': new RegExp(email, "gi")})
       }
-      if(email && supplier) {
+      // if(email && customer) {
+      //   //@ts-ignore
+      //   q = {...q, 'customers.email': new RegExp(email, "gi"), 'customers.name': new RegExp(customer, "gi")}
+      // }
+      // if(email && supplier) {
+      //   //@ts-ignore
+      //   q = {...q, 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi")}
+      // }
+      if(supplier) {
         //@ts-ignore
-        q = {...q, 'suppliers.email': new RegExp(email, "gi"), 'suppliers.name': new RegExp(supplier, "gi")}
+        // q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+        or.push({'suppliers.name': new RegExp(supplier, "gi")})
       }
-      if(supplier?.length) {
+      if(orderType == pickupType.CUSTOMER && routeStatus) {
         //@ts-ignore
-        q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+        // q ={...q,'customers.status': routeStatus}
+        or.push({'customers.status': new RegExp(routeStatus,'gi')})
       }
-      if(routeStatus) {
-        //@ts-ignore
-        q ={...q,'customers.status': new RegExp(routeStatus, "gi")}
+      if(orderType == pickupType.SUPPLIER && routeStatus) {
+        or.push({'suppliers.status': new RegExp(routeStatus,'gi')})
       }
       if(customer?.length) {
         //@ts-ignore
-        q = {...q, 'customers.name': new RegExp(customer, "gi")}
+        // q = {...q, 'customers.name': new RegExp(customer, "gi")}
+        or.push({'customers.name': new RegExp(customer, "gi")})
       }
       if(activity?.length) {
         //@ts-ignore
-        q = {...q, 'activity': new RegExp(activity, "gi")}
+        q = {...q, 'activity': activity}
+        // or.push({'activity': new RegExp(activity, "gi")})
       }
-      if(pickupType?.length) {
+      if(orderType) {
         //@ts-ignore
-        q = {...q, 'orderType': new RegExp(pickupType, "gi")}
+        q = {...q, 'orderType': orderType}
+        // or.push({'orderType': new RegExp(pickupType, "gi")})
       }
       if(fromDate) {
         //@ts-ignore

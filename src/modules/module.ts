@@ -58,7 +58,8 @@ export interface QueryInterface {
   cylinderStatus?:string
   noteType?:string
   status?:string
-  barcode?:string
+  barcode?:string,
+  orderType?:string
 }
 
 /**

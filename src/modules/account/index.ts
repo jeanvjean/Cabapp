@@ -85,10 +85,11 @@ class Account extends Module{
             let invoiceNumber = padLeft(sn, 6, "");
             reciept.invoiceNo = init+invoiceNumber;
             reciept.invInit = sn;
-            let delivery = await this.deliveryNote.findById(reciept.delivery_id)
-            if(delivery){
-                delivery.invoice_id = reciept._id;
-                await delivery.save();
+            
+            let sales = await this.salesRequisition.findById(reciept.salesReq)
+            if(sales){
+                sales.invoice_id = reciept._id;
+                await sales.save();
             }
             await reciept.save();
             await createLog({

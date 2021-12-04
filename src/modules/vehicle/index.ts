@@ -22,6 +22,7 @@ import { EcrApproval, EcrType, EmptyCylinderInterface, Priority, ProductionSched
 import { WayBillInterface } from "../../models/waybill";
 import OutGoingCylinder from "../ocn";
 import { OutgoingCylinderInterface } from "../../models/ocn";
+import { RecieptInterface } from "../../models/reciept";
 
 export { schedule };
 
@@ -38,6 +39,7 @@ interface vehicleProps{
   ecr:Model<EmptyCylinderInterface>
   waybill:Model<WayBillInterface>
   ocn:Model<OutgoingCylinderInterface>
+  invoice:Model<RecieptInterface>
 }
 
 type NewVehicle = {
@@ -156,6 +158,7 @@ interface newWaybillInterface {
   lpoNo:WayBillInterface['lpoNo']
   deliveryType:WayBillInterface['deliveryType'],
   ocn:WayBillInterface['ocn']
+  invoice_id:WayBillInterface['invoice_id']
 }
 
 type Parameters = {
@@ -199,6 +202,7 @@ class Vehicle extends Module{
   private ecr:Model<EmptyCylinderInterface>
   private waybill:Model<WayBillInterface>
   private ocn:Model<OutgoingCylinderInterface>
+  private invoice:Model<RecieptInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -214,6 +218,7 @@ class Vehicle extends Module{
     this.ecr = props.ecr
     this.waybill = props.waybill
     this.ocn = props.ocn
+    this.invoice = props.invoice
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -1358,11 +1363,12 @@ class Vehicle extends Module{
       let deliveryNo = padLeft(wbNo, 6, '');
       delivery.deliveryNo = "D"+deliveryNo;
       delivery.numInit = wbNo;
-      let ocn = await this.ocn.findById(delivery.ocn)
-      if(ocn) {
-        ocn.delivery_id = ocn._id
-        await ocn.save()
-      }
+
+      let invoice = await this.invoice.findById(delivery.invoice_id)
+          if(invoice){
+              invoice.delivery_id = delivery._id;
+              await invoice.save();
+          }
       await delivery.save();
       return Promise.resolve(delivery);
     } catch (e) {

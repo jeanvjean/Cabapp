@@ -126,6 +126,8 @@ class OutGoingCylinder extends Module{
             // ocn.ocnNo = grnNo;
             ocn.ocnInit = initNum;
 
+            
+
             await ocn.save();
             await createLog({
               user:user._id,

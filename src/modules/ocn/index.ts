@@ -13,6 +13,7 @@ import { CustomerInterface } from "../../models/customer";
 import { BranchInterface } from "../../models/branch";
 import { saleCylinder } from "../../models/sales-requisition";
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
+import { WayBillInterface } from "../../models/waybill";
 
 interface ocnPropsInterface {
     ocn:Model<OutgoingCylinderInterface>
@@ -20,6 +21,7 @@ interface ocnPropsInterface {
     customer:Model<CustomerInterface>
     branch:Model<BranchInterface>
     cylinder:Model<RegisteredCylinderInterface>
+    delivery:Model<WayBillInterface>
 }
 
 interface newOcnInterface {
@@ -71,6 +73,7 @@ class OutGoingCylinder extends Module{
     private branch:Model<BranchInterface>
     private customer:Model<CustomerInterface>
     private cylinder:Model<RegisteredCylinderInterface>
+    private delivery:Model<WayBillInterface>
 
     constructor(props:ocnPropsInterface){
         super()
@@ -78,7 +81,8 @@ class OutGoingCylinder extends Module{
         this.user = props.user;
         this.branch = props.branch
         this.customer = props.customer
-        this.cylinder = props.cylinder;
+        this.cylinder = props.cylinder
+        this.delivery = props.delivery
     }
 
     public async createOCNRecord(data:newOcnInterface, user:UserInterface):Promise<OutgoingCylinderInterface|undefined>{
@@ -125,9 +129,15 @@ class OutGoingCylinder extends Module{
             }
             // ocn.ocnNo = grnNo;
             ocn.ocnInit = initNum;
-
-            
-
+            if(ocn.delivery_ids.length > 0) {
+              for(let delivery of ocn.delivery_ids) {
+                let d = await this.delivery.findById(delivery);
+                if(d) {
+                  d.ocn_id = ocn._id;
+                  await d.save();
+                }
+              }
+            }
             await ocn.save();
             await createLog({
               user:user._id,
@@ -390,7 +400,8 @@ class OutGoingCylinder extends Module{
               {path:'branch', model:'branches'},
               {path:"cylinders", model:"registered-cylinders"},
               {path:"invoice", model:'reciept'},
-              {path:"routePlan", model:"pickup-routes"}
+              {path:"routePlan", model:"pickup-routes"},
+              {path:'delivery_ids', model:'waybill'}
             ]
           }
           let q = {
@@ -429,7 +440,8 @@ class OutGoingCylinder extends Module{
               {path:'branch', model:'branches'},
               {path:"cylinders", model:"registered-cylinders"},
               {path:"invoice", model:'reciept'},
-              {path:"routePlan", model:"pickup-routes"}
+              {path:"routePlan", model:"pickup-routes"},
+              {path:'delivery_ids', model:'waybill'}
             ]
           }
           let q = {
@@ -477,7 +489,8 @@ class OutGoingCylinder extends Module{
                 {path:'branch', model:'branches'},
                 {path:"cylinders", model:"registered-cylinders"},
                 {path:"invoice", model:'reciept'},
-                {path:"routePlan", model:"pickup-routes"}
+                {path:"routePlan", model:"pickup-routes"},
+                {path:'delivery_ids', model:'waybill'}
             ]);
             return Promise.resolve(outgoing as OutgoingCylinderInterface);
         } catch (e) {

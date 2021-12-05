@@ -18,7 +18,7 @@ export interface WayBillInterface extends Document{
     }
     // cylinders: purchaseCylinderInterface[]
     cylinders: Schema.Types.ObjectId[]
-    ocn:Schema.Types.ObjectId
+    ocn_id:Schema.Types.ObjectId
     invoiceNo: string
     lpoNo:string
     deliveryType:pickupType,
@@ -35,7 +35,7 @@ const waybillSchema = new Schema({
         id:Schema.Types.ObjectId,
         email:String
     },
-    ocn:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"},
+    ocn_id:{type:Schema.Types.ObjectId, ref:"out-going-cylinders"},
     cylinders: [{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
     invoiceNo: {type:String},
     lpoNo:{type:String},

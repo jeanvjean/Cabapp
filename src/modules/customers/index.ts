@@ -53,6 +53,7 @@ interface newCustomerInterface {
   products:CustomerInterface['products']
   CAC:CustomerInterface['CAC']
   validID:CustomerInterface['validID']
+  vat:CustomerInterface['vat']
 }
 
 interface CreateOrderInterface{

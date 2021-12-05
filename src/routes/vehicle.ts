@@ -150,7 +150,7 @@ router.post(
 router.get(
   '/fetch-delivery-notes',
   auth.verify(),
-  vehicleCtrl.fetchWaybills
+  vehicleCtrl.fetchWaybills()
 );
 
 router.get(

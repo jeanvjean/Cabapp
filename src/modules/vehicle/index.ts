@@ -1390,6 +1390,7 @@ class Vehicle extends Module{
       let q = {
         branch:user.branch
       }
+      console.log(q)
       let or = [];
       if(search) {
         or.push({customer: new RegExp(search, 'gi')})

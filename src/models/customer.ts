@@ -23,10 +23,6 @@ interface customerProducts {
     value:number,
     unit:string
   }
-  vat:{
-    value:number,
-    unit:string
-  }
 }
 
 export interface CustomerInterface extends Document{
@@ -47,6 +43,10 @@ export interface CustomerInterface extends Document{
   CAC:string
   validID:string
   branch:Schema.Types.ObjectId
+  vat:{
+    value:number,
+    unit:string
+  }
 }
 
 const customerProductSchema = new Schema({
@@ -81,7 +81,11 @@ export const customerSchema = new Schema({
   products:[customerProductSchema],
   CAC:String,
   validID:String,
-  branch:{type:Schema.Types.ObjectId, ref:'branches'}
+  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  vat:{
+    value:Number,
+    unit:String
+  }
 },{
   timestamps:true
 });

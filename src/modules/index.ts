@@ -149,7 +149,8 @@ export const ocn = new OcnModule({
   user:User,
   customer:Customer,
   branch:Branch,
-  cylinder:RegisteredCylinder
+  cylinder:RegisteredCylinder,
+  delivery:Waybill
 });
 
 export const account = new AccountModule({

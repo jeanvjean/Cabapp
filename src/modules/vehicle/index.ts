@@ -157,7 +157,7 @@ interface newWaybillInterface {
   invoiceNo: WayBillInterface['invoiceNo']
   lpoNo:WayBillInterface['lpoNo']
   deliveryType:WayBillInterface['deliveryType'],
-  ocn:WayBillInterface['ocn']
+  ocn_id:WayBillInterface['ocn_id']
   invoice_id:WayBillInterface['invoice_id']
 }
 

@@ -50,7 +50,7 @@ interface newCustomerInterface {
   rcNumber:CustomerInterface['rcNumber']
   cylinderHoldingTime:number
   territory:CustomerInterface['territory']
-  products:CustomerInterface['products']
+  products:string
   CAC:CustomerInterface['CAC']
   validID:CustomerInterface['validID']
   vat:CustomerInterface['vat']
@@ -164,8 +164,10 @@ class Customer extends Module{
       if(exist) {
         throw new BadInputFormatException('a customer with this email exists');
       }
+      let products = JSON.parse(data.products)
       const customer = await this.customer.create({
         ...data,
+        products,
         cylinderHoldingTime:date.toISOString(),
         branch:user.branch
       });

@@ -642,7 +642,7 @@ class Vehicle extends Module{
       if(routePlan.activity == RouteActivity.DELIVERY) {
         if(routePlan.orderType == pickupType.CUSTOMER) {
           for(let plan of routePlan.customers) {
-            let delivery = await this.waybill.findById(plan.deliveryNo);
+            let delivery = await this.waybill.findOne({deliveryNo:plan.deliveryNo});
             if(delivery){
               delivery.route_plan_id = routePlan._id
               await delivery.save()
@@ -650,7 +650,7 @@ class Vehicle extends Module{
           }
         }else if(routePlan.orderType == pickupType.SUPPLIER) {
           for(let plan of routePlan.suppliers) {
-            let delivery = await this.waybill.findById(plan.deliveryNo);
+            let delivery = await this.waybill.findOne({deliveryNo:plan.deliveryNo});
             if(delivery){
               delivery.route_plan_id = routePlan._id
               await delivery.save();

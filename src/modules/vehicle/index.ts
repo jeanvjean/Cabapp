@@ -870,8 +870,8 @@ class Vehicle extends Module{
         populate:[
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},
-          // {path:"suppliers.cylinders", model:"registered-cylinders"},
-          // {path:"customers.cylinders", model:"registered-cylinders"},
+          {path:"suppliers.cylinders", model:"registered-cylinders"},
+          {path:"customers.cylinders", model:"registered-cylinders"},
           {path:'vehicle', model:'vehicle',populate:{
             path:'assignedTo', model:"User"
           }},

@@ -749,7 +749,7 @@ class Vehicle extends Module{
       let ObjectId = mongoose.Types.ObjectId;
       let { routeId, query } = data;
       //@ts-ignore
-      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType  } = query;
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType, routeStatus, status  } = query;
 
       let q = {
             _id:`${routeId}`,
@@ -757,35 +757,43 @@ class Vehicle extends Module{
       }
       let or = [];
       if(search) {
-        or.push({modeOfService: new RegExp(search || "", "gi")})
+        or.push({modeOfService: new RegExp(search, "gi")})
       }
-       if(email && customer) {
+      if(orderType == pickupType.SUPPLIER && email) {
         //@ts-ignore
-        q = {...q, 'customers.email': new RegExp(email, "gi")}
+        // q = {...q, 'customers.email': new RegExp(email, "gi")},
+        or.push({'suppliers.email':new RegExp(email,'gi')})
       }
-      if(email) {
+      if(orderType == pickupType.CUSTOMER && email) {
         //@ts-ignore
-        q = {...q, 'customers.email': new RegExp(email, "gi")}
+        // q = {...q, 'customers.email': new RegExp(email, "gi")},
+        or.push({'customers.email': new RegExp(email, "gi")})
       }
-      if(email && supplier) {
+      if(supplier) {
         //@ts-ignore
-        q = {...q, 'suppliers.email': new RegExp(email, "gi")}
+        // q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+        or.push({'suppliers.name': new RegExp(supplier, "gi")})
       }
-      if(supplier?.length) {
+      if(routeStatus) {
         //@ts-ignore
-        q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
+        // q ={...q,'customers.status': routeStatus}
+        or.push({'customers.status': new RegExp(routeStatus,'gi')})
+        or.push({'suppliers.status': new RegExp(routeStatus,'gi')})
       }
       if(customer?.length) {
         //@ts-ignore
-        q = {...q, 'customers.name': new RegExp(customer, "gi")}
+        // q = {...q, 'customers.name': new RegExp(customer, "gi")}
+        or.push({'customers.name': new RegExp(customer, "gi")})
       }
       if(activity?.length) {
         //@ts-ignore
-        q = {...q, 'activity': new RegExp(activity, "gi")}
+        q = {...q, 'activity': activity}
+        // or.push({'activity': new RegExp(activity, "gi")})
       }
-      if(pickupType?.length) {
+      if(orderType) {
         //@ts-ignore
-        q = {...q, 'orderType': new RegExp(pickupType, "gi")}
+        q = {...q, 'orderType': orderType}
+        // or.push({'orderType': new RegExp(pickupType, "gi")})
       }
       if(fromDate) {
         //@ts-ignore
@@ -795,6 +803,10 @@ class Vehicle extends Module{
         //@ts-ignore
         q = {...q, createdAt:{ $lte:new Date(toDate) }}
       }
+      if(status) {
+        or.push({'status': new RegExp(status,'gi')})
+      }
+      // console.log(q)
       if(or.length > 0) {
         //@ts-ignore
         q = {...q, $or:or}
@@ -824,7 +836,7 @@ class Vehicle extends Module{
     try {
       const ObjectId = mongoose.Types.ObjectId;
       
-      let { driver, email, supplier, customer, search, fromDate, toDate, activity, orderType, routeStatus } = query;
+      let { driver, email, supplier, customer, search, fromDate, toDate, activity, orderType, routeStatus, status } = query;
       // console.log(orderType, routeStatus)
       let q = {
         vehicle:`${vehicleId}`,
@@ -877,6 +889,9 @@ class Vehicle extends Module{
       if(toDate) {
         //@ts-ignore
         q = {...q, createdAt:{ $lte:new Date(toDate) }}
+      }
+      if(status) {
+        or.push({'status': new RegExp(status,'gi')})
       }
       // console.log(q)
       if(or.length > 0) {
@@ -1297,6 +1312,20 @@ class Vehicle extends Module{
             return;
     } catch (e) {
       this.handleException(e);
+    }
+  }
+
+  public async marAsCompletedRoutePlan(routeId:string):Promise<any>{
+    try {
+      let routePlan = await this.pickup.findById(routeId)
+      if(!routePlan) {
+        throw new BadInputFormatException('routePlan not found')
+      }
+      routePlan.status = RoutePlanStatus.DONE
+      await routePlan.save();
+      return routePlan
+    } catch (e) {
+      this.handleException(e)
     }
   }
 

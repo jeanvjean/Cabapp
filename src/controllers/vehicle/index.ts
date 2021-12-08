@@ -290,6 +290,18 @@ class VehicleController extends Ctrl{
       }
     }
   }
+
+  marAsCompletedRoutePlan():RequestHandler{
+    return async(req, res)=>{
+      try {
+        const data = await this.module.marAsCompletedRoutePlan(req.params.routeId);
+        this.ok(res, 'done', data);
+      } catch (e) {
+        this.handleError(e, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

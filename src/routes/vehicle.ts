@@ -159,4 +159,10 @@ router.get(
   vehicleCtrl.fetchDeliveryDetails()
 );
 
+router.get(
+  '/complete-route-plan',
+  auth.verify(),
+  vehicleCtrl.marAsCompletedRoutePlan()
+);
+
 export default router;

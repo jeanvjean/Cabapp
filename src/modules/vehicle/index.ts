@@ -749,70 +749,13 @@ class Vehicle extends Module{
       let ObjectId = mongoose.Types.ObjectId;
       let { routeId, query } = data;
       //@ts-ignore
-      let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType, routeStatus, status  } = query;
-
+      let {  email, supplier, customer, routeStatus } = query;
+      console.log(routeId)
       let q = {
-            _id:`${routeId}`,
-            deleted:false
+            _id:routeId
       }
-      let or = [];
-      if(search) {
-        or.push({modeOfService: new RegExp(search, "gi")})
-      }
-      if(orderType == pickupType.SUPPLIER && email) {
-        //@ts-ignore
-        // q = {...q, 'customers.email': new RegExp(email, "gi")},
-        or.push({'suppliers.email':new RegExp(email,'gi')})
-      }
-      if(orderType == pickupType.CUSTOMER && email) {
-        //@ts-ignore
-        // q = {...q, 'customers.email': new RegExp(email, "gi")},
-        or.push({'customers.email': new RegExp(email, "gi")})
-      }
-      if(supplier) {
-        //@ts-ignore
-        // q ={...q,'suppliers.name': new RegExp(supplier, "gi")}
-        or.push({'suppliers.name': new RegExp(supplier, "gi")})
-      }
-      if(routeStatus) {
-        //@ts-ignore
-        // q ={...q,'customers.status': routeStatus}
-        or.push({'customers.status': new RegExp(routeStatus,'gi')})
-        or.push({'suppliers.status': new RegExp(routeStatus,'gi')})
-      }
-      if(customer?.length) {
-        //@ts-ignore
-        // q = {...q, 'customers.name': new RegExp(customer, "gi")}
-        or.push({'customers.name': new RegExp(customer, "gi")})
-      }
-      if(activity?.length) {
-        //@ts-ignore
-        q = {...q, 'activity': activity}
-        // or.push({'activity': new RegExp(activity, "gi")})
-      }
-      if(orderType) {
-        //@ts-ignore
-        q = {...q, 'orderType': orderType}
-        // or.push({'orderType': new RegExp(pickupType, "gi")})
-      }
-      if(fromDate) {
-        //@ts-ignore
-        q = {...q, createdAt:{ $gte:new Date(fromDate) }}
-      }
-      if(toDate) {
-        //@ts-ignore
-        q = {...q, createdAt:{ $lte:new Date(toDate) }}
-      }
-      if(status) {
-        or.push({'status': new RegExp(status,'gi')})
-      }
-      // console.log(q)
-      if(or.length > 0) {
-        //@ts-ignore
-        q = {...q, $or:or}
-      }
-      // let aggregate = this.pickup.aggregate([q]);
-      const routePlan = await this.pickup.findOne(q).populate(
+
+      let routePlan = await this.pickup.findOne(q).populate(
         [
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},
@@ -825,9 +768,29 @@ class Vehicle extends Module{
           {path:'recievedBy', model:'User'}
         ]
       );
+      console.log(routePlan)
       if(!routePlan) {
         throw new BadInputFormatException('Not found')
       }
+
+      if(routeStatus) {
+        if(routePlan.orderType == pickupType.CUSTOMER) {
+          let custs = routePlan.customers.filter(customer=> customer.status == routeStatus)
+          routePlan.customers = custs;
+        }else if (routePlan.orderType == pickupType.SUPPLIER){
+          let supls = routePlan.suppliers.filter(supplier=> supplier.status == routeStatus)
+          routePlan.suppliers = supls;
+        }
+      }
+      if(email) {
+        if(routePlan.orderType == pickupType.CUSTOMER) {
+          let custs = routePlan.customers.filter(customer=> customer.email == email)
+          routePlan.customers = custs;
+        }else if (routePlan.orderType == pickupType.SUPPLIER){
+          let supls = routePlan.suppliers.filter(supplier=> supplier.email == email)
+          routePlan.suppliers = supls;
+        }
+      }      
       return Promise.resolve(routePlan as PickupInterface);
     } catch (e) {
       this.handleException(e);

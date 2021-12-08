@@ -881,17 +881,17 @@ class Vehicle extends Module{
       }
       //@ts-ignore
       let v = await this.pickup.paginate(q, options)
-      .populate([
-        {path:'customer', model:'customer'},
-        {path:'supplier', model:'supplier'},
-        {path:"suppliers.cylinders", model:"registered-cylinders"},
-        {path:"customers.cylinders", model:"registered-cylinders"},
-        {path:'vehicle', model:'vehicle',populate:{
-          path:'assignedTo', model:"User"
-        }},
-        {path:'security', model:'User'},
-        {path:'recievedBy', model:'User'}
-      ]);
+      // .populate([
+      //   {path:'customer', model:'customer'},
+      //   {path:'supplier', model:'supplier'},
+      //   {path:"suppliers.cylinders", model:"registered-cylinders"},
+      //   {path:"customers.cylinders", model:"registered-cylinders"},
+      //   {path:'vehicle', model:'vehicle',populate:{
+      //     path:'assignedTo', model:"User"
+      //   }},
+      //   {path:'security', model:'User'},
+      //   {path:'recievedBy', model:'User'}
+      // ]);
       return Promise.resolve(v);
     } catch (e) {
       this.handleException(e);

@@ -913,7 +913,7 @@ class Vehicle extends Module{
         ]
       }
       //@ts-ignore
-      let v = await this.pickup.paginate(q, options);
+      let v = await this.pickup.find(q, options);
       return Promise.resolve(v);
     } catch (e) {
       this.handleException(e);

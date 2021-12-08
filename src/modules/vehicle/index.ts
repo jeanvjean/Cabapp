@@ -819,6 +819,8 @@ class Vehicle extends Module{
           {path:'vehicle', model:'vehicle' ,populate:{
             path:'assignedTo', model:"User"
           }},
+          {path:"suppliers.cylinders", model:"registered-cylinders"},
+          {path:"customers.cylinders", model:"registered-cylinders"},
           {path:'security', model:'User'},
           {path:'recievedBy', model:'User'}
         ]
@@ -905,6 +907,8 @@ class Vehicle extends Module{
         populate:[
           {path:'customer', model:'customer'},
           {path:'supplier', model:'supplier'},
+          // {path:"suppliers.cylinders", model:"registered-cylinders"},
+          // {path:"customers.cylinders", model:"registered-cylinders"},
           {path:'vehicle', model:'vehicle',populate:{
             path:'assignedTo', model:"User"
           }},
@@ -913,7 +917,17 @@ class Vehicle extends Module{
         ]
       }
       //@ts-ignore
-      let v = await this.pickup.find(q, options);
+      let v = await this.pickup.find(q).populate([
+        {path:'customer', model:'customer'},
+        {path:'supplier', model:'supplier'},
+        {path:"suppliers.cylinders", model:"registered-cylinders"},
+        {path:"customers.cylinders", model:"registered-cylinders"},
+        {path:'vehicle', model:'vehicle',populate:{
+          path:'assignedTo', model:"User"
+        }},
+        {path:'security', model:'User'},
+        {path:'recievedBy', model:'User'}
+      ]);
       return Promise.resolve(v);
     } catch (e) {
       this.handleException(e);

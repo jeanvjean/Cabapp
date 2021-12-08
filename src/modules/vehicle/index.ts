@@ -1040,9 +1040,10 @@ class Vehicle extends Module{
   public async markRouteAsComplete(data:Parameters, user:UserInterface):Promise<PickupInterface|undefined>{
     try {
       // console.log(user)
-      const { query, ecrData, routeId, deliveryNo } = data;
+      const { query, ecrData, routeId } = data;
+      // console.log(data)
       //@ts-ignore
-      const { name, email } = query;
+      const { name, email, deliveryNo } = query;
       const pickup = await this.pickup.findById(routeId);
       if(!pickup) {
         throw new BadInputFormatException('Route Plan not found');
@@ -1054,8 +1055,8 @@ class Vehicle extends Module{
       if(pickup?.orderType == pickupType.SUPPLIER && pickup.activity == RouteActivity.DELIVERY) {
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
-            if(supplier.email == `${email}`) {
-              if(supplier.deliveryNo == `${deliveryNo}`) {
+            if(supplier.email == email) {
+              if(supplier.deliveryNo == deliveryNo) {
                 if(supplier.cylinders.length > 0) {
                   for(let cylinder of supplier.cylinders) {
                       let cyl = await this.registerCylinder.findById(cylinder);
@@ -1087,10 +1088,13 @@ class Vehicle extends Module{
           }
         }
       }else if(pickup?.orderType == pickupType.CUSTOMER && pickup.activity == RouteActivity.DELIVERY){
+        
         if(pickup.customers.length > 0){
+          // console.log(email, deliveryNo)
           for(let customer of pickup.customers) {
-            if(customer.email == `${email}`) {
-              if(customer.deliveryNo == `${deliveryNo}`) {
+            if(customer.email == email) {
+              if(customer.deliveryNo == deliveryNo) {
+               console.log(email, deliveryNo)
                 if(customer.cylinders.length > 0) {
                   for(let cylinder of customer.cylinders) {
                       let cyl = await this.registerCylinder.findById(cylinder);

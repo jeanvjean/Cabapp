@@ -880,7 +880,8 @@ class Vehicle extends Module{
         ]
       }
       //@ts-ignore
-      let v = await this.pickup.paginate(q).populate([
+      let v = await this.pickup.paginate(q, options)
+      .populate([
         {path:'customer', model:'customer'},
         {path:'supplier', model:'supplier'},
         {path:"suppliers.cylinders", model:"registered-cylinders"},

@@ -123,7 +123,7 @@ const routeSupplier = new Schema({
   numberOfCylinders:Number,
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   fringeCylinders:[routeCylinderSchema],
-  status:String,  
+  status:{type: String, default: RoutePlanStatus.PROGRESS},  
   reportId:String,
   deliveryNo:String
 },{
@@ -138,7 +138,7 @@ const routeCustomer = new Schema({
   numberOfCylinders:Number,
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   fringeCylinders:[routeCylinderSchema],
-  status:String,
+  status:{type:String, default: RoutePlanStatus.PROGRESS},
   reportId:String,
   deliveryNo:String
 },{

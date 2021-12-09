@@ -12,7 +12,7 @@ import { createLog } from "../../util/logs";
 import { passWdCheck } from "../../util/token";
 import { WalkinCustomerStatus } from "../../models/walk-in-customers";
 import { mongoose } from "../cylinder";
-import { EmptyCylinderInterface } from "../../models/emptyCylinder";
+import { EcrType, EmptyCylinderInterface } from "../../models/emptyCylinder";
 import { cylinderTypes } from "../../models/cylinder";
 import { ProductionScheduleInterface } from "../../models/productionSchedule";
 
@@ -95,8 +95,15 @@ class Sale extends Module{
       for(let cyl of sales.cylinders) {
         let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
         if(cylinder) {
-          if(!fEcr.removeArr.includes(cylinder._id)) {
-            throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
+          if(fEcr.type == EcrType.SALES) {
+            if(!fEcr.removeArr.includes(cylinder._id)) {
+              throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
+            }
+          }
+          if(fEcr.type == EcrType.FILLED) {
+            if(!fEcr.cylinders.includes(cylinder._id)) {
+              throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
+            }
           }
           if(cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY) {
             throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is empty`)

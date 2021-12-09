@@ -1037,13 +1037,14 @@ class Vehicle extends Module{
     }
   }
 
-  public async markRouteAsComplete(data:Parameters, user:UserInterface):Promise<PickupInterface|undefined>{
+  public async markRouteAsComplete(data:Parameters, user:UserInterface):Promise<any>{
     try {
       // console.log(user)
       const { query, ecrData, routeId } = data;
       // console.log(data)
       //@ts-ignore
       const { name, email, deliveryNo } = query;
+      let TECR = ''
       const pickup = await this.pickup.findById(routeId);
       if(!pickup) {
         throw new BadInputFormatException('Route Plan not found');
@@ -1151,10 +1152,12 @@ class Vehicle extends Module{
               //@ts-ignore
               routeReport?.timeOut = new Date().getTime();
               //TO-DO create tecr
-              await this.createTecr({
+              let {ecrNo} = await this.createTecr({
                 customer,
                 ecrData
-              }, user)
+              }, user);
+              // console.log(ecr)
+              TECR = ecrNo;
             }
           }
         }
@@ -1187,17 +1190,23 @@ class Vehicle extends Module{
               routeReport?.mileageOut = data.mileageOut;
               //@ts-ignore
               routeReport?.timeOut = new Date().getTime();
-              await this.createTecr({
+              let {ecrNo} = await this.createTecr({
                 supplier,
                 ecrData
               }, user)
+              // console.log(ecr)
+              TECR = ecrNo;
             }
           }
         }
       }
       await pickup?.save();
       await routeReport.save();
-      return Promise.resolve(pickup as PickupInterface);
+      return Promise.resolve({
+          pickup,
+          tecr:TECR,
+          message:`An otp has been sent to the customer's registered email`
+        });
     } catch (e) {
       this.handleException(e);
     }
@@ -1205,7 +1214,8 @@ class Vehicle extends Module{
 
   public async createTecr(data:any, user:UserInterface):Promise<any>{
     try {
-      let { customer, supplier, ecrData } = data
+      let { customer, supplier, ecrData } = data;
+      let responseData;
       if(customer) {
         let cust = await this.customer.findOne({email:customer.email});
         let ecr = new this.ecr({
@@ -1234,7 +1244,7 @@ class Vehicle extends Module{
         ecr.otp = otp.toString();
         ecr.ecrNo = ecrN;
         await ecr.save();
-
+        responseData = ecr;
         const html = await getTemplate('OTP', {//8639
           name:cust?.name,
           email:cust?.email,
@@ -1276,6 +1286,7 @@ class Vehicle extends Module{
             ecr.otp = otp.toString();
             ecr.ecrNo = ecrN;
             await ecr.save();
+            responseData = ecr;
 
             const html = await getTemplate('OTP', {//8639
               name:suppl?.name,
@@ -1291,7 +1302,7 @@ class Vehicle extends Module{
             }//@ts-ignore
             new Notify().sendMail(mailLoad);
       }
-            return;
+            return responseData;
     } catch (e) {
       this.handleException(e);
     }

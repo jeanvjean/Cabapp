@@ -45,7 +45,8 @@ export interface SalesRequisitionInterface extends Document{
   type: CustomerType
   production_id:Schema.Types.ObjectId,
   purchase_id:Schema.Types.ObjectId
-  invoice_id:Schema.Types.ObjectId
+  invoice_id:Schema.Types.ObjectId,
+  fcr_id:Schema.Types.ObjectId
 }
 
 export const saleCylinderSchema = new Schema({
@@ -82,7 +83,8 @@ const salesReqSchema = new Schema({
   type:{type:String, enum:Object.values(CustomerType)},
   production_id:Schema.Types.ObjectId,
   purchase_id:Schema.Types.ObjectId,
-  invoice_id:Schema.Types.ObjectId
+  invoice_id:Schema.Types.ObjectId,
+  fcr_id:Schema.Types.ObjectId
 },{
   timestamps:true
 });

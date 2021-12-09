@@ -38,7 +38,8 @@ interface newSaleRequisition{
   cylinderType:SalesRequisitionInterface['cyliderType']
   type: SalesRequisitionInterface['type']
   production_id:SalesRequisitionInterface['production_id'],
-  purchase_id:SalesRequisitionInterface['purchase_id']
+  purchase_id:SalesRequisitionInterface['purchase_id'],
+  fcr_id?:SalesRequisitionInterface['fcr_id']
 }
 
 type SalesApproval = {
@@ -116,8 +117,8 @@ class Sale extends Module{
           await schedule.save()
         }
       }
-      if(sales.purchase_id) {
-        let purchase = await this.purchase.findById(sales.purchase_id);
+      if(sales.fcr_id) {
+        let purchase = await this.ecr.findById(sales.fcr_id);
         if(purchase) {
           purchase.sales_req_id = sales._id
           await purchase.save();

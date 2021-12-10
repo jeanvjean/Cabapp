@@ -1415,7 +1415,8 @@ class Vehicle extends Module{
         sort:{createdAt: -1}
       }
       let q = {
-        branch:user.branch
+        branch:user.branch,
+        route_plan_id:null
       }
       console.log(q)
       let or = [];

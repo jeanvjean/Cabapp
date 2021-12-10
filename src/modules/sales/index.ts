@@ -90,7 +90,7 @@ class Sale extends Module{
 
       let fEcr = await this.ecr.findOne({ecrNo:sales.ecrNo});
       if(!fEcr) {
-        throw new BadInputFormatException('No ecr witht this number found');
+        throw new BadInputFormatException('No ecr with this number found');
       }
       for(let cyl of sales.cylinders) {
         let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
@@ -170,7 +170,8 @@ class Sale extends Module{
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
           {path:'preparedBy', model:'User'}
-        ]
+        ],        
+        sort:{createdAt: -1}
       }
       let q = {
         branch:user.branch
@@ -493,7 +494,8 @@ class Sale extends Module{
       let { stage, page, limit, search, cylinderNumber, cylinderType, fromDate, toDate } = query;
       let options = {
         page:page || 1,
-        limit:limit||10
+        limit:limit||10,
+        sort:{createdAt: -1}
       }
       let q = {
         branch:user.branch,
@@ -563,7 +565,8 @@ class Sale extends Module{
         ...query,
         populate:[
           {path:'assignedTo', model:'customer'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       //@ts-ignore
       const cylinders = await this.cylinder.paginate({branch:user.branch, cylinderType:cylinderTypes.ASSIGNED}, options);
@@ -635,7 +638,8 @@ class Sale extends Module{
           {path:"initiator", model:"User"},
           {path:"branch", model:"branches"},
           {path:"customer", model:"customer"}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       //@ts-ignore
       const purchaseOrder = await this.purchase.paginate({branch:user.branch},options);
@@ -663,7 +667,8 @@ class Sale extends Module{
           {path:"initiator", model:"User"},
           {path:"branch", model:"branches"},
           {path:"customer", model:"customer"}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       //@ts-ignore
       const purchaseOrder = await this.purchase.find({branch:user.branch},options);

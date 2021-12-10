@@ -877,7 +877,8 @@ class Vehicle extends Module{
           }},
           {path:'security', model:'User'},
           {path:'recievedBy', model:'User'}
-        ]
+        ],        
+        sort:{createdAt:-1}
       }
       //@ts-ignore
       let v = await this.pickup.paginate(q, options)
@@ -905,7 +906,7 @@ class Vehicle extends Module{
       let { driver, email, supplier, customer, search, fromDate, toDate, activity, pickupType } = query;
 
       let q = {
-        branch:user.branch
+        branch:user.branch,
       }
       let or = [];
       if(search) {
@@ -964,7 +965,8 @@ class Vehicle extends Module{
           }},
           {path:'security', model:'User'},
           {path:'recievedBy', model:'User'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       //@ts-ignore
       let v = await this.pickup.paginate(q, options);
@@ -1340,7 +1342,8 @@ class Vehicle extends Module{
       let { search, filter, fromDate, toDate, page, limit } = query;
       const options = {
         page: page || 1,
-        limit: limit || 10
+        limit: limit || 10,
+        sort:{createdAt:-1}
       }
 
       let q = {
@@ -1406,8 +1409,10 @@ class Vehicle extends Module{
         limit: limit||10,
         populate:[
           {path:'branch', model:'branches'},
-          {path:'ocn', model:'out-going-cylinders'}
-        ]
+          {path:'ocn', model:'out-going-cylinders'},
+          {path:'customer.id', model:'customer'}
+        ],
+        sort:{createdAt: -1}
       }
       let q = {
         branch:user.branch
@@ -1435,7 +1440,11 @@ class Vehicle extends Module{
 
   public async fetchDeliveryDetails(deliveryId:string, user:UserInterface):Promise<WayBillInterface|undefined>{
     try {
-      let delivery = await this.waybill.findById(deliveryId);
+      let delivery = await this.waybill.findById(deliveryId).populate([
+        {path:'branch', model:'branches'},
+        {path:'ocn', model:'out-going-cylinders'},
+        {path:'customer.id', model:'customer'}
+      ]);
       return Promise.resolve(delivery as WayBillInterface);
     } catch (e) {
       this.handleException(e)

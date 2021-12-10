@@ -193,7 +193,8 @@ class Customer extends Module{
         populate:[
           {path:'branch', model:'branches'},
           {path:'products', model:'products'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       let q = {
         branch:user.branch
@@ -273,7 +274,8 @@ class Customer extends Module{
       const { search, name, email } = query;
       let options = {
         page:query.page || 1,
-        limit:query.limit ||10
+        limit:query.limit ||10,
+        sort:{createdAt: -1}
       }
       let q={
         branch:user.branch
@@ -378,7 +380,8 @@ class Customer extends Module{
           },
           {path:'supplier', model:'supplier'},
           {path:'customer', model:'customer'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       const { search, filter } = query;
       let or = [];
@@ -419,7 +422,8 @@ class Customer extends Module{
           {path:'vehicle', model:'vehicle',populate:{
             path:'assignedTo', model:'User'
           }}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       //@ts-ignore
       const orders = await this.order.paginate({customer:`${customerId}`}, options);
@@ -442,7 +446,8 @@ class Customer extends Module{
           {path:'supplier', model:'supplier'},
           {path:'customer', model:'customer'},
           {path:'gasType', model:'cylinder'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       const { search, filter, type } = query;
       let or = [];
@@ -837,7 +842,8 @@ class Customer extends Module{
           {path:'customer', model:'customer'},
           {path:"icn", model:"out-going-cylinders"},
           {path:"ecr", model:"empty-cylinders"}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       // console.log(user);
       let q = {
@@ -880,7 +886,8 @@ class Customer extends Module{
           {path:'customer', model:'customer'},
           {path:"icn", model:"out-going-cylinders"},
           {path:"ecr", model:"empty-cylinders"}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       let q = {
         branch: user.branch
@@ -945,7 +952,8 @@ class Customer extends Module{
           {path:'customer', model:'customer'},
           {path:"icn", model:"out-going-cylinders"},
           {path:"ecr", model:"empty-cylinders"}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       let q = {
         branch: user._id
@@ -1084,7 +1092,8 @@ class Customer extends Module{
         ...query,
         populate:[
           {path:'branch', model:'branches'}
-        ]
+        ],
+        sort:{createdAt: -1}
       }
       let aggregate;
       const aggregate1 = this.walkin.aggregate([

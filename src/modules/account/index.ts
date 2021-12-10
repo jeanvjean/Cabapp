@@ -115,9 +115,10 @@ class Account extends Module{
             page:query.page,
             limit:query.limit,
             populate:[
-                    { path:'preparedBy', model:'User' },
-                    { path:'salesReq', model:"sales-requisition" }
-                ]
+                { path:'preparedBy', model:'User' },
+                { path:'salesReq', model:"sales-requisition" }
+            ],
+            sort:{createdAt: -1}
           }
           let q = {
             branch:user.branch

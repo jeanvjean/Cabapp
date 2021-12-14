@@ -18,7 +18,6 @@ router.post(
 
 router.get(
   '/fetch-customers',
-  auth.verify(),
   customerCtrl.fetchCustomers()
 );
 

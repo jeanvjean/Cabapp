@@ -543,6 +543,18 @@ class User extends Module {
       return Promise.resolve(user);
   }
 
+  public async fetchUserAuth(data: TokenPayloadInterface): Promise<UserInterface>{
+
+    const user = await this.user.findOne({
+      _id:data.id,
+      email: data.email
+    });
+      if(!user) {
+        throw new BadInputFormatException('Authorization error');
+      }
+      return Promise.resolve(user);
+  }
+
   public async fetchUserByEmail(email:string): Promise<UserInterface>{
 
     const user = await this.user.findOne({

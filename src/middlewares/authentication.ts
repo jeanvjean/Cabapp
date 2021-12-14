@@ -18,7 +18,7 @@ class Authenticate extends Ctrl{
           token = token.split(' ')[0];
             //@ts-ignore
           const decoded:TokenPayloadInterface= verify(token, signTokenKey);
-          const userAccount:UserInterface = await User.fetchUser(decoded);
+          const userAccount:UserInterface = await User.fetchUserAuth(decoded);
           //@ts-ignore
           req.user = userAccount;
           return next()

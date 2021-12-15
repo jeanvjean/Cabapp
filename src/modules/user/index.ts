@@ -494,7 +494,7 @@ class User extends Module {
       const { email, password } = data;
       let user = await this.user.findOne({email:email}).select('+password');
       if(!user) {
-        throw new BadInputFormatException('User Not Found');
+        throw new BadInputFormatException('Invalid credentials');
       }
       // if(!user.isVerified) {
       //   throw new BadInputFormatException('Account has not been verified');

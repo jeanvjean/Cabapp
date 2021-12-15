@@ -300,7 +300,9 @@ class EmptyCylinderModule extends Module {
                     {path:'cylinders', model:'registered-cylinders'},
                     {path:'nextApprovalOfficer', model:'User'},
                     {path:'branch', model:'branches'},
-                    {path:'initiator', model:'User'},
+                    {path:'initiator', model:'User',populate:{
+                        path:'vehicle', model:'vehicle'
+                    }, select:'name email vehicle'},
                     {path:"gasType", model:"cylinder"},
                     {path:"icn_id", model:"out-going-cylinders"}
                 ],
@@ -418,7 +420,7 @@ class EmptyCylinderModule extends Module {
                 {path:'nextApprovalOfficer', model:'User'},
                 {path:'initiator', model:'User', populate:{
                     path:'vehicle', model:"vehicle"
-                }},
+                }, select:'name email vehicle'},
                 {path:'branch', model:'branches'},
                 {path:"gasType", model:"cylinder"},
                 {path:"icn_id", model:"out-going-cylinders"}

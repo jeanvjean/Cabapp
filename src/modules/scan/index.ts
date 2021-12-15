@@ -4,6 +4,7 @@ import { ScanInterface, scanStatus } from '../../models/scan';
 import Module, { QueryInterface } from "../module";
 import Notify from '../../util/mail';
 import { RegisteredCylinderInterface } from "../../models/registeredCylinders";
+import { padLeft } from "../../util/token";
 
 interface scanPropInterface {
     scan: Model<ScanInterface>
@@ -182,7 +183,8 @@ class Scan extends Module {
             }else {
                 formId = 1
             }
-            form.formId = formId.toString();
+            
+            form.formId = padLeft(formId, 6, '');
             form.initNum = formId;
             await form.save();
             await new Notify().saveFormToFirebase({

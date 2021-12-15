@@ -193,6 +193,7 @@ class User extends Module {
       const branch = await this.user.findById(userInfo._id).populate({
         path:'branch', model:'branches'
       });
+      console.log(branch?.branch);
       const exists = [];
       for(let user of data.users) {
         let existUser:UserInterface | null = await this.user.findOne({email:user.email});
@@ -224,12 +225,13 @@ class User extends Module {
                 let hod = await this.user.findOne({
                   role:user.role,
                   subrole:user.subrole,
-                  branch:branch?.branch
+                  branch:userInfo.branch
                 });
+                console.log(hod)
                 if(!hod) {
                   let password = await generateToken(4);
                   //@ts-ignore
-                  await this.user.create({...user, branch:branch?.branch._id, password});
+                  await this.user.create({...user, branch:branch.branch._id, password});
                   const html = await getTemplate('invite', {
                     team: user.role,
                     role:user.subrole,

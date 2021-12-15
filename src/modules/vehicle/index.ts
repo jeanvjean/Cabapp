@@ -681,18 +681,29 @@ class Vehicle extends Module{
   public async assignDriver(data:Parameters, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
       const vehicle = await this.vehicle.findById(data.vehicleId);
+      if(!vehicle) {
+        throw new BadInputFormatException('vehicle not found')
+      }else {
+        //@ts-ignore
+        vehicle.assignedTo = data.driver;
+      }
+
       const driver = await this.user.findById(data.driver);
+
+      if(!driver) {
+        throw new BadInputFormatException('driver not found');
+      }else {
+        driver.vehicle = vehicle._id
+      }
       //@ts-ignore
-      vehicle?.assignedTo = data.driver;
-      //@ts-ignore
-      driver?.vehicle = vehicle?._id
       vehicle?.comments.push({
         //@ts-ignore
         comment:data.comment,
         commentBy:user._id
       });
-      await vehicle?.save();
-      await driver?.save();
+      await vehicle.save();
+      await driver.save();
+      console.log(driver)
       await createLog({
         user:user._id,
         activities:{

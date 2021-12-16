@@ -169,8 +169,10 @@ class Sale extends Module{
         populate:[
           {path:'initiator', model:'User'},
           {path:'nextApprovalOfficer', model:'User'},
-          {path:'preparedBy', model:'User'}
-        ],        
+          {path:'preparedBy', model:'User'},
+          { path:"customer.id", model:"customer", 
+          select:"vat email phoneNumber rcNumber" }
+        ],
         sort:{createdAt: -1}
       }
       let q = {
@@ -219,7 +221,9 @@ class Sale extends Module{
       const sales = await this.sales.findById(salesId).populate([
         {path:'initiator', model:'User'},
         {path:'nextApprovalOfficer', model:'User'},
-        {path:'preparedBy', model:'User'}
+        {path:'preparedBy', model:'User'},
+        { path:"customer.id", model:"customer", 
+        select:"vat email phoneNumber rcNumber" }
       ]);
       return Promise.resolve(sales as SalesRequisitionInterface);
     } catch (e) {

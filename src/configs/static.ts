@@ -16,6 +16,14 @@ class Secret {
   static FCM_SERVER_KEY = ''
 
   static FRONTEND_URL=`https://asnl-web.netlify.app`
+
+  static TWILIO_ACCOUNT_SID = `ACc4c4f04c47d9bf9ace138f33f3a5eefe`
+  static TWILIO_AUTH_TOKEN = `b678a088cf7f14609dc6e95ba2831380`
+  static SMS_SENDER = `+2349066263759`
+
+  static INFOBIP_API_KEY = 'cb3822996471ea51d67161feeb83b603-70589608-b434-4c8a-861b-178f84e8e2f2'
+  static INFOBIP_URL = 'https://891g43.api.infobip.com/'
+  static INFOBIP_FROM = 'ASNL'
 }
 
 export default Secret

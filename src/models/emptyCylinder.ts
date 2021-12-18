@@ -64,6 +64,7 @@ export interface EmptyCylinderInterface extends Document {
     driverStatus?:EcrApproval
     otp?:string,
     closed:boolean
+    recieversPhone?:string
     totalVolume?:{
         value:number,
         unit:string
@@ -101,6 +102,7 @@ const ecrSchema = new Schema({
     waybillNo:String, //if its a complaint
     otp:String,
     closed:{type:Boolean, default:false},
+    recieversPhone:String,
     totalVolume:{
         value:Number,
         unit:String

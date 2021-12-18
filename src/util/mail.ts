@@ -7,6 +7,7 @@ import {post} from 'request-promise'
 import { getTemplate } from "./resolve-template";
 import SecretKeys from '../configs/static';
 import { ScanInterface } from '../models/scan';
+import axios from 'axios';
 
 const serviceAccount = require(join(
 	__dirname,
@@ -52,6 +53,11 @@ export interface SendMailOption {
 interface NotificationPersistOption {
 	user_id: number
 	message: string
+}
+
+interface smsInterface {
+  message?: string,
+  to?:string
 }
 
 interface FormData {
@@ -230,6 +236,33 @@ class NotificationModule extends Module {
             }
 		}
 	}
+
+  public async sendSms(payload:smsInterface) {
+    try {
+      let messagePayload = {
+        messages: [
+          {
+            from: SecretKeys.INFOBIP_FROM,
+            destinations: [
+              { to: payload.to }
+            ],
+            text: payload.message
+          }
+        ]
+      }
+     let response = await axios.post(`${SecretKeys.INFOBIP_URL}sms/2/text/advanced`, messagePayload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `App ${SecretKeys.INFOBIP_API_KEY}`
+          }
+        }
+      )
+      console.log(response.data)
+    } catch (error) {
+      console.log({er:error})
+    }
+  }
 
   public fetchData(){
     const db = firebase.database();

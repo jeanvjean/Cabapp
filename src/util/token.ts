@@ -3,6 +3,7 @@ import { BadInputFormatException } from '../exceptions';
 import { User } from '../models';
 import { UserInterface } from '../models/user';
 import { Parser } from 'json2csv';
+import { uuid } from 'uuid-apikey';
 
 
 export const generateToken = (num:number) =>
@@ -64,6 +65,33 @@ export const formatDate = (dateValue:any)=> {
   return `${date.getFullYear()}/${toTwoValue(
     date.getMonth() + 1
   )}/${toTwoValue(date.getDate())}`;
+}
+
+export const parsePhoneNumberToStandard = (phoneNumbers:any)=> {
+  try {
+      // const { uuid } = uuidAPIKey.create();
+      let results = []
+      // for(let i = 0; i <= phoneNumbers.length - 1; i++) {
+          if(phoneNumbers.length === 11) {
+              phoneNumbers = { to: `234${phoneNumbers.substring(1)}`, messageId: uuid }
+          }
+          if(phoneNumbers.length === 13 && phoneNumbers.substring(0, 1) !== '+') {
+              phoneNumbers = { to: `${phoneNumbers}`, messageId: uuid }
+          }
+          if(phoneNumbers.length === 14 && phoneNumbers.substring(0, 1) === '+') {
+              phoneNumbers = { to: `${phoneNumbers.substring(1, 14)}`, messageId: uuid }
+          }
+
+          results.push({
+              to: phoneNumbers,
+              messageId: uuid
+          })
+      // }
+
+      return phoneNumbers
+  } catch (error) {
+      console.log(error)
+  }
 }
 
 //  function(s){

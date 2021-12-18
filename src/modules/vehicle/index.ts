@@ -11,7 +11,7 @@ import { createLog } from "../../util/logs";
 import { ActivityLogInterface } from "../../models/logs";
 import { orderType, pickupType } from "../../models/order";
 import { cylinderHolder, RegisteredCylinderInterface } from "../../models/registeredCylinders";
-import { generateToken, padLeft } from "../../util/token";
+import { generateToken, padLeft, parsePhoneNumberToStandard } from "../../util/token";
 import * as schedule from 'node-schedule'
 import { getTemplate } from '../../util/resolve-template';
 import { vehiclePerformance } from "../../models/pickupReport";
@@ -174,7 +174,8 @@ type Parameters = {
   ecrData?:{
     cylinders?:EmptyCylinderInterface['cylinders'],
     fringeCylinders?:EmptyCylinderInterface['fringeCylinders']
-    reason?:EmptyCylinderInterface['reason']
+    reason?:EmptyCylinderInterface['reason'],
+    recieversPhone?:string
   }
 }
 
@@ -1218,7 +1219,7 @@ class Vehicle extends Module{
       return Promise.resolve({
           pickup,
           tecr:TECR,
-          message:`An otp has been sent to the customer's registered email`
+          message:`An otp has been sent to the customer`
         });
     } catch (e) {
       this.handleException(e);
@@ -1250,6 +1251,9 @@ class Vehicle extends Module{
         ecr.position = ProductionSchedule.TRUCK
         ecr.branch = user.branch
         ecr.initiator= user._id
+        //@ts-ignore
+        let totalC = ecr.cylinders.length + ecr.fringeCylinders?.length;
+        ecr.totalQuantity = totalC.toString();
 
         let num = padLeft(ecr.initNum , 6, "");
         const ecrN = "TECR"+num;
@@ -1257,20 +1261,26 @@ class Vehicle extends Module{
         ecr.otp = otp.toString();
         ecr.ecrNo = ecrN;
         await ecr.save();
-        responseData = ecr;
-        const html = await getTemplate('OTP', {//8639
-          name:cust?.name,
-          email:cust?.email,
-          otp:`${otp}`,
-          driver:user.name,
-          ref:ecr.ecrNo
+        responseData = ecr;            
+        let number = parsePhoneNumberToStandard(ecr.recieversPhone);
+        console.log(number)
+        new Notify().sendSms({
+          message: `complete the TECR with OTP:${otp}, Tecr number:${ecr.ecrNo} `,
+          to:`${number.to}`
         });
-        let mailLoad = {
-          content:html,
-          subject:'Complete TECR',
-          email:cust?.email,
-        }//@ts-ignore
-        new Notify().sendMail(mailLoad);
+        // const html = await getTemplate('OTP', {//8639
+        //   name:cust?.name,
+        //   email:cust?.email,
+        //   otp:`${otp}`,
+        //   driver:user.name,
+        //   ref:ecr.ecrNo
+        // });
+        // let mailLoad = {
+        //   content:html,
+        //   subject:'Complete TECR',
+        //   email:cust?.email,
+        // }//@ts-ignore
+        // new Notify().sendMail(mailLoad);
       }else if(supplier) {
         let suppl = await this.supplier.findOne({email:supplier.email});
             let ecr = new this.ecr({
@@ -1299,21 +1309,26 @@ class Vehicle extends Module{
             ecr.otp = otp.toString();
             ecr.ecrNo = ecrN;
             await ecr.save();
-            responseData = ecr;
-
-            const html = await getTemplate('OTP', {//8639
-              name:suppl?.name,
-              email:suppl?.email,
-              otp:`${otp}`,
-              driver:user.name,
-              ref:ecr.ecrNo
+            responseData = ecr;            
+            let number = parsePhoneNumberToStandard(ecr.recieversPhone);
+            new Notify().sendSms({
+              message: `complete the TECR with OTP:${otp}`,
+              to:`${number.to}`
             });
-            let mailLoad = {
-              content:html,
-              subject:'Complete TFCR',
-              email:suppl?.email,
-            }//@ts-ignore
-            new Notify().sendMail(mailLoad);
+            // const html = await getTemplate('OTP', {//8639
+            //   name:suppl?.name,
+            //   email:suppl?.email,
+            //   otp:`${otp}`,
+            //   driver:user.name,
+            //   ref:ecr.ecrNo
+            // });
+            // let mailLoad = {
+            //   content:html,
+            //   subject:'Complete TFCR',
+            //   email:suppl?.email,
+            // }
+            // //@ts-ignore
+            // new Notify().sendMail(mailLoad);
       }
             return responseData;
     } catch (e) {

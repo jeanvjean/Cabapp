@@ -165,4 +165,22 @@ router.get(
   vehicleCtrl.marAsCompletedRoutePlan()
 );
 
+router.post(
+  '/add-terretory',
+  auth.verify(),
+  vehicleCtrl.addTerritory()
+);
+
+router.get(
+  '/fetch-terretories',
+  auth.verify(),
+  vehicleCtrl.fetchTerritory()
+)
+
+router.delete(
+  '/delete-terretory/:terretory_id',
+  auth.verify(),
+  vehicleCtrl.deleteTerretory()
+)
+
 export default router;

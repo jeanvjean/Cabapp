@@ -23,6 +23,7 @@ import { WayBillInterface } from "../../models/waybill";
 import OutGoingCylinder from "../ocn";
 import { OutgoingCylinderInterface } from "../../models/ocn";
 import { RecieptInterface } from "../../models/reciept";
+import { TerretoryInterface } from "../../models/territory";
 
 export { schedule };
 
@@ -40,6 +41,7 @@ interface vehicleProps{
   waybill:Model<WayBillInterface>
   ocn:Model<OutgoingCylinderInterface>
   invoice:Model<RecieptInterface>
+  terretory:Model<TerretoryInterface>
 }
 
 type NewVehicle = {
@@ -204,6 +206,7 @@ class Vehicle extends Module{
   private waybill:Model<WayBillInterface>
   private ocn:Model<OutgoingCylinderInterface>
   private invoice:Model<RecieptInterface>
+  private terretory:Model<TerretoryInterface>
 
   constructor(props:vehicleProps) {
     super()
@@ -220,6 +223,7 @@ class Vehicle extends Module{
     this.waybill = props.waybill
     this.ocn = props.ocn
     this.invoice = props.invoice
+    this.terretory = props.terretory
   }
   public async createVehicle(data:NewVehicle, user:UserInterface):Promise<VehicleInterface|undefined>{
     try {
@@ -1477,6 +1481,52 @@ class Vehicle extends Module{
       this.handleException(e)
     }
   }
+
+  public async addTerritory(data:TerretoryInterface, user:UserInterface):Promise<any>{
+    try {
+      let ft = await this.terretory.findOne({name: data.name});
+      if(ft){
+        throw new BadInputFormatException('a terretory with this name already exists');
+      }
+      const terretory = await this.terretory.create({...data, branch: user.branch});
+      return terretory;
+    } catch (error) {
+        this.handleException(error)
+    }
+  }
+
+  public async fetchTerritory(query:QueryInterface, user:UserInterface):Promise<any>{
+    try {
+      let { search } = query;
+      let q = {
+        branch: user.branch
+      }
+      let or = []
+      if(search) {
+        or.push({name: new RegExp(search, 'gi')})
+      }
+      if(or.length > 0) {
+        //@ts-ignore
+        q = {...q, $or:or}
+      }
+      const terretories = await this.terretory.find(q).populate({
+        path:'branch', model:"branches", select: 'name location'
+      })
+      return terretories;
+    } catch (error) {
+        this.handleException(error)
+    }
+  }
+
+  public async deleteTerretory(id:string):Promise<any>{
+    try {
+      await this.terretory.findByIdAndRemove(id);
+      return 'Oppereation successful';
+    } catch (error) {
+      this.handleException(error)
+    }
+  }
+
 }
 
 

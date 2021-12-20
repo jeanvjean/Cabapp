@@ -302,6 +302,41 @@ class VehicleController extends Ctrl{
     }
   }
 
+  addTerritory():RequestHandler{
+    return async(req:Request, res:Response)=>{
+      try {
+        //@ts-ignore
+        const data = await this.module.addTerritory(req.body, req.user);
+        this.ok(res, 'done', data);
+      } catch (error) {
+        this.handleError(error, req, res);
+      }
+    }
+  }
+
+  fetchTerritory():RequestHandler{
+    return async(req:Request, res:Response) =>{
+      try {
+        //@ts-ignore
+        const data = await this.module.fetchTerritory(req.query, req.user);
+        this.ok(res, 'done', data);
+      } catch (error) {
+        this.handleError(error, req, res);
+      }
+    }
+  }
+
+  deleteTerretory():RequestHandler{
+    return async (req:Request, res:Response)=>{
+      try {
+        const data =  await this.module.deleteTerretory(req.params.terretoryId);
+        this.ok(res, 'done',data);
+      } catch (error) {
+        this.handleError(error, req, res);
+      }
+    }
+  }
+
 }
 
 export { Validator }

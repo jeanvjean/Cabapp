@@ -36,6 +36,7 @@ import deleteCustomerFactory, { DeletedCustomer } from './deletedCustomers';
 import ecrFactory, { EmptyCylinderInterface } from "./emptyCylinder";
 import waybill, { WayBillInterface } from './waybill';
 import scanFactory, { ScanInterface } from "./scan";
+import terretoryFactory, { TerretoryInterface } from './territory';
 
 export const conn: Connection = createConnection(MongoConfig.uri, MongoConfig.options);
 
@@ -102,5 +103,7 @@ export const EmptyCylinder:Model<EmptyCylinderInterface> = ecrFactory(conn);
 export const Waybill:Model<WayBillInterface> = waybill(conn);
 
 export const ScanModel:Model<ScanInterface> = scanFactory(conn);
+
+export const TerretoryModel:Model<TerretoryInterface> = terretoryFactory(conn)
 
 conn.once('open', (): void => console.log('db connection open'));

@@ -30,7 +30,8 @@ import {
   DeletedCustomers,
   EmptyCylinder,
   Waybill,
-  ScanModel
+  ScanModel,
+  TerretoryModel
 } from '../models/index';
 import PersonModule from './person';
 import UserModule from './user';
@@ -99,7 +100,8 @@ export const vehicle = new VehicleModule({
   ecr:EmptyCylinder,
   waybill:Waybill,
   ocn:OCN,
-  invoice:Reciept
+  invoice:Reciept,
+  terretory:TerretoryModel
 });
 
 export const driver = new DriverModule({

@@ -24,6 +24,10 @@ class Secret {
   static INFOBIP_API_KEY = 'cb3822996471ea51d67161feeb83b603-70589608-b434-4c8a-861b-178f84e8e2f2'
   static INFOBIP_URL = 'https://891g43.api.infobip.com/'
   static INFOBIP_FROM = 'ASNL'
+
+  static TERMII_API_KEY = 'TLVxopTZsxPruXiozn7hZWmcfnbxRwCIoo0mnPbGZ6CAsdjl1IGvAs7CkbX8fN'
+  static TERMII_SECRET = 'tsk_1peh60226f4fdf8a019421tgb9'
+  static TERMII_URL = 'https://api.ng.termii.com/api/sms/number/send'
 }
 
 export default Secret

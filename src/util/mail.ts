@@ -8,6 +8,7 @@ import { getTemplate } from "./resolve-template";
 import SecretKeys from '../configs/static';
 import { ScanInterface } from '../models/scan';
 import axios from 'axios';
+import request = require('request');
 
 const serviceAccount = require(join(
 	__dirname,
@@ -261,6 +262,37 @@ class NotificationModule extends Module {
       console.log(response.data)
     } catch (error) {
       console.log({er:error})
+    }
+  }
+
+  public async sendSMSTermii(payload:smsInterface){
+    try {
+      var data = {
+        to:payload.to,
+        from:"ASNL",
+        sms:payload.message,
+        type:"plain",
+        api_key:SecretKeys.TERMII_API_KEY,
+        channel:"generic",
+        //  "media": {
+        //     "url": "https://media.example.com/file",
+        //     "caption": "your media file"
+        //   }   
+      };
+      var options = {
+          'method': 'POST',
+          'url': 'https://api.ng.termii.com/api/sms/send',
+          'headers': {
+            'Content-Type': ['application/json', 'application/json']
+          },
+          body: JSON.stringify(data)
+      };
+        request(options, function (error, response) { 
+          if (error) throw new Error(error);
+            console.log(response.body);
+        });
+    } catch (error) {
+      console.log(error)
     }
   }
 

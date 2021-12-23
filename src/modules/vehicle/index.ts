@@ -1268,7 +1268,7 @@ class Vehicle extends Module{
         responseData = ecr;            
         let number = parsePhoneNumberToStandard(ecr.recieversPhone);
         console.log(number)
-        new Notify().sendSms({
+        new Notify().sendSMSTermii({
           message: `complete the TECR with OTP:${otp}, Tecr number:${ecr.ecrNo} `,
           to:`${number.to}`
         });
@@ -1315,8 +1315,8 @@ class Vehicle extends Module{
             await ecr.save();
             responseData = ecr;            
             let number = parsePhoneNumberToStandard(ecr.recieversPhone);
-            new Notify().sendSms({
-              message: `complete the TECR with OTP:${otp}`,
+            new Notify().sendSMSTermii({
+              message: `complete the TECR with OTP:${otp}, Tecr number:${ecr.ecrNo}`,
               to:`${number.to}`
             });
             // const html = await getTemplate('OTP', {//8639

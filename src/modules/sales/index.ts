@@ -88,23 +88,23 @@ class Sale extends Module{
       sales.status = TransferStatus.PENDING;
       sales.preparedBy = user._id;
 
-      let fEcr = await this.ecr.findOne({ecrNo:sales.ecrNo});
-      if(!fEcr) {
-        throw new BadInputFormatException('No ecr with this number found');
-      }
+      // let fEcr = await this.ecr.findOne({ecrNo:sales.ecrNo});
+      // if(!fEcr) {
+      //   throw new BadInputFormatException('No ecr with this number found');
+      // }
       for(let cyl of sales.cylinders) {
         let cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
         if(cylinder) {
-          if(fEcr.type == EcrType.SALES) {
-            if(!fEcr.removeArr.includes(cylinder._id)) {
-              throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
-            }
-          }
-          if(fEcr.type == EcrType.FILLED) {
-            if(!fEcr.cylinders.includes(cylinder._id)) {
-              throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
-            }
-          }
+          // if(fEcr.type == EcrType.SALES) {
+          //   if(!fEcr.removeArr.includes(cylinder._id)) {
+          //     throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
+          //   }
+          // }
+          // if(fEcr.type == EcrType.FILLED) {
+          //   if(!fEcr.cylinders.includes(cylinder._id)) {
+          //     throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
+          //   }
+          // }
           if(cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY) {
             throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is empty`)
           }
@@ -117,20 +117,20 @@ class Sale extends Module{
           await cylinder.save()
         }
       }
-      if(sales.production_id) {
-        let schedule = await this.productionSchedule.findById(sales.production_id);
-        if(schedule){
-          schedule.sales_req_id = sales._id
-          await schedule.save()
-        }
-      }
-      if(sales.fcr_id) {
-        let purchase = await this.ecr.findById(sales.fcr_id);
-        if(purchase) {
-          purchase.sales_req_id = sales._id
-          await purchase.save();
-        }
-      }
+      // if(sales.production_id) {
+      //   let schedule = await this.productionSchedule.findById(sales.production_id);
+      //   if(schedule){
+      //     schedule.sales_req_id = sales._id
+      //     await schedule.save()
+      //   }
+      // }
+      // if(sales.fcr_id) {
+      //   let purchase = await this.ecr.findById(sales.fcr_id);
+      //   if(purchase) {
+      //     purchase.sales_req_id = sales._id
+      //     await purchase.save();
+      //   }
+      // }
       await sales.save();
       await createLog({
         user:user._id,

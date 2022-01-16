@@ -159,18 +159,32 @@ class Customer extends Module{
     try {
       const date = new Date()
       date.setDate(date.getDate() + data.cylinderHoldingTime);
-      let exist = await this.customer.findOne({email:data.email, branch:user.branch});
-      // console.log(exist)
-      if(exist) {
-        throw new BadInputFormatException('a customer with this email exists');
+      // let exist = await this.customer.findOne({email:data.email, branch:user.branch});
+      // // console.log(exist)
+      // if(exist) {
+      //   throw new BadInputFormatException('a customer with this email exists');
+      // }
+
+      let cid;
+      let customers = await this.customer.find({}).sort({gen_id_no: -1}).limit(1);
+      if(!customers[0]) {
+        cid = 1
+      }else {
+        cid = customers[0].gen_id_no + 1
       }
+
+      let gen_id = padLeft(cid, 6, '');
+      let ucid = 'CUS/'+ gen_id;
+
       let products = JSON.parse(data.products)
       const customer = await this.customer.create({
         ...data,
         products,
         cylinderHoldingTime:date.toISOString(),
-        branch:user.branch
+        branch:user.branch,
+        unique_id: ucid
       });
+
       await createLog({
         user:user._id,
         activities:{
@@ -1274,7 +1288,7 @@ class Customer extends Module{
 
   public async customerOrderHistory(query:QueryInterface, user:UserInterface):Promise<any>{
     try {
-      let { search, email, activity } = query;
+      let { search, customer_unique_id, activity } = query;
       let q = {
         branch:user.branch
       }
@@ -1282,9 +1296,9 @@ class Customer extends Module{
       if(search) {
         or.push({tecrNo:new RegExp(search, 'gi')})
       }
-      if(email) {
+      if(customer_unique_id) {
         //@ts-ignore
-        q ={...q, "customers.email": email}
+        q ={...q, "customers.unique_id": customer_unique_id}
       }
       if(activity) {
         //@ts-ignore
@@ -1302,7 +1316,7 @@ class Customer extends Module{
       let customerOrder=[]
       for(let ar of mappedCustomer) {
         for(let a of ar) {
-          if(a.email == email) {
+          if(a.unique_id == customer_unique_id) {
             customerOrder.push(a)
           }
         }

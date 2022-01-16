@@ -91,6 +91,7 @@ class OutGoingCylinder extends Module{
             const hod = await this.user.findOne({branch:user.branch, role:user.role, subrole:'head of department'});
             ocn.branch = user.branch;
             ocn.nextApprovalOfficer = hod?._id
+            ocn.initiator = user._id;
             
             if(data.cylinders) {
               for(let cyl of data.cylinders) {

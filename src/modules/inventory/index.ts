@@ -424,11 +424,23 @@ class Product extends Module{
 
   public async createSupplier(data:NewSupplierInterface, user:UserInterface):Promise<SupplierInterface|undefined>{
     try {
+      let suppliers = await this.supplier.find({}).sort({gen_id_no: -1}).limit(1);
+      let uid;
+      if(!suppliers[0]) {
+        uid = 1
+      } else {
+        uid = suppliers[0].gen_id_no + 1
+      }
+
+      let genNo = padLeft(uid, 6, '');
+
+      let suid = "SUP/"+genNo;
       const supplier = await this.supplier.create({
         ...data, 
         email: 
         data.emailAddress,
-        branch:user.branch
+        branch:user.branch,
+        suid
       });
       return Promise.resolve(supplier);
     } catch (e) {

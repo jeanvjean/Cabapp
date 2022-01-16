@@ -41,7 +41,8 @@ export interface newEcrInterface {
     priority?:EmptyCylinderInterface['priority'],
     type:EmptyCylinderInterface['type'],
     gasType:EmptyCylinderInterface['gasType'],
-    icn_id?:EmptyCylinderInterface['icn_id']
+    icn_id?:EmptyCylinderInterface['icn_id'],
+    modeOfService?:EmptyCylinderInterface['modeOfService']
 }
 
 type skipped = {
@@ -192,7 +193,13 @@ class EmptyCylinderModule extends Module {
                     {path:'initiator', model:'User'},
                     {path:'branch', model:'branches'},
                     {path:"gasType", model:"cylinder"},
-                    {path:"icn_id", model:"out-going-cylinders"}
+                    {path:"icn_id", model:"out-going-cylinders", populate:[
+                            {path:"initiator", model:"User"},
+                            {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{
+                                path:'assignedTo', model:"User"
+                            }}
+                        ]
+                    }
                 ]
             }
             let q = {

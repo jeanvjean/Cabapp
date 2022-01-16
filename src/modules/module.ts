@@ -59,7 +59,8 @@ export interface QueryInterface {
   noteType?:string
   status?:string
   barcode?:string,
-  orderType?:string
+  orderType?:string,
+  customer_unique_id?:string
 }
 
 /**

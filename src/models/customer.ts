@@ -42,7 +42,9 @@ export interface CustomerInterface extends Document{
   products:customerProducts[]
   CAC:string
   validID:string
-  branch:Schema.Types.ObjectId
+  branch:Schema.Types.ObjectId,
+  unique_id:string
+  gen_id_no:number,
   vat:{
     value:number,
     unit:string
@@ -82,6 +84,8 @@ export const customerSchema = new Schema({
   CAC:String,
   validID:String,
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  unique_id:{type:String, required:true, unique:true},
+  gen_id_no:Number,
   vat:{
     value:Number,
     unit:String

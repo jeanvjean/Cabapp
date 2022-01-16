@@ -25,7 +25,7 @@ export interface RouteCylinderInterface{
 
 export interface customerPickupInterface{
   name:string
-  email:string
+  unique_id:string
   destination:string
   departure:string
   numberOfCylinders:number,
@@ -40,7 +40,7 @@ export interface customerPickupInterface{
 export interface supplierPickupInterface{
   supplierType?: SupplierTypes;
   name?:string
-  email:string
+  unique_id:string
   destination:string
   departure:string
   numberOfCylinders:number,
@@ -117,7 +117,7 @@ export const routeCylinderSchema = new Schema({
 
 const routeSupplier = new Schema({
   name:String,
-  email:String,
+  unique_id:String,
   destination:String,
   departure:String,
   numberOfCylinders:Number,
@@ -132,7 +132,7 @@ const routeSupplier = new Schema({
 
 const routeCustomer = new Schema({
   name:String,
-  email:String,
+  unique_id:String,
   destination:String,
   departure:String,
   numberOfCylinders:Number,

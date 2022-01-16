@@ -104,7 +104,7 @@ interface InspectionData {
 
 interface startRouteInput {
   departure?:string,
-  email?:string;
+  customer_unique_id?:string;
   mileIn?:string,
   mileOut?:string
 }
@@ -622,7 +622,7 @@ class Vehicle extends Module{
       let routePlanCust = []
       if(routePlan.orderType == pickupType.CUSTOMER) {
         for(let cust of routePlan.customers) {
-          let checkCust = await this.customer.findOne({email:cust.email});
+          let checkCust = await this.customer.findOne({unique_id:cust.unique_id});
           if(checkCust) {
             routePlanCust.push(cust);
           }
@@ -634,7 +634,7 @@ class Vehicle extends Module{
       }
       if(routePlan.orderType == pickupType.SUPPLIER) {
         for(let sup of routePlan.suppliers) {
-          let checkSupplier = await this.supplier.findOne({email:sup.email});
+          let checkSupplier = await this.supplier.findOne({unique_id:sup.unique_id});
           if(checkSupplier) {
             routePlanCust.push(sup);
           }
@@ -800,10 +800,10 @@ class Vehicle extends Module{
       }
       if(email) {
         if(routePlan.orderType == pickupType.CUSTOMER) {
-          let custs = routePlan.customers.filter(customer=> customer.email == email)
+          let custs = routePlan.customers.filter(customer=> customer.unique_id == email)
           routePlan.customers = custs;
         }else if (routePlan.orderType == pickupType.SUPPLIER){
-          let supls = routePlan.suppliers.filter(supplier=> supplier.email == email)
+          let supls = routePlan.suppliers.filter(supplier=> supplier.unique_id == email)
           routePlan.suppliers = supls;
         }
       }      
@@ -1006,7 +1006,7 @@ class Vehicle extends Module{
       if(plan?.orderType == pickupType.SUPPLIER) {
         if(plan.suppliers.length > 0){
           for(let supplier of plan.suppliers) {
-            if(supplier.email == data.email) {
+            if(supplier.unique_id == data.customer_unique_id) {
               let payload = {
                 vehicle:plan.vehicle,
                 dateStarted:new Date().toISOString(),
@@ -1028,7 +1028,7 @@ class Vehicle extends Module{
       }else if(plan.orderType == pickupType.CUSTOMER) {
         if(plan.customers.length > 0) {
           for(let customer of plan.customers) {
-            if(customer.email == data.email) {
+            if(customer.unique_id == data.customer_unique_id) {
               let payload = {
                 vehicle:plan.vehicle,
                 dateStarted:new Date().toISOString(),
@@ -1061,7 +1061,7 @@ class Vehicle extends Module{
       const { query, ecrData, routeId } = data;
       // console.log(data)
       //@ts-ignore
-      const { name, email, deliveryNo } = query;
+      const { name, customer_uniqe_id, deliveryNo } = query;
       let TECR = ''
       const pickup = await this.pickup.findById(routeId);
       if(!pickup) {
@@ -1074,7 +1074,7 @@ class Vehicle extends Module{
       if(pickup?.orderType == pickupType.SUPPLIER && pickup.activity == RouteActivity.DELIVERY) {
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
-            if(supplier.email == email) {
+            if(supplier.unique_id == customer_uniqe_id) {
               if(supplier.deliveryNo == deliveryNo) {
                 if(supplier.cylinders.length > 0) {
                   for(let cylinder of supplier.cylinders) {
@@ -1111,9 +1111,9 @@ class Vehicle extends Module{
         if(pickup.customers.length > 0){
           // console.log(email, deliveryNo)
           for(let customer of pickup.customers) {
-            if(customer.email == email) {
+            if(customer.unique_id == customer_uniqe_id) {
               if(customer.deliveryNo == deliveryNo) {
-               console.log(email, deliveryNo)
+               console.log(customer_uniqe_id, deliveryNo)
                 if(customer.cylinders.length > 0) {
                   for(let cylinder of customer.cylinders) {
                       let cyl = await this.registerCylinder.findById(cylinder);
@@ -1144,7 +1144,7 @@ class Vehicle extends Module{
       }else if(pickup?.activity == RouteActivity.PICKUP && pickup?.orderType == pickupType.CUSTOMER){
         if(pickup.customers.length > 0){
           for(let customer of pickup.customers) {
-            if(customer.email == `${email}`) {
+            if(customer.unique_id == `${customer_uniqe_id}`) {
               if(customer.cylinders.length > 0) {
                 for(let cylinder of customer.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -1182,7 +1182,7 @@ class Vehicle extends Module{
       }else if(pickup?.activity == RouteActivity.PICKUP && pickup?.orderType == pickupType.SUPPLIER){
         if(pickup.suppliers.length > 0){
           for(let supplier of pickup.suppliers) {
-            if(supplier.email == `${email}`) {
+            if(supplier.unique_id == `${customer_uniqe_id}`) {
               if(supplier.cylinders.length > 0) {
                 for(let cylinder of supplier.cylinders) {
                     let cyl = await this.registerCylinder.findById(cylinder);
@@ -1272,19 +1272,7 @@ class Vehicle extends Module{
           message: `complete the TECR with OTP:${otp}, Tecr number:${ecr.ecrNo} `,
           to:`${number.to}`
         });
-        // const html = await getTemplate('OTP', {//8639
-        //   name:cust?.name,
-        //   email:cust?.email,
-        //   otp:`${otp}`,
-        //   driver:user.name,
-        //   ref:ecr.ecrNo
-        // });
-        // let mailLoad = {
-        //   content:html,
-        //   subject:'Complete TECR',
-        //   email:cust?.email,
-        // }//@ts-ignore
-        // new Notify().sendMail(mailLoad);
+
       }else if(supplier) {
         let suppl = await this.supplier.findOne({email:supplier.email});
             let ecr = new this.ecr({
@@ -1319,20 +1307,7 @@ class Vehicle extends Module{
               message: `complete the TECR with OTP:${otp}, Tecr number:${ecr.ecrNo}`,
               to:`${number.to}`
             });
-            // const html = await getTemplate('OTP', {//8639
-            //   name:suppl?.name,
-            //   email:suppl?.email,
-            //   otp:`${otp}`,
-            //   driver:user.name,
-            //   ref:ecr.ecrNo
-            // });
-            // let mailLoad = {
-            //   content:html,
-            //   subject:'Complete TFCR',
-            //   email:suppl?.email,
-            // }
-            // //@ts-ignore
-            // new Notify().sendMail(mailLoad);
+         
       }
             return responseData;
     } catch (e) {
@@ -1440,7 +1415,7 @@ class Vehicle extends Module{
         populate:[
           {path:'branch', model:'branches'},
           {path:'ocn', model:'out-going-cylinders'},
-          {path:'customer.id', model:'customer'}
+          {path:'customer.id', model:'customer'},
         ],
         sort:{createdAt: -1}
       }
@@ -1474,7 +1449,8 @@ class Vehicle extends Module{
       let delivery = await this.waybill.findById(deliveryId).populate([
         {path:'branch', model:'branches'},
         {path:'ocn', model:'out-going-cylinders'},
-        {path:'customer.id', model:'customer'}
+        {path:'customer.id', model:'customer'},
+        { path:"cylinders", model:"registered-cylinders" }
       ]);
       return Promise.resolve(delivery as WayBillInterface);
     } catch (e) {

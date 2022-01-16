@@ -27,7 +27,9 @@ export interface SupplierInterface extends Document {
   phoneNumber:number
   supplierType:SupplierTypes
   branch:Schema.Types.ObjectId,
-  productType:ProductType
+  productType:ProductType,
+  unique_id:string
+  gen_id_no:number,
 }
 
 export const supplierSchema = new Schema({
@@ -38,7 +40,9 @@ export const supplierSchema = new Schema({
   phoneNumber:{type:Number},
   supplierType:{type:String, enum:Object.values(SupplierTypes), required:true},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
-  productType:{type:String, enum:Object.values(ProductType)}
+  productType:{type:String, enum:Object.values(ProductType)},
+  unique_id:String,
+  gen_id_no:Number,
 });
 
 supplierSchema.index({supplierType:'text', productType:'text'});

@@ -40,15 +40,16 @@ export interface CustomerInterfaceProp{
 interface newCustomerInterface {
   name:CustomerInterface['name']
   customerType:CustomerInterface['customerType']
-  modeOfService:CustomerInterface['modeOfService']
+  customerSubType?:CustomerInterface['customerSubType']
+  modeOfService?:CustomerInterface['modeOfService']
   nickName:CustomerInterface['nickName']
   address:CustomerInterface['address']
   contactPerson:CustomerInterface['contactPerson']
-  email:CustomerInterface['email']
+  email?:CustomerInterface['email']
   TIN:CustomerInterface['TIN']
   phoneNumber:CustomerInterface['phoneNumber']
   rcNumber:CustomerInterface['rcNumber']
-  cylinderHoldingTime:number
+  cylinderHoldingTime?:number
   territory:CustomerInterface['territory']
   products:string
   CAC:CustomerInterface['CAC']
@@ -157,8 +158,12 @@ class Customer extends Module{
 
   public async createCustomer(data:newCustomerInterface, user:UserInterface):Promise<CustomerInterface|undefined> {
     try {
-      const date = new Date()
-      date.setDate(date.getDate() + data.cylinderHoldingTime);
+      if(data.cylinderHoldingTime) {
+        const date = new Date()
+        date.setDate(date.getDate() + data.cylinderHoldingTime);
+        //@ts-ignore
+        data.cylinderHoldingTime = date.toISOString()
+      }
       // let exist = await this.customer.findOne({email:data.email, branch:user.branch});
       // // console.log(exist)
       // if(exist) {
@@ -180,7 +185,6 @@ class Customer extends Module{
       const customer = await this.customer.create({
         ...data,
         products,
-        cylinderHoldingTime:date.toISOString(),
         branch:user.branch,
         unique_id: ucid
       });

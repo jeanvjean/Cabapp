@@ -10,7 +10,22 @@ import * as aggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 export enum CustomerType {
   WALKIN="walk-in",
-  REGULAR="regular"
+  REGULAR="regular",
+}
+
+export enum CustomerSubType{
+  ASNL_COOPRATE="asnl-cooprate",
+  ASNL_MEDICAL="asnl-medical",
+  ASNL_RETAIL="asnl-retail",
+  TP_COOPRATE="tp-cooprate",
+  TP_MEDICAL="tp-medical",
+  TP_RETAIL="tp-retail"
+}
+
+export enum ModeOfService{
+  ASNL_CYLINDER="asnl-cylinder",
+  CUSTOMER_CYLINDER="customer-cylinder",
+  BOTH="both"
 }
 
 interface customerProducts {
@@ -29,7 +44,8 @@ export interface CustomerInterface extends Document{
   _id:Schema.Types.ObjectId
   name:string
   customerType:CustomerType
-  modeOfService:string
+  customerSubType:CustomerSubType
+  modeOfService:ModeOfService
   nickName:string
   address:string
   contactPerson:string
@@ -70,7 +86,8 @@ const customerProductSchema = new Schema({
 export const customerSchema = new Schema({
   name:{type:String, lowercase:true},
   customerType:{type:String, enum:Object.values(CustomerType), default:CustomerType.REGULAR, lowercase:true},
-  modeOfeService:String,
+  customerSubType:{ type:String, enum:Object.values(CustomerSubType), lowercase:true },
+  modeOfeService:{type:String, enum:Object.values(ModeOfService), default:ModeOfService.BOTH},
   nickName:{type:String, lowercase:true},
   address:String,
   contactPerson:{type:String, lowercase:true},

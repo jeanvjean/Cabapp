@@ -29,7 +29,12 @@ class CustomerValidation extends Ctrl{
       check('customerType')
         .exists()
         .withMessage('Customer Type is required'),
-      check('modeOfService'),
+      check('modeOfService')
+        .exists()
+        .withMessage('Mode of service is required'),
+      check('customerSubType')
+        .exists()
+        .withMessage('customer sub type is required'),
       check('nickName')
         .exists()
         .withMessage('Customer email is required'),
@@ -45,9 +50,7 @@ class CustomerValidation extends Ctrl{
         .exists()
         .withMessage('Please Provide phone number'),
       check('rcNumber'),
-      check('cylinderHoldingTime')
-        .exists()
-        .withMessage('Please Provide holding time'),
+      check('cylinderHoldingTime'),
       check('territory'),
       check('products'),
       check('unitPrice'),

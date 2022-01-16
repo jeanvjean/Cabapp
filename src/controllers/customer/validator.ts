@@ -39,11 +39,7 @@ class CustomerValidation extends Ctrl{
       check('contactPerson')
         .exists()
         .withMessage('Contact Person is required please provide one'),
-      check('email')
-        .exists()
-        .withMessage('Provide an email address')
-        .isEmail()
-        .withMessage('provide a valid email address'),
+      check('email'),
       check('TIN'),
       check('phoneNumber')
         .exists()

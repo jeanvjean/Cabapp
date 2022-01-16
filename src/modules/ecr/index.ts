@@ -283,7 +283,13 @@ class EmptyCylinderModule extends Module {
                 {path:'initiator', model:'User'},
                 {path:'branch', model:'branches'},
                 {path:"gasType", model:"cylinder"},
-                {path:"icn_id", model:"out-going-cylinders"}
+                {path:"icn_id", model:"out-going-cylinders", populate:[
+                        {path:"initiator", model:"User"},
+                        {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{
+                            path:'assignedTo', model:"User"
+                        }}
+                    ]
+                }
             ]);
             return Promise.resolve(ecr as EmptyCylinderInterface);
         } catch (e) {
@@ -311,7 +317,13 @@ class EmptyCylinderModule extends Module {
                         path:'vehicle', model:'vehicle'
                     }, select:'name email vehicle'},
                     {path:"gasType", model:"cylinder"},
-                    {path:"icn_id", model:"out-going-cylinders"}
+                    {path:"icn_id", model:"out-going-cylinders", populate:[
+                            {path:"initiator", model:"User"},
+                            {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{
+                                path:'assignedTo', model:"User"
+                            }}
+                        ]
+                    }
                 ],
                 sort:{priority: 1}
             }
@@ -374,7 +386,14 @@ class EmptyCylinderModule extends Module {
                     {path:'branch', model:'branches'},
                     {path:'initiator', model:'User'},
                     {path:"gasType", model:"cylinder"},
-                    {path:"icn_id", model:"out-going-cylinders"}
+                    // {path:"icn_id", model:"out-going-cylinders"},
+                    {path:"icn_id", model:"out-going-cylinders", populate:[
+                            {path:"initiator", model:"User"},
+                            {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{
+                                path:'assignedTo', model:"User"
+                            }}
+                        ]
+                    }
                 ],
                 sort:{priority: 1}
             }
@@ -430,7 +449,13 @@ class EmptyCylinderModule extends Module {
                 }, select:'name email vehicle'},
                 {path:'branch', model:'branches'},
                 {path:"gasType", model:"cylinder"},
-                {path:"icn_id", model:"out-going-cylinders"}
+                {path:"icn_id", model:"out-going-cylinders", populate:[
+                        {path:"initiator", model:"User"},
+                        {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{
+                            path:'assignedTo', model:"User"
+                        }}
+                    ]
+                }
             ]);
             return Promise.resolve(data as EmptyCylinderInterface);
         } catch (e) {

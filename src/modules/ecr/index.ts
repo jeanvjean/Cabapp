@@ -42,7 +42,7 @@ export interface newEcrInterface {
     type:EmptyCylinderInterface['type'],
     gasType:EmptyCylinderInterface['gasType'],
     icn_id?:EmptyCylinderInterface['icn_id'],
-    modeOfService?:EmptyCylinderInterface['modeOfService']
+    modeOfService?:EmptyCylinderInterface['modeOfService'],
 }
 
 type skipped = {
@@ -81,7 +81,8 @@ class EmptyCylinderModule extends Module {
             let not_same = []
             const ecr = new this.emptyCylinder({
                 ...data,
-                branch:user.branch
+                branch:user.branch,
+                initiator:user._id
             });
             let aprvO = await this.user.findOne({role:user.role, subrole:"head of department", branch:user.branch});
             if(!aprvO) {
@@ -386,7 +387,6 @@ class EmptyCylinderModule extends Module {
                     {path:'branch', model:'branches'},
                     {path:'initiator', model:'User'},
                     {path:"gasType", model:"cylinder"},
-                    // {path:"icn_id", model:"out-going-cylinders"},
                     {path:"icn_id", model:"out-going-cylinders", populate:[
                             {path:"initiator", model:"User"},
                             {path:"vehicle", model:"vehicle", select:"assignedTo", populate:{

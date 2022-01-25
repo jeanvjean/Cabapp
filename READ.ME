@@ -1,0 +1,46 @@
+/** =========================   =========================================
+
+function solution(N) {
+    // write your code in JavaScript (Node.js 8.9.4)
+    let binaryValue = (N >>> 0).toString(2);
+
+    let lengthArr = [];
+    let length = 1;
+
+    for(let i = 0; i < binaryValue.length; i++){
+        if(binaryValue[i] == 0){
+            // Check if 1 is ending then push the lenght to array and reset the length
+            if(binaryValue[i + 1] == 1){
+                lengthArr.push(length);
+                length = 0;
+            }
+            length++;
+        }
+    }
+    return lengthArr.length ? Math.max(...lengthArr) : 0;
+
+}
+===========================    ========================================
+
+===========================    ========================================
+An array A consisting of N integers is given. Rotation of the array means that each element is shifted right by one 
+index, and the last element of the array is moved to the first place. For example, the rotation of array A = [3, 8, 9, 7, 6] 
+is [6, 3, 8, 9, 7] (elements are shifted right by one index and 6 is moved to the first place)
+
+function solution(A, K) {
+    // write your code in JavaScript (Node.js 8.9.4)
+    for(let i=0; i<K; i++) {
+        let lastIndex = A.length - 1;
+        let lastItem = A[lastIndex];
+        for(let j=(A.length-1); j>-1; j--) {
+            if(j>0) {
+                A[j] = A[j-1];
+            } else {
+                A[j] = lastItem;
+            }
+        }
+    }
+    return A;
+}
+
+ ===========================   =======================================*/

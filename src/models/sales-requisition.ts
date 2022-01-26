@@ -19,7 +19,8 @@ export interface saleCylinder{
   }
   unitPrice?:number
   amount?:number,
-  cyliderType?:string
+  cyliderType?:string,
+  id:Schema.Types.ObjectId
 }
 
 

@@ -1,0 +1,23 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const controllers_1 = require("../controllers");
+const sales_1 = require("../controllers/sales");
+const authentication_1 = require("../middlewares/authentication");
+const val = new sales_1.Validator();
+const auth = new authentication_1.default();
+const router = express_1.Router();
+router.post('/create-sales-requisition', sales_1.Validator.validateSales(), val.validate(), auth.verify(), controllers_1.salesCtrl.createSalesReq());
+router.get('/fetch-sales-requisitions', auth.verify(), controllers_1.salesCtrl.fetchSalesReq());
+router.get('/fetch-sales-req/:salesId', controllers_1.salesCtrl.fetchRequisitionDetails());
+router.post('/approve-sales-requisition', auth.verify(), sales_1.Validator.validateSalesApproval(), val.validate(), controllers_1.salesCtrl.approveSalesRequisition());
+router.get('/fetch-pending-req-approval', auth.verify(), controllers_1.salesCtrl.fetchPendingSaleRequisition());
+router.get('/returned-cylinder/:cylinderId', auth.verify(), controllers_1.salesCtrl.returnedCylinder());
+router.get('/sales-cylinder-transactions', auth.verify(), controllers_1.salesCtrl.salesReportCylinders());
+router.get('/sales-purchase-order', auth.verify(), controllers_1.salesCtrl.purchaseOrderReport());
+router.get('/sales-order-report', auth.verify(), controllers_1.salesCtrl.salesOrderReport());
+router.get('/download-purchase-report', auth.verify(), controllers_1.salesCtrl.purchaseReportDowndload());
+router.get('/download-salesOrderReport', auth.verify(), controllers_1.salesCtrl.salesOrderDownload());
+router.get('/download-cylinderTransactions', auth.verify(), controllers_1.salesCtrl.salesReportCylindersDownload());
+exports.default = router;
+//# sourceMappingURL=sales.js.map

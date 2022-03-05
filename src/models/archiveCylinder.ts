@@ -1,10 +1,11 @@
+/* eslint-disable require-jsdoc */
 import {
   Schema,
   Connection,
   Model,
   Document
 } from 'mongoose';
-import { CylinderCondition } from './cylinder';
+import {CylinderCondition} from './cylinder';
 
 import * as mongoosePagination from 'mongoose-paginate-v2';
 
@@ -14,152 +15,152 @@ export interface ArchivedCylinder extends Document{
     /**
    * @param _id object id auto gen
    */
-     _id:Schema.Types.ObjectId,
+     _id: Schema.Types.ObjectId;
      /**
       * @param cylinderType type of cylinder being registered
       */
-     cylinderType:string,
+     cylinderType: string;
      /**
       * @param waterCapacity cylinder water capacity
       */
-     waterCapacity:{
-      value:number,
-      unit:string
-    }
+     waterCapacity: {
+      value: number;
+      unit: string;
+    };
 
      /**
       * @param dateManufactured manufacturing date of cylinder
       */
 
-     dateManufactured:Date
+     dateManufactured: Date;
 
      /**
       * @param assignedTo cylinder assigned to
       */
 
-     assignedTo:Schema.Types.ObjectId
+     assignedTo: Schema.Types.ObjectId;
 
      /**
       * @param gasType type of gas contained in cylinder
       */
 
-     gasType:Schema.Types.ObjectId
+     gasType: Schema.Types.ObjectId;
 
      /**
       * @param standardColor standard gas color for cylinder
       */
 
-     standardColor: string
+     standardColor: string;
 
      /**
       * @param assignedNumber
       */
 
-     assignedNumber:string
+     assignedNumber: string;
 
      /**
       * @param testingPresure
       */
 
-     testingPresure:string
+     testingPresure: string;
 
      /**
       * @param fillingPreasure
       */
 
-     fillingPreasure:string
+     fillingPreasure: string;
 
      /**
       * @param gasVolumeContent
       */
 
-     gasVolumeContent:{
-      value:number,
-      unit:string
-    }
+     gasVolumeContent: {
+      value: number;
+      unit: string;
+    };
 
      /**
       * @param cylinderNumber
       */
 
-     cylinderNumber:string
+     cylinderNumber: string;
 
      /**
       * @param condition cylinder condition
       */
 
-     condition:CylinderCondition
+     condition: CylinderCondition;
 
-     branch:Schema.Types.ObjectId
+     branch: Schema.Types.ObjectId;
 
-     department:string
+     department: string;
 
-     holdingTime:Date
+     holdingTime: Date;
 
-     purchaseCost:{
-      cost:number,
-      unit:string
-    }
+     purchaseCost: {
+      cost: number;
+      unit: string;
+    };
 
      /**
       * @param createdAt
       */
 
-     createdAt: Date
+     createdAt: Date;
 
      /**
       * @param updatedAt
       */
 
-     updatedAt: Date
+     updatedAt: Date;
 }
 
 export const archiveCylinderSchema = new Schema({
-  cylinderType:{type:String},
+  cylinderType: {type: String},
 
-  waterCapacity:{
-    value:Number,
-    unit:String
+  waterCapacity: {
+    value: Number,
+    unit: String
   },
 
-  dateManufactured:{type:Date},
+  dateManufactured: {type: Date},
 
-  assignedTo:{type:Schema.Types.ObjectId, ref:'customer'},
+  assignedTo: {type: Schema.Types.ObjectId, ref: 'customer'},
 
-  gasType:{type:String},
+  gasType: {type: String},
 
-  standardColor:{type:String},
+  standardColor: {type: String},
 
-  assignedNumber:{type:String},
+  assignedNumber: {type: String},
 
-  testingPresure:{type:String},
+  testingPresure: {type: String},
 
-  fillingPreasure:{type:String},
+  fillingPreasure: {type: String},
 
-  gasVolumeContent:{
-    value:Number,
-    unit:String
+  gasVolumeContent: {
+    value: Number,
+    unit: String
   },
 
-  cylinderNumber:{type:String},
+  cylinderNumber: {type: String},
 
-  condition:{type:String},
+  condition: {type: String},
 
-  branch:{type:Schema.Types.ObjectId, ref:'branches'},
+  branch: {type: Schema.Types.ObjectId, ref: 'branches'},
 
-  holdingTime:{type:Date},
+  holdingTime: {type: Date},
 
-  department:{type:String},
+  department: {type: String},
 
-  purchaseCost:{
-    cost:Number,
-    unit:String
+  purchaseCost: {
+    cost: Number,
+    unit: String
   },
 });
 
-archiveCylinderSchema.plugin(mongoosePagination)
+archiveCylinderSchema.plugin(mongoosePagination);
 archiveCylinderSchema.plugin(aggregatePaginate);
 
-export default function factory(conn:Connection):Model<ArchivedCylinder> {
+export default function factory(conn: Connection): Model<ArchivedCylinder> {
   return conn.model('archive-cylinders', archiveCylinderSchema);
 }

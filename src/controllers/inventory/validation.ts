@@ -1,27 +1,33 @@
-import { Request, Response, RequestHandler, NextFunction } from 'express';
-import { check, ValidationChain, validationResult } from 'express-validator';
-import { BadInputFormatException } from '../../exceptions';
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import {Request, Response, RequestHandler, NextFunction} from 'express';
+import {check, ValidationChain, validationResult} from 'express-validator';
+import {BadInputFormatException} from '../../exceptions';
 import Ctrl from '../ctrl';
 
 
-export class InventoryValidator extends Ctrl{
+export class InventoryValidator extends Ctrl {
   validate(): RequestHandler {
-    return async(req:Request, res:Response, next:NextFunction):Promise<void>=> {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
       const result = validationResult(req);
-      const hasErrors = !result.isEmpty()
-      const errors = result.array()
+      const hasErrors = !result.isEmpty();
+      const errors = result.array();
       if (hasErrors) {
-				const error = new BadInputFormatException(
-					errors.map((i) => i.msg).join(','),
-					errors.map((e) => e.msg)
-				)
-				return this.handleError(error, req, res)
-			}
-			return next()
-    }
+        const error = new BadInputFormatException(
+          errors.map((i) => i.msg).join(','),
+          errors.map((e) => e.msg)
+        );
+        return this.handleError(error, req, res);
+      }
+      return next();
+    };
   }
 
-  static validateProduct():ValidationChain[]{
+  static validateProduct(): ValidationChain[] {
     const rules = [
       check('equipmentModel')
         .exists()
@@ -46,9 +52,7 @@ export class InventoryValidator extends Ctrl{
         .withMessage('provide unit cost'),
       check('totalCost')
         .exists()
-        .withMessage('totalCost')
-        .isNumeric()
-        .withMessage('Total cost should be numeric value'),
+        .withMessage('totalCost'),
       check('reorderLevel')
         .exists()
         .withMessage('Provice reorder level'),
@@ -58,11 +62,11 @@ export class InventoryValidator extends Ctrl{
       check('referer'),
       check('division'),
       check('supplier')
-    ]
+    ];
     return rules;
   }
 
-  static updateProduct():ValidationChain[]{
+  static updateProduct(): ValidationChain[] {
     const rules = [
       check('equipmentModel'),
       check('equipmentType'),
@@ -71,25 +75,23 @@ export class InventoryValidator extends Ctrl{
       check('productName')
         .exists()
         .withMessage('product name is required'),
-      check('quantity')
-        .isNumeric()
-        .withMessage('quantity should be a numeric value'),
+      check('quantity'),
       check('unitCost')
-        .isNumeric()
-        .withMessage('Total cost should be numeric value'),
+        .exists()
+        .withMessage('provide unit cost'),
       check('totalCost')
-        .isNumeric()
-        .withMessage('Total cost should be numeric value'),
+        .exists()
+        .withMessage('totalCost'),
       check('reorderLevel'),
       check('location'),
       check('referer'),
       check('division'),
       check('supplier')
-    ]
+    ];
     return rules;
   }
 
-  static approveInput():ValidationChain[]{
+  static approveInput(): ValidationChain[] {
     const rules = [
       check('password')
         .exists()
@@ -104,11 +106,11 @@ export class InventoryValidator extends Ctrl{
         .exists()
         .withMessage('provide status approve/reject'),
       check('comment')
-    ]
+    ];
     return rules;
   }
 
-  static validateUpdateInventory():ValidationChain[]{
+  static validateUpdateInventory(): ValidationChain[] {
     const rules = [
       check('products')
         .exists()
@@ -116,11 +118,11 @@ export class InventoryValidator extends Ctrl{
       check('direction')
         .exists()
         .withMessage('Direction is required in-coming/out-going')
-    ]
+    ];
     return rules;
   }
 
-  static createSupplier():ValidationChain[]{
+  static createSupplier(): ValidationChain[] {
     const rules = [
       check('name')
         .exists()
@@ -142,33 +144,33 @@ export class InventoryValidator extends Ctrl{
       check('contactPerson')
         .exists()
         .withMessage('provide a contact person')
-    ]
+    ];
     return rules;
   }
 
-  static updateSupplier():ValidationChain[]{
+  static updateSupplier(): ValidationChain[] {
     const rules = [
       check('name')
-        .optional({checkFalsy:true}),
+        .optional({checkFalsy: true}),
       check('productType')
-        .optional({checkFalsy:true}),
+        .optional({checkFalsy: true}),
       check('supplierType')
-        .optional({checkFalsy:true}),
-      check('email')        
-        .optional({checkFalsy:true})
+        .optional({checkFalsy: true}),
+      check('email')
+        .optional({checkFalsy: true})
         .isEmail()
         .withMessage('email has to be a valid email'),
       check('phoneNumber')
-        .optional({checkFalsy:true})
+        .optional({checkFalsy: true})
         .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
         .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
       check('contactPerson')
-        .optional({checkFalsy:true})
-    ]
+        .optional({checkFalsy: true})
+    ];
     return rules;
   }
 
-  static validateProductDisbursal():ValidationChain[] {
+  static validateProductDisbursal(): ValidationChain[] {
     const rules = [
       check('products')
         .exists()
@@ -184,11 +186,11 @@ export class InventoryValidator extends Ctrl{
       check('customer')
         .exists()
         .withMessage('please pass a customer')
-    ]
+    ];
     return rules;
   }
 
-  static createBranch():ValidationChain[]{
+  static createBranch(): ValidationChain[] {
     const rules = [
       check('name')
         .exists()
@@ -201,11 +203,11 @@ export class InventoryValidator extends Ctrl{
       check('location')
         .exists()
         .withMessage('provide location (address')
-    ]
+    ];
     return rules;
   }
 
-  static approveGrn():ValidationChain[]{
+  static approveGrn(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
@@ -213,10 +215,9 @@ export class InventoryValidator extends Ctrl{
       check('grnId')
         .exists()
         .withMessage('Grn id is required')
-    ]
+    ];
     return rules;
   }
-
 }
 
 export default InventoryValidator;

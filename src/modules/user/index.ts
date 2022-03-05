@@ -1,408 +1,400 @@
-import Module, { QueryInterface } from '../module';
-import { Model } from 'mongoose';
-import { UserInterface } from '../../models/user';
-import { BadInputFormatException, InvalidAccessCredentialsException } from '../../exceptions';
-import { sign, verify } from 'jsonwebtoken';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import Module, {QueryInterface} from '../module';
+import {Model} from 'mongoose';
+import {UserInterface} from '../../models/user';
+import {BadInputFormatException, InvalidAccessCredentialsException} from '../../exceptions';
+import {sign, verify} from 'jsonwebtoken';
 import Notify from '../../util/mail';
-import { generateToken } from '../../util/token';
-import { constants } from '../../util/constants';
+import {generateToken} from '../../util/token';
+import {constants} from '../../util/constants';
 import Environment from '../../configs/static';
-import { compareSync, genSaltSync, hash } from 'bcryptjs';
-import { getTemplate } from '../../util/resolve-template';
-import { createLog } from '../../util/logs';
-import { DeletedUser } from '../../models/removedUser';
-import { mongoose } from '../cylinder';
-import { user } from '..';
+import {compareSync, genSaltSync, hash} from 'bcryptjs';
+import {getTemplate} from '../../util/resolve-template';
+import {createLog} from '../../util/logs';
+import {DeletedUser} from '../../models/removedUser';
+import {mongoose} from '../cylinder';
+import {user} from '..';
 import paginate from '../../util/paginate';
-export const signTokenKey = "loremipsumdolorsitemet";
+export const signTokenKey = 'loremipsumdolorsitemet';
 
 interface UserConstructorInterface {
-  user: Model<UserInterface>
-  deleted:Model<DeletedUser>
+  user: Model<UserInterface>;
+  deleted: Model<DeletedUser>;
 }
 
 interface NewUserInterface {
-  name:UserInterface['name'],
-  email:UserInterface['email'],
-  password:UserInterface['password'],
-  account_type:UserInterface['account_type']
-  branch:UserInterface['branch']
+  name: UserInterface['name'];
+  email: UserInterface['email'];
+  password: UserInterface['password'];
+  account_type: UserInterface['account_type'];
+  branch: UserInterface['branch'];
 }
 
 type SuspendUserInput = {
-  userId:string,
-  suspend:boolean,
-  reason?:string
+  userId: string;
+  suspend: boolean;
+  reason?: string;
 }
 
 type suspendUserResponse = {
-  message:string
-  user:UserInterface
+  message: string;
+  user: UserInterface;
 }
 
 interface inviteUserInput {
-  users:UserInterface[]
+  users: UserInterface[];
 }
 
 interface RoleUpdateInterface {
-  userId:string,
-  role:string,
-  subrole:string
+  userId: string;
+  role: string;
+  subrole: string;
 }
 
 export interface TokenInterface {
-  token:string,
-  expires:string
+  token: string;
+  expires: string;
 }
 
 export interface idInterface {
-  id:string
+  id: string;
 }
 
 interface RolesInterfaceResponse{
-  roles:object[]
+  roles: object[];
 }
 
-//password reset interfaces
+// password reset interfaces
 interface PasswordResetInputInterface {
-  password:string,
-  token:string
+  password: string;
+  token: string;
 }
 
 interface RequestPasswordResetInput{
-  email:string
+  email: string;
 }
 
 interface RequestResponseInterface{
-  message:string,
-  token:string
+  message: string;
+  token: string;
 }
 
 interface ResetResponseInterface{
-  message:string
+  message: string;
 }
 
-//password reset interfaces
+// password reset interfaces
 
 interface UpdateUserInterface{
-  id?:string,
-  input?:UserInterface
+  id?: string;
+  input?: UserInterface;
 }
 
 interface ChangePasswordInterface{
-  newPassword:string,
-  oldPassword:string
+  newPassword: string;
+  oldPassword: string;
 }
 
 interface LoginReturn {
-  user: UserInterface,
-  accessToken:TokenInterface
+  user: UserInterface;
+  accessToken: TokenInterface;
 }
 
 export type TokenPayloadInterface = {
-  id: string,
-  email:string
+  id: string;
+  email: string;
 }
 
 export interface LoginInterface {
-  email: UserInterface['email'],
-  password:UserInterface['password']
+  email: UserInterface['email'];
+  password: UserInterface['password'];
 }
 
 export interface InviteUserInterfaceRespone{
-  message:string,
-  failedInvites:string[]
+  message: string;
+  failedInvites: string[];
 }
 
 class User extends Module {
   private user: Model<UserInterface>
-  private deleted:Model<DeletedUser>
+  private deleted: Model<DeletedUser>
 
-  constructor(props: UserConstructorInterface){
+  constructor(props: UserConstructorInterface) {
     super();
     this.user = props.user;
-    this.deleted = props.deleted
+    this.deleted = props.deleted;
   }
 
-  public async registerSupremeUser(data: NewUserInterface) : Promise<UserInterface|undefined>{
-    let newUser : UserInterface|undefined;
+  public async registerSupremeUser(data: NewUserInterface): Promise<UserInterface|undefined> {
+    let newUser: UserInterface|undefined;
     try {
-      let existUser:UserInterface | null = await this.user.findOne({email:data.email});
-      if(existUser) {
+      const existUser: UserInterface | null = await this.user.findOne({email: data.email});
+      if (existUser) {
         throw new BadInputFormatException('A user exists with this email... use another email');
       }
-      let hasSupreme = await this.user.findOne({subrole:"supreme", role:"supreme"}); 
-      if(hasSupreme) {
+      const hasSupreme = await this.user.findOne({subrole: 'supreme', role: 'supreme'});
+      if (hasSupreme) {
         throw new BadInputFormatException('there can only be one supreme user');
       }
       newUser = await this.user.create({
         ...data,
-        subrole:'supreme',
-        role:"supreme",
-        isVerified:true
+        subrole: 'supreme',
+        role: 'supreme',
+        isVerified: true
       });
       return Promise.resolve(newUser as UserInterface);
     } catch (error) {
-      this.handleException(error)
+      this.handleException(error);
     }
   }
 
-  public async register(data: NewUserInterface) : Promise<UserInterface|undefined>{
-    let newUser : UserInterface|undefined;
+  public async register(data: NewUserInterface): Promise<UserInterface|undefined> {
+    let newUser: UserInterface|undefined;
     try {
-      let existUser:UserInterface | null = await this.user.findOne({email:data.email, branch:data.branch});
-      if(existUser) {
+      const existUser: UserInterface | null = await this.user.findOne({email: data.email, branch: data.branch});
+      if (existUser) {
         throw new BadInputFormatException('A user already exists with this email');
       }
 
-      let hasSuperadmin = await this.user.findOne({branch:data.branch, subrole:"superadmin"}); 
-      if(hasSuperadmin) {
+      const hasSuperadmin = await this.user.findOne({branch: data.branch, subrole: 'superadmin'});
+      if (hasSuperadmin) {
         throw new BadInputFormatException('only one superadmin can exist in a branch');
       }
 
       newUser = await this.user.create({
         ...data,
-        subrole:'superadmin',
-        isVerified:true
+        subrole: 'superadmin',
+        isVerified: true
       });
-      // let payload = {
-      //   id:newUser._id,
-      //   email:newUser.email
-      // }
-      // const expiresIn = 1000 * 60 * 60 * 24;
-      // let token = sign(payload, signTokenKey, {expiresIn});
-      // const html = await getTemplate('registration', {
-      //   name: newUser.name,
-      //   link:`${Environment.FRONTEND_URL}/verify/${token}`
-      // });
-      // let mailLoad = {
-      //   content:html,
-      //   subject:'test messaging',
-      //   email:newUser.email,
-      // }
-      // new Notify().sendMail(mailLoad);
       return Promise.resolve(newUser as UserInterface);
     } catch (error) {
-      this.handleException(error)
+      this.handleException(error);
     }
   }
 
-  public async inviteUser(data:inviteUserInput, userInfo:UserInterface) : Promise<InviteUserInterfaceRespone|undefined>{
+  public async inviteUser(data: inviteUserInput, userInfo: UserInterface): Promise<InviteUserInterfaceRespone|undefined> {
     try {
       // new Notify().fetchData()
       const branch = await this.user.findById(userInfo._id).populate({
-        path:'branch', model:'branches'
+        path: 'branch', model: 'branches'
       });
       console.log(branch?.branch);
       const exists = [];
-      for(let user of data.users) {
-        let existUser:UserInterface | null = await this.user.findOne({email:user.email});
-        if(existUser){
-          if(!existUser.isVerified) {
-            let password = await generateToken(4);
-                  //@ts-ignore
-                  await this.user.findByIdAndUpdate(existUser._id,{password}, {new:true});
-                  const html = await getTemplate('invite', {
-                    team: user.role,
-                    role:user.subrole,
-                    email:user.email,
-                    link:`${Environment.FRONTEND_URL}`,
-                    //@ts-ignore
-                    branch:branch?.branch.name,
-                    password
-                  });
-                  let mailLoad = {
-                    content:html,
-                    subject:'RE:Invitiation',
-                    email:user.email,
-                  }
-                  new Notify().sendMail(mailLoad);
+      for (const user of data.users) {
+        const existUser: UserInterface | null = await this.user.findOne({email: user.email});
+        if (existUser) {
+          if (!existUser.isVerified) {
+            const password = await generateToken(4);
+            // @ts-ignore
+            await this.user.findByIdAndUpdate(existUser._id, {password}, {new: true});
+            const html = await getTemplate('invite', {
+              team: user.role,
+              role: user.subrole,
+              email: user.email,
+              link: `${Environment.FRONTEND_URL}`,
+              // @ts-ignore
+              branch: branch?.branch.name,
+              password
+            });
+            const mailLoad = {
+              content: html,
+              subject: 'RE:Invitiation',
+              email: user.email,
+            };
+            new Notify().sendMail(mailLoad);
           } else {
             exists.push(user.email);
           }
         } else {
-          if(user.subrole == 'head of department') {
-                let hod = await this.user.findOne({
-                  role:user.role,
-                  subrole:user.subrole,
-                  branch:userInfo.branch
-                });
-                console.log(hod)
-                if(!hod) {
-                  let password = await generateToken(4);
-                  //@ts-ignore
-                  await this.user.create({...user, branch:branch.branch._id, password});
-                  const html = await getTemplate('invite', {
-                    team: user.role,
-                    role:user.subrole,
-                    email:user.email,
-                    link:`${Environment.FRONTEND_URL}`,
-                    //@ts-ignore
-                    branch:branch?.branch.name,
-                    password
-                  });
-                  let mailLoad = {
-                    content:html,
-                    subject:'New User registeration',
-                    email:user.email,
-                  }
-                  new Notify().sendMail(mailLoad);
-            }else {
+          if (user.subrole == 'head of department') {
+            const hod = await this.user.findOne({
+              role: user.role,
+              subrole: user.subrole,
+              branch: userInfo.branch
+            });
+            console.log(hod);
+            if (!hod) {
+              const password = await generateToken(4);
+              // @ts-ignore
+              await this.user.create({...user, branch: branch.branch._id, password});
+              const html = await getTemplate('invite', {
+                team: user.role,
+                role: user.subrole,
+                email: user.email,
+                link: `${Environment.FRONTEND_URL}`,
+                // @ts-ignore
+                branch: branch?.branch.name,
+                password
+              });
+              const mailLoad = {
+                content: html,
+                subject: 'New User registeration',
+                email: user.email,
+              };
+              new Notify().sendMail(mailLoad);
+            } else {
               exists.push(user.email);
             }
-          } else if(user.subrole == 'superadmin'){
-            if(userInfo.subrole !== 'supreme') {
+          } else if (user.subrole == 'superadmin') {
+            if (userInfo.subrole !== 'supreme') {
               const html = await getTemplate('invite_decline', {
-                message:"only supreme user can add a superadmin to a branch",
+                message: 'only supreme user can add a superadmin to a branch',
               });
-              let mailLoad = {
-                content:html,
-                subject:'Invite Declined',
-                email:userInfo.email,
-              }
+              const mailLoad = {
+                content: html,
+                subject: 'Invite Declined',
+                email: userInfo.email,
+              };
               new Notify().sendMail(mailLoad);
-            }else {
-              let password = await generateToken(4);
-                  //@ts-ignore
-                  await this.user.create({...user, branch:branch?.branch._id, password});
-                  const html = await getTemplate('invite', {
-                    team: user.role,
-                    role:user.subrole,
-                    email:user.email,
-                    link:`${Environment.FRONTEND_URL}`,
-                    //@ts-ignore
-                    branch:branch?.branch.name,
-                    password
-                  });
-                  let mailLoad = {
-                    content:html,
-                    subject:'New User registeration',
-                    email:user.email,
-                  }
-                  new Notify().sendMail(mailLoad);
+            } else {
+              const password = await generateToken(4);
+              // @ts-ignore
+              await this.user.create({...user, branch: branch?.branch._id, password});
+              const html = await getTemplate('invite', {
+                team: user.role,
+                role: user.subrole,
+                email: user.email,
+                link: `${Environment.FRONTEND_URL}`,
+                // @ts-ignore
+                branch: branch?.branch.name,
+                password
+              });
+              const mailLoad = {
+                content: html,
+                subject: 'New User registeration',
+                email: user.email,
+              };
+              new Notify().sendMail(mailLoad);
             }
-          }else {
-            let password = await generateToken(4);
-            //@ts-ignore
-            await this.user.create({...user, branch:branch?.branch._id, password});
+          } else {
+            const password = await generateToken(4);
+            // @ts-ignore
+            await this.user.create({...user, branch: branch?.branch._id, password});
             const html = await getTemplate('invite', {
               team: user.role,
-              role:user.subrole,
-              email:user.email,
-              link:`${Environment.FRONTEND_URL}`,
-              //@ts-ignore
-              branch:branch?.branch.name,
+              role: user.subrole,
+              email: user.email,
+              link: `${Environment.FRONTEND_URL}`,
+              // @ts-ignore
+              branch: branch?.branch.name,
               password
             });
-            let mailLoad = {
-              content:html,
-              subject:'New User registeration',
-              email:user.email,
-            }
+            const mailLoad = {
+              content: html,
+              subject: 'New User registeration',
+              email: user.email,
+            };
             new Notify().sendMail(mailLoad);
           }
         }
       }
       await createLog({
-        user:userInfo._id,
-        activities:{
-          title:'Invited new Users',
-          activity:'You invited some new users to join the team',
+        user: userInfo._id,
+        activities: {
+          title: 'Invited new Users',
+          activity: 'You invited some new users to join the team',
           time: new Date().toISOString()
         }
       });
       return Promise.resolve({
-        message:'An email has been sent to your new user(s)',
-        failedInvites:exists
+        message: 'An email has been sent to your new user(s)',
+        failedInvites: exists
       });
     } catch (e) {
-      this.handleException(e)
+      this.handleException(e);
     }
   }
 
-  public async fetchRoles(user:UserInterface) : Promise<RolesInterfaceResponse|undefined>{
+  public async fetchRoles(user: UserInterface): Promise<RolesInterfaceResponse|undefined> {
     try {
-      //@ts-ignore
-      let roles:RolesInterfaceResponse = constants;
+      // @ts-ignore
+      const roles: RolesInterfaceResponse = constants;
       return Promise.resolve(roles as RolesInterfaceResponse);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchUsers(query:QueryInterface, user:UserInterface) {
+  public async fetchUsers(query: QueryInterface, user: UserInterface) {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
-      let options = {
-        page:query.page || 1,
-        limit:query.limit || 10
-      }
-      let q = {}
-      //@ts-ignore
-      let or = [];
+      const {search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate} = query;
+      const options = {
+        page: query.page || 1,
+        limit: query.limit || 10,
+        sort: {createdAt: -1}
+      };
+      let q = {};
+      // @ts-ignore
+      const or = [];
       // console.log(q)
-      if(verified) {
-        //@ts-ignore
+      if (verified) {
+        // @ts-ignore
         q = {...q, isVerified: !!verified};
         // q.$or.push({isVerified: !!verified});
       }
-      if(active) {
-        //@ts-ignore
+      if (active) {
+        // @ts-ignore
         // q.$or.push({deactivated: !!active});
         q = {...q, deactivated: !active};
       }
-      if(suspended) {
-        //@ts-ignore
+      if (suspended) {
+        // @ts-ignore
         // q.$or.push({deactivated: !suspended});
         q = {...q, deactivated: !!suspended};
       }
-      if(unverified) {
-        //@ts-ignore
+      if (unverified) {
+        // @ts-ignore
         // q.$or.push({deactivated: !unverified});
         q = {...q, isVerified: !unverified};
       }
-      if(email) {
-        //@ts-ignore
-        or.push({email: new RegExp(email, "gi")});
+      if (email) {
+        // @ts-ignore
+        or.push({email: new RegExp(email, 'gi')});
         // q = {...q, email: new RegExp(email, 'gi')};
       }
-      if(subrole) {
-        //@ts-ignore
-        or.push({subrole: new RegExp(subrole, "gi")});
+      if (subrole) {
+        // @ts-ignore
+        or.push({subrole: new RegExp(subrole, 'gi')});
         // q = {...q, subrole: new RegExp(subrole, "gi")};
       }
-      if(departments) {
-          //@ts-ignore
-          q = {...q, role: {$in:departments}};
+      if (departments) {
+        // @ts-ignore
+        q = {...q, role: {$in: departments}};
       }
-      if(fromDate) {
-        //@ts-ignore
-          // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
-          q = {...q, createdAt: { $gte: new Date(fromDate)}};
-          
-      }      
-      if(toDate) {
-        //@ts-ignore
-          // q.$or.push({createdAt: {$lte: new Date(toDate)}});
-          //@ts-ignore
-          q = {...q, createdAt: { $lte: new Date(toDate) }};
+      if (fromDate) {
+        // @ts-ignore
+        // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+        q = {...q, createdAt: {$gte: new Date(fromDate)}};
       }
-      if(name) {
-        or.push({"name": new RegExp(name, "gi")})
-        //@ts-ignore
+      if (toDate) {
+        // @ts-ignore
+        // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+        // @ts-ignore
+        q = {...q, createdAt: {$lte: new Date(toDate)}};
+      }
+      if (name) {
+        or.push({'name': new RegExp(name, 'gi')});
+        // @ts-ignore
         // q = {...q, name: new RegExp(name, 'gi')};
       }
-      if(or.length > 0) {
-        //@ts-ignore
-        q = {...q, $or:or}
-      };
+      if (or.length > 0) {
+        // @ts-ignore
+        q = {...q, $or: or};
+      }
 
-      //@ts-ignore
-      let users = await this.user.paginate(q, options);
+      // @ts-ignore
+      const users = await this.user.paginate(q, options);
       return Promise.resolve(users);
 
-      //@ts-ignore
+      // @ts-ignore
       // users = await this.user.searchPartial(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
       // users = await this.user.searchFull(search, {}, {sort:{createdAt:1}, branch:user.branch.toString()});
     } catch (e) {
@@ -410,120 +402,119 @@ class User extends Module {
     }
   }
 
-  public async branchUsers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
-    try {     
+  public async branchUsers(query: QueryInterface, user: UserInterface): Promise<UserInterface[]|undefined> {
+    try {
       const ObjectId = mongoose.Types.ObjectId;
-      let { search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate } = query;
-      let options = {
-        page:query.page || 1,
-        limit:query.limit || 10
-      }
+      const {search, email, name, phone, verified, active, subrole, unverified, suspended, departments, fromDate, toDate} = query;
+      const options = {
+        page: query.page || 1,
+        limit: query.limit || 10,
+        sort: {createdAt: -1}
+      };
       let q = {
         branch: user.branch
-      }
+      };
 
-      //@ts-ignore
-      let or = [];
+      // @ts-ignore
+      const or = [];
       // console.log(q)
-      if(verified) {
-        //@ts-ignore
+      if (verified) {
+        // @ts-ignore
         q = {...q, isVerified: !!verified};
         // q.$or.push({isVerified: !!verified});
       }
-      if(active) {
-        //@ts-ignore
+      if (active) {
+        // @ts-ignore
         // q.$or.push({deactivated: !!active});
         q = {...q, deactivated: !active};
       }
-      if(suspended) {
-        //@ts-ignore
+      if (suspended) {
+        // @ts-ignore
         // q.$or.push({deactivated: !suspended});
         q = {...q, deactivated: !!suspended};
       }
-      if(unverified) {
-        //@ts-ignore
+      if (unverified) {
+        // @ts-ignore
         // q.$or.push({deactivated: !unverified});
         q = {...q, isVerified: !unverified};
       }
-      if(email) {
-        //@ts-ignore
-        or.push({email: new RegExp(email, "gi")});
+      if (email) {
+        // @ts-ignore
+        or.push({email: new RegExp(email, 'gi')});
         // q = {...q, email: new RegExp(email, 'gi')};
       }
-      if(subrole) {
-        //@ts-ignore
-        or.push({subrole: new RegExp(subrole, "gi")});
+      if (subrole) {
+        // @ts-ignore
+        or.push({subrole: new RegExp(subrole, 'gi')});
         // q = {...q, subrole: new RegExp(subrole, "gi")};
       }
-      if(departments) {
-          //@ts-ignore
-          q = {...q, role: {$in:departments}};
+      if (departments) {
+        // @ts-ignore
+        q = {...q, role: {$in: departments}};
       }
-      if(fromDate) {
-        //@ts-ignore
-          // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
-          q = {...q, createdAt: { $gte: new Date(fromDate)}};
-          
-      }      
-      if(toDate) {
-        //@ts-ignore
-          // q.$or.push({createdAt: {$lte: new Date(toDate)}});
-          //@ts-ignore
-          q = {...q, createdAt: { $lte: new Date(toDate) }};
+      if (fromDate) {
+        // @ts-ignore
+        // q.$or.push({createdAt: {$gte: new Date(fromDate)}});
+        q = {...q, createdAt: {$gte: new Date(fromDate)}};
       }
-      if(name) {
-        or.push({"name": new RegExp(name || "", "gi")})
-        //@ts-ignore
+      if (toDate) {
+        // @ts-ignore
+        // q.$or.push({createdAt: {$lte: new Date(toDate)}});
+        // @ts-ignore
+        q = {...q, createdAt: {$lte: new Date(toDate)}};
+      }
+      if (name) {
+        or.push({'name': new RegExp(name || '', 'gi')});
+        // @ts-ignore
         // q = {...q, createdAt:{$gte:new Date(fromDate), $lte:new Date(toDate)}}
-        //@ts-ignore
+        // @ts-ignore
         // q = {...q, name: new RegExp(name, 'gi')};
       }
-      if(or.length > 0) {
-        //@ts-ignore
-        q = {...q, $or:or}
+      if (or.length > 0) {
+        // @ts-ignore
+        q = {...q, $or: or};
       }
-      //@ts-ignore
-      let users = await this.user.paginate(q, options);
+      // @ts-ignore
+      const users = await this.user.paginate(q, options);
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async login(data:LoginInterface) : Promise<LoginReturn | undefined>{
-
+  public async login(data: LoginInterface): Promise<LoginReturn | undefined> {
     try {
-      const { email, password } = data;
-      let user = await this.user.findOne({email:email}).select('+password');
-      if(!user) {
+      const {email, password} = data;
+      const user = await this.user.findOne({email: email}).select('+password');
+      if (!user) {
         throw new BadInputFormatException('Invalid credentials');
       }
       // if(!user.isVerified) {
       //   throw new BadInputFormatException('Account has not been verified');
       // }
-      let correctPassword = await user.comparePWD(password);
-      if(!correctPassword) {
+      const correctPassword = await user.comparePWD(password);
+      if (!correctPassword) {
         throw new BadInputFormatException('Incorrect password');
       }
-      let payload = {
+      const payload = {
         id: user._id.toString(),
-        email:user.email.toString()
-      }
-      let expiresIn = 180//1000 * 60 * 60 * 24
-      let token = sign(payload, signTokenKey, {expiresIn:"180d"});
+        email: user.email.toString()
+      };
+      const expiresIn = 180;// 1000 * 60 * 60 * 24
+      const token = sign(payload, signTokenKey, {expiresIn: '180d'});
       await createLog({
-        user:user._id,
-        activities:{
-          title:'Logged in',
-          activity:'You logged into your account',
+        user: user._id,
+        activities: {
+          title: 'Logged in',
+          activity: 'You logged into your account',
           time: new Date().toISOString()
         }
       });
-      let date = new Date();
+      const date = new Date();
       date.setDate(date.getDate() + 180);
       return Promise.resolve({
         user,
-        accessToken:{
+        accessToken: {
           token,
           expires: date.toISOString()
         }
@@ -533,75 +524,71 @@ class User extends Module {
     }
   }
 
-  public async fetchUser(data: TokenPayloadInterface): Promise<UserInterface>{
-
+  public async fetchUser(data: TokenPayloadInterface): Promise<UserInterface> {
     const user = await this.user.findOne({
-      _id:data.id,
+      _id: data.id,
       email: data.email
     });
-      if(!user) {
-        throw new BadInputFormatException('No User found');
-      }
-      return Promise.resolve(user);
+    if (!user) {
+      throw new BadInputFormatException('No User found');
+    }
+    return Promise.resolve(user);
   }
 
-  public async fetchUserAuth(data: TokenPayloadInterface): Promise<UserInterface>{
-
+  public async fetchUserAuth(data: TokenPayloadInterface): Promise<UserInterface> {
     const user = await this.user.findOne({
-      _id:data.id,
+      _id: data.id,
       email: data.email
     });
-      if(!user) {
-        throw new BadInputFormatException('Authorization error');
-      }
-      return Promise.resolve(user);
+    if (!user) {
+      throw new BadInputFormatException('Authorization error');
+    }
+    return Promise.resolve(user);
   }
 
-  public async fetchUserByEmail(email:string): Promise<UserInterface>{
-
+  public async fetchUserByEmail(email: string): Promise<UserInterface> {
     const user = await this.user.findOne({
       email: email
     });
-      if(!user) {
-        throw new BadInputFormatException('No User found');
-      }
-      return Promise.resolve(user);
+    if (!user) {
+      throw new BadInputFormatException('No User found');
+    }
+    return Promise.resolve(user);
   }
 
-  public async updateUser (data:UpdateUserInterface, user:UserInterface) : Promise<UserInterface|undefined>{
-    //Todo implement user update
+  public async updateUser(data: UpdateUserInterface, user: UserInterface): Promise<UserInterface|undefined> {
+    // Todo implement user update
     try {
-
-      let options = {new:true}
-     // @ts-ignore
-      let exists = await this.user.findById(user._id);
-      if(!exists) {
+      const options = {new: true};
+      // @ts-ignore
+      const exists = await this.user.findById(user._id);
+      if (!exists) {
         throw new BadInputFormatException('Not Found');
       }
-      //@ts-ignore
-      if(data.email && user.email !== data.email){
-        //@ts-ignore
-        let thisUser = await this.user.findOne({email:data.email});
-        if(thisUser) {
+      // @ts-ignore
+      if (data.email && user.email !== data.email) {
+        // @ts-ignore
+        const thisUser = await this.user.findOne({email: data.email});
+        if (thisUser) {
           throw new BadInputFormatException('the email is in use by another client');
         }
       }
-      let set = {
+      const set = {
         ...data,
-        isVerified:true
-      }
-      let updateUser = await this.user.findByIdAndUpdate(
+        isVerified: true
+      };
+      const updateUser = await this.user.findByIdAndUpdate(
         user._id,
         {
-          $set:set
+          $set: set
         },
         options
-      )
+      );
       await createLog({
-        user:user._id,
-        activities:{
-          title:'Update profine',
-          activity:'You updated your profile',
+        user: user._id,
+        activities: {
+          title: 'Update profine',
+          activity: 'You updated your profile',
           time: new Date().toISOString()
         }
       });
@@ -611,45 +598,45 @@ class User extends Module {
     }
   }
 
-  public async changeUserRole(data:RoleUpdateInterface, user:UserInterface):Promise<UserInterface|undefined>{
+  public async changeUserRole(data: RoleUpdateInterface, user: UserInterface): Promise<UserInterface|undefined> {
     try {
       let updatedUser;
       const user = await this.user.findById(data.userId);
-      if(!user) {
-        throw new BadInputFormatException('user not found')
+      if (!user) {
+        throw new BadInputFormatException('user not found');
       }
-      if(user.subrole == 'superadmin') {
+      if (user.subrole == 'superadmin') {
         throw new BadInputFormatException('this role cannot be changed');
       }
-      if(data.subrole == 'head of department') {
-        if(user?.subrole !== 'head of department') {
-          let hod = await this.user.findOne({role:user?.role, subrole:'head of department'});
-          if(!hod){
+      if (data.subrole == 'head of department') {
+        if (user?.subrole !== 'head of department') {
+          const hod = await this.user.findOne({role: user?.role, subrole: 'head of department'});
+          if (!hod) {
             updatedUser = await this.user.findByIdAndUpdate(
               user?._id,
               {
-                $set:data
+                $set: data
               },
-              {new:true}
-            )
+              {new: true}
+            );
             return Promise.resolve(updatedUser as UserInterface);
-          }else {
-            throw new BadInputFormatException('this department already has a head')
+          } else {
+            throw new BadInputFormatException('this department already has a head');
           }
         }
-      }else {
+      } else {
         updatedUser = await this.user.findByIdAndUpdate(
           user?._id,
           {
-            $set:{role:data.role, subrole:data.subrole}
+            $set: {role: data.role, subrole: data.subrole}
           },
-          {new:true}
+          {new: true}
         );
         await createLog({
-          user:user._id,
-          activities:{
-            title:'Change role',
-            activity:`You changed ${updatedUser?.name}\'s role`,
+          user: user._id,
+          activities: {
+            title: 'Change role',
+            activity: `You changed ${updatedUser?.name}\'s role`,
             time: new Date().toISOString()
           }
         });
@@ -660,213 +647,214 @@ class User extends Module {
     }
   }
 
-  public async requestPasswordReset(data:RequestPasswordResetInput):Promise<RequestResponseInterface|undefined> {
+  public async requestPasswordReset(data: RequestPasswordResetInput): Promise<RequestResponseInterface|undefined> {
     try {
-      const user = await this.user.findOne({email:data.email});
-      if(!user) {
+      const user = await this.user.findOne({email: data.email});
+      if (!user) {
         throw new BadInputFormatException('No user exists with this email');
       }
       const payload = {
-        id:user._id,
-        email:user.email
-      }
-      let expiresIn = 1000 * 60 * 60 * 24
+        id: user._id,
+        email: user.email
+      };
+      const expiresIn = 1000 * 60 * 60 * 24;
       const token = sign(payload, signTokenKey, {expiresIn} );
       const html = await getTemplate('reset-password', {
         name: user.role,
-        link:`${Environment.FRONTEND_URL}/reset-password/${token}`,
+        link: `${Environment.FRONTEND_URL}/reset-password/${token}`,
       });
-      let mailLoad = {
-        content:html,
-        subject:'Reset Password',
-        email:user.email,
-      }
+      const mailLoad = {
+        content: html,
+        subject: 'Reset Password',
+        email: user.email,
+      };
       await new Notify().sendMail(mailLoad);
       return Promise.resolve({
-        message:'A reset email has been sent',
+        message: 'A reset email has been sent',
         token
       });
     } catch (e) {
-      this.handleException(e)
+      this.handleException(e);
     }
   }
 
-  public async resetPassword(data:PasswordResetInputInterface): Promise<ResetResponseInterface|undefined> {
+  public async resetPassword(data: PasswordResetInputInterface): Promise<ResetResponseInterface|undefined> {
     try {
       const decode = verify(data.token, signTokenKey);
-      //@ts-ignore
-      const user = await this.user.findOne({_id:decode.id, email:decode.email}).select('+password');
+      // @ts-ignore
+      const user = await this.user.findOne({_id: decode.id, email: decode.email}).select('+password');
       const salt = genSaltSync(10);
-      let password = await hash(data.password, salt);
-      //@ts-ignore
-      await this.user.findByIdAndUpdate(user._id,{password, isVerified:true},{new:true});
+      const password = await hash(data.password, salt);
+      // @ts-ignore
+      await this.user.findByIdAndUpdate(user._id, {password, isVerified: true}, {new: true});
       await createLog({
-        //@ts-ignore
-        user:user._id,
-        activities:{
-          title:'change password',
-          activity:`You changed your password`,
+        // @ts-ignore
+        user: user._id,
+        activities: {
+          title: 'change password',
+          activity: `You changed your password`,
           time: new Date().toISOString()
         }
       });
       return Promise.resolve({
-        message:'password reset success'
-      })
+        message: 'password reset success'
+      });
     } catch (e) {
-      if(e.name == "TokenExpiredError") {
-        throw new InvalidAccessCredentialsException('This token has expired')
+      if (e.name == 'TokenExpiredError') {
+        throw new InvalidAccessCredentialsException('This token has expired');
       }
-      if(e.name == "JsonWebTokenError"){
-        throw new InvalidAccessCredentialsException('Invalid token')
+      if (e.name == 'JsonWebTokenError') {
+        throw new InvalidAccessCredentialsException('Invalid token');
       }
       throw e;
     }
   }
 
-  public async changePassword(data:ChangePasswordInterface, user:UserInterface):Promise<UserInterface|undefined>{
+  public async changePassword(data: ChangePasswordInterface, user: UserInterface): Promise<UserInterface|undefined> {
     try {
       const findUser = await this.user.findById(user._id).select('+password');
-      const { oldPassword, newPassword } = data;
-      //@ts-ignore
+      const {oldPassword, newPassword} = data;
+      // @ts-ignore
       const matchPassword = compareSync(oldPassword, findUser.password);
-      if(!matchPassword) {
+      if (!matchPassword) {
         throw new BadInputFormatException('Old password does not match');
       }
       const salt = genSaltSync(10);
       const password = await hash(newPassword, salt);
-      let updated = await this.user.findByIdAndUpdate(user._id, {password, isVerified:true}, {new:true});
+      const updated = await this.user.findByIdAndUpdate(user._id, {password, isVerified: true}, {new: true});
       await createLog({
-        user:user._id,
-        activities:{
-          title:'Change password',
-          activity:`Password Changed`,
+        user: user._id,
+        activities: {
+          title: 'Change password',
+          activity: `Password Changed`,
           time: new Date().toISOString()
         }
       });
       return Promise.resolve(updated as UserInterface);
     } catch (e) {
-     this.handleException(e);
+      this.handleException(e);
     }
   }
 
-  public async suspendUser(data:SuspendUserInput, user:UserInterface):Promise<suspendUserResponse|undefined>{
-    try{
+  public async suspendUser(data: SuspendUserInput, user: UserInterface): Promise<suspendUserResponse|undefined> {
+    try {
       const suspendUser = await this.user.findById(data.userId);
-      if(!suspendUser) {
+      if (!suspendUser) {
         throw new BadInputFormatException('user not found');
       }
       let suspend;
-      if(suspendUser.deactivated) {
+      if (suspendUser.deactivated) {
         suspend = false;
-      }else{
-        suspend = true
+      } else {
+        suspend = true;
       }
       // suspendUser.deactivated = data.suspend;
       // suspendUser.suspensionReason = data.reason;
-      let updatedUser = await this.user.findByIdAndUpdate(suspendUser._id,{deactivated:suspend, suspensionReason:data?.reason}, {new:true});
-      console.log(updatedUser)
-      //@ts-ignore
-      let message = updatedUser.deactivated? `suspended` : 're-activated';
+      const updatedUser = await this.user.findByIdAndUpdate(suspendUser._id, {deactivated: suspend, suspensionReason: data?.reason}, {new: true});
+      console.log(updatedUser);
+      // @ts-ignore
+      const message = updatedUser.deactivated? `suspended` : 're-activated';
       const html = await getTemplate('suspend', {
         name: suspendUser.name,
-        officer:user.name,
-        action:message
+        officer: user.name,
+        action: message
       });
-      let mailLoad = {
-        content:html,
-        subject:'Account suspension',
-        email:suspendUser.email,
-      }
+      const mailLoad = {
+        content: html,
+        subject: 'Account suspension',
+        email: suspendUser.email,
+      };
       await createLog({
-        user:user._id,
-        activities:{
-          title:'Suspended User',
-          activity:`You ${message} ${updatedUser?.name}`,
+        user: user._id,
+        activities: {
+          title: 'Suspended User',
+          activity: `You ${message} ${updatedUser?.name}`,
           time: new Date().toISOString()
         }
       });
       await createLog({
-        user:updatedUser?._id,
-        activities:{
-          title:'Suspended User',
-          activity:`You were ${message} by ${user?.name}`,
+        user: updatedUser?._id,
+        activities: {
+          title: 'Suspended User',
+          activity: `You were ${message} by ${user?.name}`,
           time: new Date().toISOString()
         }
       });
       new Notify().sendMail(mailLoad);
       return Promise.resolve({
         message,
-        user:updatedUser as UserInterface
+        user: updatedUser as UserInterface
       });
-    }catch(e){
+    } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchallUsers():Promise<UserInterface[]|undefined>{
+  public async fetchallUsers(): Promise<UserInterface[]|undefined> {
     try {
-      const users = await this.user.find({});
+      const users = await this.user.find({}).sort({createdAt: -1});
       return Promise.resolve(users);
     } catch (e) {
-      this.handleException(e)
+      this.handleException(e);
     }
   }
 
-  public async deleteUser(id:string, reason:string, userInfo:UserInterface):Promise<any>{
-    try{
+  public async deleteUser(id: string, reason: string, userInfo: UserInterface): Promise<any> {
+    try {
       const user = await this.user.findById(id);
-      if(!user) {
+      if (!user) {
         throw new BadInputFormatException('user not found');
       }
       await this.deleted.create({
-        name:user.name,
-        email:user.email,
-        role:user.subrole,
-        department:user.role,
-        branch:user.branch,
+        name: user.name,
+        email: user.email,
+        role: user.subrole,
+        department: user.role,
+        branch: user.branch,
         reason
       });
       await createLog({
-        user:userInfo?._id,
-        activities:{
-          title:'Deleted User',
-          activity:`You deleted ${user?.name}`,
+        user: userInfo?._id,
+        activities: {
+          title: 'Deleted User',
+          activity: `You deleted ${user?.name}`,
           time: new Date().toISOString()
         }
       });
       await this.user.findByIdAndDelete(id);
       return Promise.resolve({
-        message:'User deleted'
+        message: 'User deleted'
       });
-    }catch(e){
+    } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchDeletedUsers(query:QueryInterface, user:UserInterface):Promise<DeletedUser[]|undefined>{
+  public async fetchDeletedUsers(query: QueryInterface, user: UserInterface): Promise<DeletedUser[]|undefined> {
     try {
       const ObjectId = mongoose.Types.ObjectId;
-      const { search } = query;
-      let options = {
-        ...query
-      }
-      let aggregate = this.deleted.aggregate([
+      const {search} = query;
+      const options = {
+        ...query,
+        sort: {createdAt: -1}
+      };
+      const aggregate = this.deleted.aggregate([
         {
-          $match:{
-            $and:[
+          $match: {
+            $and: [
               {
-                $or:[
-                  {email:{
-                    $regex: search?.toLowerCase || ""
+                $or: [
+                  {email: {
+                    $regex: search?.toLowerCase || ''
                   }},
-                  {name:{
-                    $regex: search?.toLowerCase || ""
+                  {name: {
+                    $regex: search?.toLowerCase || ''
                   }},
-                  {role:{
-                    $regex: search?.toLowerCase || ""
+                  {role: {
+                    $regex: search?.toLowerCase || ''
                   }},
-                  {department:{
-                    $regex: search?.toLowerCase || ""
+                  {department: {
+                    $regex: search?.toLowerCase || ''
                   }}
                 ]
               },
@@ -875,7 +863,7 @@ class User extends Module {
           }
         }
       ]);
-      //@ts-ignore
+      // @ts-ignore
       const users = await this.deleted.aggregatePaginate(aggregate, options);
       return Promise.resolve(users);
     } catch (e) {
@@ -883,16 +871,16 @@ class User extends Module {
     }
   }
 
-  public async userStatistics(user:UserInterface):Promise<any>{
+  public async userStatistics(user: UserInterface): Promise<any> {
     try {
-      const deletedUsers = await this.deleted.find({branch:user.branch});
-      const users = await this.user.find({branch:user.branch});
-      const activeUsers = users.filter(user=> user.isVerified);
-      const inactiveUsers = users.filter(user=> !user.isVerified)
+      const deletedUsers = await this.deleted.find({branch: user.branch});
+      const users = await this.user.find({branch: user.branch});
+      const activeUsers = users.filter((user)=> user.isVerified);
+      const inactiveUsers = users.filter((user)=> !user.isVerified);
       return Promise.resolve({
-        deletedUsers:deletedUsers.length || 0,
-        activeUsers:activeUsers.length || 0,
-        inactiveUsers:inactiveUsers.length || 0,
+        deletedUsers: deletedUsers.length || 0,
+        activeUsers: activeUsers.length || 0,
+        inactiveUsers: inactiveUsers.length || 0,
         totalUsers: users.length || 0
       });
     } catch (e) {
@@ -900,27 +888,26 @@ class User extends Module {
     }
   }
 
-  public async updateToken(userId:string, token:string):Promise<UserInterface|undefined>{
+  public async updateToken(userId: string, token: string): Promise<UserInterface|undefined> {
     try {
-      const user = await this.user.findByIdAndUpdate(userId, { token }, {new:true});
+      const user = await this.user.findByIdAndUpdate(userId, {token}, {new: true});
       console.log(user);
-      if(!user){
+      if (!user) {
         throw new BadInputFormatException('user not found');
       }
       await createLog({
-        user:user?._id,
-        activities:{
-          title:'Suspended User',
-          activity:`You have subscribed to notifications`,
+        user: user?._id,
+        activities: {
+          title: 'Suspended User',
+          activity: `You have subscribed to notifications`,
           time: new Date().toISOString()
         }
       });
-      return Promise.resolve(user)
+      return Promise.resolve(user);
     } catch (e) {
       this.handleException(e);
     }
   }
-
 }
 
 export default User;

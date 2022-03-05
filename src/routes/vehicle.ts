@@ -1,11 +1,11 @@
-import { Router as expressRouter } from 'express';
+import {Router as expressRouter} from 'express';
 import Auth from '../middlewares/authentication';
-import { vehicleCtrl } from '../controllers';
-import { Validator } from '../controllers/vehicle';
+import {vehicleCtrl} from '../controllers';
+import {Validator} from '../controllers/vehicle';
 const auth = new Auth();
 const val = new Validator();
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 router.post(
   '/register-vehicle',
@@ -175,12 +175,12 @@ router.get(
   '/fetch-terretories',
   auth.verify(),
   vehicleCtrl.fetchTerritory()
-)
+);
 
 router.delete(
   '/delete-terretory/:terretory_id',
   auth.verify(),
   vehicleCtrl.deleteTerretory()
-)
+);
 
 export default router;

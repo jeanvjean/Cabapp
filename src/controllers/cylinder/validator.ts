@@ -1,28 +1,32 @@
-import { Request, Response, RequestHandler, NextFunction } from 'express';
-import { body, check, ValidationChain, validationResult } from 'express-validator';
-import { values } from 'lodash';
-import { BadInputFormatException } from '../../exceptions';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable require-jsdoc */
+import {Request, Response, RequestHandler, NextFunction} from 'express';
+import {body, check, ValidationChain, validationResult} from 'express-validator';
+import {values} from 'lodash';
+import {BadInputFormatException} from '../../exceptions';
 import Ctrl from '../ctrl';
 
 
-class CylinderValidator extends Ctrl{
+class CylinderValidator extends Ctrl {
   validate(): RequestHandler {
-    return async(req:Request, res:Response, next:NextFunction):Promise<void>=> {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
       const result = validationResult(req);
-      const hasErrors = !result.isEmpty()
-      const errors = result.array()
+      const hasErrors = !result.isEmpty();
+      const errors = result.array();
       if (hasErrors) {
-				const error = new BadInputFormatException(
-					errors.map((i) => i.msg).join(','),
-					errors.map((e) => e.msg)
-				)
-				return this.handleError(error, req, res)
-			}
-			return next()
-    }
+        const error = new BadInputFormatException(
+          errors.map((i) => i.msg).join(','),
+          errors.map((e) => e.msg)
+        );
+        return this.handleError(error, req, res);
+      }
+      return next();
+    };
   }
 
-  static validateCylinder():ValidationChain[]{
+  static validateCylinder(): ValidationChain[] {
     const rules = [
       check('gasName')
         .exists()
@@ -30,11 +34,11 @@ class CylinderValidator extends Ctrl{
       check('colorCode')
         .exists()
         .withMessage('Color code is required')
-    ]
+    ];
     return rules;
   }
 
-  static validateCylinderRegisteration():ValidationChain[]{
+  static validateCylinderRegisteration(): ValidationChain[] {
     const rules = [
       check('cylinderType')
         .exists()
@@ -69,11 +73,11 @@ class CylinderValidator extends Ctrl{
       check('purchaseCost')
         .exists()
         .withMessage('pass purchase cost object')
-    ]
+    ];
     return rules;
   }
 
-  static updateCylinder():ValidationChain[]{
+  static updateCylinder(): ValidationChain[] {
     const rules = [
       check('cylinderType'),
       check('waterCapacity'),
@@ -88,11 +92,11 @@ class CylinderValidator extends Ctrl{
       check('cylinderNumber'),
       check('holdingTime'),
       check('purchaseCost')
-    ]
+    ];
     return rules;
   }
 
-  static validateCylinderTransfer():ValidationChain[]{
+  static validateCylinderTransfer(): ValidationChain[] {
     const rules = [
       check('cylinders')
         .exists()
@@ -102,11 +106,11 @@ class CylinderValidator extends Ctrl{
         .exists()
         .withMessage('type of transfer (Permanent/Temporary)'),
       check('comment')
-    ]
+    ];
     return rules;
   }
 
-  static validateCylinderCondemnation():ValidationChain[]{
+  static validateCylinderCondemnation(): ValidationChain[] {
     const rules = [
       check('cylinders')
         .exists()
@@ -114,11 +118,11 @@ class CylinderValidator extends Ctrl{
         .isArray()
         .withMessage('Cylinders must be an array'),
       check('comment')
-    ]
+    ];
     return rules;
   }
 
-  static validateGasChange():ValidationChain[]{
+  static validateGasChange(): ValidationChain[] {
     const rules = [
       check('cylinders')
         .exists()
@@ -134,11 +138,11 @@ class CylinderValidator extends Ctrl{
       check('cylinderType')
         .exists()
         .withMessage('cylinderType is required')
-    ]
+    ];
     return rules;
   }
 
-  static validateApproval():ValidationChain[]{
+  static validateApproval(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
@@ -149,10 +153,9 @@ class CylinderValidator extends Ctrl{
       check('comment')
         .exists()
         .withMessage('please make a short comment on this action')
-    ]
+    ];
     return rules;
   }
-
 }
 
 export default CylinderValidator;

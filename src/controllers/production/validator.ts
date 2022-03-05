@@ -1,29 +1,34 @@
-import { RequestHandler, NextFunction, Request, Response } from "express";
-import { check, ValidationChain, validationResult } from "express-validator";
-import { BadInputFormatException } from "../../exceptions";
-import Ctrl from "../ctrl";
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import {RequestHandler, NextFunction, Request, Response} from 'express';
+import {check, ValidationChain, validationResult} from 'express-validator';
+import {BadInputFormatException} from '../../exceptions';
+import Ctrl from '../ctrl';
 
 
-
-
-class ProductionValidator extends Ctrl{
-  validate():RequestHandler{
-    return async(req:Request, res:Response, next:NextFunction)=>{
+class ProductionValidator extends Ctrl {
+  validate(): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction)=>{
       const result = validationResult(req);
-      const hasErrors = !result.isEmpty()
-      const errors = result.array()
+      const hasErrors = !result.isEmpty();
+      const errors = result.array();
       if (hasErrors) {
-				const error = new BadInputFormatException(
-					errors.map((i) => i.msg).join(','),
-					errors.map((e) => e.msg)
-				)
-				return this.handleError(error, req, res)
-			}
-			return next();
-    }
+        const error = new BadInputFormatException(
+          errors.map((i) => i.msg).join(','),
+          errors.map((e) => e.msg)
+        );
+        return this.handleError(error, req, res);
+      }
+      return next();
+    };
   }
 
-  static validateProductionSchedule():ValidationChain[]{
+  static validateProductionSchedule(): ValidationChain[] {
     const rules = [
       check('customer')
         .exists()
@@ -57,11 +62,11 @@ class ProductionValidator extends Ctrl{
       check('totalVolume')
         .exists()
         .withMessage('provide total Volume to be filled')
-    ]
+    ];
     return rules;
   }
 
-  static validateApproval():ValidationChain[]{
+  static validateApproval(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
@@ -72,11 +77,11 @@ class ProductionValidator extends Ctrl{
       check('password')
         .exists()
         .withMessage('provide your password for confirmation')
-    ]
+    ];
     return rules;
   }
 
-  static markFullCylinders():ValidationChain[]{
+  static markFullCylinders(): ValidationChain[] {
     const rules = [
       check('productionId')
         .exists()
@@ -84,11 +89,11 @@ class ProductionValidator extends Ctrl{
       check('cylinders')
         .exists()
         .withMessage('pass the id of filled cylinders')
-    ]
+    ];
     return rules;
   }
 
-  static cylindersStatusChange():ValidationChain[]{
+  static cylindersStatusChange(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
@@ -98,7 +103,7 @@ class ProductionValidator extends Ctrl{
         .withMessage('pass the _id of cylinders')
         .isArray()
         .withMessage('cylinder_ids must be an array')
-    ]
+    ];
     return rules;
   }
 }

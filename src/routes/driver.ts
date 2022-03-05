@@ -1,10 +1,10 @@
-import { Router as expressRouter } from 'express';
+import {Router as expressRouter} from 'express';
 import Auth from '../middlewares/authentication';
-import { driverCtrl } from '../controllers';
+import {driverCtrl} from '../controllers';
 
 const auth = new Auth();
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 router.post(
   '/create-driver',

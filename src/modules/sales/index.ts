@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
 import {Model} from 'mongoose';
 import {SalesRequisitionInterface} from '../../models/sales-requisition';
 import {ApprovalStatus, stagesOfApproval, TransferStatus} from '../../models/transferCylinder';
@@ -91,24 +98,9 @@ class Sale extends Module {
       sales.branch = user.branch;
       sales.status = TransferStatus.PENDING;
       sales.preparedBy = user._id;
-
-      // let fEcr = await this.ecr.findOne({ecrNo:sales.ecrNo});
-      // if(!fEcr) {
-      //   throw new BadInputFormatException('No ecr with this number found');
-      // }
       for (const cyl of sales.cylinders) {
         const cylinder = await this.cylinder.findOne({cylinderNumber: cyl.cylinderNumber});
         if (cylinder) {
-          // if(fEcr.type == EcrType.SALES) {
-          //   if(!fEcr.removeArr.includes(cylinder._id)) {
-          //     throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
-          //   }
-          // }
-          // if(fEcr.type == EcrType.FILLED) {
-          //   if(!fEcr.cylinders.includes(cylinder._id)) {
-          //     throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is not in the ECR number passed`)
-          //   }
-          // }
           if (cylinder.cylinderStatus == WalkinCustomerStatus.EMPTY) {
             throw new BadInputFormatException(`cylinder number ${cyl.cylinderNumber} is empty`);
           }
@@ -121,20 +113,6 @@ class Sale extends Module {
           await cylinder.save();
         }
       }
-      // if(sales.production_id) {
-      //   let schedule = await this.productionSchedule.findById(sales.production_id);
-      //   if(schedule){
-      //     schedule.sales_req_id = sales._id
-      //     await schedule.save()
-      //   }
-      // }
-      // if(sales.fcr_id) {
-      //   let purchase = await this.ecr.findById(sales.fcr_id);
-      //   if(purchase) {
-      //     purchase.sales_req_id = sales._id
-      //     await purchase.save();
-      //   }
-      // }
       await sales.save();
       await createLog({
         user: user._id,
@@ -157,7 +135,7 @@ class Sale extends Module {
         // @ts-ignore
         assignedTo: customerId,
         cylinderStatus: WalkinCustomerStatus.FILLED
-      });
+      }).sort({createdAt: -1});
       return Promise.resolve(user_cylinders);
     } catch (e) {
       this.handleException(e);
@@ -238,11 +216,6 @@ class Sale extends Module {
   public async approveSalesRequisition(data: SalesApproval, user: UserInterface): Promise<SalesRequisitionInterface|undefined> {
     try {
       await passWdCheck(user, data.password);
-      // let loginUser = await this.user.findById(user._id).select('+password');
-      // let matchPWD = await loginUser?.comparePWD(data.password, user.password);
-      // if(!matchPWD) {
-      //   throw new BadInputFormatException('Incorrect password... please check the password');
-      // }
       const sales = await this.sales.findById(data.salesId).populate({
         path: 'initiator', model: 'User'
       });
@@ -668,8 +641,6 @@ class Sale extends Module {
   public async purchaseReportDowndload(user: UserInterface): Promise<any> {
     try {
       const options = {
-        // page: query.page || 1,
-        // limit:query.limit || 10,
         populate: [
           {path: 'nextApprovalOfficer', model: 'User'},
           {path: 'initiator', model: 'User'},

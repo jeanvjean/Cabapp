@@ -1,12 +1,12 @@
-import { Router as expressRouter } from 'express';
-import { cylinderCtrl } from '../controllers';
-import { Validator } from '../controllers/cylinder';
+import {Router as expressRouter} from 'express';
+import {cylinderCtrl} from '../controllers';
+import {Validator} from '../controllers/cylinder';
 import Auth from '../middlewares/authentication';
 const val = new Validator();
 const auth = new Auth();
 
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 router.post('/create-cylinder',
   Validator.validateCylinder(),
@@ -233,8 +233,7 @@ router.post(
   '/register-multiple-cylinders',
   auth.verify(),
   cylinderCtrl.registerMultipleCylinders()
-)
-
+);
 
 
 export default router;

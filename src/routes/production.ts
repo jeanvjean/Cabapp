@@ -1,12 +1,12 @@
-import { Router as expressRouter } from 'express';
-import { Validator } from '../controllers/production';
+import {Router as expressRouter} from 'express';
+import {Validator} from '../controllers/production';
 import Auth from '../middlewares/authentication';
-import { productionCtrl } from '../controllers';
-import { production } from '../modules';
+import {productionCtrl} from '../controllers';
+import {production} from '../modules';
 
 const auth = new Auth;
 const val = new Validator();
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 
 router.post(
@@ -44,7 +44,7 @@ router.get(
 
 router.post(
   '/update-completed-cylinders',
-  auth.verify(),  
+  auth.verify(),
   Validator.markFullCylinders(),
   val.validate(),
   productionCtrl.markCompletedCylinders()

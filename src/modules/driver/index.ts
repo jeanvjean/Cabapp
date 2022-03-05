@@ -1,44 +1,50 @@
-import Module, { QueryInterface } from "../module";
-import { Model } from "mongoose";
-import { DriverInterface } from "../../models/driver";
-import { BadInputFormatException } from "../../exceptions";
-import { UserInterface } from "../../models/user";
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import Module, {QueryInterface} from '../module';
+import {Model} from 'mongoose';
+import {DriverInterface} from '../../models/driver';
+import {BadInputFormatException} from '../../exceptions';
+import {UserInterface} from '../../models/user';
 
 interface DriverPropInterface {
-  driver:Model<UserInterface>
+  driver: Model<UserInterface>;
 }
 
 interface NewDriverInterface {
-  name:DriverInterface['name']
-  address:DriverInterface['address']
-  email:DriverInterface['email']
-  qualification:DriverInterface['qualification']
-  image?:DriverInterface['image']
-  age:DriverInterface['age']
-  height:DriverInterface['height']
+  name: DriverInterface['name'];
+  address: DriverInterface['address'];
+  email: DriverInterface['email'];
+  qualification: DriverInterface['qualification'];
+  image?: DriverInterface['image'];
+  age: DriverInterface['age'];
+  height: DriverInterface['height'];
 }
 
 type Parameters ={
-  driverId?:string
+  driverId?: string;
 }
 
 type DeleteResponse = {
-  message:string
+  message: string;
 }
 
 
-class Driver extends Module{
-  private driver:Model<UserInterface>
+class Driver extends Module {
+  private driver: Model<UserInterface>
 
-  constructor(props:DriverPropInterface) {
-    super()
-    this.driver = props.driver
+  constructor(props: DriverPropInterface) {
+    super();
+    this.driver = props.driver;
   }
 
-  public async createDriver(data:NewDriverInterface):Promise<UserInterface|undefined>{
+  public async createDriver(data: NewDriverInterface): Promise<UserInterface|undefined> {
     try {
-      const driverExists = await this.driver.findOne({email:data.email});
-      if(driverExists) {
+      const driverExists = await this.driver.findOne({email: data.email});
+      if (driverExists) {
         throw new BadInputFormatException('A driver already exists with this email');
       }
       const driver = await this.driver.create(data);
@@ -48,73 +54,73 @@ class Driver extends Module{
     }
   }
 
-  public async deleteDriver(data:Parameters):Promise<DeleteResponse|undefined>{
+  public async deleteDriver(data: Parameters): Promise<DeleteResponse|undefined> {
     try {
       const driver = await this.driver.findById(data.driverId);
-      if(!driver) {
+      if (!driver) {
         throw new BadInputFormatException('this driver no longer exist');
       }
       await this.driver.findByIdAndDelete(data.driverId);
       return Promise.resolve({
-        message:'Driver deleted'
-      })
+        message: 'Driver deleted'
+      });
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchDrivers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
+  public async fetchDrivers(query: QueryInterface, user: UserInterface): Promise<UserInterface[]|undefined> {
     try {
-      let { search, name, email } = query;
+      const {search, name, email} = query;
       const options = {
-        page:query.page || 1,
-        limit:query.limit || 10,
-        populate:[
-          {path:'vehicle', model:'vehicle'}
-        ]
-      }
+        page: query.page || 1,
+        limit: query.limit || 10,
+        populate: [
+          {path: 'vehicle', model: 'vehicle'}
+        ],
+        sort: {createdAt: -1}
+      };
       let q={
-        branch:user.branch,
-        subrole:'driver'
-      }
-      let or = []
+        branch: user.branch,
+        subrole: 'driver'
+      };
+      const or = [];
 
-      if(name) {
-        //@ts-ignore
-        q = {...q, name:name}
+      if (name) {
+        // @ts-ignore
+        q = {...q, name: name};
       }
-      if(email) {
-        //@ts-ignore
-        q = {...q, email:email}
+      if (email) {
+        // @ts-ignore
+        q = {...q, email: email};
       }
-      //@ts-ignore
-      const users = await this.driver.paginate(q,options);
+      // @ts-ignore
+      const users = await this.driver.paginate(q, options);
       return Promise.resolve(users);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchallDrivers(query:QueryInterface, user:UserInterface):Promise<UserInterface[]|undefined>{
+  public async fetchallDrivers(query: QueryInterface, user: UserInterface): Promise<UserInterface[]|undefined> {
     try {
-      const drivers = await this.driver.find({branch:user.branch ,subrole:'driver'});
+      const drivers = await this.driver.find({branch: user.branch, subrole: 'driver'}).sort({createdAt: -1});
       return Promise.resolve(drivers);
     } catch (e) {
       this.handleException(e);
     }
   }
 
-  public async fetchDriver(data:Parameters):Promise<UserInterface|undefined>{
+  public async fetchDriver(data: Parameters): Promise<UserInterface|undefined> {
     try {
       const driver = await this.driver.findById(data.driverId).populate(
-        {path:'vehicle', model:'vehicle'}
+        {path: 'vehicle', model: 'vehicle'}
       );
       return Promise.resolve(driver as UserInterface);
     } catch (e) {
       this.handleException(e);
     }
   }
-
 }
 
 export default Driver;

@@ -326,11 +326,14 @@ class Product extends Module {
 
   public async deleteProduct(productId: string): Promise<DeleteResponse|undefined> {
     try {
+      console.log({productId});
+
       const product = await this.product.findById(productId);
       if (!product) {
         throw new BadInputFormatException('product not found');
       }
       product.deleted = true;
+      await product.save();
       return Promise.resolve({
         message: 'Product deleted'
       });
@@ -464,7 +467,8 @@ class Product extends Module {
         limit: limit||10,
         populate: {
           path: 'branch', model: 'branches'
-        }
+        },
+        sort: {createdAt: -1}
       };
       const q = {
         branch: user.branch
@@ -492,7 +496,7 @@ class Product extends Module {
 
   public async fetchAllSuppliers(user: UserInterface): Promise<SupplierInterface[]|undefined> {
     try {
-      const suppliers = await this.supplier.find({branch: user.branch});
+      const suppliers = await this.supplier.find({branch: user.branch}).sort({createdAt: -1});
       return Promise.resolve(suppliers);
     } catch (e) {
       this.handleException(e);
@@ -542,7 +546,6 @@ class Product extends Module {
         inspectingOfficer: user._id,
         branch: user.branch
       });
-      // let num = await generateNumber(6)
       const inv = await this.inventory.find({branch: user.branch}).sort({grInit: -1}).limit(1);
       let initNum;
       if (inv[0] == undefined) {
@@ -551,9 +554,6 @@ class Product extends Module {
         initNum = inv[0].grInit+1;
       }
       const init = 'GRN';
-      // let str = ""+initNum
-      // let pad = "000000"
-      // let ans = pad.substring(0, pad.length - str.length) + str;
       const num = padLeft(initNum, 6, '');
       const grnNo = init+num;
       inventory.grnNo = grnNo;
@@ -645,7 +645,7 @@ class Product extends Module {
 
   public async fetchAllProducts(query: QueryInterface, user: UserInterface): Promise<ProductInterface[]|undefined> {
     try {
-      const products = await this.product.find({branch: user.branch});
+      const products = await this.product.find({branch: user.branch}).sort({createdAt: -1});
       return Promise.resolve(products);
     } catch (e) {
       this.handleException(e);
@@ -683,7 +683,8 @@ class Product extends Module {
         populate: [
           {path: 'inspectingOfficer', model: 'User'},
           {path: 'branch', model: 'branches'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
       // @ts-ignore
       const inventories = await this.inventory.paginate(q, options);
@@ -1294,7 +1295,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
 
       let q = {
@@ -1334,7 +1336,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
       let q = {
         requestApproval: TransferStatus.PENDING,
@@ -1389,7 +1392,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
       let q = {
         fromBranch: user.branch
@@ -1442,7 +1446,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
       let q = {
         branch: user.branch
@@ -1495,7 +1500,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
 
       let q = {
@@ -1533,7 +1539,8 @@ class Product extends Module {
           {path: 'customer', model: 'customer'},
           {path: 'releasedTo', model: 'User'},
           {path: 'releasedBy', model: 'User'}
-        ]
+        ],
+        sort: {createdAt: -1}
       };
       let q = {
         disburseStatus: TransferStatus.COMPLETED,

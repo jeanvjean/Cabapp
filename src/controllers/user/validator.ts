@@ -1,43 +1,46 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import {Request, Response, NextFunction, RequestHandler} from 'express';
 import Ctrl from '../ctrl';
-import { check,ValidationChain, validationResult  } from 'express-validator';
-import { BadInputFormatException } from '../../exceptions';
-
-
+import {check, ValidationChain, validationResult} from 'express-validator';
+import {BadInputFormatException} from '../../exceptions';
 
 
 class UserValidator extends Ctrl {
-
   validate(): RequestHandler {
-    return async(req:Request, res:Response, next:NextFunction):Promise<void>=> {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
       const result = validationResult(req);
-      const hasErrors = !result.isEmpty()
-      const errors = result.array()
+      const hasErrors = !result.isEmpty();
+      const errors = result.array();
       if (hasErrors) {
-				const error = new BadInputFormatException(
-					errors.map((i) => i.msg).join(','),
-					errors.map((e) => e.msg)
-				)
-				return this.handleError(error, req, res)
-			}
-			return next()
-    }
+        const error = new BadInputFormatException(
+          errors.map((i) => i.msg).join(','),
+          errors.map((e) => e.msg)
+        );
+        return this.handleError(error, req, res);
+      }
+      return next();
+    };
   }
 
   static validateUser(): ValidationChain[] {
     const rules = [
       check('name')
-        .exists({checkFalsy:true})
+        .exists({checkFalsy: true})
         .withMessage('Name needs to be provided'),
       check('email')
-        .exists({checkFalsy:true})
+        .exists({checkFalsy: true})
         .withMessage('Email is required')
         .isEmail()
         .withMessage('e mail must be a valid email address'),
       check('password')
-        .exists({checkFalsy:true})
+        .exists({checkFalsy: true})
         .withMessage('Password is required')
-        .isLength({min:6})
+        .isLength({min: 6})
         .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/)
         .withMessage('Password must be at least six(6) character long and most contain at least 1 letter, 1 number and 1 special character'),
       check('role')
@@ -46,26 +49,26 @@ class UserValidator extends Ctrl {
       check('phoneNumber')
         .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
         .withMessage('Phone number must contain international code as well as 9 or 10 digits!')
-    ]
+    ];
 
-    return rules
+    return rules;
   }
 
-  static validateLogin():ValidationChain[]{
+  static validateLogin(): ValidationChain[] {
     const rules = [
       check('email')
-        .exists({checkFalsy:true})
+        .exists({checkFalsy: true})
         .withMessage('Email is required')
         .isEmail()
         .withMessage('pease provide a valid email'),
       check('password')
-        .exists({checkFalsy:true})
+        .exists({checkFalsy: true})
         .withMessage('enter password')
-    ]
+    ];
     return rules;
   }
 
-  static validatePasswordChange():ValidationChain[]{
+  static validatePasswordChange(): ValidationChain[] {
     const rules=[
       check('oldPassword')
         .exists()
@@ -73,49 +76,49 @@ class UserValidator extends Ctrl {
       check('newPassword')
         .exists()
         .withMessage('Provide your new password')
-        .isLength({min:6})
+        .isLength({min: 6})
         .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/)
         .withMessage('Password must be at least six(6) character long and most contain at least 1 letter, 1 number and 1 special character'),
-    ]
+    ];
     return rules;
   }
 
-  static validatePassword():ValidationChain[]{
+  static validatePassword(): ValidationChain[] {
     const rules=[
       check('password')
         .exists()
         .withMessage('Provide your old password')
-        .isLength({min:6})
+        .isLength({min: 6})
         .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/)
         .withMessage('Password must be at least six(6) character long and most contain at least 1 letter, 1 number and 1 special character'),
       check('token')
         .exists()
         .withMessage('invalid token')
-    ]
+    ];
     return rules;
   }
 
-  static validateInvite():ValidationChain[]{
+  static validateInvite(): ValidationChain[] {
     const rules = [
       check('users')
         .exists()
         .withMessage('users array is required')
         .isArray()
         .withMessage('provide an array of user objects to be added with (email, role, and subrole)')
-    ]
+    ];
     return rules;
   }
 
-  static validateUserUpdate():ValidationChain[]{
+  static validateUserUpdate(): ValidationChain[] {
     const rules = [
       check('name')
-        .optional({checkFalsy:true}),
+        .optional({checkFalsy: true}),
       check('email')
-        .optional({checkFalsy:true})
+        .optional({checkFalsy: true})
         .isEmail()
         .withMessage('email needs to be a valid email'),
       check('phoneNumber')
-        .optional({checkFalsy:true})
+        .optional({checkFalsy: true})
         .matches(/^(\+\d{2,3})(?:\d\s?){9,10}$/)
         .withMessage('Phone number must contain international code as well as 9 or 10 digits!'),
       check('gender')
@@ -124,11 +127,11 @@ class UserValidator extends Ctrl {
       check('location')
         .exists()
         .withMessage('provide location')
-    ]
+    ];
     return rules;
   }
 
-  static validateRoleChange():ValidationChain[]{
+  static validateRoleChange(): ValidationChain[] {
     const rules = [
       check('role')
         .exists()
@@ -136,21 +139,20 @@ class UserValidator extends Ctrl {
       check('subrole')
         .exists()
         .withMessage('please provide a subrole')
-    ]
+    ];
     return rules;
   }
 
-  static requestPaswordReset():ValidationChain[]{
+  static requestPaswordReset(): ValidationChain[] {
     const rules = [
       check('email')
         .exists()
         .withMessage('pass email')
         .isEmail()
         .withMessage('email has to be valid')
-    ]
+    ];
     return rules;
   }
-
 }
 
 export default UserValidator;

@@ -1,45 +1,45 @@
-import { Router as expressRouter } from 'express';
-import { Validator } from '../controllers/scan';
+import {Router as expressRouter} from 'express';
+import {Validator} from '../controllers/scan';
 import Auth from '../middlewares/authentication';
-import { scanCtrl } from '../controllers';
+import {scanCtrl} from '../controllers';
 
 const auth = new Auth();
 const val = new Validator();
 
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 
 router.get(
-    '/scan-cylinder',
-    scanCtrl.startScan()
+  '/scan-cylinder',
+  scanCtrl.startScan()
 );
 
 router.get(
-    '/fetch-scans',
-    auth.verify(),
-    scanCtrl.fetchScans()
+  '/fetch-scans',
+  auth.verify(),
+  scanCtrl.fetchScans()
 );
 
 router.get(
-    '/scan-info/:formId',
-    auth.verify(),
-    scanCtrl.scanInfo()
+  '/scan-info/:formId',
+  auth.verify(),
+  scanCtrl.scanInfo()
 );
 
 router.get(
-    '/complete-scan/:formId',
-    scanCtrl.complete()
+  '/complete-scan/:formId',
+  scanCtrl.complete()
 );
 
 router.get(
-    '/initiate-scan',
-    scanCtrl.initiateScan()
+  '/initiate-scan',
+  scanCtrl.initiateScan()
 );
 
 router.post(
-    '/update-scan',
-    scanCtrl.update()
+  '/update-scan',
+  scanCtrl.update()
 );
 
 export default router;

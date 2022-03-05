@@ -409,7 +409,8 @@ class OutGoingCylinder extends Module {
             {path: 'invoice', model: 'reciept'},
             {path: 'routePlan', model: 'pickup-routes'},
             {path: 'delivery_ids', model: 'waybill'}
-          ]
+          ],
+          sort: {createdAt: -1}
         };
         let q = {
           branch: user.branch,
@@ -449,7 +450,8 @@ class OutGoingCylinder extends Module {
             {path: 'invoice', model: 'reciept'},
             {path: 'routePlan', model: 'pickup-routes'},
             {path: 'delivery_ids', model: 'waybill'}
-          ]
+          ],
+          sort: {createdAt: -1}
         };
         let q = {
           branch: user.branch,

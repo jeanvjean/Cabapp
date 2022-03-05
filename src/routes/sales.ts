@@ -1,11 +1,11 @@
-import { Router as expressRouter } from 'express';
-import { salesCtrl } from '../controllers';
-import { Validator } from '../controllers/sales';
+import {Router as expressRouter} from 'express';
+import {salesCtrl} from '../controllers';
+import {Validator} from '../controllers/sales';
 import Auth from '../middlewares/authentication';
 const val = new Validator();
 const auth = new Auth();
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 
 router.post(

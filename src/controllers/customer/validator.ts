@@ -1,27 +1,31 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { check, ValidationChain, validationResult } from 'express-validator';
-import { BadInputFormatException } from '../../exceptions';
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable require-jsdoc */
+import {Request, Response, NextFunction, RequestHandler} from 'express';
+import {check, ValidationChain, validationResult} from 'express-validator';
+import {BadInputFormatException} from '../../exceptions';
 import Ctrl from '../ctrl';
 
 
-class CustomerValidation extends Ctrl{
-  validate():RequestHandler{
-    return async(req:Request, res:Response, next:NextFunction):Promise<void>=> {
+class CustomerValidation extends Ctrl {
+  validate(): RequestHandler {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void>=> {
       const result = validationResult(req);
-      const hasErrors = !result.isEmpty()
-      const errors = result.array()
+      const hasErrors = !result.isEmpty();
+      const errors = result.array();
       if (hasErrors) {
-				const error = new BadInputFormatException(
-					errors.map((i) => i.msg).join(','),
-					errors.map((e) => e.msg)
-				)
-				return this.handleError(error, req, res)
-			}
-			return next()
-    }
+        const error = new BadInputFormatException(
+          errors.map((i) => i.msg).join(','),
+          errors.map((e) => e.msg)
+        );
+        return this.handleError(error, req, res);
+      }
+      return next();
+    };
   }
 
-  static validateCustomer():ValidationChain[]{
+  static validateCustomer(): ValidationChain[] {
     const rules = [
       check('name')
         .exists()
@@ -56,11 +60,11 @@ class CustomerValidation extends Ctrl{
       check('unitPrice'),
       check('CAC'),
       check('validId')
-    ]
+    ];
     return rules;
   }
 
-  static validateOrder():ValidationChain[]{
+  static validateOrder(): ValidationChain[] {
     const rules = [
       check('pickupType'),
       check('pickupDate'),
@@ -70,11 +74,11 @@ class CustomerValidation extends Ctrl{
       check('cylinderSize'),
       check('gasType'),
       check('gasColor')
-    ]
+    ];
     return rules;
   }
 
-  static validateValkinCustomer():ValidationChain[]{
+  static validateValkinCustomer(): ValidationChain[] {
     const rules = [
       check('customerName')
         .exists()
@@ -100,11 +104,11 @@ class CustomerValidation extends Ctrl{
         .withMessage('enter cylinder size'),
       check('totalVolume'),
       check('totalQuantity')
-    ]
+    ];
     return rules;
   }
 
-  static makeComplaint():ValidationChain[]{
+  static makeComplaint(): ValidationChain[] {
     const rules = [
       // check('icnNo')
       //   .exists()
@@ -121,11 +125,11 @@ class CustomerValidation extends Ctrl{
       check('customer')
         .exists()
         .withMessage('please pass the customer for this complaint')
-    ]
+    ];
     return rules;
   }
 
-  static approveComplaint():ValidationChain[]{
+  static approveComplaint(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
@@ -137,16 +141,16 @@ class CustomerValidation extends Ctrl{
         .exists()
         .withMessage('users password is needed to authorize'),
       check('comment')
-    ]
+    ];
     return rules;
   }
 
-  static markOrder():ValidationChain[]{
+  static markOrder(): ValidationChain[] {
     const rules = [
       check('status')
         .exists()
         .withMessage('please provide complaint type'),
-    ]
+    ];
     return rules;
   }
 }

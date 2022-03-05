@@ -1,66 +1,73 @@
-import Ctrl from "../ctrl";
-import Production from '../../modules/production'
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable max-lines */
+/* eslint-disable max-len */
+/* eslint-disable new-cap */
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable require-jsdoc */
+import Ctrl from '../ctrl';
+import Production from '../../modules/production';
 import Validator from './validator';
-import { Request, RequestHandler, Response } from "express";
+import {Request, RequestHandler, Response} from 'express';
 
 
 class ProductionController extends Ctrl {
-  private module:Production;
+  private module: Production;
 
-  constructor(module:Production){
-    super()
-    this.module = module
+  constructor(module: Production) {
+    super();
+    this.module = module;
   }
 
-  createProductionSchedule():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  createProductionSchedule(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
-        //@ts-ignore
+        // @ts-ignore
         const data = await this.module.createProductionSchedule(req.body, req.user);
         this.ok(res, 'Schedule created', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  approveProductionSchedule():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  approveProductionSchedule(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
-        //@ts-ignore
+        // @ts-ignore
         const data = await this.module.approveProductionSchedule(req.body, req.user);
         this.ok(res, 'Approved ', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  fetchPendingProductionApprovals():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  fetchPendingProductionApprovals(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
-        //@ts-ignore
+        // @ts-ignore
         const data = await this.module.fetchPendingProductionApprovals(req.query, req.user);
         this.ok(res, 'Fetched pending approvals', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  viewProductionSchedule():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  viewProductionSchedule(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
         const data = await this.module.viewProductionSchedule(req.params.productionId);
         this.ok(res, 'Fetched detailes', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  fetchProductions():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  fetchProductions(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
         // @ts-ignore
         const data = await this.module.fetchApprovedSchedules(req.query, req.user);
@@ -68,44 +75,43 @@ class ProductionController extends Ctrl {
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  markCompletedProduction():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  markCompletedProduction(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
         const data = await this.module.markCompletedProduction(req.params.productionId);
         this.ok(res, 'Production complete', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  markCompletedCylinders():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  markCompletedCylinders(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
         const data = await this.module.markcompletedCylinders(req.body);
         this.ok(res, 'updated completed cylinders', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
 
-  markFilledCylinders():RequestHandler{
-    return async(req:Request, res:Response)=>{
+  markFilledCylinders(): RequestHandler {
+    return async (req: Request, res: Response)=>{
       try {
-        const data = await this.module.markFilledCylinders(req.body)
+        const data = await this.module.markFilledCylinders(req.body);
         this.ok(res, 'marked as filled', data);
       } catch (e) {
         this.handleError(e, req, res);
       }
-    }
+    };
   }
-
 }
 
-export { Validator };
+export {Validator};
 
 export default ProductionController;

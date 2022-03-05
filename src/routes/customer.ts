@@ -1,11 +1,11 @@
-import { Router as expressRouter } from 'express';
+import {Router as expressRouter} from 'express';
 import Auth from '../middlewares/authentication';
-import { customerCtrl } from '../controllers';
-import { Validator } from '../controllers/customer';
+import {customerCtrl} from '../controllers';
+import {Validator} from '../controllers/customer';
 const auth = new Auth();
 const val = new Validator();
 
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 
 router.post(

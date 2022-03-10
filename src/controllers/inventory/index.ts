@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* eslint-disable @typescript-eslint/class-name-casing */
@@ -88,7 +89,7 @@ class ProductCtrl extends Ctrl {
     return async (req: Request, res: Response)=>{
       try {
         // @ts-ignore
-        const data = await this.module.approveGrn(req.body, reg.user);
+        const data = await this.module.approveGrn(req.body, req.user);
         this.ok(res, 'done', data);
       } catch (e) {
         this.handleError(e, req, res);

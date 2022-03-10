@@ -99,7 +99,7 @@ type NewInventory={
 }
 
 interface NewDisburseInterface{
-  products: DisburseProductInterface['products'];
+  products: string;
   releasedBy: DisburseProductInterface['releasedBy'];
   releasedTo: DisburseProductInterface['releasedTo'];
   comment: string;
@@ -715,13 +715,17 @@ class Product extends Module {
         subrole: 'head of department',
         branch: user.branch
       });
+      const {products} = data;
+      const prod = JSON.parse(products);
       const disbursement = new this.disburse({
         ...data,
+        products: prod,
         nextApprovalOfficer: hod?._id,
         initiator: user._id,
         branch: user.branch,
         requestDepartment: user.role
       });
+
       const finGrn = await this.disburse.find({}).sort({grnInit: -1}).limit(1);
       let initGrn;
       if (finGrn[0]) {

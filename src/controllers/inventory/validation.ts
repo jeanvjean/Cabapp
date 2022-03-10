@@ -175,14 +175,11 @@ export class InventoryValidator extends Ctrl {
       check('products')
         .exists()
         .withMessage('products is reqired')
-        .isArray()
-        .withMessage('products must be an array'),
+        .isString()
+        .withMessage('products must be a string'),
       check('jobTag')
         .exists()
         .withMessage('Job tag is required'),
-      check('mrnDocument')
-        .exists()
-        .withMessage('please upload an mrn doc.'),
       check('customer')
         .exists()
         .withMessage('please pass a customer')

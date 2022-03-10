@@ -171,12 +171,6 @@ class Customer extends Module {
         // @ts-ignore
         data.cylinderHoldingTime = date.toISOString();
       }
-      // let exist = await this.customer.findOne({email:data.email, branch:user.branch});
-      // // console.log(exist)
-      // if(exist) {
-      //   throw new BadInputFormatException('a customer with this email exists');
-      // }
-
       let cid;
       const customers = await this.customer.find({}).sort({gen_id_no: -1}).limit(1);
       if (!customers[0]) {

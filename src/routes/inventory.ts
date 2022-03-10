@@ -1,10 +1,10 @@
-import { Router as expressRouter } from 'express';
+import {Router as expressRouter} from 'express';
 import Auth from '../middlewares/authentication';
-import {productCtrl} from '../controllers'
-import { Validator } from '../controllers/inventory';
-import { product } from '../modules';
+import {productCtrl} from '../controllers';
+import {Validator} from '../controllers/inventory';
+import {product} from '../modules';
 const auth = new Auth();
-const router:expressRouter = expressRouter();
+const router: expressRouter = expressRouter();
 
 const val = new Validator();
 

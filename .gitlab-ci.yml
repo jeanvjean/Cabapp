@@ -1,16 +1,32 @@
-deploy-prod:
-  stage: deploy
+# This file is a template, and might need editing before it works on your project.
+# Official framework image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/node/tags/
+image: node:15.0
+
+# Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
+
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+deploy:
+  before_script:
+    - apt-get update
+    - apt-get --yes --force-yes install rsync
 
   only:
-    - master
-
-  tags:
-    - master
+    refs:
+      - master
 
   script:
-    - cp -r -u * $ASNL_BACKEND
-    - cd $ASNL_BACKEND
-    - npm install
-    - npm run build
-    - pm2 restart asnl
-    - service apache2 restart
+    - "which ssh-agent || ( apt-get update -y && apt-get install
+      openssh-client -y )"
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    # sync the files and restart the app
+    - rsync -avrc --delete --exclude=.env "$PWD/" root@$SERVER_IP:/root/asnl/asl-backend/
+    - ssh root@$SERVER_IP "cd /root/asnl/asl-backend/; /usr/bin/npm i; /usr/local/bin/pm2 restart asnl"

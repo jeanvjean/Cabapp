@@ -15,7 +15,7 @@ class Secret {
   static CLOUDINARY_NAME="dorz7hgqx"
   static FCM_SERVER_KEY = ''
 
-  static FRONTEND_URL=`https://asnl-web.netlify.app`
+  static FRONTEND_URL=`https://air-seperation.netlify.app`
 
   static TWILIO_ACCOUNT_SID = `ACc4c4f04c47d9bf9ace138f33f3a5eefe`
   static TWILIO_AUTH_TOKEN = `b678a088cf7f14609dc6e95ba2831380`

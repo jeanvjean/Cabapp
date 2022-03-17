@@ -172,7 +172,7 @@ const routeSchema = new Schema({
   deleted:{type:Boolean, default:false},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   dateCompleted:{type:Date},
-  territory:{type:Schema.Types.ObjectId, ref:'terretory'},
+  territory:{type:Schema.Types.String},
   mileageIn:{
     value:Number,
     unit:String

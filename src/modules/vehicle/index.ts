@@ -467,7 +467,8 @@ class Vehicle extends Module {
     try {
       const vehicle = await this.vehicle.findById(id).populate([
         {path: 'assignedTo', model: 'User'},
-        {path: 'branch', model: 'branches'}
+        {path: 'branch', model: 'branches'},
+        {path: '', model:'terretory'}
       ]);
       return Promise.resolve(vehicle as VehicleInterface);
     } catch (e) {

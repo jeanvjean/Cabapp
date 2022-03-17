@@ -46,7 +46,7 @@ export interface supplierPickupInterface{
   numberOfCylinders:number,
   cylinders:Schema.Types.ObjectId[]
   fringeCylinders:RouteCylinderInterface[]
-  status:RoutePlanStatus,  
+  status:RoutePlanStatus,
   reportId:string
   tfcrNo?:string
   deliveryNo?:string
@@ -123,7 +123,7 @@ const routeSupplier = new Schema({
   numberOfCylinders:Number,
   cylinders:[{type:Schema.Types.ObjectId, ref:'registered-cylinders'}],
   fringeCylinders:[routeCylinderSchema],
-  status:{type: String, default: RoutePlanStatus.PROGRESS},  
+  status:{type: String, default: RoutePlanStatus.PROGRESS},
   reportId:String,
   deliveryNo:String
 },{
@@ -172,7 +172,7 @@ const routeSchema = new Schema({
   deleted:{type:Boolean, default:false},
   branch:{type:Schema.Types.ObjectId, ref:'branches'},
   dateCompleted:{type:Date},
-  territory:{type:String},
+  territory:{type:Schema.Types.ObjectId, ref:'terretory'},
   mileageIn:{
     value:Number,
     unit:String
